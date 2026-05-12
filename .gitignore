@@ -177,3 +177,7 @@ cython_debug/
 # Logs
 lightning_logs/
 checkpoints/
+
+# Agents
+AGENTS.md
+research/
