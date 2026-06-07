@@ -1,0 +1,614 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Evaluate HLVid/NVILA under uniform and proxy-guided frame sampling."""
+
+import argparse
+import json
+import math
+import re
+import time
+from collections import Counter
+from pathlib import Path
+from typing import Dict, List, Optional, Sequence, Tuple
+
+import cv2
+import numpy as np
+import pyarrow.parquet as pq
+import torch
+from PIL import Image
+from tqdm import tqdm
+from transformers import AutoModel, AutoProcessor
+
+from generate_delta_labels import (
+    SiglipTileEncoder,
+    VideoMAEReconstructionOracle,
+    cosine_distance,
+    pixel_mse_tensors,
+    resize_tile,
+    torch_dtype,
+)
+
+
+ANSWER_RE = re.compile(r"\b([ABCD])\b", re.IGNORECASE)
+DEFAULT_DELTAS = "1,2,4,8,16,32,64,128,192,256,320"
+DEFAULT_MODEL_ROOT = "/storage/slurm/latn/data/AutoGaze/hf_models"
+DEFAULT_VIDEOMAE_WEIGHTS = "/storage/slurm/latn/data/AutoGaze/VideoMAE_AutoGaze/videomae.pt"
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument("--dataset-root", default="/storage/slurm/latn/data/AutoGaze/HLVid")
+    parser.add_argument("--model-path", default=f"{DEFAULT_MODEL_ROOT}/nvidia--NVILA-8B-HD-Video")
+    parser.add_argument("--autogaze-model-id", default=f"{DEFAULT_MODEL_ROOT}/nvidia--AutoGaze")
+    parser.add_argument("--output", required=True)
+    parser.add_argument("--summary-output", required=True)
+    parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--start-index", type=int, default=0)
+    parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--dry-run-sampling", action="store_true")
+
+    parser.add_argument("--sampling", required=True, help="'dense' or a fixed sampled-frame count such as 128.")
+    parser.add_argument("--tile-len", type=int, default=16)
+    parser.add_argument("--selection", choices=["uniform", "proxy"], default="uniform")
+    parser.add_argument(
+        "--proxy",
+        choices=["pixel_mse", "siglip", "videomae_reconstruction"],
+        default=None,
+        help="Proxy used when --selection proxy.",
+    )
+    parser.add_argument("--threshold", type=float, default=None, help="Proxy threshold used when --selection proxy.")
+    parser.add_argument("--deltas", default=DEFAULT_DELTAS)
+    parser.add_argument(
+        "--fallback-delta",
+        type=int,
+        default=0,
+        help="Delta used when no candidate delta is below the threshold.",
+    )
+
+    parser.add_argument("--max-new-tokens", type=int, default=16)
+    parser.add_argument("--num-video-frames-thumbnail", type=int, default=64)
+    parser.add_argument(
+        "--max-tiles-video",
+        type=int,
+        default=1,
+        help=(
+            "NVILA max spatial tiles per temporal chunk. This is not the number of temporal tiles; "
+            "keep it small for high-frame-count runs."
+        ),
+    )
+    parser.add_argument(
+        "--max-dense-sampled-frames",
+        type=int,
+        default=None,
+        help=(
+            "Optional safety cap for dense mode. True dense HLVid can require thousands of 4K frames "
+            "in one NVILA call, so use this for a feasible dense approximation."
+        ),
+    )
+    parser.add_argument("--max-batch-size-autogaze", type=int, default=16)
+    parser.add_argument("--max-batch-size-siglip", type=int, default=32)
+    parser.add_argument("--device-map", default="auto")
+    parser.add_argument("--torch-dtype", default="bfloat16", choices=["auto", "float16", "bfloat16", "float32"])
+
+    parser.add_argument("--proxy-device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--proxy-dtype", choices=["float32", "float16", "bfloat16"], default="float32")
+    parser.add_argument("--resize", type=int, default=224)
+    parser.add_argument("--feature-frame-stride", type=int, default=4)
+    parser.add_argument("--siglip-model", default=f"{DEFAULT_MODEL_ROOT}/google--siglip2-base-patch16-224")
+    parser.add_argument("--videomae-model", default=f"{DEFAULT_MODEL_ROOT}/facebook--vit-mae-large")
+    parser.add_argument("--videomae-weights", default=DEFAULT_VIDEOMAE_WEIGHTS)
+    parser.add_argument("--videomae-scales", default="224")
+    parser.add_argument("--videomae-patch-size", type=int, default=16)
+    parser.add_argument("--videomae-gaze-ratio", type=float, default=0.25)
+    parser.add_argument("--videomae-attn-mode", default="sdpa")
+    return parser.parse_args()
+
+
+def parse_csv_ints(value: str) -> List[int]:
+    return [int(item.strip()) for item in value.split(",") if item.strip()]
+
+
+def dtype_from_name(name: str):
+    if name == "auto":
+        return "auto"
+    return {
+        "float16": torch.float16,
+        "bfloat16": torch.bfloat16,
+        "float32": torch.float32,
+    }[name]
+
+
+def extract_letter(text: str) -> str:
+    match = ANSWER_RE.search(text.strip())
+    return match.group(1).upper() if match else ""
+
+
+def load_rows(dataset_root: Path) -> List[dict]:
+    parquet_path = dataset_root / "data" / "test-00000-of-00001.parquet"
+    return pq.read_table(parquet_path).to_pylist()
+
+
+def existing_question_ids(path: Path) -> set:
+    ids = set()
+    if not path.exists():
+        return ids
+    with path.open() as f:
+        for line in f:
+            if not line.strip():
+                continue
+            try:
+                ids.add(json.loads(line)["question_id"])
+            except Exception:
+                continue
+    return ids
+
+
+def video_frame_count(video_path: Path) -> int:
+    cap = cv2.VideoCapture(str(video_path))
+    if not cap.isOpened():
+        raise ValueError(f"Failed to open video: {video_path}")
+    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    while frame_count > 0:
+        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_count - 1)
+        if cap.grab():
+            break
+        frame_count -= 1
+    cap.release()
+    if frame_count <= 0:
+        raise ValueError(f"Video has no frames: {video_path}")
+    return frame_count
+
+
+def video_frame_count_from_capture(video_path: Path) -> int:
+    cap = cv2.VideoCapture(str(video_path))
+    if not cap.isOpened():
+        raise ValueError(f"Failed to open video: {video_path}")
+    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    cap.release()
+    if frame_count <= 0:
+        return video_frame_count(video_path)
+    return frame_count
+
+
+def sampled_count(
+    sampling: str,
+    frame_count: int,
+    tile_len: int,
+    max_dense_sampled_frames: Optional[int] = None,
+) -> int:
+    if sampling == "dense":
+        count = (frame_count // tile_len) * tile_len
+        count = max(tile_len, count) if frame_count >= tile_len else tile_len
+        if max_dense_sampled_frames is not None:
+            max_dense = (max_dense_sampled_frames // tile_len) * tile_len
+            if max_dense < tile_len:
+                raise ValueError("--max-dense-sampled-frames must be at least tile_len")
+            count = min(count, max_dense)
+        return count
+    count = int(sampling)
+    if count <= 0:
+        raise ValueError("--sampling must be 'dense' or a positive integer")
+    if count % tile_len != 0:
+        raise ValueError(f"Fixed --sampling values must be multiples of tile_len={tile_len}: {count}")
+    return count
+
+
+def max_sampled_count_for_rows(
+    rows: Sequence[dict],
+    dataset_root: Path,
+    sampling: str,
+    tile_len: int,
+    max_dense_sampled_frames: Optional[int],
+) -> int:
+    if sampling != "dense":
+        return sampled_count(sampling, 1, tile_len, max_dense_sampled_frames)
+    counts = []
+    for row in tqdm(rows, desc="scan frame counts"):
+        video_path = dataset_root / "videos" / row["video_path"]
+        counts.append(
+            sampled_count(
+                sampling,
+                video_frame_count_from_capture(video_path),
+                tile_len,
+                max_dense_sampled_frames,
+            )
+        )
+    return max(counts) if counts else tile_len
+
+
+def uniform_indices(frame_count: int, num_samples: int) -> np.ndarray:
+    return np.round(np.linspace(0, frame_count - 1, num_samples)).astype(np.int64)
+
+
+def load_video_samples(
+    video_path: Path,
+    sampling: str,
+    tile_len: int,
+    max_dense_sampled_frames: Optional[int],
+) -> Tuple[np.ndarray, np.ndarray, int]:
+    frame_count = video_frame_count(video_path)
+    indices = uniform_indices(frame_count, sampled_count(sampling, frame_count, tile_len, max_dense_sampled_frames))
+
+    cap = cv2.VideoCapture(str(video_path))
+    frames_by_index = {}
+    for index in sorted({int(index) for index in indices}):
+        cap.set(cv2.CAP_PROP_POS_FRAMES, index)
+        ok, frame = cap.read()
+        if not ok:
+            continue
+        frames_by_index[index] = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    cap.release()
+
+    frames = [frames_by_index[int(index)] for index in indices if int(index) in frames_by_index]
+    if not frames:
+        raise ValueError(f"Could not extract frames from video: {video_path}")
+    while len(frames) < len(indices):
+        frames.append(frames[-1])
+    return np.stack(frames), indices, frame_count
+
+
+def uniform_tile_starts(num_samples: int, tile_len: int) -> List[int]:
+    return list(range(0, num_samples - tile_len + 1, tile_len))
+
+
+class ProxyScorer:
+    def __init__(self, args: argparse.Namespace):
+        self.args = args
+        self.siglip_encoder = None
+        self.videomae_oracle = None
+        dtype = torch_dtype(args.proxy_dtype)
+        if args.proxy == "siglip":
+            self.siglip_encoder = SiglipTileEncoder(
+                args.siglip_model,
+                args.proxy_device,
+                dtype,
+                args.max_batch_size_siglip,
+            )
+        elif args.proxy == "videomae_reconstruction":
+            self.videomae_oracle = VideoMAEReconstructionOracle(
+                model_name_or_path=args.videomae_model,
+                weights_path=args.videomae_weights,
+                scales=args.videomae_scales,
+                patch_size=args.videomae_patch_size,
+                gaze_ratio=args.videomae_gaze_ratio,
+                attn_mode=args.videomae_attn_mode,
+                device=args.proxy_device,
+                dtype=dtype,
+            )
+
+    def score(
+        self,
+        proxy: str,
+        current_start: int,
+        candidate_start: int,
+        frames: np.ndarray,
+        tile_len: int,
+        tile_cache: Dict[int, np.ndarray],
+        resized_cache: Dict[int, torch.Tensor],
+        siglip_cache: Dict[int, torch.Tensor],
+        videomae_cache: Dict[int, float],
+    ) -> float:
+        def get_tile(start: int) -> np.ndarray:
+            if start not in tile_cache:
+                tile_cache[start] = frames[start : start + tile_len]
+            return tile_cache[start]
+
+        def get_resized(start: int) -> torch.Tensor:
+            if start not in resized_cache:
+                resized_cache[start] = resize_tile(get_tile(start), self.args.resize)
+            return resized_cache[start]
+
+        def get_siglip(start: int) -> torch.Tensor:
+            if start not in siglip_cache:
+                siglip_cache[start] = self.siglip_encoder.encode(get_tile(start), self.args.feature_frame_stride)
+            return siglip_cache[start]
+
+        def get_videomae(start: int) -> float:
+            if start not in videomae_cache:
+                videomae_cache[start] = self.videomae_oracle.score(get_tile(start))
+            return videomae_cache[start]
+
+        if proxy == "pixel_mse":
+            return pixel_mse_tensors(get_resized(current_start), get_resized(candidate_start))
+        if proxy == "siglip":
+            return cosine_distance(get_siglip(current_start), get_siglip(candidate_start))
+        if proxy == "videomae_reconstruction":
+            return get_videomae(candidate_start)
+        raise ValueError(f"Unknown proxy: {proxy}")
+
+
+def proxy_tile_starts(
+    frames: np.ndarray,
+    tile_len: int,
+    deltas: Sequence[int],
+    threshold: float,
+    fallback_delta: int,
+    scorer: ProxyScorer,
+    proxy: str,
+) -> Tuple[List[int], List[dict], float]:
+    starts = [0] if len(frames) >= tile_len else []
+    decisions = []
+    tile_cache: Dict[int, np.ndarray] = {}
+    resized_cache: Dict[int, torch.Tensor] = {}
+    siglip_cache: Dict[int, torch.Tensor] = {}
+    videomae_cache: Dict[int, float] = {}
+    proxy_seconds = 0.0
+
+    while starts:
+        current_start = starts[-1]
+        base_next_start = current_start + tile_len
+        valid = [delta for delta in deltas if base_next_start + delta + tile_len <= len(frames)]
+        fallback_valid = base_next_start + fallback_delta + tile_len <= len(frames)
+        if not valid and not fallback_valid:
+            break
+
+        scores = {}
+        started = time.perf_counter()
+        for delta in valid:
+            candidate_start = base_next_start + delta
+            scores[str(delta)] = scorer.score(
+                proxy,
+                current_start,
+                candidate_start,
+                frames,
+                tile_len,
+                tile_cache,
+                resized_cache,
+                siglip_cache,
+                videomae_cache,
+            )
+        if torch.cuda.is_available():
+            torch.cuda.synchronize()
+        proxy_seconds += time.perf_counter() - started
+
+        passing = [delta for delta in valid if scores[str(delta)] <= threshold]
+        selected_delta = max(passing) if passing else fallback_delta
+        next_start = base_next_start + selected_delta
+        if next_start + tile_len > len(frames):
+            break
+        decisions.append(
+            {
+                "current_start": current_start,
+                "selected_delta": selected_delta,
+                "next_start": next_start,
+                "num_valid_deltas": len(valid),
+                "scores": scores,
+            }
+        )
+        starts.append(next_start)
+
+    return starts, decisions, proxy_seconds
+
+
+def frames_to_pil(frames: np.ndarray, tile_starts: Sequence[int], tile_len: int) -> List[Image.Image]:
+    selected = []
+    for start in tile_starts:
+        selected.extend(frames[start : start + tile_len])
+    return [Image.fromarray(frame) for frame in selected]
+
+
+def summarize(results_path: Path) -> dict:
+    rows = []
+    with results_path.open() as f:
+        for line in f:
+            if line.strip():
+                rows.append(json.loads(line))
+    total = len(rows)
+    correct = sum(1 for row in rows if row.get("is_correct"))
+    by_category = {}
+    for category in sorted({row["category"] for row in rows}):
+        subset = [row for row in rows if row["category"] == category]
+        by_category[category] = {
+            "num_examples": len(subset),
+            "num_correct": sum(1 for row in subset if row.get("is_correct")),
+            "accuracy": sum(1 for row in subset if row.get("is_correct")) / max(len(subset), 1),
+        }
+    tile_counts = [row["num_visited_tiles"] for row in rows]
+    llm_times = [row["timing_seconds"]["llm_inference"] for row in rows if "llm_inference" in row["timing_seconds"]]
+    return {
+        "num_examples": total,
+        "num_correct": correct,
+        "accuracy": correct / max(total, 1),
+        "by_category": by_category,
+        "prediction_counts": dict(Counter(row.get("prediction_letter", "") for row in rows)),
+        "mean_visited_tiles": float(np.mean(tile_counts)) if tile_counts else 0.0,
+        "total_visited_tiles": int(np.sum(tile_counts)) if tile_counts else 0,
+        "total_llm_inference_seconds": float(np.sum(llm_times)) if llm_times else 0.0,
+        "mean_llm_inference_seconds": float(np.mean(llm_times)) if llm_times else 0.0,
+    }
+
+
+def main() -> None:
+    args = parse_args()
+    if args.selection == "proxy" and (args.proxy is None or args.threshold is None):
+        raise ValueError("--selection proxy requires --proxy and --threshold")
+    if args.selection == "uniform" and args.proxy is not None:
+        raise ValueError("--proxy is only valid with --selection proxy")
+
+    dataset_root = Path(args.dataset_root)
+    output_path = Path(args.output)
+    summary_path = Path(args.summary_output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
+
+    rows = load_rows(dataset_root)[args.start_index :]
+    if args.limit is not None:
+        rows = rows[: args.limit]
+    done_ids = existing_question_ids(output_path) if args.resume else set()
+    deltas = parse_csv_ints(args.deltas)
+
+    max_samples = max_sampled_count_for_rows(
+        rows,
+        dataset_root,
+        args.sampling,
+        args.tile_len,
+        args.max_dense_sampled_frames,
+    )
+    max_tiles_video = args.max_tiles_video
+
+    scorer = ProxyScorer(args) if args.selection == "proxy" else None
+    processor = None
+    model = None
+    if not args.dry_run_sampling:
+        processor = AutoProcessor.from_pretrained(
+            args.model_path,
+            autogaze_model_id=args.autogaze_model_id,
+            num_video_frames=max_samples,
+            num_video_frames_thumbnail=args.num_video_frames_thumbnail,
+            max_tiles_video=max_tiles_video,
+            gazing_ratio_tile=[0.2] + [0.06] * 15,
+            gazing_ratio_thumbnail=1,
+            task_loss_requirement_tile=0.6,
+            task_loss_requirement_thumbnail=None,
+            max_batch_size_autogaze=args.max_batch_size_autogaze,
+            trust_remote_code=True,
+        )
+        model = AutoModel.from_pretrained(
+            args.model_path,
+            trust_remote_code=True,
+            device_map=args.device_map,
+            torch_dtype=dtype_from_name(args.torch_dtype),
+            max_batch_size_siglip=args.max_batch_size_siglip,
+        )
+        model.eval()
+
+    cached_video_path = None
+    cached_samples = None
+    with output_path.open("a") as out:
+        for row in tqdm(rows, desc="HLVid"):
+            if row["question_id"] in done_ids:
+                continue
+            total_started = time.perf_counter()
+            video_path = dataset_root / "videos" / row["video_path"]
+            load_started = time.perf_counter()
+            cache_hit = cached_video_path == video_path
+            if cache_hit:
+                frames, source_indices, source_frame_count = cached_samples
+                frame_load_seconds = 0.0
+            else:
+                frames, source_indices, source_frame_count = load_video_samples(
+                    video_path,
+                    args.sampling,
+                    args.tile_len,
+                    args.max_dense_sampled_frames,
+                )
+                cached_video_path = video_path
+                cached_samples = (frames, source_indices, source_frame_count)
+                frame_load_seconds = time.perf_counter() - load_started
+
+            proxy_seconds = 0.0
+            decisions = []
+            if args.selection == "uniform":
+                tile_starts = uniform_tile_starts(len(frames), args.tile_len)
+            else:
+                tile_starts, decisions, proxy_seconds = proxy_tile_starts(
+                    frames=frames,
+                    tile_len=args.tile_len,
+                    deltas=deltas,
+                    threshold=args.threshold,
+                    fallback_delta=args.fallback_delta,
+                    scorer=scorer,
+                    proxy=args.proxy,
+                )
+            visited_frames = frames_to_pil(frames, tile_starts, args.tile_len)
+
+            timing = {
+                "frame_load": frame_load_seconds,
+                "proxy": proxy_seconds,
+                "processor": 0.0,
+                "llm_inference": 0.0,
+                "total": 0.0,
+            }
+            response = ""
+            pred = ""
+            is_correct = False
+            if not args.dry_run_sampling:
+                prompt = f"{processor.tokenizer.video_token}\n\nQuestion: {row['question']}"
+                processor_started = time.perf_counter()
+                inputs = processor(text=prompt, videos=[visited_frames], return_tensors="pt")
+                target_device = model.device if hasattr(model, "device") else next(model.parameters()).device
+                inputs = {k: v.to(target_device) if isinstance(v, torch.Tensor) else v for k, v in inputs.items()}
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                timing["processor"] = time.perf_counter() - processor_started
+
+                llm_started = time.perf_counter()
+                with torch.inference_mode():
+                    outputs = model.generate(**inputs, max_new_tokens=args.max_new_tokens)
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                timing["llm_inference"] = time.perf_counter() - llm_started
+                response = processor.batch_decode(
+                    outputs[:, inputs["input_ids"].shape[1] :],
+                    skip_special_tokens=True,
+                )[0].strip()
+                pred = extract_letter(response)
+                is_correct = pred == str(row["answer"]).strip().upper()
+
+            timing["total"] = time.perf_counter() - total_started
+            record = {
+                "question_id": row["question_id"],
+                "category": row["category"],
+                "video_path": row["video_path"],
+                "answer": str(row["answer"]).strip().upper(),
+                "prediction": response,
+                "prediction_letter": pred,
+                "is_correct": is_correct,
+                "sampling": args.sampling,
+                "selection": args.selection,
+                "proxy": args.proxy,
+                "threshold": args.threshold,
+                "deltas": deltas,
+                "fallback_delta": args.fallback_delta,
+                "tile_len": args.tile_len,
+                "source_frame_count": source_frame_count,
+                "frame_cache_hit": cache_hit,
+                "num_sampled_frames": len(frames),
+                "num_unique_source_frames": len(set(int(index) for index in source_indices)),
+                "num_visited_frames": len(visited_frames),
+                "num_visited_tiles": len(tile_starts),
+                "visited_frame_ratio": len(visited_frames) / max(len(frames), 1),
+                "tile_starts": tile_starts,
+                "proxy_decisions": decisions,
+                "timing_seconds": timing,
+            }
+            out.write(json.dumps(record) + "\n")
+            out.flush()
+
+    summary = summarize(output_path)
+    summary.update(
+        {
+            "dataset_root": str(dataset_root),
+            "model_path": args.model_path,
+            "autogaze_model_id": args.autogaze_model_id,
+            "sampling": args.sampling,
+            "selection": args.selection,
+            "proxy": args.proxy,
+            "threshold": args.threshold,
+            "deltas": deltas,
+            "fallback_delta": args.fallback_delta,
+            "tile_len": args.tile_len,
+            "max_tiles_video": max_tiles_video,
+            "max_dense_sampled_frames": args.max_dense_sampled_frames,
+            "dry_run_sampling": args.dry_run_sampling,
+        }
+    )
+    with summary_path.open("w") as f:
+        json.dump(summary, f, indent=2)
+    print(json.dumps(summary, indent=2))
+
+
+if __name__ == "__main__":
+    main()
