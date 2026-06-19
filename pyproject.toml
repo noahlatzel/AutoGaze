@@ -21,6 +21,7 @@ dependencies = [
     "transformers~=4.51",
     "pillow",
     "numpy",
+    "pyarrow",
     "omegaconf",
     "matplotlib",
     "einops",

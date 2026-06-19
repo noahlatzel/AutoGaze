@@ -208,16 +208,20 @@ def train_bandit(
     valid: torch.Tensor,
     train_idx: torch.Tensor,
     args: argparse.Namespace,
-) -> nn.Module:
+) -> tuple[nn.Module, list[dict]]:
     model = build_policy(x.shape[1], rewards.shape[1], args.policy).to(args.device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     train_x = x[train_idx].to(args.device)
     train_rewards = rewards[train_idx].to(args.device)
     train_valid = valid[train_idx].to(args.device)
     generator = torch.Generator().manual_seed(args.seed)
+    history = []
 
-    for _ in tqdm(range(args.epochs), desc="train bandit"):
+    for epoch in tqdm(range(args.epochs), desc="train bandit"):
         perm = torch.randperm(train_x.shape[0], generator=generator)
+        losses = []
+        expected_rewards = []
+        entropies = []
         for start in range(0, train_x.shape[0], args.batch_size):
             batch_idx = perm[start : start + args.batch_size]
             logits = masked_logits(model(train_x[batch_idx]), train_valid[batch_idx])
@@ -228,7 +232,18 @@ def train_bandit(
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-    return model
+            losses.append(float(loss.detach().cpu().item()))
+            expected_rewards.append(float(expected_reward.detach().cpu().item()))
+            entropies.append(float(entropy.detach().cpu().item()))
+        history.append(
+            {
+                "epoch": epoch + 1,
+                "loss": float(np.mean(losses)),
+                "expected_reward": float(np.mean(expected_rewards)),
+                "entropy": float(np.mean(entropies)),
+            }
+        )
+    return model, history
 
 
 def train_supervised(
@@ -237,16 +252,18 @@ def train_supervised(
     valid: torch.Tensor,
     train_idx: torch.Tensor,
     args: argparse.Namespace,
-) -> nn.Module:
+) -> tuple[nn.Module, list[dict]]:
     model = build_policy(x.shape[1], valid.shape[1], args.policy).to(args.device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     train_x = x[train_idx].to(args.device)
     train_y = labels[train_idx].to(args.device)
     train_valid = valid[train_idx].to(args.device)
     generator = torch.Generator().manual_seed(args.seed)
+    history = []
 
-    for _ in tqdm(range(args.epochs), desc="train supervised"):
+    for epoch in tqdm(range(args.epochs), desc="train supervised"):
         perm = torch.randperm(train_x.shape[0], generator=generator)
+        losses = []
         for start in range(0, train_x.shape[0], args.batch_size):
             batch_idx = perm[start : start + args.batch_size]
             logits = masked_logits(model(train_x[batch_idx]), train_valid[batch_idx])
@@ -254,7 +271,9 @@ def train_supervised(
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-    return model
+            losses.append(float(loss.detach().cpu().item()))
+        history.append({"epoch": epoch + 1, "loss": float(np.mean(losses))})
+    return model, history
 
 
 @torch.inference_mode()
@@ -329,8 +348,8 @@ def main() -> None:
         metadata_features = normalize(metadata_features[train_idx], metadata_features)
         features = torch.cat([features, metadata_features], dim=1)
 
-    bandit = train_bandit(features, rewards, valid, train_idx, args)
-    supervised = train_supervised(features, labels, valid, train_idx, args)
+    bandit, bandit_history = train_bandit(features, rewards, valid, train_idx, args)
+    supervised, supervised_history = train_supervised(features, labels, valid, train_idx, args)
 
     results = {
         "metadata": {
@@ -360,6 +379,10 @@ def main() -> None:
             ),
             evaluate("oracle_best_reward", oracle_predictions(rewards, val_idx), labels, rewards, deltas, val_idx),
         ],
+        "training_history": {
+            "bandit": bandit_history,
+            "supervised_ce": supervised_history,
+        },
     }
     for delta in deltas:
         results["validation"].append(

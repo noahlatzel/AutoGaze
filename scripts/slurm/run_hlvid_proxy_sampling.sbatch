@@ -22,7 +22,12 @@ export HYDRA_FULL_ERROR=1
 : "${SAMPLING:?Set SAMPLING to dense or a fixed frame count, e.g. 128}"
 : "${SELECTION:?Set SELECTION to uniform or proxy}"
 
-OUT_DIR="outputs/hlvid/proxy_sampling/${RUN_NAME}"
+: "${OUTPUT_ROOT:=outputs/hlvid/proxy_sampling}"
+: "${MAX_TILES_VIDEO:=1}"
+: "${NUM_VIDEO_FRAMES_THUMBNAIL:=64}"
+: "${MAX_NEW_TOKENS:=16}"
+
+OUT_DIR="${OUTPUT_ROOT}/${RUN_NAME}"
 mkdir -p /storage/user/latn/slurm/logs
 mkdir -p "${OUT_DIR}"
 
@@ -33,12 +38,13 @@ echo "SAMPLING=${SAMPLING}"
 echo "SELECTION=${SELECTION}"
 echo "PROXY=${PROXY:-}"
 echo "THRESHOLD=${THRESHOLD:-}"
-echo "MAX_TILES_VIDEO=${MAX_TILES_VIDEO:-legacy-default}"
+echo "OUTPUT_ROOT=${OUTPUT_ROOT}"
+echo "MAX_TILES_VIDEO=${MAX_TILES_VIDEO}"
+echo "NUM_VIDEO_FRAMES_THUMBNAIL=${NUM_VIDEO_FRAMES_THUMBNAIL}"
+echo "MAX_NEW_TOKENS=${MAX_NEW_TOKENS}"
 echo "MAX_DENSE_SAMPLED_FRAMES=${MAX_DENSE_SAMPLED_FRAMES:-}"
 date
 nvidia-smi
-
-: "${MAX_TILES_VIDEO:=1}"
 
 CMD=(
   python scripts/evaluate_hlvid_proxy_sampling.py
@@ -48,6 +54,8 @@ CMD=(
   --sampling "${SAMPLING}"
   --selection "${SELECTION}"
   --max-tiles-video "${MAX_TILES_VIDEO}"
+  --num-video-frames-thumbnail "${NUM_VIDEO_FRAMES_THUMBNAIL}"
+  --max-new-tokens "${MAX_NEW_TOKENS}"
   --output "${OUT_DIR}/results.jsonl"
   --summary-output "${OUT_DIR}/summary.json"
   --resume

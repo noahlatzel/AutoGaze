@@ -18,6 +18,7 @@ import re
 import time
 from collections import Counter
 from pathlib import Path
+from types import MethodType
 from typing import Dict, List, Optional, Sequence, Tuple
 
 import cv2
@@ -42,6 +43,43 @@ ANSWER_RE = re.compile(r"\b([ABCD])\b", re.IGNORECASE)
 DEFAULT_DELTAS = "1,2,4,8,16,32,64,128,192,256,320"
 DEFAULT_MODEL_ROOT = "/storage/slurm/latn/data/AutoGaze/hf_models"
 DEFAULT_VIDEOMAE_WEIGHTS = "/storage/slurm/latn/data/AutoGaze/VideoMAE_AutoGaze/videomae.pt"
+
+
+def cuda_synchronize() -> None:
+    if torch.cuda.is_available():
+        torch.cuda.synchronize()
+
+
+class TimingProbe:
+    def __init__(self):
+        self.seconds = Counter()
+        self.counts = Counter()
+
+    def add_seconds(self, key: str, seconds: float) -> None:
+        self.seconds[key] += float(seconds)
+
+    def add_count(self, key: str, count: int | float) -> None:
+        self.counts[key] += count
+
+    def timed(self, key: str, fn, *args, sync_cuda: bool = False, **kwargs):
+        if sync_cuda:
+            cuda_synchronize()
+        started = time.perf_counter()
+        result = fn(*args, **kwargs)
+        if sync_cuda:
+            cuda_synchronize()
+        self.add_seconds(key, time.perf_counter() - started)
+        return result
+
+    def reset(self) -> None:
+        self.seconds.clear()
+        self.counts.clear()
+
+    def snapshot_seconds(self) -> Dict[str, float]:
+        return dict(self.seconds)
+
+    def snapshot_counts(self) -> Dict[str, int | float]:
+        return dict(self.counts)
 
 
 def parse_args() -> argparse.Namespace:
@@ -329,6 +367,182 @@ class ProxyScorer:
         raise ValueError(f"Unknown proxy: {proxy}")
 
 
+def install_processor_timing(processor, probe: TimingProbe) -> None:
+    if getattr(processor, "_autogaze_timing_installed", False):
+        return
+
+    if hasattr(processor, "_preprocess_videos"):
+        original_preprocess_videos = processor._preprocess_videos
+
+        def timed_preprocess_videos(self, *args, **kwargs):
+            return probe.timed("nvila_preprocess_videos", original_preprocess_videos, *args, **kwargs)
+
+        processor._preprocess_videos = MethodType(timed_preprocess_videos, processor)
+
+    if hasattr(processor, "_get_gazing_info_from_videos"):
+        original_get_gazing_info = processor._get_gazing_info_from_videos
+
+        def timed_get_gazing_info(self, *args, **kwargs):
+            result = probe.timed(
+                "autogaze_processing",
+                original_get_gazing_info,
+                *args,
+                sync_cuda=True,
+                **kwargs,
+            )
+            add_gazing_counts(probe, result)
+            return result
+
+        processor._get_gazing_info_from_videos = MethodType(timed_get_gazing_info, processor)
+
+    processor._autogaze_timing_installed = True
+
+
+def install_model_timing(model, probe: TimingProbe) -> None:
+    if getattr(model, "_autogaze_timing_installed", False):
+        return
+
+    if hasattr(model, "_run_vision_tower_batched"):
+        original_run_vision_tower = model._run_vision_tower_batched
+
+        def timed_run_vision_tower(self, all_pixels, gazing_info_batch, *args, **kwargs):
+            label = "vision_encoding_thumbnails" if int(all_pixels.shape[1]) == 1 else "vision_encoding_tiles"
+            probe.add_count("num_vision_tower_batches", 1)
+            probe.add_count("num_encoded_thumbnails" if label.endswith("thumbnails") else "num_encoded_tiles", int(all_pixels.shape[0]))
+            return probe.timed(
+                label,
+                original_run_vision_tower,
+                all_pixels,
+                gazing_info_batch,
+                *args,
+                sync_cuda=True,
+                **kwargs,
+            )
+
+        model._run_vision_tower_batched = MethodType(timed_run_vision_tower, model)
+
+    if hasattr(model, "_encode_vision"):
+        original_encode_vision = model._encode_vision
+
+        def timed_encode_vision(self, *args, **kwargs):
+            result = probe.timed(
+                "encode_vision_total",
+                original_encode_vision,
+                *args,
+                sync_cuda=True,
+                **kwargs,
+            )
+            probe.add_count("num_visual_tokens_projected", sum(int(features.shape[0]) for features in result))
+            return result
+
+        model._encode_vision = MethodType(timed_encode_vision, model)
+
+    if hasattr(model, "_embed"):
+        original_embed = model._embed
+
+        def timed_embed(self, *args, **kwargs):
+            return probe.timed(
+                "embed_total",
+                original_embed,
+                *args,
+                sync_cuda=True,
+                **kwargs,
+            )
+
+        model._embed = MethodType(timed_embed, model)
+
+    model._autogaze_timing_installed = True
+
+
+def add_gazing_counts(probe: TimingProbe, gazing_info: Optional[dict]) -> None:
+    if not gazing_info:
+        return
+
+    for key, count_key in [
+        ("num_gazing_each_frame_tiles", "num_gaze_tokens_tiles"),
+        ("num_gazing_each_frame_thumbnails", "num_gaze_tokens_thumbnails"),
+    ]:
+        values = gazing_info.get(key, [])
+        for value in values:
+            probe.add_count(count_key, int(value.sum().item()))
+
+    for key, count_key in [
+        ("if_padded_gazing_tiles", "num_non_padded_gaze_tokens_tiles"),
+        ("if_padded_gazing_thumbnails", "num_non_padded_gaze_tokens_thumbnails"),
+    ]:
+        values = gazing_info.get(key, [])
+        for value in values:
+            probe.add_count(count_key, int((~value).sum().item()))
+
+
+def collect_input_counts(inputs: dict, model, tile_starts: Sequence[int], visited_frames: Sequence[Image.Image]) -> Dict[str, int]:
+    counts = {
+        "num_temporal_tiles": int(len(tile_starts)),
+        "num_visited_frames": int(len(visited_frames)),
+    }
+    if "num_spatial_tiles_each_video" in inputs:
+        counts["num_spatial_tiles"] = int(sum(inputs["num_spatial_tiles_each_video"]))
+    if "pixel_values_videos_tiles" in inputs:
+        counts["num_encoded_tiles"] = int(sum(t.shape[0] for t in inputs["pixel_values_videos_tiles"]))
+    if "pixel_values_videos_thumbnails" in inputs:
+        counts["num_encoded_thumbnails"] = int(sum(t.shape[0] for t in inputs["pixel_values_videos_thumbnails"]))
+        counts["num_thumbnail_frames"] = counts["num_encoded_thumbnails"]
+    if "input_ids" in inputs:
+        input_ids = inputs["input_ids"]
+        counts["num_input_tokens_total"] = int(input_ids.numel())
+        video_token_id = getattr(getattr(model, "config", None), "video_token_id", None)
+        if video_token_id is not None:
+            counts["num_visual_tokens_in_context"] = int((input_ids == video_token_id).sum().item())
+            counts["num_text_tokens"] = counts["num_input_tokens_total"] - counts["num_visual_tokens_in_context"]
+    return counts
+
+
+def finalize_v2_timing(timing: Dict[str, float], probe: TimingProbe, processor_seconds: float, generate_seconds: float) -> Dict[str, float]:
+    seconds = probe.snapshot_seconds()
+    vision_encoding = seconds.get("vision_encoding_tiles", 0.0) + seconds.get("vision_encoding_thumbnails", 0.0)
+    visual_token_processing = max(
+        0.0,
+        seconds.get("embed_total", seconds.get("encode_vision_total", 0.0)) - vision_encoding,
+    )
+    autogaze_processing = seconds.get("autogaze_processing", 0.0)
+    nvila_preprocess = max(0.0, processor_seconds - autogaze_processing)
+
+    timing.update(
+        {
+            "video_decode_and_sampling": timing.get("frame_load", 0.0),
+            "proxy_scoring": timing.get("proxy", 0.0),
+            "nvila_preprocess": nvila_preprocess,
+            "nvila_preprocess_videos": seconds.get("nvila_preprocess_videos", 0.0),
+            "autogaze_processing": autogaze_processing,
+            "vision_encoding": vision_encoding,
+            "vision_encoding_tiles": seconds.get("vision_encoding_tiles", 0.0),
+            "vision_encoding_thumbnails": seconds.get("vision_encoding_thumbnails", 0.0),
+            "visual_token_processing": visual_token_processing,
+            "encode_vision_total": seconds.get("encode_vision_total", 0.0),
+            "embed_total": seconds.get("embed_total", 0.0),
+            "model_generate": generate_seconds,
+        }
+    )
+    attributed = (
+        timing["video_decode_and_sampling"]
+        + timing["proxy_scoring"]
+        + timing["nvila_preprocess"]
+        + timing["model_generate"]
+    )
+    timing["system_overhead"] = max(0.0, timing.get("total", 0.0) - attributed)
+    return timing
+
+
+def proxy_decision_counts(decisions: Sequence[dict]) -> Dict[str, object]:
+    num_scores = sum(len(decision.get("scores", {})) for decision in decisions)
+    selected_delta_counts = Counter(str(decision.get("selected_delta")) for decision in decisions)
+    return {
+        "proxy_num_candidate_scores": int(num_scores),
+        "proxy_seconds_per_score": None,
+        "selected_delta_counts": dict(selected_delta_counts),
+    }
+
+
 def proxy_tile_starts(
     frames: np.ndarray,
     tile_len: int,
@@ -416,7 +630,31 @@ def summarize(results_path: Path) -> dict:
             "accuracy": sum(1 for row in subset if row.get("is_correct")) / max(len(subset), 1),
         }
     tile_counts = [row["num_visited_tiles"] for row in rows]
-    llm_times = [row["timing_seconds"]["llm_inference"] for row in rows if "llm_inference" in row["timing_seconds"]]
+    llm_times = [
+        row["timing_seconds"].get("model_generate", row["timing_seconds"].get("llm_inference", 0.0))
+        for row in rows
+        if "timing_seconds" in row
+    ]
+    timing_keys = sorted({key for row in rows for key in row.get("timing_seconds", {})})
+    timing_summary = {}
+    for key in timing_keys:
+        values = [row.get("timing_seconds", {}).get(key) for row in rows]
+        values = [value for value in values if isinstance(value, (int, float))]
+        if values:
+            timing_summary[key] = {
+                "mean": float(np.mean(values)),
+                "total": float(np.sum(values)),
+            }
+    count_keys = sorted({key for row in rows for key in row.get("timing_counts", {})})
+    count_summary = {}
+    for key in count_keys:
+        values = [row.get("timing_counts", {}).get(key) for row in rows]
+        values = [value for value in values if isinstance(value, (int, float))]
+        if values:
+            count_summary[key] = {
+                "mean": float(np.mean(values)),
+                "total": float(np.sum(values)),
+            }
     return {
         "num_examples": total,
         "num_correct": correct,
@@ -427,6 +665,8 @@ def summarize(results_path: Path) -> dict:
         "total_visited_tiles": int(np.sum(tile_counts)) if tile_counts else 0,
         "total_llm_inference_seconds": float(np.sum(llm_times)) if llm_times else 0.0,
         "mean_llm_inference_seconds": float(np.mean(llm_times)) if llm_times else 0.0,
+        "timing_summary_seconds": timing_summary,
+        "timing_count_summary": count_summary,
     }
 
 
@@ -461,6 +701,7 @@ def main() -> None:
     scorer = ProxyScorer(args) if args.selection == "proxy" else None
     processor = None
     model = None
+    timing_probe = TimingProbe()
     if not args.dry_run_sampling:
         processor = AutoProcessor.from_pretrained(
             args.model_path,
@@ -483,6 +724,8 @@ def main() -> None:
             max_batch_size_siglip=args.max_batch_size_siglip,
         )
         model.eval()
+        install_processor_timing(processor, timing_probe)
+        install_model_timing(model, timing_probe)
 
     cached_video_path = None
     cached_samples = None
@@ -490,6 +733,7 @@ def main() -> None:
         for row in tqdm(rows, desc="HLVid"):
             if row["question_id"] in done_ids:
                 continue
+            timing_probe.reset()
             total_started = time.perf_counter()
             video_path = dataset_root / "videos" / row["video_path"]
             load_started = time.perf_counter()
@@ -523,14 +767,19 @@ def main() -> None:
                     proxy=args.proxy,
                 )
             visited_frames = frames_to_pil(frames, tile_starts, args.tile_len)
+            proxy_counts = proxy_decision_counts(decisions)
+            if proxy_counts["proxy_num_candidate_scores"]:
+                proxy_counts["proxy_seconds_per_score"] = proxy_seconds / proxy_counts["proxy_num_candidate_scores"]
 
             timing = {
                 "frame_load": frame_load_seconds,
                 "proxy": proxy_seconds,
                 "processor": 0.0,
                 "llm_inference": 0.0,
+                "model_generate": 0.0,
                 "total": 0.0,
             }
+            timing_counts = dict(proxy_counts)
             response = ""
             pred = ""
             is_correct = False
@@ -538,18 +787,21 @@ def main() -> None:
                 prompt = f"{processor.tokenizer.video_token}\n\nQuestion: {row['question']}"
                 processor_started = time.perf_counter()
                 inputs = processor(text=prompt, videos=[visited_frames], return_tensors="pt")
-                target_device = model.device if hasattr(model, "device") else next(model.parameters()).device
-                inputs = {k: v.to(target_device) if isinstance(v, torch.Tensor) else v for k, v in inputs.items()}
-                if torch.cuda.is_available():
-                    torch.cuda.synchronize()
+                cuda_synchronize()
                 timing["processor"] = time.perf_counter() - processor_started
+                target_device = model.device if hasattr(model, "device") else next(model.parameters()).device
+                timing_counts.update(collect_input_counts(inputs, model, tile_starts, visited_frames))
+                inputs = {k: v.to(target_device) if isinstance(v, torch.Tensor) else v for k, v in inputs.items()}
 
                 llm_started = time.perf_counter()
+                cuda_synchronize()
                 with torch.inference_mode():
                     outputs = model.generate(**inputs, max_new_tokens=args.max_new_tokens)
-                if torch.cuda.is_available():
-                    torch.cuda.synchronize()
+                cuda_synchronize()
                 timing["llm_inference"] = time.perf_counter() - llm_started
+                timing["model_generate"] = timing["llm_inference"]
+                timing_counts["generated_tokens"] = int(outputs.shape[1] - inputs["input_ids"].shape[1])
+                timing_counts.update(timing_probe.snapshot_counts())
                 response = processor.batch_decode(
                     outputs[:, inputs["input_ids"].shape[1] :],
                     skip_special_tokens=True,
@@ -558,6 +810,13 @@ def main() -> None:
                 is_correct = pred == str(row["answer"]).strip().upper()
 
             timing["total"] = time.perf_counter() - total_started
+            if not args.dry_run_sampling:
+                timing = finalize_v2_timing(
+                    timing,
+                    timing_probe,
+                    processor_seconds=timing["processor"],
+                    generate_seconds=timing["model_generate"],
+                )
             record = {
                 "question_id": row["question_id"],
                 "category": row["category"],
@@ -583,6 +842,7 @@ def main() -> None:
                 "tile_starts": tile_starts,
                 "proxy_decisions": decisions,
                 "timing_seconds": timing,
+                "timing_counts": timing_counts,
             }
             out.write(json.dumps(record) + "\n")
             out.flush()
