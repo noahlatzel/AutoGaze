@@ -27,11 +27,31 @@ from autogaze.temporal_sampling import (
     select_best_action,
     thumbnail_tensor,
 )
-from evaluate_hlvid_proxy_sampling import load_rows, load_video_samples, parse_csv_ints
-from run_hlvid_proxy_dry_sweep import DEFAULT_DELTAS, DEFAULT_LAMBDAS, SWEEP_CONFIGS
+from hlvid_common import load_rows, load_video_samples, parse_csv_ints
 
 
 DEFAULT_MODEL_ROOT = "/storage/slurm/latn/data/AutoGaze/hf_models"
+DEFAULT_DELTAS = "1,2,4,8,16,32,64,128,192,256,320"
+DEFAULT_LAMBDAS = ("0", "0.001", "0.002", "0.005", "0.01", "0.02", "0.05", "0.1")
+
+
+SWEEP_CONFIGS = [
+    {"name": "mean_novelty_pixel_mse", "proxy_metric": "mean_novelty", "proxy_base_metric": "pixel_mse"},
+    {"name": "mean_novelty_edge_l1", "proxy_metric": "mean_novelty", "proxy_base_metric": "edge_l1"},
+    {"name": "within_diversity_pixel_mse", "proxy_metric": "within_diversity", "proxy_base_metric": "pixel_mse"},
+    {"name": "within_diversity_edge_l1", "proxy_metric": "within_diversity", "proxy_base_metric": "edge_l1"},
+    {"name": "mean_pairwise_change_pixel_mse", "proxy_metric": "mean_pairwise_change", "proxy_base_metric": "pixel_mse"},
+    {"name": "mean_pairwise_change_edge_l1", "proxy_metric": "mean_pairwise_change", "proxy_base_metric": "edge_l1"},
+    {"name": "ssim_distance", "proxy_metric": "ssim_distance"},
+    {"name": "siglip_semantic_mean_novelty", "proxy_metric": "semantic_mean_novelty", "semantic_model": "siglip"},
+    {"name": "dinov2_semantic_mean_novelty", "proxy_metric": "semantic_mean_novelty", "semantic_model": "dinov2"},
+    {"name": "siglip_semantic_diversity", "proxy_metric": "semantic_diversity", "semantic_model": "siglip"},
+    {"name": "dinov2_semantic_diversity", "proxy_metric": "semantic_diversity", "semantic_model": "dinov2"},
+    {"name": "siglip_cosine", "proxy_metric": "siglip_cosine"},
+    {"name": "dinov2_cosine", "proxy_metric": "dinov2_cosine"},
+    {"name": "siglip_qgain", "proxy_metric": "siglip_qgain"},
+    {"name": "question_relevance", "proxy_metric": "question_relevance"},
+]
 
 
 def parse_args() -> argparse.Namespace:

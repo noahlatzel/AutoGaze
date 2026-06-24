@@ -56,7 +56,7 @@ run_dataset() {
     echo "output=${output}"
   } | tee "${log}"
 
-  python scripts/generate_delta_labels.py \
+  python scripts/runners/generate_delta_labels.py \
     --input-roots "${DATA_ROOT}/${root}" \
     --split train \
     --limit 5000 \
@@ -104,7 +104,7 @@ for idx in "${!pids[@]}"; do
   fi
 done
 
-python scripts/combine_delta_label_files.py \
+python scripts/maintenance/combine_delta_label_files.py \
   --inputs \
     "${OUT_DIR}/exp0b_pixel_mse_t004_internvid_train_5000.json" \
     "${OUT_DIR}/exp0b_pixel_mse_t004_100doh_train_5000.json" \

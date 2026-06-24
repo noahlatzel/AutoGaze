@@ -20,7 +20,7 @@ REPRESENTATIONS="final_gaze,mean_gaze,final_frame_mean_gaze,mean_vision"
 echo "[$(date --iso-8601=seconds)] Starting Experiment 1C representation ablation"
 
 if [[ ! -f "${FEATURES}" ]]; then
-  python scripts/extract_delta_probe_features.py \
+  python scripts/runners/extract_delta_probe_features.py \
     --labels "${PIXEL_LABELS}" \
     --heuristic pixel_mse \
     --device cuda \
@@ -32,7 +32,7 @@ fi
 
 for representation in final_gaze mean_gaze final_frame_mean_gaze mean_vision; do
   echo "[$(date --iso-8601=seconds)] Training pixel-MSE probe for ${representation}"
-  python scripts/train_delta_probe.py \
+  python scripts/runners/train_delta_probe.py \
     --features "${FEATURES}" \
     --feature-key "${representation}" \
     --labels-json "${PIXEL_LABELS}" \
@@ -45,7 +45,7 @@ for representation in final_gaze mean_gaze final_frame_mean_gaze mean_vision; do
     > "${LOG_DIR}/exp1c_pixel_mse_${representation}_linear_balanced5k.log" 2>&1
 
   echo "[$(date --iso-8601=seconds)] Training VideoMAE probe for ${representation}"
-  python scripts/train_delta_probe.py \
+  python scripts/runners/train_delta_probe.py \
     --features "${FEATURES}" \
     --feature-key "${representation}" \
     --labels-json "${VIDEOMAE_LABELS}" \

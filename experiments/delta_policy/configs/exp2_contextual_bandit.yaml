@@ -2,7 +2,7 @@ id: exp2_contextual_bandit
 family: delta_policy
 status: completed
 question: Test whether a trainable delta policy can optimize an explicit skip reward over logged all-action scores.
-runner: scripts/train_delta_bandit.py
+runner: scripts/runners/train_delta_bandit.py
 environment: autogaze
 dataset:
   name: autogaze_training_data_delta_labels
@@ -12,9 +12,13 @@ command:
   features: outputs/delta_probe_features/autogaze_balanced5k_representations.pt
   labels_json: outputs/delta_labels/exp0b_siglip_balanced5k_train.json
   heuristic: siglip
-  reward: "-score + skip_bonus * log(delta)"
   skip_bonus: 0.0025
   entropy_bonus: 0.01
+  epochs: 80
+  batch_size: 512
+  device: cuda
+grid:
+  reward: "-score + skip_bonus * log(delta)"
   deltas: [1, 2, 4, 8, 16, 32]
   policies:
     - linear
@@ -44,18 +48,39 @@ runs:
   - id: exp2c_siglip_mean_vision_runtime_bucket_linear_beta0025
     status: completed
     output: outputs/delta_bandit/exp2c_siglip_mean_vision_runtime_bucket_linear_beta0025_metrics.json
+    command:
+      feature_key: mean_vision
+      metadata_fields: fps_bucket,effective_fps,frame_count,start
+      policy: linear
   - id: exp2c_siglip_mean_vision_runtime_linear_beta0025
     status: completed
     output: outputs/delta_bandit/exp2c_siglip_mean_vision_runtime_linear_beta0025_metrics.json
+    command:
+      feature_key: mean_vision
+      metadata_fields: effective_fps,frame_count,start
+      policy: linear
   - id: exp2c_siglip_mean_vision_runtime_mlp_beta0025
     status: completed
     output: outputs/delta_bandit/exp2c_siglip_mean_vision_runtime_mlp_beta0025_metrics.json
+    command:
+      feature_key: mean_vision
+      metadata_fields: effective_fps,frame_count,start
+      policy: mlp
   - id: exp2c_siglip_final_gaze_linear_beta0025
     status: completed
     output: outputs/delta_bandit/exp2c_siglip_final_gaze_linear_beta0025_metrics.json
+    command:
+      feature_key: final_gaze
+      policy: linear
   - id: exp2c_siglip_mean_gaze_linear_beta0025
     status: completed
     output: outputs/delta_bandit/exp2c_siglip_mean_gaze_linear_beta0025_metrics.json
+    command:
+      feature_key: mean_gaze
+      policy: linear
   - id: exp2c_siglip_final_frame_mean_gaze_linear_beta0025
     status: completed
     output: outputs/delta_bandit/exp2c_siglip_final_frame_mean_gaze_linear_beta0025_metrics.json
+    command:
+      feature_key: final_frame_mean_gaze
+      policy: linear

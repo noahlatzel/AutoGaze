@@ -31,7 +31,7 @@ run_dataset() {
   local log="${LOG_DIR}/exp0b_videomae_reconstruction_${name}_train_1000.log"
 
   echo "[$(date --iso-8601=seconds)] Starting ${name}"
-  python scripts/generate_delta_labels.py \
+  python scripts/runners/generate_delta_labels.py \
     --input-roots "${DATA_ROOT}/${root}" \
     "${COMMON_ARGS[@]}" \
     --output "${output}" \
@@ -45,7 +45,7 @@ run_dataset "ego4d" "Ego4D_res448_250K"
 run_dataset "scanning_sam" "scanning_SAM_res448_50K"
 run_dataset "scanning_idl" "scanning_idl_res448_50K"
 
-python scripts/combine_delta_label_files.py \
+python scripts/maintenance/combine_delta_label_files.py \
   --inputs \
     "${OUT_DIR}/exp0b_videomae_reconstruction_internvid_train_1000.json" \
     "${OUT_DIR}/exp0b_videomae_reconstruction_100doh_train_1000.json" \

@@ -25,7 +25,7 @@ for DATASET in "${DATASETS[@]}"; do
   OUTPUT="${OUTPUT_DIR}/exp0b_siglip_${DATASET}_train_1000.json"
   OUTPUTS+=("${OUTPUT}")
   echo "[$(date --iso-8601=seconds)] Generating ${OUTPUT}"
-  python scripts/generate_delta_labels.py \
+  python scripts/runners/generate_delta_labels.py \
     --input-roots "${ROOT}/${DATASET}" \
     --split train \
     --limit 1000 \
@@ -41,7 +41,7 @@ for DATASET in "${DATASETS[@]}"; do
 done
 
 COMBINED="${OUTPUT_DIR}/exp0b_siglip_balanced5k_train.json"
-python scripts/combine_delta_label_files.py \
+python scripts/maintenance/combine_delta_label_files.py \
   --inputs "${OUTPUTS[@]}" \
   --output "${COMBINED}" \
   2>&1 | tee "${LOG_DIR}/exp0b_siglip_balanced5k_combine.log"

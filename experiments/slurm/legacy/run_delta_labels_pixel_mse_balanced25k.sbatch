@@ -53,7 +53,7 @@ echo "root=${DATA_ROOT}/${root}"
 echo "output=${output}"
 date
 
-python scripts/generate_delta_labels.py \
+python scripts/runners/generate_delta_labels.py \
   --input-roots "${DATA_ROOT}/${root}" \
   --split train \
   --limit 5000 \

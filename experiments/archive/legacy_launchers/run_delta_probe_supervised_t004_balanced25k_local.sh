@@ -29,7 +29,7 @@ nvidia-smi || true
 
 if [[ ! -s "${FEATURES}" ]]; then
   echo "[$(date --iso-8601=seconds)] Extracting frozen AutoGaze representations"
-  python scripts/extract_delta_probe_features.py \
+  python scripts/runners/extract_delta_probe_features.py \
     --labels "${LABELS}" \
     --heuristic pixel_mse \
     --representations final_gaze,mean_vision \
@@ -55,7 +55,7 @@ run_probe() {
   fi
 
   echo "[$(date --iso-8601=seconds)] Training ${name}"
-  python scripts/train_delta_probe.py \
+  python scripts/runners/train_delta_probe.py \
     --features "${FEATURES}" \
     --feature-key "${feature_key}" \
     --labels-json "${LABELS}" \
@@ -75,7 +75,7 @@ run_probe "pixel_mse_t004_mean_vision_runtime_mlp" "mean_vision" "mlp" "none"
 run_probe "pixel_mse_t004_final_gaze_runtime_linear" "final_gaze" "linear" "none"
 run_probe "pixel_mse_t004_mean_vision_runtime_linear_balanced" "mean_vision" "linear" "balanced"
 
-python scripts/plot_delta_probe_losses.py \
+python scripts/analysis/plot_delta_probe_losses.py \
   --inputs \
     "${OUT_DIR}/pixel_mse_t004_mean_vision_runtime_linear_metrics.json" \
     "${OUT_DIR}/pixel_mse_t004_mean_vision_runtime_mlp_metrics.json" \

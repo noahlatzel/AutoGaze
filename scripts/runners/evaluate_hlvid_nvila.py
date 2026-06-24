@@ -11,20 +11,16 @@
 
 import argparse
 import json
-import re
 from collections import Counter
 from pathlib import Path
 
-import pyarrow.parquet as pq
 import torch
-import cv2
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
 from transformers import AutoModel, AutoProcessor
 
-
-ANSWER_RE = re.compile(r"\b([ABCD])\b", re.IGNORECASE)
+from hlvid_common import dtype_from_name, existing_question_ids, extract_letter, load_rows
 
 
 def parse_args():
@@ -71,27 +67,9 @@ def parse_args():
     return parser.parse_args()
 
 
-def dtype_from_name(name):
-    if name == "auto":
-        return "auto"
-    return {
-        "float16": torch.float16,
-        "bfloat16": torch.bfloat16,
-        "float32": torch.float32,
-    }[name]
-
-
-def extract_letter(text):
-    match = ANSWER_RE.search(text.strip())
-    return match.group(1).upper() if match else ""
-
-
-def load_rows(dataset_root):
-    parquet_path = Path(dataset_root) / "data" / "test-00000-of-00001.parquet"
-    return pq.read_table(parquet_path).to_pylist()
-
-
 def load_uniform_frames(video_path, num_frames):
+    import cv2
+
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
         raise ValueError(f"Failed to open video: {video_path}")
@@ -128,6 +106,8 @@ def load_uniform_frames(video_path, num_frames):
 
 
 def load_frames_by_indices(video_path, indices):
+    import cv2
+
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
         raise ValueError(f"Failed to open video: {video_path}")
@@ -170,6 +150,8 @@ def select_inter_tile_delta_frames(frames, tile_len, delta_gap):
 
 
 def select_dense_inter_tile_delta_frames(video_path, tile_len, delta_gap, frame_stride, max_source_tiles):
+    import cv2
+
     if frame_stride <= 0:
         raise ValueError("dense_frame_stride must be positive")
     if max_source_tiles is not None and max_source_tiles <= 0:
@@ -197,21 +179,6 @@ def select_dense_inter_tile_delta_frames(video_path, tile_len, delta_gap, frame_
         tile_starts = [0]
         source_indices = source_positions[:tile_len]
     return load_frames_by_indices(video_path, source_indices), tile_starts, frame_count
-
-
-def existing_question_ids(path):
-    ids = set()
-    if not path.exists():
-        return ids
-    with path.open() as f:
-        for line in f:
-            if not line.strip():
-                continue
-            try:
-                ids.add(json.loads(line)["question_id"])
-            except Exception:
-                continue
-    return ids
 
 
 def summarize(results_path):

@@ -5,7 +5,13 @@ the broader proxy-sampling grid. It should contain default AutoGaze runs,
 fixed-delta baselines, and any future controls that are primarily about the
 NVILA evaluator rather than proxy metric design.
 
-Execution currently uses `scripts/evaluate_hlvid_nvila.py`.
+Execution currently uses `scripts/runners/evaluate_hlvid_nvila.py`.
+
+This runner is intentionally separate from
+`scripts/runners/evaluate_hlvid_proxy_sampling.py`: it is the smaller control
+path for direct NVILA baselines, fixed inter-tile deltas, and dense/fixed frame
+sources. Use the proxy-sampling evaluator when the run needs proxy scoring,
+score-minus-cost action selection, or detailed proxy timing.
 
 ## Existing Baselines
 

@@ -20,7 +20,7 @@ echo "[$(date --iso-8601=seconds)] Starting Experiment 1 balanced5k"
 
 if [[ ! -f "${FEATURES}" ]]; then
   echo "[$(date --iso-8601=seconds)] Extracting frozen AutoGaze features"
-  python scripts/extract_delta_probe_features.py \
+  python scripts/runners/extract_delta_probe_features.py \
     --labels "${PIXEL_LABELS}" \
     --heuristic pixel_mse \
     --device cuda \
@@ -32,7 +32,7 @@ else
 fi
 
 echo "[$(date --iso-8601=seconds)] Training pixel-MSE probe"
-python scripts/train_delta_probe.py \
+python scripts/runners/train_delta_probe.py \
   --features "${FEATURES}" \
   --labels-json "${PIXEL_LABELS}" \
   --heuristic pixel_mse \
@@ -44,7 +44,7 @@ python scripts/train_delta_probe.py \
   > "${LOG_DIR}/exp1a_pixel_mse_linear_balanced5k.log" 2>&1
 
 echo "[$(date --iso-8601=seconds)] Training VideoMAE-reconstruction probe"
-python scripts/train_delta_probe.py \
+python scripts/runners/train_delta_probe.py \
   --features "${FEATURES}" \
   --labels-json "${VIDEOMAE_LABELS}" \
   --heuristic videomae_reconstruction \

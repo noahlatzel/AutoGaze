@@ -7,11 +7,11 @@ scores.
 
 Execution currently uses:
 
-- `scripts/generate_delta_labels.py`
-- `scripts/combine_delta_label_files.py`
-- `scripts/extract_delta_probe_features.py`
-- `scripts/train_delta_probe.py`
-- `scripts/train_delta_bandit.py`
+- `scripts/runners/generate_delta_labels.py`
+- `scripts/maintenance/combine_delta_label_files.py`
+- `scripts/runners/extract_delta_probe_features.py`
+- `scripts/runners/train_delta_probe.py`
+- `scripts/runners/train_delta_bandit.py`
 
 ## Research Separation
 

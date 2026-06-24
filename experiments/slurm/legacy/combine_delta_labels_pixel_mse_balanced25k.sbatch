@@ -23,7 +23,7 @@ echo "pwd=$(pwd)"
 echo "hostname=$(hostname)"
 date
 
-python scripts/combine_delta_label_files.py \
+python scripts/maintenance/combine_delta_label_files.py \
   --inputs \
     "${OUT_DIR}/exp0b_pixel_mse_t004_internvid_train_5000.json" \
     "${OUT_DIR}/exp0b_pixel_mse_t004_100doh_train_5000.json" \

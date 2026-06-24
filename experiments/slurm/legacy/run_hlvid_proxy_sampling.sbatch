@@ -51,7 +51,7 @@ date
 nvidia-smi
 
 CMD=(
-  python scripts/evaluate_hlvid_proxy_sampling.py
+  python scripts/runners/evaluate_hlvid_proxy_sampling.py
   --dataset-root /storage/slurm/latn/data/AutoGaze/HLVid
   --model-path /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video
   --autogaze-model-id /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze

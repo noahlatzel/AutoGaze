@@ -1,8 +1,9 @@
 id: exp0_delta_labels
 family: delta_policy
 status: completed
+launchable: false
 question: Generate all-action temporal-delta pseudo-labels for supervised probes and bandit rewards.
-runner: scripts/generate_delta_labels.py
+runner: scripts/runners/generate_delta_labels.py
 environment: autogaze
 dataset:
   name: autogaze_training_data
@@ -10,17 +11,17 @@ dataset:
 outputs:
   root: outputs/delta_labels
 command:
+  input_roots:
+    - /storage/slurm/latn/data/AutoGaze/AutoGaze-Training-Data/InternVid_res448_250K
+    - /storage/slurm/latn/data/AutoGaze/AutoGaze-Training-Data/100DoH_res448_250K
+    - /storage/slurm/latn/data/AutoGaze/AutoGaze-Training-Data/Ego4D_res448_250K
+    - /storage/slurm/latn/data/AutoGaze/AutoGaze-Training-Data/scanning_SAM_res448_50K
+    - /storage/slurm/latn/data/AutoGaze/AutoGaze-Training-Data/scanning_idl_res448_50K
   split: train
   tile_len: 16
   tile_stride: 16
   deltas: [1, 2, 4, 8, 16, 32]
   max_tiles_per_video: 8
-  datasets:
-    - InternVid_res448_250K
-    - 100DoH_res448_250K
-    - Ego4D_res448_250K
-    - scanning_SAM_res448_50K
-    - scanning_idl_res448_50K
   heuristics:
     - pixel_mse
     - siglip
@@ -37,14 +38,17 @@ notes:
 runs:
   - id: exp0b_pixel_mse_t004_balanced25k_train
     status: completed
+    launchable: false
     output: outputs/delta_labels/exp0b_pixel_mse_t004_balanced25k_train.json
     threshold:
       pixel_mse: 0.04
   - id: exp0b_siglip_balanced5k_train
     status: completed
+    launchable: false
     output: outputs/delta_labels/exp0b_siglip_balanced5k_train.json
     threshold:
       siglip: 0.0125
   - id: exp0b_videomae_reconstruction_balanced5k_train
     status: completed
+    launchable: false
     output: outputs/delta_labels/exp0b_videomae_reconstruction_balanced5k_train.json

@@ -45,6 +45,17 @@ Every run config should make the following explicit:
 Keep run configs small and specific. Put grids in a family config when all runs
 share the same question and execution path.
 
+## Configs vs Manifests
+
+Configs are the source of runnable intent: they describe the runner, command
+arguments, grids, and per-run overrides. A run with `launchable: false` is a
+historical or aggregate entry and should not be rendered as a command.
+
+Manifests are the source of observed state: they record completed, planned,
+queued, failed, or superseded runs and point at result artifacts. The summary
+tool reads manifests because it is reporting what exists, not every possible
+config expansion.
+
 ## Output Convention
 
 Prefer:
@@ -64,7 +75,7 @@ past results remain discoverable without changing provenance.
 
 1. Register existing proxy-sampling and delta-policy results.
 2. Move future sweeps from Python constants and shell env vars into YAML configs.
-3. Route local and SLURM launches through the small launch helpers in each
-   experiment family.
+3. Route local and SLURM launches through `experiments/tools/`. Family launch
+   helpers are thin aliases for convenience.
 4. Keep AutoGaze model, dataset, and training code changes separate from
    experiment bookkeeping.

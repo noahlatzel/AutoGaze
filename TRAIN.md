@@ -73,7 +73,7 @@ Each video sub-dataset contains `train/` and `val/` splits, with `.mp4` video fi
 
 ## Stage 1: Pre-training with NTP
 
-Pre-train AutoGaze by learning to predict ground-truth gazing sequences via next-token prediction. See `scripts/example_ntp_training.sh`:
+Pre-train AutoGaze by learning to predict ground-truth gazing sequences via next-token prediction. See `scripts/examples/example_ntp_training.sh`:
 
 ```bash
 torchrun \
@@ -120,7 +120,7 @@ Replace all `<path to ...>` placeholders with your actual paths.
 
 ## Stage 2: Post-training with RL
 
-After NTP pre-training, further train AutoGaze with GRPO (Group Relative Policy Optimization) using reconstruction reward. See `scripts/example_rl_training.sh`:
+After NTP pre-training, further train AutoGaze with GRPO (Group Relative Policy Optimization) using reconstruction reward. See `scripts/examples/example_rl_training.sh`:
 
 ```bash
 torchrun \
