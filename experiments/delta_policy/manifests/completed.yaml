@@ -1,0 +1,29 @@
+version: 1
+updated: "2026-06-24"
+runs:
+  - id: pixel_mse_t004_mean_vision_runtime_linear_balanced25k
+    config: experiments/delta_policy/configs/exp1_supervised_probe.yaml
+    status: completed
+    summary: outputs/delta_probe_supervised_t004_balanced25k/pixel_mse_t004_mean_vision_runtime_linear_metrics.json
+    key_results:
+      accuracy: 0.5906228423118591
+      top2_accuracy: 0.8084045052528381
+      macro_f1: 0.4138898932470298
+      mean_abs_delta_error: 5.134422302246094
+  - id: exp2c_siglip_mean_vision_runtime_bucket_linear_beta0025
+    config: experiments/delta_policy/configs/exp2_contextual_bandit.yaml
+    status: completed
+    summary: outputs/delta_bandit/exp2c_siglip_mean_vision_runtime_bucket_linear_beta0025_metrics.json
+    key_results:
+      bandit_mean_reward: -0.004659383092075586
+      bandit_label_accuracy: 0.4510611295700073
+      bandit_mean_delta: 3.8976876735687256
+      bandit_mean_abs_delta_error: 4.490972518920898
+  - id: exp0b_pixel_mse_t004_balanced25k_train
+    config: experiments/delta_policy/configs/exp0_delta_labels.yaml
+    status: completed
+    output: outputs/delta_labels/exp0b_pixel_mse_t004_balanced25k_train.json
+  - id: exp0b_siglip_balanced5k_train
+    config: experiments/delta_policy/configs/exp0_delta_labels.yaml
+    status: completed
+    output: outputs/delta_labels/exp0b_siglip_balanced5k_train.json

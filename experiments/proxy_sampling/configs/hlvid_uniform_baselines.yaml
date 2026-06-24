@@ -1,0 +1,56 @@
+id: hlvid_uniform_baselines
+family: proxy_sampling
+status: completed
+question: Establish HLVid/NVILA accuracy and timing for uniform frame budgets.
+runner: scripts/evaluate_hlvid_proxy_sampling.py
+environment: vila-autogaze-eval
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+outputs:
+  root: outputs/hlvid/proxy_sampling
+  summary_glob: clean_s1_uniform_*/summary.json
+command:
+  selection: uniform
+  sampling:
+    - "16"
+    - "32"
+    - "64"
+    - "128"
+    - "256"
+    - "512"
+    - "1024"
+  tile_len: 16
+  max_tiles_video: 1
+metrics:
+  primary:
+    - accuracy
+    - mean_visited_tiles
+    - mean_llm_inference_seconds
+  secondary:
+    - by_category
+    - prediction_counts
+notes:
+  - research/hlvid_proxy_sampling_benchmark.md
+runs:
+  - id: clean_s1_uniform_16
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_uniform_16
+  - id: clean_s1_uniform_32
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_uniform_32
+  - id: clean_s1_uniform_64
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_uniform_64
+  - id: clean_s1_uniform_128
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_uniform_128
+  - id: clean_s1_uniform_256
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_uniform_256
+  - id: clean_s1_uniform_512
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_uniform_512
+  - id: clean_s1_uniform_1024
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_uniform_1024

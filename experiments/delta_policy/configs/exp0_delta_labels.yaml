@@ -1,0 +1,50 @@
+id: exp0_delta_labels
+family: delta_policy
+status: completed
+question: Generate all-action temporal-delta pseudo-labels for supervised probes and bandit rewards.
+runner: scripts/generate_delta_labels.py
+environment: autogaze
+dataset:
+  name: autogaze_training_data
+  root: /storage/slurm/latn/data/AutoGaze/AutoGaze-Training-Data
+outputs:
+  root: outputs/delta_labels
+command:
+  split: train
+  tile_len: 16
+  tile_stride: 16
+  deltas: [1, 2, 4, 8, 16, 32]
+  max_tiles_per_video: 8
+  datasets:
+    - InternVid_res448_250K
+    - 100DoH_res448_250K
+    - Ego4D_res448_250K
+    - scanning_SAM_res448_50K
+    - scanning_idl_res448_50K
+  heuristics:
+    - pixel_mse
+    - siglip
+    - videomae_reconstruction
+metrics:
+  primary:
+    - label_counts
+    - score_distributions
+    - fps_bucket_counts
+  secondary:
+    - dataset_counts
+notes:
+  - research/temporal_delta_scheduler.md
+runs:
+  - id: exp0b_pixel_mse_t004_balanced25k_train
+    status: completed
+    output: outputs/delta_labels/exp0b_pixel_mse_t004_balanced25k_train.json
+    threshold:
+      pixel_mse: 0.04
+  - id: exp0b_siglip_balanced5k_train
+    status: completed
+    output: outputs/delta_labels/exp0b_siglip_balanced5k_train.json
+    threshold:
+      siglip: 0.0125
+  - id: exp0b_videomae_reconstruction_balanced5k_train
+    status: completed
+    output: outputs/delta_labels/exp0b_videomae_reconstruction_balanced5k_train.json

@@ -1,0 +1,42 @@
+version: 1
+updated: "2026-06-24"
+runs:
+  - id: clean_s1_uniform_128
+    config: experiments/proxy_sampling/configs/hlvid_uniform_baselines.yaml
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_uniform_128
+    summary: outputs/hlvid/proxy_sampling/clean_s1_uniform_128/summary.json
+    key_results:
+      accuracy: 0.44776119402985076
+      mean_visited_tiles: 8.0
+      mean_llm_inference_seconds: 0.9745308233115738
+  - id: clean_s1_pixel_mse_128_t002
+    config: experiments/proxy_sampling/configs/hlvid_proxy_clean_s1.yaml
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_pixel_mse_128_t002
+    summary: outputs/hlvid/proxy_sampling/clean_s1_pixel_mse_128_t002/summary.json
+    key_results:
+      accuracy: 0.45149253731343286
+      mean_visited_tiles: 7.891791044776119
+      mean_llm_inference_seconds: 0.9808630495883213
+  - id: dry_sweep_full_128_log_fast
+    config: experiments/proxy_sampling/configs/dry_sweep_full_128_log.yaml
+    status: completed
+    output_dir: outputs/hlvid/proxy_dry_sweeps/full_128_log_fast
+    summary: outputs/hlvid/proxy_dry_sweeps/full_128_log_fast/sweep_summary.jsonl
+    key_results:
+      rows_processed: 268
+      sampling: "128"
+      temporal_cost: log
+  - id: proxy_sampling_v1_mtv1
+    config: experiments/proxy_sampling/configs/hlvid_semantic_cost_sweep.yaml
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling_v1_mtv1
+  - id: proxy_sampling_v2_cost_sweep_mtv1
+    config: experiments/proxy_sampling/configs/hlvid_semantic_cost_sweep.yaml
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling_v2_cost_sweep_mtv1
+  - id: proxy_sampling_v3_semantic_mtv1
+    config: experiments/proxy_sampling/configs/hlvid_semantic_cost_sweep.yaml
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling_v3_semantic_mtv1

@@ -1,0 +1,23 @@
+version: 1
+updated: "2026-06-24"
+runs:
+  - id: exp2_reward_beta_curve
+    status: planned
+    question: Tune skip_bonus so fixed policies form a meaningful quality/compute curve.
+    base_config: experiments/delta_policy/configs/exp2_contextual_bandit.yaml
+    parameters:
+      skip_bonus: [0.0, 0.001, 0.0025, 0.005, 0.01]
+    metrics:
+      - mean_reward
+      - mean_delta
+      - prediction_counts
+      - fixed_delta baselines
+  - id: exp3_hlvid_rollout_from_delta_policy
+    status: planned
+    question: Evaluate learned delta-policy rollout in the HLVid frame-selection path.
+    depends_on:
+      - exp2_reward_beta_curve
+    metrics:
+      - accuracy
+      - mean_visited_tiles
+      - selected_delta_counts

@@ -29,12 +29,25 @@ from PIL import Image
 from tqdm import tqdm
 from transformers import AutoModel, AutoProcessor
 
+from autogaze.temporal_sampling import (
+    PAIRWISE_METRICS,
+    SEMANTIC_MODELS,
+    SEMANTIC_PAIRWISE_METRICS,
+    SEMANTIC_WINDOW_METRICS,
+    TEMPORAL_COSTS,
+    WINDOW_METRICS,
+    Dinov2SemanticEncoder,
+    SiglipSemanticEncoder,
+    score_semantic_pairwise_metric,
+    score_semantic_window_metric,
+    score_window_metric,
+    select_best_action,
+    thumbnail_tensor,
+)
 from generate_delta_labels import (
     SiglipTileEncoder,
     VideoMAEReconstructionOracle,
     cosine_distance,
-    pixel_mse_tensors,
-    resize_tile,
     torch_dtype,
 )
 
@@ -43,6 +56,7 @@ ANSWER_RE = re.compile(r"\b([ABCD])\b", re.IGNORECASE)
 DEFAULT_DELTAS = "1,2,4,8,16,32,64,128,192,256,320"
 DEFAULT_MODEL_ROOT = "/storage/slurm/latn/data/AutoGaze/hf_models"
 DEFAULT_VIDEOMAE_WEIGHTS = "/storage/slurm/latn/data/AutoGaze/VideoMAE_AutoGaze/videomae.pt"
+QUESTION_CONDITIONED_METRICS = {"siglip_qgain", "question_relevance"}
 
 
 def cuda_synchronize() -> None:
@@ -101,19 +115,34 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--tile-len", type=int, default=16)
     parser.add_argument("--selection", choices=["uniform", "proxy"], default="uniform")
     parser.add_argument(
-        "--proxy",
-        choices=["pixel_mse", "siglip", "videomae_reconstruction"],
+        "--proxy-metric",
+        choices=(
+            list(PAIRWISE_METRICS)
+            + list(WINDOW_METRICS)
+            + list(SEMANTIC_PAIRWISE_METRICS)
+            + list(SEMANTIC_WINDOW_METRICS)
+            + ["siglip", "videomae_reconstruction"]
+        ),
         default=None,
-        help="Proxy used when --selection proxy.",
+        help=(
+            "Proxy metric used when --selection proxy. Pairwise thumbnail and semantic cosine metrics "
+            "are aggregated with mean_pairwise_change over candidate chunks."
+        ),
     )
-    parser.add_argument("--threshold", type=float, default=None, help="Proxy threshold used when --selection proxy.")
-    parser.add_argument("--deltas", default=DEFAULT_DELTAS)
     parser.add_argument(
-        "--fallback-delta",
-        type=int,
-        default=0,
-        help="Delta used when no candidate delta is below the threshold.",
+        "--proxy-base-metric",
+        choices=list(PAIRWISE_METRICS),
+        default="pixel_mse",
+        help="Pairwise thumbnail distance used by window metrics.",
     )
+    parser.add_argument("--lambda-cost", type=float, default=0.0, help="Weight for temporal action cost.")
+    parser.add_argument(
+        "--temporal-cost",
+        choices=list(TEMPORAL_COSTS),
+        default="none",
+        help="Temporal action cost used when selecting the best candidate.",
+    )
+    parser.add_argument("--deltas", default=DEFAULT_DELTAS)
 
     parser.add_argument("--max-new-tokens", type=int, default=16)
     parser.add_argument("--num-video-frames-thumbnail", type=int, default=64)
@@ -145,6 +174,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--resize", type=int, default=224)
     parser.add_argument("--feature-frame-stride", type=int, default=4)
     parser.add_argument("--siglip-model", default=f"{DEFAULT_MODEL_ROOT}/google--siglip2-base-patch16-224")
+    parser.add_argument("--dinov2-model", default=f"{DEFAULT_MODEL_ROOT}/facebook--dinov2-with-registers-base")
+    parser.add_argument(
+        "--semantic-model",
+        choices=list(SEMANTIC_MODELS),
+        default="siglip",
+        help="Embedding model used by semantic_mean_novelty and semantic_diversity.",
+    )
+    parser.add_argument("--max-batch-size-semantic", type=int, default=32)
     parser.add_argument("--videomae-model", default=f"{DEFAULT_MODEL_ROOT}/facebook--vit-mae-large")
     parser.add_argument("--videomae-weights", default=DEFAULT_VIDEOMAE_WEIGHTS)
     parser.add_argument("--videomae-scales", default="224")
@@ -305,16 +342,35 @@ class ProxyScorer:
     def __init__(self, args: argparse.Namespace):
         self.args = args
         self.siglip_encoder = None
+        self.semantic_encoder = None
         self.videomae_oracle = None
         dtype = torch_dtype(args.proxy_dtype)
-        if args.proxy == "siglip":
+        if args.proxy_metric == "siglip":
             self.siglip_encoder = SiglipTileEncoder(
                 args.siglip_model,
                 args.proxy_device,
                 dtype,
                 args.max_batch_size_siglip,
             )
-        elif args.proxy == "videomae_reconstruction":
+        if self._needs_semantic_encoder():
+            semantic_model = self._semantic_model_name()
+            if semantic_model == "siglip":
+                self.semantic_encoder = SiglipSemanticEncoder(
+                    args.siglip_model,
+                    args.proxy_device,
+                    dtype,
+                    args.max_batch_size_semantic,
+                )
+            elif semantic_model == "dinov2":
+                self.semantic_encoder = Dinov2SemanticEncoder(
+                    args.dinov2_model,
+                    args.proxy_device,
+                    dtype,
+                    args.max_batch_size_semantic,
+                )
+            else:
+                raise ValueError(f"Unknown semantic model: {semantic_model}")
+        if args.proxy_metric == "videomae_reconstruction":
             self.videomae_oracle = VideoMAEReconstructionOracle(
                 model_name_or_path=args.videomae_model,
                 weights_path=args.videomae_weights,
@@ -326,6 +382,16 @@ class ProxyScorer:
                 dtype=dtype,
             )
 
+    def _needs_semantic_encoder(self) -> bool:
+        return self.args.proxy_metric in SEMANTIC_PAIRWISE_METRICS + SEMANTIC_WINDOW_METRICS
+
+    def _semantic_model_name(self) -> str:
+        if self.args.proxy_metric in ("siglip_cosine", "siglip_qgain", "question_relevance"):
+            return "siglip"
+        if self.args.proxy_metric == "dinov2_cosine":
+            return "dinov2"
+        return self.args.semantic_model
+
     def score(
         self,
         proxy: str,
@@ -336,7 +402,10 @@ class ProxyScorer:
         tile_cache: Dict[int, np.ndarray],
         resized_cache: Dict[int, torch.Tensor],
         siglip_cache: Dict[int, torch.Tensor],
+        semantic_cache: Dict[int, torch.Tensor],
+        text_cache: Dict[str, torch.Tensor],
         videomae_cache: Dict[int, float],
+        question: Optional[str] = None,
     ) -> float:
         def get_tile(start: int) -> np.ndarray:
             if start not in tile_cache:
@@ -345,7 +414,7 @@ class ProxyScorer:
 
         def get_resized(start: int) -> torch.Tensor:
             if start not in resized_cache:
-                resized_cache[start] = resize_tile(get_tile(start), self.args.resize)
+                resized_cache[start] = thumbnail_tensor(get_tile(start), self.args.resize)
             return resized_cache[start]
 
         def get_siglip(start: int) -> torch.Tensor:
@@ -353,13 +422,63 @@ class ProxyScorer:
                 siglip_cache[start] = self.siglip_encoder.encode(get_tile(start), self.args.feature_frame_stride)
             return siglip_cache[start]
 
+        def get_semantic(start: int) -> torch.Tensor:
+            if start not in semantic_cache:
+                semantic_cache[start] = self.semantic_encoder.encode_frames(get_tile(start))
+            return semantic_cache[start]
+
+        def get_question_embedding() -> torch.Tensor:
+            if question is None:
+                raise ValueError(f"{proxy} requires a question")
+            if not isinstance(self.semantic_encoder, SiglipSemanticEncoder):
+                raise ValueError(f"{proxy} requires the SigLIP semantic encoder")
+            if question not in text_cache:
+                text_cache[question] = self.semantic_encoder.encode_text(question)
+            return text_cache[question]
+
         def get_videomae(start: int) -> float:
             if start not in videomae_cache:
                 videomae_cache[start] = self.videomae_oracle.score(get_tile(start))
             return videomae_cache[start]
 
-        if proxy == "pixel_mse":
-            return pixel_mse_tensors(get_resized(current_start), get_resized(candidate_start))
+        if proxy in PAIRWISE_METRICS:
+            return float(
+                score_window_metric(
+                    get_resized(current_start),
+                    get_resized(candidate_start),
+                    "mean_pairwise_change",
+                    base_metric=proxy,
+                ).item()
+            )
+        if proxy in WINDOW_METRICS:
+            return float(
+                score_window_metric(
+                    get_resized(current_start),
+                    get_resized(candidate_start),
+                    proxy,
+                    base_metric=self.args.proxy_base_metric,
+                ).item()
+            )
+        if proxy in SEMANTIC_PAIRWISE_METRICS:
+            question_embedding = get_question_embedding() if proxy in QUESTION_CONDITIONED_METRICS else None
+            return float(
+                score_semantic_pairwise_metric(
+                    get_semantic(current_start),
+                    get_semantic(candidate_start),
+                    proxy,
+                    question_embedding=question_embedding,
+                ).item()
+            )
+        if proxy in SEMANTIC_WINDOW_METRICS:
+            question_embedding = get_question_embedding() if proxy in QUESTION_CONDITIONED_METRICS else None
+            return float(
+                score_semantic_window_metric(
+                    get_semantic(current_start),
+                    get_semantic(candidate_start),
+                    proxy,
+                    question_embedding=question_embedding,
+                ).item()
+            )
         if proxy == "siglip":
             return cosine_distance(get_siglip(current_start), get_siglip(candidate_start))
         if proxy == "videomae_reconstruction":
@@ -547,16 +666,19 @@ def proxy_tile_starts(
     frames: np.ndarray,
     tile_len: int,
     deltas: Sequence[int],
-    threshold: float,
-    fallback_delta: int,
     scorer: ProxyScorer,
     proxy: str,
+    lambda_cost: float,
+    temporal_cost_name: str,
+    question: Optional[str] = None,
 ) -> Tuple[List[int], List[dict], float]:
     starts = [0] if len(frames) >= tile_len else []
     decisions = []
     tile_cache: Dict[int, np.ndarray] = {}
     resized_cache: Dict[int, torch.Tensor] = {}
     siglip_cache: Dict[int, torch.Tensor] = {}
+    semantic_cache: Dict[int, torch.Tensor] = {}
+    text_cache: Dict[str, torch.Tensor] = {}
     videomae_cache: Dict[int, float] = {}
     proxy_seconds = 0.0
 
@@ -564,15 +686,14 @@ def proxy_tile_starts(
         current_start = starts[-1]
         base_next_start = current_start + tile_len
         valid = [delta for delta in deltas if base_next_start + delta + tile_len <= len(frames)]
-        fallback_valid = base_next_start + fallback_delta + tile_len <= len(frames)
-        if not valid and not fallback_valid:
+        if not valid:
             break
 
-        scores = {}
+        scores: Dict[int, float] = {}
         started = time.perf_counter()
         for delta in valid:
             candidate_start = base_next_start + delta
-            scores[str(delta)] = scorer.score(
+            scores[int(delta)] = scorer.score(
                 proxy,
                 current_start,
                 candidate_start,
@@ -581,14 +702,20 @@ def proxy_tile_starts(
                 tile_cache,
                 resized_cache,
                 siglip_cache,
+                semantic_cache,
+                text_cache,
                 videomae_cache,
+                question=question,
             )
         if torch.cuda.is_available():
             torch.cuda.synchronize()
         proxy_seconds += time.perf_counter() - started
 
-        passing = [delta for delta in valid if scores[str(delta)] <= threshold]
-        selected_delta = max(passing) if passing else fallback_delta
+        selected_delta, utilities = select_best_action(
+            scores,
+            lambda_cost=lambda_cost,
+            cost=temporal_cost_name,
+        )
         next_start = base_next_start + selected_delta
         if next_start + tile_len > len(frames):
             break
@@ -598,7 +725,8 @@ def proxy_tile_starts(
                 "selected_delta": selected_delta,
                 "next_start": next_start,
                 "num_valid_deltas": len(valid),
-                "scores": scores,
+                "scores": {str(delta): score for delta, score in scores.items()},
+                "utilities": {str(delta): utility for delta, utility in utilities.items()},
             }
         )
         starts.append(next_start)
@@ -630,10 +758,16 @@ def summarize(results_path: Path) -> dict:
             "accuracy": sum(1 for row in subset if row.get("is_correct")) / max(len(subset), 1),
         }
     tile_counts = [row["num_visited_tiles"] for row in rows]
+    visited_frame_counts = [row["num_visited_frames"] for row in rows]
     llm_times = [
         row["timing_seconds"].get("model_generate", row["timing_seconds"].get("llm_inference", 0.0))
         for row in rows
         if "timing_seconds" in row
+    ]
+    total_times = [
+        row["timing_seconds"].get("total")
+        for row in rows
+        if isinstance(row.get("timing_seconds", {}).get("total"), (int, float))
     ]
     timing_keys = sorted({key for row in rows for key in row.get("timing_seconds", {})})
     timing_summary = {}
@@ -655,6 +789,12 @@ def summarize(results_path: Path) -> dict:
                 "mean": float(np.mean(values)),
                 "total": float(np.sum(values)),
             }
+    selected_delta_counts = Counter()
+    for row in rows:
+        selected_delta_counts.update(row.get("timing_counts", {}).get("selected_delta_counts", {}))
+    visual_tokens_projected = _count_values(rows, "num_visual_tokens_projected")
+    visual_tokens_in_context = _count_values(rows, "num_visual_tokens_in_context")
+
     return {
         "num_examples": total,
         "num_correct": correct,
@@ -663,6 +803,16 @@ def summarize(results_path: Path) -> dict:
         "prediction_counts": dict(Counter(row.get("prediction_letter", "") for row in rows)),
         "mean_visited_tiles": float(np.mean(tile_counts)) if tile_counts else 0.0,
         "total_visited_tiles": int(np.sum(tile_counts)) if tile_counts else 0,
+        "mean_visited_frames": float(np.mean(visited_frame_counts)) if visited_frame_counts else 0.0,
+        "total_visited_frames": int(np.sum(visited_frame_counts)) if visited_frame_counts else 0,
+        "mean_visual_tokens_projected": float(np.mean(visual_tokens_projected)) if visual_tokens_projected else None,
+        "total_visual_tokens_projected": int(np.sum(visual_tokens_projected)) if visual_tokens_projected else None,
+        "mean_visual_tokens_in_context": float(np.mean(visual_tokens_in_context)) if visual_tokens_in_context else None,
+        "total_visual_tokens_in_context": int(np.sum(visual_tokens_in_context)) if visual_tokens_in_context else None,
+        "mean_end_to_end_seconds": float(np.mean(total_times)) if total_times else 0.0,
+        "total_end_to_end_seconds": float(np.sum(total_times)) if total_times else 0.0,
+        "examples_per_end_to_end_second": total / float(np.sum(total_times)) if total_times and np.sum(total_times) > 0 else 0.0,
+        "selected_delta_counts": dict(selected_delta_counts),
         "total_llm_inference_seconds": float(np.sum(llm_times)) if llm_times else 0.0,
         "mean_llm_inference_seconds": float(np.mean(llm_times)) if llm_times else 0.0,
         "timing_summary_seconds": timing_summary,
@@ -670,12 +820,19 @@ def summarize(results_path: Path) -> dict:
     }
 
 
+def _count_values(rows: Sequence[dict], key: str) -> List[float]:
+    values = [row.get("timing_counts", {}).get(key) for row in rows]
+    return [float(value) for value in values if isinstance(value, (int, float))]
+
+
 def main() -> None:
     args = parse_args()
-    if args.selection == "proxy" and (args.proxy is None or args.threshold is None):
-        raise ValueError("--selection proxy requires --proxy and --threshold")
-    if args.selection == "uniform" and args.proxy is not None:
-        raise ValueError("--proxy is only valid with --selection proxy")
+    if args.selection == "proxy" and args.proxy_metric is None:
+        raise ValueError("--selection proxy requires --proxy-metric")
+    if args.selection == "uniform" and args.proxy_metric is not None:
+        raise ValueError("--proxy-metric is only valid with --selection proxy")
+    if args.proxy_metric in QUESTION_CONDITIONED_METRICS and args.semantic_model != "siglip":
+        raise ValueError(f"{args.proxy_metric} uses SigLIP text embeddings; set --semantic-model siglip")
 
     dataset_root = Path(args.dataset_root)
     output_path = Path(args.output)
@@ -761,10 +918,11 @@ def main() -> None:
                     frames=frames,
                     tile_len=args.tile_len,
                     deltas=deltas,
-                    threshold=args.threshold,
-                    fallback_delta=args.fallback_delta,
                     scorer=scorer,
-                    proxy=args.proxy,
+                    proxy=args.proxy_metric,
+                    lambda_cost=args.lambda_cost,
+                    temporal_cost_name=args.temporal_cost,
+                    question=row.get("question"),
                 )
             visited_frames = frames_to_pil(frames, tile_starts, args.tile_len)
             proxy_counts = proxy_decision_counts(decisions)
@@ -827,10 +985,12 @@ def main() -> None:
                 "is_correct": is_correct,
                 "sampling": args.sampling,
                 "selection": args.selection,
-                "proxy": args.proxy,
-                "threshold": args.threshold,
+                "proxy_metric": args.proxy_metric,
+                "proxy_base_metric": args.proxy_base_metric,
+                "semantic_model": args.semantic_model,
+                "lambda_cost": args.lambda_cost,
+                "temporal_cost": args.temporal_cost,
                 "deltas": deltas,
-                "fallback_delta": args.fallback_delta,
                 "tile_len": args.tile_len,
                 "source_frame_count": source_frame_count,
                 "frame_cache_hit": cache_hit,
@@ -855,10 +1015,12 @@ def main() -> None:
             "autogaze_model_id": args.autogaze_model_id,
             "sampling": args.sampling,
             "selection": args.selection,
-            "proxy": args.proxy,
-            "threshold": args.threshold,
+            "proxy_metric": args.proxy_metric,
+            "proxy_base_metric": args.proxy_base_metric,
+            "semantic_model": args.semantic_model,
+            "lambda_cost": args.lambda_cost,
+            "temporal_cost": args.temporal_cost,
             "deltas": deltas,
-            "fallback_delta": args.fallback_delta,
             "tile_len": args.tile_len,
             "max_tiles_video": max_tiles_video,
             "max_dense_sampled_frames": args.max_dense_sampled_frames,

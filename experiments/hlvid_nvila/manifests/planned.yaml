@@ -1,0 +1,11 @@
+version: 1
+updated: "2026-06-24"
+runs:
+  - id: hlvid_nvila_dense_control
+    status: planned
+    question: Add a feasible dense or capped-dense control for interpreting frame-budget results.
+    base_config: experiments/hlvid_nvila/configs/default_autogaze.yaml
+    metrics:
+      - accuracy
+      - mean_llm_inference_seconds
+      - processed_frames

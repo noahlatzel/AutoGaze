@@ -1,0 +1,33 @@
+version: 1
+updated: "2026-06-24"
+families:
+  proxy_sampling:
+    description: HLVid temporal sampling with proxy metrics and cost sweeps.
+    readme: experiments/proxy_sampling/README.md
+    configs:
+      - experiments/proxy_sampling/configs/hlvid_uniform_baselines.yaml
+      - experiments/proxy_sampling/configs/hlvid_proxy_clean_s1.yaml
+      - experiments/proxy_sampling/configs/hlvid_semantic_cost_sweep.yaml
+      - experiments/proxy_sampling/configs/dry_sweep_full_128_log.yaml
+    manifests:
+      - experiments/proxy_sampling/manifests/completed.yaml
+      - experiments/proxy_sampling/manifests/planned.yaml
+  delta_policy:
+    description: Delta-label generation, supervised probes, and contextual bandits.
+    readme: experiments/delta_policy/README.md
+    configs:
+      - experiments/delta_policy/configs/exp0_delta_labels.yaml
+      - experiments/delta_policy/configs/exp1_supervised_probe.yaml
+      - experiments/delta_policy/configs/exp2_contextual_bandit.yaml
+    manifests:
+      - experiments/delta_policy/manifests/completed.yaml
+      - experiments/delta_policy/manifests/planned.yaml
+  hlvid_nvila:
+    description: NVILA-HD-Video default and fixed-delta baselines on HLVid.
+    readme: experiments/hlvid_nvila/README.md
+    configs:
+      - experiments/hlvid_nvila/configs/default_autogaze.yaml
+      - experiments/hlvid_nvila/configs/fixed_delta.yaml
+    manifests:
+      - experiments/hlvid_nvila/manifests/completed.yaml
+      - experiments/hlvid_nvila/manifests/planned.yaml

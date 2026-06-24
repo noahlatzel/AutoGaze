@@ -1,0 +1,38 @@
+version: 1
+updated: "2026-06-24"
+runs:
+  - id: hlvid_nvila_default_autogaze
+    config: experiments/hlvid_nvila/configs/default_autogaze.yaml
+    status: completed
+    output_dir: outputs/hlvid/nvila_default_autogaze
+    summary: outputs/hlvid/nvila_default_autogaze/summary.json
+  - id: hlvid_nvila_fixed_delta_1
+    config: experiments/hlvid_nvila/configs/fixed_delta.yaml
+    status: completed
+    output_dir: outputs/hlvid/nvila_fixed_delta/delta_1
+    summary: outputs/hlvid/nvila_fixed_delta/delta_1/summary.json
+  - id: hlvid_nvila_fixed_delta_2
+    config: experiments/hlvid_nvila/configs/fixed_delta.yaml
+    status: completed
+    output_dir: outputs/hlvid/nvila_fixed_delta/delta_2
+    summary: outputs/hlvid/nvila_fixed_delta/delta_2/summary.json
+  - id: hlvid_nvila_fixed_delta_4
+    config: experiments/hlvid_nvila/configs/fixed_delta.yaml
+    status: completed
+    output_dir: outputs/hlvid/nvila_fixed_delta/delta_4
+    summary: outputs/hlvid/nvila_fixed_delta/delta_4/summary.json
+  - id: hlvid_nvila_fixed_delta_8
+    config: experiments/hlvid_nvila/configs/fixed_delta.yaml
+    status: completed
+    output_dir: outputs/hlvid/nvila_fixed_delta/delta_8
+    summary: outputs/hlvid/nvila_fixed_delta/delta_8/summary.json
+  - id: hlvid_nvila_fixed_delta_16
+    config: experiments/hlvid_nvila/configs/fixed_delta.yaml
+    status: completed
+    output_dir: outputs/hlvid/nvila_fixed_delta/delta_16
+    summary: outputs/hlvid/nvila_fixed_delta/delta_16/summary.json
+  - id: hlvid_nvila_fixed_delta_32
+    config: experiments/hlvid_nvila/configs/fixed_delta.yaml
+    status: completed
+    output_dir: outputs/hlvid/nvila_fixed_delta/delta_32
+    summary: outputs/hlvid/nvila_fixed_delta/delta_32/summary.json

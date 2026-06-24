@@ -1,0 +1,61 @@
+id: exp1_supervised_probe
+family: delta_policy
+status: completed
+question: Test whether frozen AutoGaze tile representations predict temporal-delta pseudo-labels.
+runner: scripts/train_delta_probe.py
+environment: autogaze
+dataset:
+  name: autogaze_training_data_delta_labels
+outputs:
+  roots:
+    - outputs/delta_probe_features
+    - outputs/delta_probe_supervised_t004
+    - outputs/delta_probe_supervised_t004_balanced25k
+command:
+  feature_extractor: scripts/extract_delta_probe_features.py
+  representations:
+    - final_gaze
+    - mean_gaze
+    - final_frame_mean_gaze
+    - mean_vision
+  probes:
+    - linear
+    - mlp
+  metadata_fields:
+    - effective_fps
+    - frame_count
+    - start
+  deltas: [1, 2, 4, 8, 16, 32]
+metrics:
+  primary:
+    - accuracy
+    - top2_accuracy
+    - macro_f1
+    - balanced_accuracy
+    - mean_abs_delta_error
+    - mean_abs_seconds_error
+  secondary:
+    - by_fps_bucket
+    - by_dataset
+    - prediction_counts
+notes:
+  - research/supervised_pixel_mse_skip_policy.md
+runs:
+  - id: pixel_mse_t004_mean_vision_runtime_linear_balanced25k
+    status: completed
+    output: outputs/delta_probe_supervised_t004_balanced25k/pixel_mse_t004_mean_vision_runtime_linear_metrics.json
+  - id: pixel_mse_t004_mean_vision_runtime_linear_balanced_balanced25k
+    status: completed
+    output: outputs/delta_probe_supervised_t004_balanced25k/pixel_mse_t004_mean_vision_runtime_linear_balanced_metrics.json
+  - id: pixel_mse_t004_mean_vision_runtime_mlp_balanced25k
+    status: completed
+    output: outputs/delta_probe_supervised_t004_balanced25k/pixel_mse_t004_mean_vision_runtime_mlp_metrics.json
+  - id: pixel_mse_t004_final_gaze_runtime_linear_balanced25k
+    status: completed
+    output: outputs/delta_probe_supervised_t004_balanced25k/pixel_mse_t004_final_gaze_runtime_linear_metrics.json
+  - id: exp1c_representation_ablation_balanced5k
+    status: completed
+    output_glob: outputs/delta_probe_features/exp1c_*_balanced5k_metrics.json
+  - id: exp1f_siglip_representation_ablation_balanced5k
+    status: completed
+    output_glob: outputs/delta_probe_features/exp1f_siglip_*_balanced5k_metrics.json

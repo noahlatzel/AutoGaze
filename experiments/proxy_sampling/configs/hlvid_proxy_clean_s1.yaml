@@ -1,0 +1,93 @@
+id: hlvid_proxy_clean_s1
+family: proxy_sampling
+status: completed
+question: Test first-wave thresholded proxy metrics against uniform HLVid/NVILA baselines.
+runner: scripts/evaluate_hlvid_proxy_sampling.py
+environment: vila-autogaze-eval
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+outputs:
+  root: outputs/hlvid/proxy_sampling
+  summary_glob: clean_s1_*/*summary.json
+command:
+  selection: proxy
+  sampling:
+    - "128"
+    - "256"
+  tile_len: 16
+  max_tiles_video: 1
+  deltas: [1, 2, 4, 8, 16, 32, 64, 128, 192, 256, 320]
+  proxy_grid:
+    - proxy_metric: pixel_mse
+      thresholds: [0.01, 0.02, 0.04]
+    - proxy_metric: siglip
+      thresholds: [0.006, 0.0125, 0.025]
+    - proxy_metric: videomae_reconstruction
+      thresholds: [2.0, 2.5, 3.0]
+metrics:
+  primary:
+    - accuracy
+    - mean_visited_tiles
+    - mean_llm_inference_seconds
+  secondary:
+    - by_category
+    - selected_delta_counts
+    - proxy timing
+notes:
+  - research/hlvid_proxy_sampling_benchmark.md
+runs:
+  - id: clean_s1_pixel_mse_128_t001
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_pixel_mse_128_t001
+  - id: clean_s1_pixel_mse_128_t002
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_pixel_mse_128_t002
+  - id: clean_s1_pixel_mse_128_t004
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_pixel_mse_128_t004
+  - id: clean_s1_siglip_128_t0006
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_siglip_128_t0006
+  - id: clean_s1_siglip_128_t00125
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_siglip_128_t00125
+  - id: clean_s1_siglip_128_t0025
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_siglip_128_t0025
+  - id: clean_s1_videomae_128_t20
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_videomae_128_t20
+  - id: clean_s1_videomae_128_t25
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_videomae_128_t25
+  - id: clean_s1_videomae_128_t30
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_videomae_128_t30
+  - id: clean_s1_pixel_mse_256_t001
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_pixel_mse_256_t001
+  - id: clean_s1_pixel_mse_256_t002
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_pixel_mse_256_t002
+  - id: clean_s1_pixel_mse_256_t004
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_pixel_mse_256_t004
+  - id: clean_s1_siglip_256_t0006
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_siglip_256_t0006
+  - id: clean_s1_siglip_256_t00125
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_siglip_256_t00125
+  - id: clean_s1_siglip_256_t0025
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_siglip_256_t0025
+  - id: clean_s1_videomae_256_t20
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_videomae_256_t20
+  - id: clean_s1_videomae_256_t25
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_videomae_256_t25
+  - id: clean_s1_videomae_256_t30
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling/clean_s1_videomae_256_t30

@@ -387,20 +387,24 @@ def train_model(
     weight_decay: float,
     class_weighting: str,
     device: str,
-) -> nn.Module:
+) -> tuple[nn.Module, List[Dict[str, float]]]:
     model = build_probe(kind, x.shape[1], int(y.max().item()) + 1).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     train_x = x[train_idx].to(device)
     train_y = y[train_idx].to(device)
+    val_x = x[val_idx].to(device)
+    val_y = y[val_idx].to(device)
     class_weights = None
     if class_weighting == "balanced":
         num_classes = int(y.max().item()) + 1
         counts = torch.bincount(train_y.cpu(), minlength=num_classes).float().clamp_min(1)
         class_weights = (counts.sum() / (num_classes * counts)).to(device)
     generator = torch.Generator().manual_seed(0)
+    history = []
 
-    for _ in tqdm(range(epochs), desc=f"train {kind}"):
+    for epoch in tqdm(range(epochs), desc=f"train {kind}"):
         perm = torch.randperm(train_x.shape[0], generator=generator)
+        train_losses = []
         for start in range(0, train_x.shape[0], batch_size):
             batch_idx = perm[start:start + batch_size]
             logits = model(train_x[batch_idx])
@@ -408,7 +412,21 @@ def train_model(
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-    return model
+            train_losses.append(float(loss.detach().cpu().item()))
+        with torch.inference_mode():
+            val_logits = model(val_x)
+            val_loss = F.cross_entropy(val_logits, val_y, weight=class_weights)
+            val_pred = val_logits.argmax(dim=-1)
+            val_acc = (val_pred == val_y).float().mean()
+        history.append(
+            {
+                "epoch": epoch + 1,
+                "train_loss": float(np.mean(train_losses)),
+                "val_loss": float(val_loss.detach().cpu().item()),
+                "val_accuracy": float(val_acc.detach().cpu().item()),
+            }
+        )
+    return model, history
 
 
 @torch.inference_mode()
@@ -451,7 +469,7 @@ def main() -> None:
     metadata_features = build_metadata_features(examples, metadata_fields)
     metadata_features = normalize(metadata_features[train_idx], metadata_features)
 
-    feature_probe = train_model(
+    feature_probe, feature_history = train_model(
         features,
         labels,
         train_idx,
@@ -464,7 +482,7 @@ def main() -> None:
         args.class_weighting,
         args.device,
     )
-    metadata_probe = train_model(
+    metadata_probe, metadata_history = train_model(
         metadata_features,
         labels,
         train_idx,
@@ -532,6 +550,10 @@ def main() -> None:
             "fixed_delta_1": evaluate_predictions(val_y, fixed_delta_predictions(1, deltas, val_y), deltas, examples, val_idx),
             "fixed_delta_16": evaluate_predictions(val_y, fixed_delta_predictions(16, deltas, val_y), deltas, examples, val_idx),
             "fixed_delta_32": evaluate_predictions(val_y, fixed_delta_predictions(32, deltas, val_y), deltas, examples, val_idx),
+        },
+        "training_history": {
+            "feature_probe": feature_history,
+            "metadata_probe": metadata_history,
         },
     }
 

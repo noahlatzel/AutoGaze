@@ -1,0 +1,13 @@
+version: 1
+updated: "2026-06-24"
+runs:
+  - id: proxy_sampling_promote_dry_sweep_pareto_candidates
+    status: planned
+    question: Promote a small set of dry-sweep Pareto candidates to full NVILA evaluation.
+    depends_on:
+      - outputs/hlvid/proxy_dry_sweeps/full_128_log_fast/sweep_summary.jsonl
+    metrics:
+      - accuracy
+      - mean_visited_tiles
+      - mean_llm_inference_seconds
+      - selected_delta_counts

@@ -1,0 +1,48 @@
+id: hlvid_semantic_cost_sweep
+family: proxy_sampling
+status: completed
+question: Evaluate semantic proxy metrics under log temporal-cost sweeps.
+runner: scripts/evaluate_hlvid_proxy_sampling.py
+environment: vila-autogaze-eval
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+outputs:
+  roots:
+    - outputs/hlvid/proxy_sampling_v1_mtv1
+    - outputs/hlvid/proxy_sampling_v2_cost_sweep_mtv1
+    - outputs/hlvid/proxy_sampling_v3_semantic_mtv1
+command:
+  selection: proxy
+  sampling: "128"
+  tile_len: 16
+  max_tiles_video: 1
+  temporal_cost: log
+  lambda_costs: [0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05]
+  proxy_metrics:
+    - semantic_mean_novelty
+    - semantic_diversity
+    - siglip_qgain
+    - question_relevance
+    - dinov2_cosine
+metrics:
+  primary:
+    - accuracy
+    - mean_visited_tiles
+    - mean_llm_inference_seconds
+  secondary:
+    - selected_delta_counts
+    - mean_proxy_seconds_per_score
+notes:
+  - research/hlvid_semantic_proxy_metrics.md
+  - research/hlvid_proxy_sampling_benchmark_v2_timing.md
+runs:
+  - id: proxy_sampling_v1_mtv1
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling_v1_mtv1
+  - id: proxy_sampling_v2_cost_sweep_mtv1
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling_v2_cost_sweep_mtv1
+  - id: proxy_sampling_v3_semantic_mtv1
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling_v3_semantic_mtv1

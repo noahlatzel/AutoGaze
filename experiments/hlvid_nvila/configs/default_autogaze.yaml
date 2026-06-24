@@ -1,0 +1,27 @@
+id: hlvid_nvila_default_autogaze
+family: hlvid_nvila
+status: completed
+question: Measure default NVILA-HD-Video with AutoGaze processor behavior on HLVid.
+runner: scripts/evaluate_hlvid_nvila.py
+environment: vila-autogaze-eval
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+models:
+  nvila: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video
+  autogaze: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+outputs:
+  root: outputs/hlvid/nvila_default_autogaze
+  summary: outputs/hlvid/nvila_default_autogaze/summary.json
+command:
+  max_new_tokens: 16
+  max_batch_size_autogaze: 16
+metrics:
+  primary:
+    - accuracy
+    - mean_llm_inference_seconds
+  secondary:
+    - by_category
+    - prediction_counts
+notes:
+  - research/rl/option_0_fixed_delta_evaluation.md

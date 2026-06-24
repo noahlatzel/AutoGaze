@@ -1,0 +1,29 @@
+id: dry_sweep_full_128_log
+family: proxy_sampling
+status: completed
+question: Measure selected-delta behavior and proxy scoring cost before full NVILA evaluation.
+runner: scripts/run_hlvid_proxy_dry_sweep_fast.py
+environment: vila-autogaze-eval
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+outputs:
+  root: outputs/hlvid/proxy_dry_sweeps/full_128_log_fast
+  summary: outputs/hlvid/proxy_dry_sweeps/full_128_log_fast/sweep_summary.jsonl
+command:
+  sampling: "128"
+  tile_len: 16
+  temporal_cost: log
+  lambda_costs: [0, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1]
+  deltas: [1, 2, 4, 8, 16, 32, 64, 128, 192, 256, 320]
+  proxy_dtype: float16
+  proxy_device: cuda
+metrics:
+  primary:
+    - mean_visited_frames
+    - mean_proxy_seconds_per_score
+    - selected_delta_counts
+  secondary:
+    - mean_proxy_num_candidate_scores
+notes:
+  - research/hlvid_proxy_sampling_controls.md
