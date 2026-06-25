@@ -1,0 +1,72 @@
+id: hlvid_pareto_max_tiles48
+family: proxy_sampling
+status: running
+question: Evaluate current proxy-sampling Pareto candidates with max_tiles_video=48.
+runner: scripts/runners/evaluate_hlvid_proxy_sampling.py
+environment: vila-autogaze-eval
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+outputs:
+  root: outputs/hlvid/proxy_sampling_v5_pareto_mtv48
+command:
+  dataset_root: /storage/slurm/latn/data/AutoGaze/HLVid
+  sampling: "128"
+  tile_len: 16
+  max_tiles_video: 48
+  temporal_cost: log
+  max_new_tokens: 16
+  deltas: [1, 2, 4, 8, 16, 32, 64, 128, 192, 256, 320]
+slurm:
+  mem: 96G
+  gres: gpu:1
+  nodelist: node21,node22
+run_policy:
+  type: explicit_pareto_candidates
+  source:
+    - outputs/hlvid/proxy_sampling_v1_mtv1
+    - outputs/hlvid/proxy_sampling_v2_cost_sweep_mtv1
+    - outputs/hlvid/proxy_sampling_v3_semantic_mtv1
+metrics:
+  primary:
+    - accuracy
+    - mean_visited_frames
+    - mean_visual_tokens_projected
+    - mean_end_to_end_seconds
+  secondary:
+    - selected_delta_counts
+    - mean_proxy_seconds_per_score
+notes:
+  - research/hlvid_semantic_proxy_metrics.md
+  - This follow-up keeps temporal policies fixed and changes only max_tiles_video from 1 to 48.
+runs:
+  - id: dinov2_semnovel_128_l001_log_mtv48
+    status: submitted
+    slurm_job_id: 1607580
+    output_dir: outputs/hlvid/proxy_sampling_v5_pareto_mtv48/dinov2_semnovel_128_l001_log_mtv48
+    command:
+      selection: proxy
+      proxy_metric: semantic_mean_novelty
+      proxy_base_metric: pixel_mse
+      semantic_model: dinov2
+      lambda_cost: 0.01
+  - id: dinov2_semdiv_128_l001_log_mtv48
+    status: submitted
+    slurm_job_id: 1607581
+    output_dir: outputs/hlvid/proxy_sampling_v5_pareto_mtv48/dinov2_semdiv_128_l001_log_mtv48
+    command:
+      selection: proxy
+      proxy_metric: semantic_diversity
+      proxy_base_metric: pixel_mse
+      semantic_model: dinov2
+      lambda_cost: 0.01
+  - id: question_relevance_128_l001_log_mtv48
+    status: submitted
+    slurm_job_id: 1607582
+    output_dir: outputs/hlvid/proxy_sampling_v5_pareto_mtv48/question_relevance_128_l001_log_mtv48
+    command:
+      selection: proxy
+      proxy_metric: question_relevance
+      proxy_base_metric: pixel_mse
+      semantic_model: siglip
+      lambda_cost: 0.01

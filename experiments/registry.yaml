@@ -8,6 +8,7 @@ families:
       - experiments/proxy_sampling/configs/hlvid_uniform_baselines.yaml
       - experiments/proxy_sampling/configs/hlvid_proxy_clean_s1.yaml
       - experiments/proxy_sampling/configs/hlvid_semantic_cost_sweep.yaml
+      - experiments/proxy_sampling/configs/hlvid_pareto_max_tiles48.yaml
       - experiments/proxy_sampling/configs/dry_sweep_full_128_log.yaml
     manifests:
       - experiments/proxy_sampling/manifests/completed.yaml

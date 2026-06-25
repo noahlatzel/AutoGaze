@@ -40,3 +40,7 @@ runs:
     config: experiments/proxy_sampling/configs/hlvid_semantic_cost_sweep.yaml
     status: completed
     output_dir: outputs/hlvid/proxy_sampling_v3_semantic_mtv1
+  - id: proxy_sampling_v4_diversity_cosine_mtv1
+    config: experiments/proxy_sampling/configs/hlvid_semantic_cost_sweep.yaml
+    status: completed
+    output_dir: outputs/hlvid/proxy_sampling_v4_diversity_cosine_mtv1

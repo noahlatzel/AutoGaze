@@ -305,3 +305,93 @@ runs:
           proxy_base_metric: pixel_mse
           semantic_model: dinov2
           lambda_cost: 0.002
+      - id: dinov2_semdiv_128_l0005_log
+        status: completed
+        launchable: false
+        output_dir: outputs/hlvid/proxy_sampling_v4_diversity_cosine_mtv1/dinov2_semdiv_128_l0005_log
+        command:
+          selection: proxy
+          proxy_metric: semantic_diversity
+          proxy_base_metric: pixel_mse
+          semantic_model: dinov2
+          lambda_cost: 0.005
+      - id: dinov2_semdiv_128_l002_log
+        status: completed
+        launchable: false
+        output_dir: outputs/hlvid/proxy_sampling_v4_diversity_cosine_mtv1/dinov2_semdiv_128_l002_log
+        command:
+          selection: proxy
+          proxy_metric: semantic_diversity
+          proxy_base_metric: pixel_mse
+          semantic_model: dinov2
+          lambda_cost: 0.02
+      - id: dinov2_semdiv_128_l005_log
+        status: completed
+        launchable: false
+        output_dir: outputs/hlvid/proxy_sampling_v4_diversity_cosine_mtv1/dinov2_semdiv_128_l005_log
+        command:
+          selection: proxy
+          proxy_metric: semantic_diversity
+          proxy_base_metric: pixel_mse
+          semantic_model: dinov2
+          lambda_cost: 0.05
+      - id: siglip_semdiv_128_l0002_log
+        status: completed
+        launchable: false
+        output_dir: outputs/hlvid/proxy_sampling_v4_diversity_cosine_mtv1/siglip_semdiv_128_l0002_log
+        command:
+          selection: proxy
+          proxy_metric: semantic_diversity
+          proxy_base_metric: pixel_mse
+          semantic_model: siglip
+          lambda_cost: 0.002
+      - id: siglip_semdiv_128_l0005_log
+        status: completed
+        launchable: false
+        output_dir: outputs/hlvid/proxy_sampling_v4_diversity_cosine_mtv1/siglip_semdiv_128_l0005_log
+        command:
+          selection: proxy
+          proxy_metric: semantic_diversity
+          proxy_base_metric: pixel_mse
+          semantic_model: siglip
+          lambda_cost: 0.005
+      - id: siglip_semdiv_128_l001_log
+        status: completed
+        launchable: false
+        output_dir: outputs/hlvid/proxy_sampling_v4_diversity_cosine_mtv1/siglip_semdiv_128_l001_log
+        command:
+          selection: proxy
+          proxy_metric: semantic_diversity
+          proxy_base_metric: pixel_mse
+          semantic_model: siglip
+          lambda_cost: 0.01
+      - id: siglip_semdiv_128_l002_log
+        status: completed
+        launchable: false
+        output_dir: outputs/hlvid/proxy_sampling_v4_diversity_cosine_mtv1/siglip_semdiv_128_l002_log
+        command:
+          selection: proxy
+          proxy_metric: semantic_diversity
+          proxy_base_metric: pixel_mse
+          semantic_model: siglip
+          lambda_cost: 0.02
+      - id: dinov2_cosine_128_l002_log
+        status: completed
+        launchable: false
+        output_dir: outputs/hlvid/proxy_sampling_v4_diversity_cosine_mtv1/dinov2_cosine_128_l002_log
+        command:
+          selection: proxy
+          proxy_metric: dinov2_cosine
+          proxy_base_metric: pixel_mse
+          semantic_model: dinov2
+          lambda_cost: 0.02
+      - id: siglip_cosine_128_l001_log
+        status: completed
+        launchable: false
+        output_dir: outputs/hlvid/proxy_sampling_v4_diversity_cosine_mtv1/siglip_cosine_128_l001_log
+        command:
+          selection: proxy
+          proxy_metric: siglip_cosine
+          proxy_base_metric: pixel_mse
+          semantic_model: siglip
+          lambda_cost: 0.01
