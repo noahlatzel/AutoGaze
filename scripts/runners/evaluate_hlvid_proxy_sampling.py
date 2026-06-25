@@ -41,12 +41,6 @@ from autogaze.temporal_sampling import (
     select_best_action,
     thumbnail_tensor,
 )
-from generate_delta_labels import (
-    SiglipTileEncoder,
-    VideoMAEReconstructionOracle,
-    cosine_distance,
-    torch_dtype,
-)
 from hlvid_common import (
     dtype_from_name,
     existing_question_ids,
@@ -61,7 +55,6 @@ from hlvid_common import (
 
 DEFAULT_DELTAS = "1,2,4,8,16,32,64,128,192,256,320"
 DEFAULT_MODEL_ROOT = "/storage/slurm/latn/data/AutoGaze/hf_models"
-DEFAULT_VIDEOMAE_WEIGHTS = "/storage/slurm/latn/data/AutoGaze/VideoMAE_AutoGaze/videomae.pt"
 QUESTION_CONDITIONED_METRICS = {"siglip_qgain", "question_relevance"}
 
 
@@ -127,7 +120,6 @@ def parse_args() -> argparse.Namespace:
             + list(WINDOW_METRICS)
             + list(SEMANTIC_PAIRWISE_METRICS)
             + list(SEMANTIC_WINDOW_METRICS)
-            + ["siglip", "videomae_reconstruction"]
         ),
         default=None,
         help=(
@@ -178,7 +170,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--proxy-device", default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--proxy-dtype", choices=["float32", "float16", "bfloat16"], default="float32")
     parser.add_argument("--resize", type=int, default=224)
-    parser.add_argument("--feature-frame-stride", type=int, default=4)
     parser.add_argument("--siglip-model", default=f"{DEFAULT_MODEL_ROOT}/google--siglip2-base-patch16-224")
     parser.add_argument("--dinov2-model", default=f"{DEFAULT_MODEL_ROOT}/facebook--dinov2-with-registers-base")
     parser.add_argument(
@@ -188,12 +179,6 @@ def parse_args() -> argparse.Namespace:
         help="Embedding model used by semantic_mean_novelty and semantic_diversity.",
     )
     parser.add_argument("--max-batch-size-semantic", type=int, default=32)
-    parser.add_argument("--videomae-model", default=f"{DEFAULT_MODEL_ROOT}/facebook--vit-mae-large")
-    parser.add_argument("--videomae-weights", default=DEFAULT_VIDEOMAE_WEIGHTS)
-    parser.add_argument("--videomae-scales", default="224")
-    parser.add_argument("--videomae-patch-size", type=int, default=16)
-    parser.add_argument("--videomae-gaze-ratio", type=float, default=0.25)
-    parser.add_argument("--videomae-attn-mode", default="sdpa")
     return parser.parse_args()
 
 
@@ -224,20 +209,19 @@ def uniform_tile_starts(num_samples: int, tile_len: int) -> List[int]:
     return list(range(0, num_samples - tile_len + 1, tile_len))
 
 
+def torch_dtype(name: str) -> torch.dtype:
+    if name == "float16":
+        return torch.float16
+    if name == "bfloat16":
+        return torch.bfloat16
+    return torch.float32
+
+
 class ProxyScorer:
     def __init__(self, args: argparse.Namespace):
         self.args = args
-        self.siglip_encoder = None
         self.semantic_encoder = None
-        self.videomae_oracle = None
         dtype = torch_dtype(args.proxy_dtype)
-        if args.proxy_metric == "siglip":
-            self.siglip_encoder = SiglipTileEncoder(
-                args.siglip_model,
-                args.proxy_device,
-                dtype,
-                args.max_batch_size_siglip,
-            )
         if self._needs_semantic_encoder():
             semantic_model = self._semantic_model_name()
             if semantic_model == "siglip":
@@ -256,17 +240,6 @@ class ProxyScorer:
                 )
             else:
                 raise ValueError(f"Unknown semantic model: {semantic_model}")
-        if args.proxy_metric == "videomae_reconstruction":
-            self.videomae_oracle = VideoMAEReconstructionOracle(
-                model_name_or_path=args.videomae_model,
-                weights_path=args.videomae_weights,
-                scales=args.videomae_scales,
-                patch_size=args.videomae_patch_size,
-                gaze_ratio=args.videomae_gaze_ratio,
-                attn_mode=args.videomae_attn_mode,
-                device=args.proxy_device,
-                dtype=dtype,
-            )
 
     def _needs_semantic_encoder(self) -> bool:
         return self.args.proxy_metric in SEMANTIC_PAIRWISE_METRICS + SEMANTIC_WINDOW_METRICS
@@ -287,10 +260,8 @@ class ProxyScorer:
         tile_len: int,
         tile_cache: Dict[int, np.ndarray],
         resized_cache: Dict[int, torch.Tensor],
-        siglip_cache: Dict[int, torch.Tensor],
         semantic_cache: Dict[int, torch.Tensor],
         text_cache: Dict[str, torch.Tensor],
-        videomae_cache: Dict[int, float],
         question: Optional[str] = None,
     ) -> float:
         def get_tile(start: int) -> np.ndarray:
@@ -302,11 +273,6 @@ class ProxyScorer:
             if start not in resized_cache:
                 resized_cache[start] = thumbnail_tensor(get_tile(start), self.args.resize)
             return resized_cache[start]
-
-        def get_siglip(start: int) -> torch.Tensor:
-            if start not in siglip_cache:
-                siglip_cache[start] = self.siglip_encoder.encode(get_tile(start), self.args.feature_frame_stride)
-            return siglip_cache[start]
 
         def get_semantic(start: int) -> torch.Tensor:
             if start not in semantic_cache:
@@ -321,11 +287,6 @@ class ProxyScorer:
             if question not in text_cache:
                 text_cache[question] = self.semantic_encoder.encode_text(question)
             return text_cache[question]
-
-        def get_videomae(start: int) -> float:
-            if start not in videomae_cache:
-                videomae_cache[start] = self.videomae_oracle.score(get_tile(start))
-            return videomae_cache[start]
 
         if proxy in PAIRWISE_METRICS:
             return float(
@@ -365,10 +326,6 @@ class ProxyScorer:
                     question_embedding=question_embedding,
                 ).item()
             )
-        if proxy == "siglip":
-            return cosine_distance(get_siglip(current_start), get_siglip(candidate_start))
-        if proxy == "videomae_reconstruction":
-            return get_videomae(candidate_start)
         raise ValueError(f"Unknown proxy: {proxy}")
 
 
@@ -562,10 +519,8 @@ def proxy_tile_starts(
     decisions = []
     tile_cache: Dict[int, np.ndarray] = {}
     resized_cache: Dict[int, torch.Tensor] = {}
-    siglip_cache: Dict[int, torch.Tensor] = {}
     semantic_cache: Dict[int, torch.Tensor] = {}
     text_cache: Dict[str, torch.Tensor] = {}
-    videomae_cache: Dict[int, float] = {}
     proxy_seconds = 0.0
 
     while starts:
@@ -587,10 +542,8 @@ def proxy_tile_starts(
                 tile_len,
                 tile_cache,
                 resized_cache,
-                siglip_cache,
                 semantic_cache,
                 text_cache,
-                videomae_cache,
                 question=question,
             )
         if torch.cuda.is_available():
