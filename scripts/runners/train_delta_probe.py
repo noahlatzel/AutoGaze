@@ -30,7 +30,12 @@ def parse_args() -> argparse.Namespace:
         description=__doc__,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("--features", required=True, help="Feature cache produced by extract_delta_probe_features.py.")
+    parser.add_argument("--features", required=True, help="Train feature cache produced by extract_delta_probe_features.py.")
+    parser.add_argument(
+        "--val-features",
+        default=None,
+        help="Optional validation feature cache. When set, training uses all train-cache examples and evaluates on all val-cache examples.",
+    )
     parser.add_argument("--output", required=True, help="Output JSON metrics path.")
     parser.add_argument(
         "--feature-key",
@@ -40,12 +45,22 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--labels-json",
         default=None,
-        help="Optional Experiment 0B label JSON used to override labels in the feature cache.",
+        help="Optional train label JSON used to override labels in the train feature cache.",
+    )
+    parser.add_argument(
+        "--val-labels-json",
+        default=None,
+        help="Optional validation label JSON used to override labels in --val-features.",
+    )
+    parser.add_argument(
+        "--label-metric",
+        default=None,
+        help="Proxy metric label to train on. Inferred from single-metric label JSONs or feature cache metadata when omitted.",
     )
     parser.add_argument(
         "--heuristic",
         default=None,
-        help="Heuristic to read from --labels-json when overriding labels.",
+        help="Deprecated alias for --label-metric.",
     )
     parser.add_argument("--probe", choices=["linear", "mlp"], default="linear", help="Probe architecture.")
     parser.add_argument("--epochs", type=int, default=50, help="Training epochs.")
@@ -332,16 +347,39 @@ def fixed_delta_predictions(delta: int, deltas: Sequence[int], val_y: torch.Tens
     return torch.full_like(val_y, closest_idx)
 
 
-def labels_from_json(examples: Sequence[dict], labels_json: str, heuristic: str, deltas: Sequence[int]) -> torch.Tensor:
+def infer_label_metric_from_data(label_data: dict, requested: str | None) -> str:
+    if requested:
+        return requested
+    metrics = label_data.get("metadata", {}).get("proxy_metrics")
+    if metrics and len(metrics) == 1:
+        return str(metrics[0])
+    heuristics = label_data.get("metadata", {}).get("heuristics")
+    if heuristics and len(heuristics) == 1:
+        return str(heuristics[0])
+    raise ValueError("--label-metric is required when the label JSON contains multiple or no metrics.")
+
+
+def infer_label_metric_from_cache(cache: dict, requested: str | None) -> str | None:
+    if requested:
+        return requested
+    metadata = cache.get("metadata", {})
+    return metadata.get("label_metric") or metadata.get("heuristic")
+
+
+def labels_from_json(examples: Sequence[dict], labels_json: str, label_metric: str, deltas: Sequence[int]) -> torch.Tensor:
     data = json.loads(Path(labels_json).read_text())
+    label_metric = infer_label_metric_from_data(data, label_metric)
     delta_to_index = {int(delta): idx for idx, delta in enumerate(deltas)}
     labels_by_key = {}
     for video in data["videos"]:
         for tile in video["tiles"]:
-            label = tile["labels"].get(heuristic)
+            label = tile["labels"].get(label_metric)
             if label is None:
                 continue
-            labels_by_key[(video["video_path"], int(tile["start"]))] = delta_to_index[int(label)]
+            label = int(label)
+            if label not in delta_to_index:
+                raise ValueError(f"Label delta {label} is not in expected deltas={list(deltas)}")
+            labels_by_key[(video["video_path"], int(tile["start"]))] = delta_to_index[label]
 
     labels = []
     missing = []
@@ -386,9 +424,10 @@ def train_model(
     lr: float,
     weight_decay: float,
     class_weighting: str,
+    num_classes: int,
     device: str,
 ) -> tuple[nn.Module, List[Dict[str, float]]]:
-    model = build_probe(kind, x.shape[1], int(y.max().item()) + 1).to(device)
+    model = build_probe(kind, x.shape[1], num_classes).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     train_x = x[train_idx].to(device)
     train_y = y[train_idx].to(device)
@@ -396,7 +435,6 @@ def train_model(
     val_y = y[val_idx].to(device)
     class_weights = None
     if class_weighting == "balanced":
-        num_classes = int(y.max().item()) + 1
         counts = torch.bincount(train_y.cpu(), minlength=num_classes).float().clamp_min(1)
         class_weights = (counts.sum() / (num_classes * counts)).to(device)
     generator = torch.Generator().manual_seed(0)
@@ -439,32 +477,96 @@ def model_logits(model: nn.Module, x: torch.Tensor, indices: torch.Tensor, devic
     return torch.cat(logits, dim=0)
 
 
+def select_features(cache: dict, feature_key: str | None) -> torch.Tensor:
+    if feature_key is not None:
+        return cache["features_by_representation"][feature_key].float()
+    return cache["features"].float()
+
+
+def load_split(
+    features_path: str,
+    labels_json: str | None,
+    requested_label_metric: str | None,
+    feature_key: str | None,
+    expected_deltas: Sequence[int] | None = None,
+) -> tuple[torch.Tensor, torch.Tensor, List[dict], List[int], str | None, dict]:
+    cache = torch.load(features_path, map_location="cpu", weights_only=False)
+    features = select_features(cache, feature_key)
+    examples = list(cache["examples"])
+    deltas = [int(delta) for delta in cache["metadata"]["deltas"]]
+    if expected_deltas is not None and deltas != list(expected_deltas):
+        raise ValueError(f"Delta mismatch for {features_path}: {deltas} != {list(expected_deltas)}")
+
+    label_metric = infer_label_metric_from_cache(cache, requested_label_metric)
+    if labels_json is not None:
+        label_data = json.loads(Path(labels_json).read_text())
+        label_metric = infer_label_metric_from_data(label_data, requested_label_metric or label_metric)
+        labels = labels_from_json(examples, labels_json, label_metric, deltas)
+    else:
+        labels = cache["labels"].long()
+        if requested_label_metric and label_metric and requested_label_metric != label_metric:
+            raise ValueError(
+                f"Feature cache {features_path} contains labels for {label_metric}, "
+                f"but --label-metric requested {requested_label_metric}. Pass --labels-json to override."
+            )
+    return features, labels, examples, deltas, label_metric, cache
+
+
 def main() -> None:
     args = parse_args()
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
 
-    cache = torch.load(args.features, map_location="cpu", weights_only=False)
-    if args.feature_key is not None:
-        features = cache["features_by_representation"][args.feature_key].float()
-    else:
-        features = cache["features"].float()
-    examples = cache["examples"]
-    deltas = [int(delta) for delta in cache["metadata"]["deltas"]]
-    if args.labels_json is not None:
-        if args.heuristic is None:
-            raise ValueError("--heuristic is required when --labels-json is provided.")
-        labels = labels_from_json(examples, args.labels_json, args.heuristic, deltas)
-    else:
-        labels = cache["labels"].long()
+    requested_label_metric = args.label_metric or args.heuristic
+    train_features, train_labels, train_examples, deltas, label_metric, train_cache = load_split(
+        args.features,
+        args.labels_json,
+        requested_label_metric,
+        args.feature_key,
+    )
+    train_features, train_labels, train_examples = filter_examples(
+        train_features,
+        train_labels,
+        train_examples,
+        args.filter_key,
+        args.filter_value,
+    )
 
-    features, labels, examples = filter_examples(features, labels, examples, args.filter_key, args.filter_value)
+    if args.val_features is not None:
+        val_features, val_labels, val_examples, _, val_label_metric, _ = load_split(
+            args.val_features,
+            args.val_labels_json,
+            requested_label_metric or label_metric,
+            args.feature_key,
+            expected_deltas=deltas,
+        )
+        val_features, val_labels, val_examples = filter_examples(
+            val_features,
+            val_labels,
+            val_examples,
+            args.filter_key,
+            args.filter_value,
+        )
+        if train_features.shape[1:] != val_features.shape[1:]:
+            raise ValueError(f"Feature shape mismatch: train {tuple(train_features.shape)} vs val {tuple(val_features.shape)}")
+        features = torch.cat([train_features, val_features], dim=0)
+        labels = torch.cat([train_labels, val_labels], dim=0)
+        examples = train_examples + val_examples
+        train_idx = torch.arange(len(train_examples), dtype=torch.long)
+        val_idx = torch.arange(len(train_examples), len(examples), dtype=torch.long)
+        split_mode = "explicit"
+        label_metric = requested_label_metric or label_metric or val_label_metric
+    else:
+        features = train_features
+        labels = train_labels
+        examples = train_examples
+        train_idx, val_idx = split_indices(examples, args.val_fraction)
+        split_mode = "hash_fraction"
+        if len(train_idx) == 0 or len(val_idx) == 0:
+            raise ValueError("Empty train or validation split.")
+
     metadata_fields = parse_metadata_fields(args.metadata_fields)
-
-    train_idx, val_idx = split_indices(examples, args.val_fraction)
-    if len(train_idx) == 0 or len(val_idx) == 0:
-        raise ValueError("Empty train or validation split.")
-
+    num_classes = len(deltas)
     features = normalize(features[train_idx], features)
     metadata_features = build_metadata_features(examples, metadata_fields)
     metadata_features = normalize(metadata_features[train_idx], metadata_features)
@@ -480,6 +582,7 @@ def main() -> None:
         args.lr,
         args.weight_decay,
         args.class_weighting,
+        num_classes,
         args.device,
     )
     metadata_probe, metadata_history = train_model(
@@ -493,6 +596,7 @@ def main() -> None:
         args.lr,
         args.weight_decay,
         args.class_weighting,
+        num_classes,
         args.device,
     )
 
@@ -504,15 +608,20 @@ def main() -> None:
     metrics = {
         "metadata": {
             "features": args.features,
+            "val_features": args.val_features,
             "feature_key": args.feature_key,
             "labels_json": args.labels_json,
-            "heuristic": args.heuristic or cache["metadata"].get("heuristic"),
+            "val_labels_json": args.val_labels_json,
+            "label_metric": label_metric,
+            "heuristic": label_metric,
             "filter_key": args.filter_key,
             "filter_value": args.filter_value,
             "num_examples": len(examples),
             "num_train": int(len(train_idx)),
             "num_val": int(len(val_idx)),
             "deltas": deltas,
+            "split_mode": split_mode,
+            "train_cache_label_metric": infer_label_metric_from_cache(train_cache, None),
             "probe": args.probe,
             "class_weighting": args.class_weighting,
             "metadata_fields": metadata_fields,
