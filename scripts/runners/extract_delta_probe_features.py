@@ -33,9 +33,18 @@ def parse_args() -> argparse.Namespace:
         description=__doc__,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("--labels", required=True, help="Delta label JSON from Experiment 0B.")
+    parser.add_argument("--labels", required=True, help="Delta label JSON from generate_delta_labels.py.")
     parser.add_argument("--output", required=True, help="Output .pt feature cache.")
-    parser.add_argument("--heuristic", required=True, help="Heuristic label to extract, e.g. pixel_mse or videomae_reconstruction.")
+    parser.add_argument(
+        "--label-metric",
+        default=None,
+        help="Proxy metric label to extract. Inferred when the label JSON contains exactly one metadata.proxy_metrics entry.",
+    )
+    parser.add_argument(
+        "--heuristic",
+        default=None,
+        help="Deprecated alias for --label-metric.",
+    )
     parser.add_argument("--model", default=DEFAULT_AUTOGAZE_MODEL, help="AutoGaze checkpoint path or Hugging Face model id.")
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu", help="Torch device.")
     parser.add_argument("--dtype", choices=["float32", "float16", "bfloat16"], default="float16", help="Model dtype.")
@@ -67,22 +76,37 @@ def read_tile(path: str, start: int, tile_len: int) -> np.ndarray:
         return read_video_pyav(container, np.arange(start, start + tile_len))
 
 
-def collect_examples(label_data: dict, heuristic: str, limit_tiles: Optional[int]) -> List[dict]:
+def infer_label_metric(label_data: dict, requested: Optional[str]) -> str:
+    if requested:
+        return requested
+    metrics = label_data.get("metadata", {}).get("proxy_metrics")
+    if metrics and len(metrics) == 1:
+        return str(metrics[0])
+    heuristics = label_data.get("metadata", {}).get("heuristics")
+    if heuristics and len(heuristics) == 1:
+        return str(heuristics[0])
+    raise ValueError("--label-metric is required when the label JSON contains multiple or no metrics.")
+
+
+def collect_examples(label_data: dict, label_metric: str, limit_tiles: Optional[int]) -> List[dict]:
     deltas = [int(delta) for delta in label_data["metadata"]["deltas"]]
     delta_to_index = {delta: idx for idx, delta in enumerate(deltas)}
     examples = []
     for video in label_data["videos"]:
         for tile in video["tiles"]:
-            label = tile["labels"].get(heuristic)
+            label = tile["labels"].get(label_metric)
             if label is None:
                 continue
+            label = int(label)
+            if label not in delta_to_index:
+                raise ValueError(f"Label delta {label} is not in metadata.deltas={deltas}")
             examples.append(
                 {
                     "video_path": video["video_path"],
                     "relative_path": video["relative_path"],
                     "start": tile["start"],
-                    "label_delta": int(label),
-                    "label_index": delta_to_index[int(label)],
+                    "label_delta": label,
+                    "label_index": delta_to_index[label],
                     "effective_fps": video.get("effective_fps"),
                     "fps_bucket": video.get("fps_bucket"),
                     "frame_count": video.get("frame_count"),
@@ -214,9 +238,10 @@ def main() -> None:
 
     label_path = Path(args.labels)
     label_data = json.loads(label_path.read_text())
+    label_metric = infer_label_metric(label_data, args.label_metric or args.heuristic)
     tile_len = int(label_data["metadata"]["tile_len"])
     deltas = [int(delta) for delta in label_data["metadata"]["deltas"]]
-    examples = collect_examples(label_data, args.heuristic, args.limit_tiles)
+    examples = collect_examples(label_data, label_metric, args.limit_tiles)
     representations = parse_representations(args.representations)
 
     dtype = torch_dtype(args.dtype)
@@ -252,9 +277,10 @@ def main() -> None:
     }
 
     output = {
-        "metadata": {
+            "metadata": {
             "labels": str(label_path),
-            "heuristic": args.heuristic,
+            "label_metric": label_metric,
+            "heuristic": label_metric,
             "model": args.model,
             "deltas": deltas,
             "tile_len": tile_len,
