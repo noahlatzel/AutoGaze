@@ -1,0 +1,98 @@
+id: dino_semnovel_l001_fusion_probe
+family: delta_policy
+status: completed
+question: Test whether frozen AutoGaze representations add residual signal beyond runtime metadata for DINOv2 semantic-novelty temporal-delta labels.
+runner: scripts/runners/train_delta_probe.py
+environment: autogaze
+dataset:
+  name: autogaze_training_data_dino_semnovel_l001
+  labels:
+    train: outputs/delta_labels/dino_semnovel_l001_train.json
+    val: outputs/delta_labels/dino_semnovel_l001_val.json
+  features:
+    train: outputs/delta_probe_features/dino_semnovel_l001_train.pt
+    val: outputs/delta_probe_features/dino_semnovel_l001_val.pt
+outputs:
+  root: outputs/delta_policy/dino_semnovel_l001_fusion_probe
+  metrics_dir: outputs/delta_policy/dino_semnovel_l001_fusion_probe/metrics
+  plots_dir: outputs/delta_policy/dino_semnovel_l001_fusion_probe/plots
+  summary: outputs/delta_policy/dino_semnovel_l001_fusion_probe/summary.json
+command:
+  features: outputs/delta_probe_features/dino_semnovel_l001_train.pt
+  val_features: outputs/delta_probe_features/dino_semnovel_l001_val.pt
+  label_metric: semantic_mean_novelty
+  epochs: 50
+  batch_size: 512
+  lr: 0.001
+  weight_decay: 0.0001
+  class_weighting: none
+  metadata_fields: effective_fps,frame_count,start
+  input_mode: concat
+  architecture: classifier
+  loss: ce
+  device: cuda
+metrics:
+  primary:
+    - accuracy
+    - top2_accuracy
+    - balanced_accuracy
+    - macro_f1
+    - mean_abs_delta_error
+    - mean_abs_seconds_error
+  baselines:
+    - metadata_probe
+notes:
+  - Uses runtime-plausible metadata only: effective_fps, frame_count, start.
+  - Each run compares a concat feature+metadata primary probe against the metadata-only probe emitted by the trainer.
+  - Completed locally with cuda/12.8.1 on 2026-06-26.
+  - Best run was mean_vision + metadata with a linear classifier; it beat metadata-only on accuracy, balanced accuracy, top-2 accuracy, macro-F1, and delta error.
+  - The result supports that frozen AutoGaze features contain residual signal, but only after metadata fusion.
+runs:
+  - id: dino_semnovel_l001_fusion_mean_vision_linear
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_fusion_probe/metrics/mean_vision_linear.json
+    command:
+      feature_key: mean_vision
+      probe: linear
+  - id: dino_semnovel_l001_fusion_mean_vision_mlp
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_fusion_probe/metrics/mean_vision_mlp.json
+    command:
+      feature_key: mean_vision
+      probe: mlp
+  - id: dino_semnovel_l001_fusion_final_gaze_linear
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_fusion_probe/metrics/final_gaze_linear.json
+    command:
+      feature_key: final_gaze
+      probe: linear
+  - id: dino_semnovel_l001_fusion_final_gaze_mlp
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_fusion_probe/metrics/final_gaze_mlp.json
+    command:
+      feature_key: final_gaze
+      probe: mlp
+  - id: dino_semnovel_l001_fusion_mean_gaze_linear
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_fusion_probe/metrics/mean_gaze_linear.json
+    command:
+      feature_key: mean_gaze
+      probe: linear
+  - id: dino_semnovel_l001_fusion_mean_gaze_mlp
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_fusion_probe/metrics/mean_gaze_mlp.json
+    command:
+      feature_key: mean_gaze
+      probe: mlp
+  - id: dino_semnovel_l001_fusion_final_frame_mean_gaze_linear
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_fusion_probe/metrics/final_frame_mean_gaze_linear.json
+    command:
+      feature_key: final_frame_mean_gaze
+      probe: linear
+  - id: dino_semnovel_l001_fusion_final_frame_mean_gaze_mlp
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_fusion_probe/metrics/final_frame_mean_gaze_mlp.json
+    command:
+      feature_key: final_frame_mean_gaze
+      probe: mlp

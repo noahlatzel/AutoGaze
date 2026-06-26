@@ -396,12 +396,12 @@ runs:
           semantic_model: siglip
           lambda_cost: 0.01
   - id: proxy_sampling_v6_frontier_refine_mtv1
-    status: submitted
+    status: completed
     launchable: false
     output_dir: outputs/hlvid/proxy_sampling_v6_frontier_refine_mtv1
     runs:
       - id: dinov2_semdiv_128_l0015_log
-        status: submitted
+        status: completed
         launchable: false
         slurm_job_id: 1607750
         output_dir: outputs/hlvid/proxy_sampling_v6_frontier_refine_mtv1/dinov2_semdiv_128_l0015_log
@@ -412,7 +412,7 @@ runs:
           semantic_model: dinov2
           lambda_cost: 0.015
       - id: dinov2_semdiv_128_l003_log
-        status: submitted
+        status: completed
         launchable: false
         slurm_job_id: 1607751
         output_dir: outputs/hlvid/proxy_sampling_v6_frontier_refine_mtv1/dinov2_semdiv_128_l003_log
@@ -423,7 +423,7 @@ runs:
           semantic_model: dinov2
           lambda_cost: 0.03
       - id: dinov2_semdiv_128_l004_log
-        status: submitted
+        status: completed
         launchable: false
         slurm_job_id: 1607752
         output_dir: outputs/hlvid/proxy_sampling_v6_frontier_refine_mtv1/dinov2_semdiv_128_l004_log
@@ -434,7 +434,7 @@ runs:
           semantic_model: dinov2
           lambda_cost: 0.04
       - id: dinov2_semnovel_128_l003_log
-        status: submitted
+        status: completed
         launchable: false
         slurm_job_id: 1607753
         output_dir: outputs/hlvid/proxy_sampling_v6_frontier_refine_mtv1/dinov2_semnovel_128_l003_log
@@ -445,7 +445,7 @@ runs:
           semantic_model: dinov2
           lambda_cost: 0.03
       - id: dinov2_semnovel_128_l004_log
-        status: submitted
+        status: completed
         launchable: false
         slurm_job_id: 1607754
         output_dir: outputs/hlvid/proxy_sampling_v6_frontier_refine_mtv1/dinov2_semnovel_128_l004_log
@@ -456,7 +456,7 @@ runs:
           semantic_model: dinov2
           lambda_cost: 0.04
       - id: question_relevance_128_l00075_log
-        status: submitted
+        status: completed
         launchable: false
         slurm_job_id: 1607755
         output_dir: outputs/hlvid/proxy_sampling_v6_frontier_refine_mtv1/question_relevance_128_l00075_log
@@ -466,4 +466,3 @@ runs:
           proxy_base_metric: pixel_mse
           semantic_model: siglip
           lambda_cost: 0.0075
-

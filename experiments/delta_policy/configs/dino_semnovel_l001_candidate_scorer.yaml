@@ -1,0 +1,103 @@
+id: dino_semnovel_l001_candidate_scorer
+family: delta_policy
+status: completed
+question: Test whether scoring explicit candidate deltas is better than direct class logits for semantic-novelty temporal-delta labels.
+runner: scripts/runners/train_delta_probe.py
+environment: autogaze
+dataset:
+  name: autogaze_training_data_dino_semnovel_l001
+  labels:
+    train: outputs/delta_labels/dino_semnovel_l001_train.json
+    val: outputs/delta_labels/dino_semnovel_l001_val.json
+  features:
+    train: outputs/delta_probe_features/dino_semnovel_l001_train.pt
+    val: outputs/delta_probe_features/dino_semnovel_l001_val.pt
+outputs:
+  root: outputs/delta_policy/dino_semnovel_l001_candidate_scorer
+  metrics_dir: outputs/delta_policy/dino_semnovel_l001_candidate_scorer/metrics
+  plots_dir: outputs/delta_policy/dino_semnovel_l001_candidate_scorer/plots
+  summary: outputs/delta_policy/dino_semnovel_l001_candidate_scorer/summary.json
+command:
+  features: outputs/delta_probe_features/dino_semnovel_l001_train.pt
+  val_features: outputs/delta_probe_features/dino_semnovel_l001_val.pt
+  label_metric: semantic_mean_novelty
+  epochs: 50
+  batch_size: 512
+  lr: 0.001
+  weight_decay: 0.0001
+  class_weighting: none
+  metadata_fields: effective_fps,frame_count,start
+  architecture: candidate_scorer
+  loss: ce
+  device: cuda
+metrics:
+  primary:
+    - accuracy
+    - top2_accuracy
+    - balanced_accuracy
+    - macro_f1
+    - mean_abs_delta_error
+    - mean_abs_seconds_error
+notes:
+  - The candidate scorer receives the current representation plus an explicit normalized/log delta encoding for each action.
+  - This keeps the action magnitudes visible to the model instead of treating delta IDs as unrelated output classes.
+  - Completed locally with cuda/12.8.1 on 2026-06-26.
+  - Best run was mean_vision + metadata with an MLP candidate scorer; it beat metadata-only but did not beat the simpler classifier fusion or ordinal runs.
+  - Linear candidate scorers collapsed to a single coarse class in this setup, so this architecture needs a better formulation before larger sweeps.
+runs:
+  - id: dino_semnovel_l001_candidate_mean_vision_features_linear
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_candidate_scorer/metrics/mean_vision_features_linear.json
+    command:
+      feature_key: mean_vision
+      input_mode: features
+      probe: linear
+  - id: dino_semnovel_l001_candidate_mean_vision_features_mlp
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_candidate_scorer/metrics/mean_vision_features_mlp.json
+    command:
+      feature_key: mean_vision
+      input_mode: features
+      probe: mlp
+  - id: dino_semnovel_l001_candidate_mean_vision_concat_linear
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_candidate_scorer/metrics/mean_vision_concat_linear.json
+    command:
+      feature_key: mean_vision
+      input_mode: concat
+      probe: linear
+  - id: dino_semnovel_l001_candidate_mean_vision_concat_mlp
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_candidate_scorer/metrics/mean_vision_concat_mlp.json
+    command:
+      feature_key: mean_vision
+      input_mode: concat
+      probe: mlp
+  - id: dino_semnovel_l001_candidate_mean_gaze_features_linear
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_candidate_scorer/metrics/mean_gaze_features_linear.json
+    command:
+      feature_key: mean_gaze
+      input_mode: features
+      probe: linear
+  - id: dino_semnovel_l001_candidate_mean_gaze_features_mlp
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_candidate_scorer/metrics/mean_gaze_features_mlp.json
+    command:
+      feature_key: mean_gaze
+      input_mode: features
+      probe: mlp
+  - id: dino_semnovel_l001_candidate_mean_gaze_concat_linear
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_candidate_scorer/metrics/mean_gaze_concat_linear.json
+    command:
+      feature_key: mean_gaze
+      input_mode: concat
+      probe: linear
+  - id: dino_semnovel_l001_candidate_mean_gaze_concat_mlp
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_candidate_scorer/metrics/mean_gaze_concat_mlp.json
+    command:
+      feature_key: mean_gaze
+      input_mode: concat
+      probe: mlp

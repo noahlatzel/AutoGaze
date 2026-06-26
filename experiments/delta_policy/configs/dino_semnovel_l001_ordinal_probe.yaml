@@ -1,0 +1,89 @@
+id: dino_semnovel_l001_ordinal_probe
+family: delta_policy
+status: completed
+question: Test whether an ordered-delta auxiliary loss improves DINOv2 semantic-novelty temporal-delta prediction.
+runner: scripts/runners/train_delta_probe.py
+environment: autogaze
+dataset:
+  name: autogaze_training_data_dino_semnovel_l001
+  labels:
+    train: outputs/delta_labels/dino_semnovel_l001_train.json
+    val: outputs/delta_labels/dino_semnovel_l001_val.json
+  features:
+    train: outputs/delta_probe_features/dino_semnovel_l001_train.pt
+    val: outputs/delta_probe_features/dino_semnovel_l001_val.pt
+outputs:
+  root: outputs/delta_policy/dino_semnovel_l001_ordinal_probe
+  metrics_dir: outputs/delta_policy/dino_semnovel_l001_ordinal_probe/metrics
+  plots_dir: outputs/delta_policy/dino_semnovel_l001_ordinal_probe/plots
+  summary: outputs/delta_policy/dino_semnovel_l001_ordinal_probe/summary.json
+command:
+  features: outputs/delta_probe_features/dino_semnovel_l001_train.pt
+  val_features: outputs/delta_probe_features/dino_semnovel_l001_val.pt
+  label_metric: semantic_mean_novelty
+  epochs: 50
+  batch_size: 512
+  lr: 0.001
+  weight_decay: 0.0001
+  class_weighting: none
+  metadata_fields: effective_fps,frame_count,start
+  input_mode: concat
+  architecture: classifier
+  loss: ce_ordinal
+  probe: linear
+  device: cuda
+metrics:
+  primary:
+    - accuracy
+    - top2_accuracy
+    - balanced_accuracy
+    - macro_f1
+    - mean_abs_delta_error
+    - mean_abs_seconds_error
+  diagnostics:
+    - val_ce_loss
+    - val_ordinal_loss
+    - prediction_counts
+notes:
+  - The ordinal loss is SmoothL1 between target log2(delta) and expected log2(delta) under the predicted class distribution.
+  - This tests whether ordered-action supervision improves magnitude errors even when exact class accuracy is limited.
+  - Completed locally with cuda/12.8.1 on 2026-06-26.
+  - Best run was mean_vision + metadata with linear classifier and ordinal_alpha=1.0 by accuracy and balanced accuracy.
+  - Ordinal loss improved balanced accuracy over plain fusion but slightly worsened mean absolute delta error relative to the best plain fusion run.
+runs:
+  - id: dino_semnovel_l001_ordinal_mean_vision_a01
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_ordinal_probe/metrics/mean_vision_a01.json
+    command:
+      feature_key: mean_vision
+      ordinal_alpha: 0.1
+  - id: dino_semnovel_l001_ordinal_mean_vision_a05
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_ordinal_probe/metrics/mean_vision_a05.json
+    command:
+      feature_key: mean_vision
+      ordinal_alpha: 0.5
+  - id: dino_semnovel_l001_ordinal_mean_vision_a10
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_ordinal_probe/metrics/mean_vision_a10.json
+    command:
+      feature_key: mean_vision
+      ordinal_alpha: 1.0
+  - id: dino_semnovel_l001_ordinal_mean_gaze_a01
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_ordinal_probe/metrics/mean_gaze_a01.json
+    command:
+      feature_key: mean_gaze
+      ordinal_alpha: 0.1
+  - id: dino_semnovel_l001_ordinal_mean_gaze_a05
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_ordinal_probe/metrics/mean_gaze_a05.json
+    command:
+      feature_key: mean_gaze
+      ordinal_alpha: 0.5
+  - id: dino_semnovel_l001_ordinal_mean_gaze_a10
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_ordinal_probe/metrics/mean_gaze_a10.json
+    command:
+      feature_key: mean_gaze
+      ordinal_alpha: 1.0

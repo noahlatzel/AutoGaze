@@ -20,6 +20,9 @@ families:
       - experiments/delta_policy/configs/exp0_delta_labels.yaml
       - experiments/delta_policy/configs/exp1_supervised_probe.yaml
       - experiments/delta_policy/configs/dino_semnovel_l001_supervised_probe.yaml
+      - experiments/delta_policy/configs/dino_semnovel_l001_fusion_probe.yaml
+      - experiments/delta_policy/configs/dino_semnovel_l001_ordinal_probe.yaml
+      - experiments/delta_policy/configs/dino_semnovel_l001_candidate_scorer.yaml
       - experiments/delta_policy/configs/exp2_contextual_bandit.yaml
     manifests:
       - experiments/delta_policy/manifests/completed.yaml

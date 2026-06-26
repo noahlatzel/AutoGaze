@@ -1,6 +1,6 @@
 id: hlvid_pareto_max_tiles48
 family: proxy_sampling
-status: running
+status: completed
 question: Evaluate current proxy-sampling Pareto candidates with max_tiles_video=48.
 runner: scripts/runners/evaluate_hlvid_proxy_sampling.py
 environment: vila-autogaze-eval
@@ -41,7 +41,7 @@ notes:
   - This follow-up keeps temporal policies fixed and changes only max_tiles_video from 1 to 48.
 runs:
   - id: dinov2_semnovel_128_l001_log_mtv48
-    status: submitted
+    status: completed
     slurm_job_id: 1607580
     output_dir: outputs/hlvid/proxy_sampling_v5_pareto_mtv48/dinov2_semnovel_128_l001_log_mtv48
     command:
@@ -51,7 +51,7 @@ runs:
       semantic_model: dinov2
       lambda_cost: 0.01
   - id: dinov2_semdiv_128_l001_log_mtv48
-    status: submitted
+    status: completed
     slurm_job_id: 1607581
     output_dir: outputs/hlvid/proxy_sampling_v5_pareto_mtv48/dinov2_semdiv_128_l001_log_mtv48
     command:
@@ -61,7 +61,7 @@ runs:
       semantic_model: dinov2
       lambda_cost: 0.01
   - id: question_relevance_128_l001_log_mtv48
-    status: submitted
+    status: completed
     slurm_job_id: 1607582
     output_dir: outputs/hlvid/proxy_sampling_v5_pareto_mtv48/question_relevance_128_l001_log_mtv48
     command:
