@@ -49,6 +49,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu", help="Torch device.")
     parser.add_argument("--dtype", choices=["float32", "float16", "bfloat16"], default="float16", help="Model dtype.")
     parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=2,
+        help="Number of temporal tiles to run through AutoGaze at once. Use 1 if the GPU runs out of memory.",
+    )
+    parser.add_argument(
         "--representations",
         default="final_gaze",
         help=(
@@ -119,15 +125,15 @@ def collect_examples(label_data: dict, label_metric: str, limit_tiles: Optional[
     return examples
 
 
-def last_non_padded_gaze_hidden_index(gazing_info: Dict[str, torch.Tensor], hidden_sequence_length: int) -> int:
-    spans = hidden_sequence_spans(gazing_info, hidden_sequence_length)
+def last_non_padded_gaze_hidden_index(gazing_info: Dict[str, torch.Tensor], hidden_sequence_length: int, batch_idx: int = 0) -> int:
+    spans = hidden_sequence_spans(gazing_info, hidden_sequence_length, batch_idx=batch_idx)
     gaze_indices = torch.cat([span["non_padded_gaze_indices"] for span in spans if span["non_padded_gaze_indices"].numel() > 0])
     if gaze_indices.numel() == 0:
         raise ValueError("AutoGaze generated no non-padded gaze token for this tile.")
     return int(gaze_indices[-1])
 
 
-def hidden_sequence_spans(gazing_info: Dict[str, torch.Tensor], hidden_sequence_length: int) -> List[Dict[str, torch.Tensor]]:
+def hidden_sequence_spans(gazing_info: Dict[str, torch.Tensor], hidden_sequence_length: int, batch_idx: int = 0) -> List[Dict[str, torch.Tensor]]:
     num_gazing_each_frame = gazing_info["num_gazing_each_frame"].detach().cpu().tolist()
     num_frames = len(num_gazing_each_frame)
     total_gaze_tokens = sum(num_gazing_each_frame)
@@ -137,7 +143,7 @@ def hidden_sequence_spans(gazing_info: Dict[str, torch.Tensor], hidden_sequence_
             "Cannot infer per-frame vision-token count from hidden sequence length "
             f"{hidden_sequence_length} and gaze lengths {num_gazing_each_frame}."
         )
-    if_padded = gazing_info["if_padded_gazing"][0].detach().cpu().split(num_gazing_each_frame)
+    if_padded = gazing_info["if_padded_gazing"][batch_idx].detach().cpu().split(num_gazing_each_frame)
 
     offset = 0
     spans = []
@@ -173,8 +179,9 @@ def representation_features(
     final_hidden: torch.Tensor,
     gazing_info: Dict[str, torch.Tensor],
     representations: List[str],
+    batch_idx: int = 0,
 ) -> Dict[str, torch.Tensor]:
-    spans = hidden_sequence_spans(gazing_info, final_hidden.shape[0])
+    spans = hidden_sequence_spans(gazing_info, final_hidden.shape[0], batch_idx=batch_idx)
     all_non_padded_gaze = torch.cat(
         [span["non_padded_gaze_indices"] for span in spans if span["non_padded_gaze_indices"].numel() > 0]
     )
@@ -205,19 +212,23 @@ def representation_features(
 
 
 @torch.inference_mode()
-def extract_feature(
+def extract_features_batch(
     model: AutoGaze,
     processor: AutoGazeImageProcessor,
-    example: dict,
+    examples: List[dict],
     tile_len: int,
     device: str,
     dtype: torch.dtype,
     gazing_ratio: float,
     task_loss_requirement: float,
     representations: List[str],
-) -> Dict[str, torch.Tensor]:
-    raw_tile = read_tile(example["video_path"], example["start"], tile_len)
-    video = transform_video_for_pytorch(raw_tile, processor).unsqueeze(0).to(device=device, dtype=dtype)
+) -> List[Dict[str, torch.Tensor]]:
+    video = torch.stack(
+        [
+            transform_video_for_pytorch(read_tile(example["video_path"], example["start"], tile_len), processor)
+            for example in examples
+        ]
+    ).to(device=device, dtype=dtype)
     inputs = {"video": video}
 
     gazing_info = model(
@@ -227,8 +238,11 @@ def extract_feature(
         generate_only=True,
     )
     outputs = model.gazing_model(video, gazing_info, output_hidden_states=True)
-    final_hidden = outputs.hidden_states[-1][0]
-    return representation_features(final_hidden, gazing_info, representations)
+    final_hidden = outputs.hidden_states[-1]
+    return [
+        representation_features(final_hidden[batch_idx], gazing_info, representations, batch_idx=batch_idx)
+        for batch_idx in range(final_hidden.shape[0])
+    ]
 
 
 def main() -> None:
@@ -251,25 +265,23 @@ def main() -> None:
 
     features_by_representation = {representation: [] for representation in representations}
     kept_examples = []
-    failures = []
-    for idx, example in enumerate(tqdm(examples, desc="tiles")):
-        try:
-            extracted = extract_feature(
-                model=model,
-                processor=processor,
-                example=example,
-                tile_len=tile_len,
-                device=args.device,
-                dtype=dtype,
-                gazing_ratio=args.gazing_ratio,
-                task_loss_requirement=args.task_loss_requirement,
-                representations=representations,
-            )
+    for start in tqdm(range(0, len(examples), args.batch_size), desc="tile batches"):
+        batch_examples = examples[start : start + args.batch_size]
+        extracted_batch = extract_features_batch(
+            model=model,
+            processor=processor,
+            examples=batch_examples,
+            tile_len=tile_len,
+            device=args.device,
+            dtype=dtype,
+            gazing_ratio=args.gazing_ratio,
+            task_loss_requirement=args.task_loss_requirement,
+            representations=representations,
+        )
+        for example, extracted in zip(batch_examples, extracted_batch):
             for representation in representations:
                 features_by_representation[representation].append(extracted[representation])
             kept_examples.append(example)
-        except Exception as exc:
-            failures.append({"index": idx, "example": example, "error": repr(exc)})
 
     stacked_features = {
         representation: torch.stack(features) if features else torch.empty(0)
@@ -277,7 +289,7 @@ def main() -> None:
     }
 
     output = {
-            "metadata": {
+        "metadata": {
             "labels": str(label_path),
             "label_metric": label_metric,
             "heuristic": label_metric,
@@ -287,8 +299,9 @@ def main() -> None:
             "representations": representations,
             "gazing_ratio": args.gazing_ratio,
             "task_loss_requirement": args.task_loss_requirement,
-            "num_failures": len(failures),
-            "failures": failures[:100],
+            "batch_size": args.batch_size,
+            "num_failures": 0,
+            "failures": [],
         },
         "features": stacked_features[representations[0]],
         "features_by_representation": stacked_features,
@@ -305,7 +318,7 @@ def main() -> None:
             {
                 "output": str(output_path),
                 "num_examples": len(kept_examples),
-                "num_failures": len(failures),
+                "num_failures": 0,
                 "feature_shapes": {
                     representation: list(features.shape)
                     for representation, features in stacked_features.items()
