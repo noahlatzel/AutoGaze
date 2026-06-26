@@ -63,6 +63,25 @@ def parse_args() -> argparse.Namespace:
         help="Deprecated alias for --label-metric.",
     )
     parser.add_argument("--probe", choices=["linear", "mlp"], default="linear", help="Probe architecture.")
+    parser.add_argument(
+        "--input-mode",
+        choices=["features", "metadata", "concat"],
+        default="features",
+        help="Input representation for the trained primary probe.",
+    )
+    parser.add_argument(
+        "--architecture",
+        choices=["classifier", "candidate_scorer"],
+        default="classifier",
+        help="Delta prediction architecture.",
+    )
+    parser.add_argument(
+        "--loss",
+        choices=["ce", "ce_ordinal"],
+        default="ce",
+        help="Training objective. ce_ordinal adds SmoothL1 on expected log2(delta).",
+    )
+    parser.add_argument("--ordinal-alpha", type=float, default=0.0, help="Weight for the ordinal auxiliary loss.")
     parser.add_argument("--epochs", type=int, default=50, help="Training epochs.")
     parser.add_argument("--batch-size", type=int, default=256, help="Batch size.")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate.")
@@ -136,6 +155,42 @@ def build_probe(kind: str, input_dim: int, num_classes: int) -> nn.Module:
     )
 
 
+class CandidateDeltaScorer(nn.Module):
+    """Score each candidate delta from shared input plus an explicit delta encoding."""
+
+    def __init__(self, kind: str, input_dim: int, deltas: Sequence[int]) -> None:
+        super().__init__()
+        delta_values = torch.tensor(deltas, dtype=torch.float32)
+        log_delta = torch.log2(delta_values)
+        log_delta = (log_delta - log_delta.mean()) / log_delta.std().clamp_min(1e-6)
+        self.register_buffer("delta_features", torch.stack([delta_values / delta_values.max(), log_delta], dim=-1))
+        scorer_input_dim = input_dim + self.delta_features.shape[1]
+        if kind == "linear":
+            self.scorer = nn.Linear(scorer_input_dim, 1)
+        else:
+            hidden_dim = input_dim
+            self.scorer = nn.Sequential(
+                nn.Linear(scorer_input_dim, hidden_dim),
+                nn.GELU(),
+                nn.Dropout(0.1),
+                nn.Linear(hidden_dim, 1),
+            )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        batch_size = x.shape[0]
+        num_deltas = self.delta_features.shape[0]
+        x_expanded = x[:, None, :].expand(batch_size, num_deltas, x.shape[-1])
+        delta_expanded = self.delta_features[None, :, :].expand(batch_size, num_deltas, self.delta_features.shape[-1])
+        scores = self.scorer(torch.cat([x_expanded, delta_expanded], dim=-1)).squeeze(-1)
+        return scores
+
+
+def build_delta_model(architecture: str, kind: str, input_dim: int, deltas: Sequence[int]) -> nn.Module:
+    if architecture == "classifier":
+        return build_probe(kind, input_dim, len(deltas))
+    return CandidateDeltaScorer(kind, input_dim, deltas)
+
+
 def parse_metadata_fields(value: str) -> List[str]:
     fields = [field.strip() for field in value.split(",") if field.strip()]
     valid = {"dataset_id", "fps_bucket", "effective_fps", "frame_count", "start"}
@@ -183,6 +238,16 @@ def normalize(train_x: torch.Tensor, all_x: torch.Tensor) -> torch.Tensor:
     mean = train_x.mean(dim=0, keepdim=True)
     std = train_x.std(dim=0, keepdim=True).clamp_min(1e-6)
     return (all_x - mean) / std
+
+
+def build_primary_features(features: torch.Tensor, metadata_features: torch.Tensor, input_mode: str) -> torch.Tensor:
+    if input_mode == "features":
+        return features
+    if input_mode == "metadata":
+        return metadata_features
+    if input_mode == "concat":
+        return torch.cat([features, metadata_features], dim=-1)
+    raise ValueError(f"Unknown input mode: {input_mode}")
 
 
 def macro_f1(y_true: torch.Tensor, y_pred: torch.Tensor, num_classes: int) -> float:
@@ -424,10 +489,14 @@ def train_model(
     lr: float,
     weight_decay: float,
     class_weighting: str,
-    num_classes: int,
+    deltas: Sequence[int],
+    architecture: str,
+    loss_name: str,
+    ordinal_alpha: float,
     device: str,
 ) -> tuple[nn.Module, List[Dict[str, float]]]:
-    model = build_probe(kind, x.shape[1], num_classes).to(device)
+    num_classes = len(deltas)
+    model = build_delta_model(architecture, kind, x.shape[1], deltas).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     train_x = x[train_idx].to(device)
     train_y = y[train_idx].to(device)
@@ -437,6 +506,7 @@ def train_model(
     if class_weighting == "balanced":
         counts = torch.bincount(train_y.cpu(), minlength=num_classes).float().clamp_min(1)
         class_weights = (counts.sum() / (num_classes * counts)).to(device)
+    log_deltas = torch.log2(torch.tensor(deltas, dtype=torch.float32, device=device))
     generator = torch.Generator().manual_seed(0)
     history = []
 
@@ -446,14 +516,18 @@ def train_model(
         for start in range(0, train_x.shape[0], batch_size):
             batch_idx = perm[start:start + batch_size]
             logits = model(train_x[batch_idx])
-            loss = F.cross_entropy(logits, train_y[batch_idx], weight=class_weights)
+            ce_loss = F.cross_entropy(logits, train_y[batch_idx], weight=class_weights)
+            ordinal_loss = expected_log_delta_loss(logits, train_y[batch_idx], log_deltas) if loss_name == "ce_ordinal" else logits.new_tensor(0.0)
+            loss = ce_loss + ordinal_alpha * ordinal_loss
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             train_losses.append(float(loss.detach().cpu().item()))
         with torch.inference_mode():
             val_logits = model(val_x)
-            val_loss = F.cross_entropy(val_logits, val_y, weight=class_weights)
+            val_ce_loss = F.cross_entropy(val_logits, val_y, weight=class_weights)
+            val_ordinal_loss = expected_log_delta_loss(val_logits, val_y, log_deltas) if loss_name == "ce_ordinal" else val_logits.new_tensor(0.0)
+            val_loss = val_ce_loss + ordinal_alpha * val_ordinal_loss
             val_pred = val_logits.argmax(dim=-1)
             val_acc = (val_pred == val_y).float().mean()
         history.append(
@@ -461,10 +535,19 @@ def train_model(
                 "epoch": epoch + 1,
                 "train_loss": float(np.mean(train_losses)),
                 "val_loss": float(val_loss.detach().cpu().item()),
+                "val_ce_loss": float(val_ce_loss.detach().cpu().item()),
+                "val_ordinal_loss": float(val_ordinal_loss.detach().cpu().item()),
                 "val_accuracy": float(val_acc.detach().cpu().item()),
             }
         )
     return model, history
+
+
+def expected_log_delta_loss(logits: torch.Tensor, y: torch.Tensor, log_deltas: torch.Tensor) -> torch.Tensor:
+    probs = logits.softmax(dim=-1)
+    expected_log_delta = (probs * log_deltas[None, :]).sum(dim=-1)
+    target_log_delta = log_deltas[y]
+    return F.smooth_l1_loss(expected_log_delta, target_log_delta)
 
 
 @torch.inference_mode()
@@ -571,8 +654,10 @@ def main() -> None:
     metadata_features = build_metadata_features(examples, metadata_fields)
     metadata_features = normalize(metadata_features[train_idx], metadata_features)
 
-    feature_probe, feature_history = train_model(
-        features,
+    primary_features = build_primary_features(features, metadata_features, args.input_mode)
+
+    primary_probe, primary_history = train_model(
+        primary_features,
         labels,
         train_idx,
         val_idx,
@@ -582,7 +667,10 @@ def main() -> None:
         args.lr,
         args.weight_decay,
         args.class_weighting,
-        num_classes,
+        deltas,
+        args.architecture,
+        args.loss,
+        args.ordinal_alpha,
         args.device,
     )
     metadata_probe, metadata_history = train_model(
@@ -596,7 +684,10 @@ def main() -> None:
         args.lr,
         args.weight_decay,
         args.class_weighting,
-        num_classes,
+        deltas,
+        "classifier",
+        "ce",
+        0.0,
         args.device,
     )
 
@@ -623,12 +714,23 @@ def main() -> None:
             "split_mode": split_mode,
             "train_cache_label_metric": infer_label_metric_from_cache(train_cache, None),
             "probe": args.probe,
+            "input_mode": args.input_mode,
+            "architecture": args.architecture,
+            "loss": args.loss,
+            "ordinal_alpha": args.ordinal_alpha,
             "class_weighting": args.class_weighting,
             "metadata_fields": metadata_fields,
         },
+        "primary_probe": evaluate_predictions(
+            val_y,
+            model_logits(primary_probe, primary_features, val_idx, args.device),
+            deltas,
+            examples,
+            val_idx,
+        ),
         "feature_probe": evaluate_predictions(
             val_y,
-            model_logits(feature_probe, features, val_idx, args.device),
+            model_logits(primary_probe, primary_features, val_idx, args.device),
             deltas,
             examples,
             val_idx,
@@ -661,7 +763,8 @@ def main() -> None:
             "fixed_delta_32": evaluate_predictions(val_y, fixed_delta_predictions(32, deltas, val_y), deltas, examples, val_idx),
         },
         "training_history": {
-            "feature_probe": feature_history,
+            "primary_probe": primary_history,
+            "feature_probe": primary_history,
             "metadata_probe": metadata_history,
         },
     }
