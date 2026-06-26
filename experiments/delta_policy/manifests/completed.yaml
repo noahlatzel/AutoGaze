@@ -1,6 +1,37 @@
 version: 1
-updated: "2026-06-24"
+updated: "2026-06-26"
 runs:
+  - id: dino_semnovel_l001_supervised_probe
+    config: experiments/delta_policy/configs/dino_semnovel_l001_supervised_probe.yaml
+    status: completed
+    output_root: outputs/delta_policy/dino_semnovel_l001_supervised_probe
+    summary: outputs/delta_policy/dino_semnovel_l001_supervised_probe/summary.json
+    results: outputs/delta_policy/dino_semnovel_l001_supervised_probe/results.jsonl
+    run_manifest: outputs/delta_policy/dino_semnovel_l001_supervised_probe/run_manifest.yaml
+    plots:
+      - outputs/delta_policy/dino_semnovel_l001_supervised_probe/plots/accuracy_by_run.png
+      - outputs/delta_policy/dino_semnovel_l001_supervised_probe/plots/delta_error_by_run.png
+      - outputs/delta_policy/dino_semnovel_l001_supervised_probe/plots/best_confusion_matrix.png
+      - outputs/delta_policy/dino_semnovel_l001_supervised_probe/plots/best_delta_distribution.png
+      - outputs/delta_policy/dino_semnovel_l001_supervised_probe/plots/training_curves.png
+    key_results:
+      best_feature_by_accuracy:
+        id: dino_semnovel_l001_mean_vision_linear
+        accuracy: 0.4395886957645416
+        balanced_accuracy: 0.2227391612250358
+        top2_accuracy: 0.6642490029335022
+        mean_abs_delta_error: 8.835291862487793
+      best_feature_by_balanced_accuracy:
+        id: dino_semnovel_l001_mean_gaze_linear
+        accuracy: 0.437385231256485
+        balanced_accuracy: 0.22291915770620108
+        top2_accuracy: 0.6573631763458252
+        mean_abs_delta_error: 8.845574378967285
+      metadata_probe:
+        accuracy: 0.4443628489971161
+        balanced_accuracy: 0.29681722323099774
+        top2_accuracy: 0.7672603726387024
+        mean_abs_delta_error: 10.5661039352417
   - id: pixel_mse_t004_mean_vision_runtime_linear_balanced25k
     config: experiments/delta_policy/configs/exp1_supervised_probe.yaml
     status: completed

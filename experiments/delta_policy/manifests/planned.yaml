@@ -1,5 +1,5 @@
 version: 1
-updated: "2026-06-24"
+updated: "2026-06-26"
 runs:
   - id: exp2_reward_beta_curve
     status: planned

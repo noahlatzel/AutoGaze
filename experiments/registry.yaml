@@ -1,5 +1,5 @@
 version: 1
-updated: "2026-06-24"
+updated: "2026-06-26"
 families:
   proxy_sampling:
     description: HLVid temporal sampling with proxy metrics and cost sweeps.
@@ -19,6 +19,7 @@ families:
     configs:
       - experiments/delta_policy/configs/exp0_delta_labels.yaml
       - experiments/delta_policy/configs/exp1_supervised_probe.yaml
+      - experiments/delta_policy/configs/dino_semnovel_l001_supervised_probe.yaml
       - experiments/delta_policy/configs/exp2_contextual_bandit.yaml
     manifests:
       - experiments/delta_policy/manifests/completed.yaml

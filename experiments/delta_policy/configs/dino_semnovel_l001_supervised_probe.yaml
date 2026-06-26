@@ -1,0 +1,134 @@
+id: dino_semnovel_l001_supervised_probe
+family: delta_policy
+status: completed
+question: Test whether frozen AutoGaze tile representations predict DINOv2 semantic-novelty temporal-delta pseudo-labels better than runtime metadata and simple class baselines.
+runner: scripts/runners/train_delta_probe.py
+environment: autogaze
+dataset:
+  name: autogaze_training_data_dino_semnovel_l001
+  labels:
+    train: outputs/delta_labels/dino_semnovel_l001_train.json
+    val: outputs/delta_labels/dino_semnovel_l001_val.json
+  features:
+    train: outputs/delta_probe_features/dino_semnovel_l001_train.pt
+    val: outputs/delta_probe_features/dino_semnovel_l001_val.pt
+outputs:
+  root: outputs/delta_policy/dino_semnovel_l001_supervised_probe
+  metrics_dir: outputs/delta_policy/dino_semnovel_l001_supervised_probe/metrics
+  plots_dir: outputs/delta_policy/dino_semnovel_l001_supervised_probe/plots
+  summary: outputs/delta_policy/dino_semnovel_l001_supervised_probe/summary.json
+command:
+  features: outputs/delta_probe_features/dino_semnovel_l001_train.pt
+  val_features: outputs/delta_probe_features/dino_semnovel_l001_val.pt
+  label_metric: semantic_mean_novelty
+  epochs: 50
+  batch_size: 512
+  lr: 0.001
+  weight_decay: 0.0001
+  class_weighting: none
+  metadata_fields: effective_fps,frame_count,start
+  device: cuda
+grid:
+  representations:
+    - mean_vision
+    - final_gaze
+    - mean_gaze
+    - final_frame_mean_gaze
+  probes:
+    - linear
+    - mlp
+metrics:
+  primary:
+    - accuracy
+    - top2_accuracy
+    - balanced_accuracy
+    - macro_f1
+    - mean_abs_delta_error
+    - mean_abs_seconds_error
+  diagnostics:
+    - label_counts
+    - prediction_counts
+    - confusion
+    - by_fps_bucket
+    - by_dataset
+  baselines:
+    - metadata_probe
+    - global_majority
+    - dataset_majority
+    - fps_bucket_majority
+    - fixed_delta_1
+    - fixed_delta_16
+    - fixed_delta_32
+plots:
+  required:
+    - id: accuracy_by_run
+      output: outputs/delta_policy/dino_semnovel_l001_supervised_probe/plots/accuracy_by_run.png
+      description: Accuracy, top-2 accuracy, and balanced accuracy for all representation/head runs.
+    - id: delta_error_by_run
+      output: outputs/delta_policy/dino_semnovel_l001_supervised_probe/plots/delta_error_by_run.png
+      description: Mean absolute delta error and mean absolute seconds error for all runs.
+    - id: best_confusion_matrix
+      output: outputs/delta_policy/dino_semnovel_l001_supervised_probe/plots/best_confusion_matrix.png
+      description: Confusion matrix over deltas for the best validation run by balanced accuracy.
+    - id: best_delta_distribution
+      output: outputs/delta_policy/dino_semnovel_l001_supervised_probe/plots/best_delta_distribution.png
+      description: Label distribution versus prediction distribution for the best validation run.
+    - id: training_curves
+      output: outputs/delta_policy/dino_semnovel_l001_supervised_probe/plots/training_curves.png
+      description: Train loss, validation loss, and validation accuracy across epochs.
+notes:
+  - This is a supervised CE representation probe, not an HLVid rollout or production policy evaluation.
+  - The explicit train/val split uses separate generated label files and separate feature caches.
+  - The action space is metadata.deltas from the generated labels, expected to be [1, 2, 4, 8, 16, 32].
+  - Completed locally with cuda/12.8.1 on 2026-06-26.
+  - Best feature probe by balanced accuracy was mean_gaze + linear, but the metadata-only probe remained stronger on accuracy, top-2 accuracy, balanced accuracy, and macro-F1.
+  - Best feature probes had lower mean absolute delta error than metadata-only, suggesting class calibration and coarse/fine distribution remain important diagnostics.
+runs:
+  - id: dino_semnovel_l001_mean_vision_linear
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_supervised_probe/metrics/mean_vision_linear.json
+    command:
+      feature_key: mean_vision
+      probe: linear
+  - id: dino_semnovel_l001_mean_vision_mlp
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_supervised_probe/metrics/mean_vision_mlp.json
+    command:
+      feature_key: mean_vision
+      probe: mlp
+  - id: dino_semnovel_l001_final_gaze_linear
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_supervised_probe/metrics/final_gaze_linear.json
+    command:
+      feature_key: final_gaze
+      probe: linear
+  - id: dino_semnovel_l001_final_gaze_mlp
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_supervised_probe/metrics/final_gaze_mlp.json
+    command:
+      feature_key: final_gaze
+      probe: mlp
+  - id: dino_semnovel_l001_mean_gaze_linear
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_supervised_probe/metrics/mean_gaze_linear.json
+    command:
+      feature_key: mean_gaze
+      probe: linear
+  - id: dino_semnovel_l001_mean_gaze_mlp
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_supervised_probe/metrics/mean_gaze_mlp.json
+    command:
+      feature_key: mean_gaze
+      probe: mlp
+  - id: dino_semnovel_l001_final_frame_mean_gaze_linear
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_supervised_probe/metrics/final_frame_mean_gaze_linear.json
+    command:
+      feature_key: final_frame_mean_gaze
+      probe: linear
+  - id: dino_semnovel_l001_final_frame_mean_gaze_mlp
+    status: completed
+    output: outputs/delta_policy/dino_semnovel_l001_supervised_probe/metrics/final_frame_mean_gaze_mlp.json
+    command:
+      feature_key: final_frame_mean_gaze
+      probe: mlp
