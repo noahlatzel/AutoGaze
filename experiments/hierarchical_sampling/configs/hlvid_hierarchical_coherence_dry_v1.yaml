@@ -1,0 +1,63 @@
+id: hlvid_hierarchical_coherence_dry_v1
+family: hierarchical_sampling
+status: planned
+question: Does best-first hierarchical coherence splitting produce adaptive temporal frame distributions on HLVid?
+runner: scripts/runners/run_hierarchical_coherence_dry_sweep.py
+environment: vila-autogaze-eval
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+outputs:
+  root: outputs/hierarchical_sampling/hlvid_hierarchical_coherence_dry_v1
+  summary: outputs/hierarchical_sampling/hlvid_hierarchical_coherence_dry_v1/summary.json
+command:
+  dataset_root: /storage/slurm/latn/data/AutoGaze/HLVid
+  tile_len: 16
+  resize: 224
+  target_leaf_tiles: 16
+  split_policy: best_first
+  max_depth: 5
+  min_interval_frames: 64
+  coherence_metric: within_diversity
+  proxy_base_metric: pixel_mse
+  semantic_dtype: float16
+  max_batch_size_semantic: 32
+metrics:
+  primary:
+    - mean_leaf_tiles
+    - mean_selected_frames
+    - mean_leaf_depth
+    - leaf_count_distribution
+  secondary:
+    - by_category
+    - mean_leaf_score
+    - selected_frame_ratio
+    - leaf interval distribution
+notes:
+  - research/hierarchical_coherent_tile_sampling.md
+  - v1 fixes v0's balanced-tree degeneration by splitting only the current highest-incoherence leaf at each step.
+runs:
+  - id: hcs_v1_pixel_diversity_16
+    status: planned
+    output_dir: outputs/hierarchical_sampling/hlvid_hierarchical_coherence_dry_v1/pixel_diversity_16
+    command:
+      coherence_metric: within_diversity
+      proxy_base_metric: pixel_mse
+      target_leaf_tiles: 16
+      split_policy: best_first
+  - id: hcs_v1_dino_semdiv_16
+    status: planned
+    output_dir: outputs/hierarchical_sampling/hlvid_hierarchical_coherence_dry_v1/dino_semdiv_16
+    command:
+      coherence_metric: semantic_diversity
+      semantic_model: dinov2
+      target_leaf_tiles: 16
+      split_policy: best_first
+  - id: hcs_v1_dino_semnovel_16
+    status: planned
+    output_dir: outputs/hierarchical_sampling/hlvid_hierarchical_coherence_dry_v1/dino_semnovel_16
+    command:
+      coherence_metric: semantic_mean_novelty
+      semantic_model: dinov2
+      target_leaf_tiles: 16
+      split_policy: best_first

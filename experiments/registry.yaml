@@ -13,6 +13,15 @@ families:
     manifests:
       - experiments/proxy_sampling/manifests/completed.yaml
       - experiments/proxy_sampling/manifests/planned.yaml
+  hierarchical_sampling:
+    description: Top-down coherent temporal partitioning before AutoGaze/NVILA inference.
+    readme: experiments/hierarchical_sampling/README.md
+    configs:
+      - experiments/hierarchical_sampling/configs/hlvid_hierarchical_coherence_dry_v0.yaml
+      - experiments/hierarchical_sampling/configs/hlvid_hierarchical_coherence_dry_v1.yaml
+    manifests:
+      - experiments/hierarchical_sampling/manifests/completed.yaml
+      - experiments/hierarchical_sampling/manifests/planned.yaml
   delta_policy:
     description: Delta-label generation, supervised probes, and contextual bandits.
     readme: experiments/delta_policy/README.md

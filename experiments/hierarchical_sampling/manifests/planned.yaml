@@ -1,0 +1,23 @@
+version: 1
+updated: "2026-07-04"
+runs:
+  - id: hlvid_hierarchical_coherence_dry_v0
+    status: planned
+    question: Dry-run top-down coherent temporal partitioning on HLVid before full NVILA promotion.
+    config: experiments/hierarchical_sampling/configs/hlvid_hierarchical_coherence_dry_v0.yaml
+    output_root: outputs/hierarchical_sampling/hlvid_hierarchical_coherence_dry_v0
+    metrics:
+      - mean_leaf_tiles
+      - mean_selected_frames
+      - mean_leaf_depth
+      - leaf_count_distribution
+  - id: hlvid_hierarchical_coherence_dry_v1
+    status: planned
+    question: Dry-run best-first adaptive coherent temporal partitioning on HLVid.
+    config: experiments/hierarchical_sampling/configs/hlvid_hierarchical_coherence_dry_v1.yaml
+    output_root: outputs/hierarchical_sampling/hlvid_hierarchical_coherence_dry_v1
+    metrics:
+      - mean_leaf_tiles
+      - mean_selected_frames
+      - mean_leaf_depth
+      - leaf_count_distribution
