@@ -1,6 +1,20 @@
 version: 1
-updated: "2026-06-24"
+updated: "2026-06-26"
 runs:
+  - id: hlvid_nvila_learned_delta_dino_semnovel_l001_mtv1
+    status: submitted
+    question: Evaluate a supervised dino semnovel l001 delta policy in the direct HLVid/NVILA path with max_tiles_video=1.
+    config: experiments/hlvid_nvila/configs/learned_delta_dino_semnovel_l001_mtv1.yaml
+    output_root: outputs/hlvid/learned_delta_dino_semnovel_l001_mtv1
+    slurm_job_id: 1608784
+    slurm_state_at_submission: PD
+    slurm_reason_at_submission: Resources
+    policy_checkpoint: outputs/delta_policy/dino_semnovel_l001_fusion_probe/checkpoints/mean_vision_linear.pt
+    metrics:
+      - accuracy
+      - mean_visited_frames
+      - mean_visited_tiles
+      - delta_policy_counts
   - id: hlvid_nvila_dense_control
     status: planned
     question: Add a feasible dense or capped-dense control for interpreting frame-budget results.

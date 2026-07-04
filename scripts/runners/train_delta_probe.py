@@ -38,6 +38,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--output", required=True, help="Output JSON metrics path.")
     parser.add_argument(
+        "--checkpoint-output",
+        default=None,
+        help="Optional .pt checkpoint path containing the trained primary probe and input normalization statistics.",
+    )
+    parser.add_argument(
         "--feature-key",
         default=None,
         help="Representation key when the cache contains features_by_representation.",
@@ -234,10 +239,14 @@ def build_metadata_features(examples: Sequence[dict], fields: Sequence[str]) -> 
     return torch.tensor(rows, dtype=torch.float32)
 
 
-def normalize(train_x: torch.Tensor, all_x: torch.Tensor) -> torch.Tensor:
+def standardize(train_x: torch.Tensor, all_x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     mean = train_x.mean(dim=0, keepdim=True)
     std = train_x.std(dim=0, keepdim=True).clamp_min(1e-6)
-    return (all_x - mean) / std
+    return (all_x - mean) / std, mean, std
+
+
+def normalize(train_x: torch.Tensor, all_x: torch.Tensor) -> torch.Tensor:
+    return standardize(train_x, all_x)[0]
 
 
 def build_primary_features(features: torch.Tensor, metadata_features: torch.Tensor, input_mode: str) -> torch.Tensor:
@@ -650,9 +659,9 @@ def main() -> None:
 
     metadata_fields = parse_metadata_fields(args.metadata_fields)
     num_classes = len(deltas)
-    features = normalize(features[train_idx], features)
+    features, feature_mean, feature_std = standardize(features[train_idx], features)
     metadata_features = build_metadata_features(examples, metadata_fields)
-    metadata_features = normalize(metadata_features[train_idx], metadata_features)
+    metadata_features, metadata_mean, metadata_std = standardize(metadata_features[train_idx], metadata_features)
 
     primary_features = build_primary_features(features, metadata_features, args.input_mode)
 
@@ -772,6 +781,32 @@ def main() -> None:
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(metrics, indent=2))
+
+    if args.checkpoint_output is not None:
+        checkpoint_path = Path(args.checkpoint_output)
+        checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+        torch.save(
+            {
+                "model_state_dict": primary_probe.cpu().state_dict(),
+                "deltas": deltas,
+                "feature_key": args.feature_key,
+                "label_metric": label_metric,
+                "probe": args.probe,
+                "input_mode": args.input_mode,
+                "architecture": args.architecture,
+                "loss": args.loss,
+                "ordinal_alpha": args.ordinal_alpha,
+                "class_weighting": args.class_weighting,
+                "metadata_fields": metadata_fields,
+                "feature_mean": feature_mean.cpu(),
+                "feature_std": feature_std.cpu(),
+                "metadata_mean": metadata_mean.cpu(),
+                "metadata_std": metadata_std.cpu(),
+                "input_dim": int(primary_features.shape[1]),
+                "metrics": metrics,
+            },
+            checkpoint_path,
+        )
     print(json.dumps(metrics, indent=2))
 
 

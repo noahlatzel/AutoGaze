@@ -20,7 +20,11 @@ from PIL import Image
 from tqdm import tqdm
 from transformers import AutoModel, AutoProcessor
 
+from autogaze.datasets.video_utils import transform_video_for_pytorch
+from autogaze.models.autogaze import AutoGaze, AutoGazeImageProcessor
+from extract_delta_probe_features import representation_features
 from hlvid_common import dtype_from_name, existing_question_ids, extract_letter, load_rows
+from train_delta_probe import build_delta_model
 
 
 def parse_args():
@@ -58,6 +62,15 @@ def parse_args():
     )
     parser.add_argument("--tile-len", type=int, default=16)
     parser.add_argument("--delta-gap", type=int, default=0)
+    parser.add_argument(
+        "--delta-policy-checkpoint",
+        default=None,
+        help="Optional trained delta-probe checkpoint. When set, uniform mode uses learned inter-tile deltas.",
+    )
+    parser.add_argument("--delta-policy-device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--delta-policy-dtype", default="float16", choices=["float32", "float16", "bfloat16"])
+    parser.add_argument("--delta-policy-gazing-ratio", type=float, default=0.75)
+    parser.add_argument("--delta-policy-task-loss-requirement", type=float, default=0.7)
     parser.add_argument("--max-tiles-video", type=int, default=48)
     parser.add_argument("--max-batch-size-autogaze", type=int, default=16)
     parser.add_argument("--max-batch-size-siglip", type=int, default=32)
@@ -65,6 +78,122 @@ def parse_args():
     parser.add_argument("--torch-dtype", default="bfloat16", choices=["auto", "float16", "bfloat16", "float32"])
     parser.add_argument("--resume", action="store_true")
     return parser.parse_args()
+
+
+def torch_dtype_from_name(name):
+    if name == "float16":
+        return torch.float16
+    if name == "bfloat16":
+        return torch.bfloat16
+    return torch.float32
+
+
+def read_video_metadata(video_path):
+    import cv2
+
+    cap = cv2.VideoCapture(str(video_path))
+    if not cap.isOpened():
+        raise ValueError(f"Failed to open video: {video_path}")
+    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = float(cap.get(cv2.CAP_PROP_FPS) or 0.0)
+    cap.release()
+    duration = frame_count / fps if fps > 0 and frame_count > 0 else None
+    return {"frame_count": frame_count, "fps": fps, "duration": duration}
+
+
+class LearnedDeltaPolicy:
+    """Runtime wrapper for a supervised delta probe checkpoint.
+
+    Question-conditioned policies are intentionally not supported here yet; this rollout uses
+    tile-only AutoGaze features plus runtime metadata.
+    """
+
+    def __init__(
+        self,
+        checkpoint_path,
+        autogaze_model_id,
+        device,
+        dtype_name,
+        gazing_ratio,
+        task_loss_requirement,
+    ):
+        checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
+        self.checkpoint_path = str(checkpoint_path)
+        self.deltas = [int(delta) for delta in checkpoint["deltas"]]
+        self.feature_key = checkpoint.get("feature_key") or "mean_vision"
+        self.input_mode = checkpoint["input_mode"]
+        self.metadata_fields = list(checkpoint["metadata_fields"])
+        self.feature_mean = checkpoint["feature_mean"].float()
+        self.feature_std = checkpoint["feature_std"].float().clamp_min(1e-6)
+        self.metadata_mean = checkpoint["metadata_mean"].float()
+        self.metadata_std = checkpoint["metadata_std"].float().clamp_min(1e-6)
+        self.device = device
+        self.dtype = torch_dtype_from_name(dtype_name)
+        self.gazing_ratio = gazing_ratio
+        self.task_loss_requirement = task_loss_requirement
+
+        self.probe = build_delta_model(
+            checkpoint["architecture"],
+            checkpoint["probe"],
+            int(checkpoint["input_dim"]),
+            self.deltas,
+        )
+        self.probe.load_state_dict(checkpoint["model_state_dict"])
+        self.probe.to(device).eval()
+
+        self.processor = AutoGazeImageProcessor.from_pretrained(autogaze_model_id)
+        self.autogaze = AutoGaze.from_pretrained(autogaze_model_id).to(device=device, dtype=self.dtype)
+        self.autogaze.eval()
+
+    def _metadata_tensor(self, start, source_frame_count, effective_fps):
+        row = []
+        for field in self.metadata_fields:
+            if field == "effective_fps":
+                row.append(float(effective_fps or 0.0))
+            elif field == "frame_count":
+                row.append(float(source_frame_count or 0.0))
+            elif field == "start":
+                row.append(float(start))
+            else:
+                raise ValueError(
+                    f"Delta policy metadata field {field!r} is not available at HLVid inference time."
+                )
+        return torch.tensor([row], dtype=torch.float32)
+
+    @torch.inference_mode()
+    def _extract_feature(self, tile_frames):
+        np_video = np.stack([np.asarray(frame.convert("RGB")) for frame in tile_frames])
+        video = transform_video_for_pytorch(np_video, self.processor)[None].to(device=self.device, dtype=self.dtype)
+        gazing_info = self.autogaze(
+            {"video": video},
+            gazing_ratio=self.gazing_ratio,
+            task_loss_requirement=self.task_loss_requirement,
+            generate_only=True,
+        )
+        outputs = self.autogaze.gazing_model(video, gazing_info, output_hidden_states=True)
+        features = representation_features(outputs.hidden_states[-1][0], gazing_info, [self.feature_key], batch_idx=0)
+        return features[self.feature_key][None]
+
+    @torch.inference_mode()
+    def predict(self, tile_frames, start, source_frame_count, effective_fps):
+        feature = (self._extract_feature(tile_frames) - self.feature_mean) / self.feature_std
+        metadata = self._metadata_tensor(start, source_frame_count, effective_fps)
+        metadata = (metadata - self.metadata_mean) / self.metadata_std
+        if self.input_mode == "features":
+            x = feature
+        elif self.input_mode == "metadata":
+            x = metadata
+        elif self.input_mode == "concat":
+            x = torch.cat([feature, metadata], dim=-1)
+        else:
+            raise ValueError(f"Unknown delta policy input_mode: {self.input_mode}")
+        logits = self.probe(x.to(self.device)).float().cpu()[0]
+        index = int(logits.argmax().item())
+        return {
+            "delta": int(self.deltas[index]),
+            "delta_index": index,
+            "logits": [float(value) for value in logits.tolist()],
+        }
 
 
 def load_uniform_frames(video_path, num_frames):
@@ -149,6 +278,42 @@ def select_inter_tile_delta_frames(frames, tile_len, delta_gap):
     return selected, starts
 
 
+def select_learned_delta_frames(frames, tile_len, policy, video_meta, num_video_frames):
+    if tile_len <= 0:
+        raise ValueError("tile_len must be positive")
+
+    duration = video_meta.get("duration")
+    effective_fps = (num_video_frames / duration) if duration and duration > 0 else video_meta.get("fps")
+    selected = []
+    starts = []
+    policy_records = []
+    start = 0
+    while start + tile_len <= len(frames):
+        tile_frames = frames[start : start + tile_len]
+        prediction = policy.predict(
+            tile_frames,
+            start=start,
+            source_frame_count=len(frames),
+            effective_fps=effective_fps,
+        )
+        starts.append(start)
+        selected.extend(tile_frames)
+        policy_records.append(
+            {
+                "start": int(start),
+                "delta": int(prediction["delta"]),
+                "delta_index": int(prediction["delta_index"]),
+                "logits": prediction["logits"],
+            }
+        )
+        start = start + tile_len + int(prediction["delta"])
+
+    if not selected:
+        selected = frames[:tile_len]
+        starts = [0]
+    return selected, starts, policy_records, effective_fps
+
+
 def select_dense_inter_tile_delta_frames(video_path, tile_len, delta_gap, frame_stride, max_source_tiles):
     import cv2
 
@@ -199,12 +364,22 @@ def summarize(results_path):
             "accuracy": sum(1 for row in subset if row["is_correct"]) / max(len(subset), 1),
         }
 
+    visited_frames = [row.get("num_visited_frames") for row in rows if row.get("num_visited_frames") is not None]
+    visited_tiles = [row.get("num_visited_tiles") for row in rows if row.get("num_visited_tiles") is not None]
+    delta_counts = Counter()
+    for row in rows:
+        for policy_record in row.get("delta_policy_records") or []:
+            delta_counts[str(policy_record["delta"])] += 1
+
     return {
         "num_examples": total,
         "num_correct": correct,
         "accuracy": correct / max(total, 1),
         "by_category": by_category,
         "prediction_counts": dict(Counter(row["prediction_letter"] for row in rows)),
+        "mean_visited_frames": float(np.mean(visited_frames)) if visited_frames else None,
+        "mean_visited_tiles": float(np.mean(visited_tiles)) if visited_tiles else None,
+        "delta_policy_counts": dict(delta_counts),
     }
 
 
@@ -245,6 +420,18 @@ def main():
         max_batch_size_siglip=args.max_batch_size_siglip,
     )
     model.eval()
+    delta_policy = None
+    if args.delta_policy_checkpoint is not None:
+        if args.frame_source != "uniform":
+            raise ValueError("--delta-policy-checkpoint currently supports --frame-source uniform only.")
+        delta_policy = LearnedDeltaPolicy(
+            checkpoint_path=args.delta_policy_checkpoint,
+            autogaze_model_id=args.autogaze_model_id,
+            device=args.delta_policy_device,
+            dtype_name=args.delta_policy_dtype,
+            gazing_ratio=args.delta_policy_gazing_ratio,
+            task_loss_requirement=args.delta_policy_task_loss_requirement,
+        )
 
     video_token = processor.tokenizer.video_token
     with output_path.open("a") as out:
@@ -258,13 +445,26 @@ def main():
 
             prompt = f"{video_token}\n\nQuestion: {row['question']}"
             source_frame_count = None
+            delta_policy_records = None
+            delta_policy_effective_fps = None
             if args.frame_source == "uniform":
                 sampled_frames = load_uniform_frames(video_path, args.num_video_frames)
-                visited_frames, tile_starts = select_inter_tile_delta_frames(
-                    sampled_frames,
-                    tile_len=args.tile_len,
-                    delta_gap=args.delta_gap,
-                )
+                if delta_policy is None:
+                    visited_frames, tile_starts = select_inter_tile_delta_frames(
+                        sampled_frames,
+                        tile_len=args.tile_len,
+                        delta_gap=args.delta_gap,
+                    )
+                else:
+                    video_meta = read_video_metadata(video_path)
+                    source_frame_count = video_meta["frame_count"]
+                    visited_frames, tile_starts, delta_policy_records, delta_policy_effective_fps = select_learned_delta_frames(
+                        sampled_frames,
+                        tile_len=args.tile_len,
+                        policy=delta_policy,
+                        video_meta=video_meta,
+                        num_video_frames=args.num_video_frames,
+                    )
                 num_source_frames = len(sampled_frames)
             else:
                 max_source_tiles = args.max_source_tiles
@@ -309,6 +509,9 @@ def main():
                 "visited_frame_ratio": len(visited_frames) / max(num_source_frames, 1),
                 "tile_starts": tile_starts,
                 "num_visited_tiles": len(tile_starts),
+                "delta_policy_checkpoint": args.delta_policy_checkpoint,
+                "delta_policy_records": delta_policy_records,
+                "delta_policy_effective_fps": delta_policy_effective_fps,
             }
             out.write(json.dumps(record) + "\n")
             out.flush()
@@ -326,6 +529,9 @@ def main():
             "max_source_tiles": args.max_source_tiles,
             "tile_len": args.tile_len,
             "delta_gap": args.delta_gap,
+            "delta_policy_checkpoint": args.delta_policy_checkpoint,
+            "delta_policy_gazing_ratio": args.delta_policy_gazing_ratio,
+            "delta_policy_task_loss_requirement": args.delta_policy_task_loss_requirement,
             "max_tiles_video": args.max_tiles_video,
             "max_batch_size_autogaze": args.max_batch_size_autogaze,
             "max_batch_size_siglip": args.max_batch_size_siglip,

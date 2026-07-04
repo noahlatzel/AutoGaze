@@ -1,0 +1,62 @@
+id: hlvid_nvila_learned_delta_dino_semnovel_l001_mtv1
+family: hlvid_nvila
+status: submitted
+slurm:
+  job_id: 1608784
+  state_at_submission: PD
+  reason_at_submission: Resources
+  script: outputs/hlvid/learned_delta_dino_semnovel_l001_mtv1/submit.sbatch
+question: Evaluate a supervised dino semnovel l001 delta policy in the direct HLVid/NVILA path with max_tiles_video=1.
+runner: scripts/runners/evaluate_hlvid_nvila.py
+environment: vila-autogaze-eval
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+models:
+  nvila: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video
+  autogaze: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+policy:
+  checkpoint: outputs/delta_policy/dino_semnovel_l001_fusion_probe/checkpoints/mean_vision_linear.pt
+  labels: dino semantic mean novelty with lambda_cost=0.01
+  feature_key: mean_vision
+  input_mode: concat
+  architecture: classifier
+  probe: linear
+  metadata_fields:
+    - effective_fps
+    - frame_count
+    - start
+outputs:
+  root: outputs/hlvid/learned_delta_dino_semnovel_l001_mtv1
+  summary: outputs/hlvid/learned_delta_dino_semnovel_l001_mtv1/summary.json
+command:
+  dataset_root: /storage/slurm/latn/data/AutoGaze/HLVid
+  model_path: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video
+  autogaze_model_id: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+  num_video_frames: 128
+  num_video_frames_thumbnail: 64
+  frame_source: uniform
+  tile_len: 16
+  max_tiles_video: 1
+  delta_policy_checkpoint: outputs/delta_policy/dino_semnovel_l001_fusion_probe/checkpoints/mean_vision_linear.pt
+  delta_policy_device: cuda
+  delta_policy_dtype: float16
+  delta_policy_gazing_ratio: 0.75
+  delta_policy_task_loss_requirement: 0.7
+  max_new_tokens: 16
+  max_batch_size_autogaze: 16
+  max_batch_size_siglip: 32
+  torch_dtype: bfloat16
+  resume: true
+metrics:
+  primary:
+    - accuracy
+    - mean_visited_frames
+    - mean_visited_tiles
+    - delta_policy_counts
+  secondary:
+    - by_category
+    - prediction_counts
+    - visited_frame_ratio
+notes:
+  - First direct NVILA rollout of the supervised delta probe; policy AutoGaze extraction is separate from the NVILA processor AutoGaze pass.
