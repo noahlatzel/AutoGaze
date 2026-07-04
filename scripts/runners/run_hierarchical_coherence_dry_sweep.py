@@ -33,11 +33,14 @@ from autogaze.temporal_sampling import (
     score_window_metric,
     thumbnail_tensor,
 )
+from autogaze.datasets.video_utils import transform_video_for_pytorch
+from autogaze.models.autogaze import AutoGaze, AutoGazeImageProcessor
 from hlvid_common import load_rows, video_frame_count_from_capture
 
 
 DEFAULT_MODEL_ROOT = "/storage/slurm/latn/data/AutoGaze/hf_models"
-SUPPORTED_METRICS = tuple(WINDOW_METRICS) + tuple(SEMANTIC_WINDOW_METRICS)
+AUTOGAZE_METRICS = ("autogaze_gaze_density",)
+SUPPORTED_METRICS = tuple(WINDOW_METRICS) + tuple(SEMANTIC_WINDOW_METRICS) + AUTOGAZE_METRICS
 
 
 @dataclass
@@ -104,6 +107,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--siglip-model", default=f"{DEFAULT_MODEL_ROOT}/google--siglip2-base-patch16-224")
     parser.add_argument("--dinov2-model", default=f"{DEFAULT_MODEL_ROOT}/facebook--dinov2-with-registers-base")
+    parser.add_argument("--autogaze-model", default=f"{DEFAULT_MODEL_ROOT}/nvidia--AutoGaze")
+    parser.add_argument("--autogaze-device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--autogaze-dtype", choices=["float32", "float16", "bfloat16"], default="float16")
+    parser.add_argument("--autogaze-gazing-ratio", type=float, default=0.75)
+    parser.add_argument("--autogaze-task-loss-requirement", type=float, default=0.7)
     parser.add_argument("--semantic-device", default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--semantic-dtype", choices=["float32", "float16", "bfloat16"], default="float16")
     parser.add_argument("--max-batch-size-semantic", type=int, default=32)
@@ -218,6 +226,8 @@ class CoherenceScorer:
     def __init__(self, args: argparse.Namespace):
         self.args = args
         self.semantic_encoder = None
+        self.autogaze_processor = None
+        self.autogaze_model = None
         if args.coherence_metric in SEMANTIC_WINDOW_METRICS:
             dtype = torch_dtype(args.semantic_dtype)
             if args.semantic_model == "siglip":
@@ -234,6 +244,14 @@ class CoherenceScorer:
                     dtype,
                     args.max_batch_size_semantic,
                 )
+        if args.coherence_metric in AUTOGAZE_METRICS:
+            dtype = torch_dtype(args.autogaze_dtype)
+            self.autogaze_processor = AutoGazeImageProcessor.from_pretrained(args.autogaze_model)
+            self.autogaze_model = AutoGaze.from_pretrained(args.autogaze_model).to(
+                device=args.autogaze_device,
+                dtype=dtype,
+            )
+            self.autogaze_model.eval()
 
     def score(self, frames: np.ndarray) -> float:
         metric = self.args.coherence_metric
@@ -252,6 +270,9 @@ class CoherenceScorer:
                 ).item()
             )
 
+        if metric in AUTOGAZE_METRICS:
+            return self._score_autogaze(frames)
+
         embeddings = self.semantic_encoder.encode_frames(frames)
         if metric == "semantic_diversity":
             current = candidate = embeddings
@@ -262,6 +283,23 @@ class CoherenceScorer:
                 f"{metric} is question-conditioned and is not implemented for question-agnostic coherence."
             )
         return float(score_semantic_window_metric(current, candidate, metric).item())
+
+    @torch.inference_mode()
+    def _score_autogaze(self, frames: np.ndarray) -> float:
+        video = transform_video_for_pytorch(frames, self.autogaze_processor)[None].to(
+            device=self.args.autogaze_device,
+            dtype=torch_dtype(self.args.autogaze_dtype),
+        )
+        gazing_info = self.autogaze_model(
+            {"video": video},
+            gazing_ratio=self.args.autogaze_gazing_ratio,
+            task_loss_requirement=self.args.autogaze_task_loss_requirement,
+            generate_only=True,
+        )
+        non_padded = int((~gazing_info["if_padded_gazing"]).sum().item())
+        num_frames = int(gazing_info["num_gazing_each_frame"].numel())
+        denom = max(1, num_frames * int(self.autogaze_model.num_vision_tokens_each_frame))
+        return non_padded / denom
 
 
 def score_node(node: IntervalNode, frame_loader: VideoFrameLoader, tile_len: int, scorer: CoherenceScorer) -> None:
@@ -429,6 +467,11 @@ def main() -> None:
                 "coherence_metric": args.coherence_metric,
                 "proxy_base_metric": args.proxy_base_metric,
                 "semantic_model": args.semantic_model if args.coherence_metric in SEMANTIC_WINDOW_METRICS else None,
+                "autogaze_model": args.autogaze_model if args.coherence_metric in AUTOGAZE_METRICS else None,
+                "autogaze_gazing_ratio": args.autogaze_gazing_ratio if args.coherence_metric in AUTOGAZE_METRICS else None,
+                "autogaze_task_loss_requirement": (
+                    args.autogaze_task_loss_requirement if args.coherence_metric in AUTOGAZE_METRICS else None
+                ),
                 "target_leaf_tiles": args.target_leaf_tiles,
                 "split_policy": args.split_policy,
                 "num_leaf_tiles": len(leaves),
@@ -466,6 +509,9 @@ def main() -> None:
             "coherence_metric": args.coherence_metric,
             "proxy_base_metric": args.proxy_base_metric,
             "semantic_model": args.semantic_model,
+            "autogaze_model": args.autogaze_model,
+            "autogaze_gazing_ratio": args.autogaze_gazing_ratio,
+            "autogaze_task_loss_requirement": args.autogaze_task_loss_requirement,
         }
     )
     summary_path.write_text(json.dumps(summary, indent=2))

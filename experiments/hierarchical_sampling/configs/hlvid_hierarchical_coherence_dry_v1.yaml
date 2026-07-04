@@ -53,6 +53,26 @@ runs:
       semantic_model: dinov2
       target_leaf_tiles: 16
       split_policy: best_first
+      limit_videos: 6
+  - id: hcs_v1_siglip_semdiv_16
+    status: planned
+    output_dir: outputs/hierarchical_sampling/hlvid_hierarchical_coherence_dry_v1/siglip_semdiv_16
+    command:
+      coherence_metric: semantic_diversity
+      semantic_model: siglip
+      target_leaf_tiles: 16
+      split_policy: best_first
+      limit_videos: 6
+  - id: hcs_v1_autogaze_gaze_density_16
+    status: planned
+    output_dir: outputs/hierarchical_sampling/hlvid_hierarchical_coherence_dry_v1/autogaze_gaze_density_16
+    command:
+      coherence_metric: autogaze_gaze_density
+      target_leaf_tiles: 16
+      split_policy: best_first
+      limit_videos: 6
+      autogaze_gazing_ratio: 0.75
+      autogaze_task_loss_requirement: 0.7
   - id: hcs_v1_dino_semnovel_16
     status: planned
     output_dir: outputs/hierarchical_sampling/hlvid_hierarchical_coherence_dry_v1/dino_semnovel_16
