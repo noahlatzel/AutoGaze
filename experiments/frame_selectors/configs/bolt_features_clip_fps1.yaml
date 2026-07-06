@@ -1,0 +1,32 @@
+id: frame_selectors_bolt_features_clip_fps1
+family: frame_selectors
+status: submitted
+slurm:
+  submitted_at: "2026-07-06"
+  job_id: 1616355
+  state_at_submission: R
+  script: /storage/slurm/latn/data/AutoGaze/frame_selector_features/bolt/clip_vit_l14_fps1/submit.sbatch
+question: Extract BOLT-compatible CLIP ViT-L/14 frame features for HLVid at 1 FPS.
+runner: scripts/frame_selectors/extract_bolt_features.py
+environment: autogaze
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+outputs:
+  root: /storage/slurm/latn/data/AutoGaze/frame_selector_features/bolt/clip_vit_l14_fps1
+command:
+  dataset_root: /storage/slurm/latn/data/AutoGaze/HLVid
+  output_dir: /storage/slurm/latn/data/AutoGaze/frame_selector_features/bolt/clip_vit_l14_fps1
+  model: clip
+  fps: 1.0
+  batch_size: 32
+  device: cuda
+  dtype: float16
+  resume: true
+metrics:
+  primary:
+    - feature_files_written
+    - wall_time
+notes:
+  - Feature extraction is a prerequisite for experiments/frame_selectors/configs/bolt_128.yaml.
+  - Model paths are resolved from experiments/frame_selectors/models.yaml unless overridden.

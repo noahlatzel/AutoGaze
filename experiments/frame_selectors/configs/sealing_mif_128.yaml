@@ -1,0 +1,36 @@
+id: frame_selectors_sealing_mif_128
+family: frame_selectors
+status: submitted
+slurm:
+  submitted_at: "2026-07-06"
+  job_id: 1616356
+  state_at_submission: R
+  script: outputs/frame_indices/sealing_mif_128/submit.sbatch
+question: Generate Sealing MIF fixed-budget 128-frame HLVid indices using GIT captions and QA-evaluator scoring.
+runner: scripts/frame_selectors/generate_sealing_indices.py
+environment: autogaze
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+outputs:
+  root: outputs/frame_indices/sealing_mif_128
+command:
+  dataset_root: /storage/slurm/latn/data/AutoGaze/HLVid
+  output: outputs/frame_indices/sealing_mif_128.jsonl
+  mode: mif
+  num_frames: 128
+  mif_candidates: 512
+  sort_indices: true
+  video_backend: av
+  batch_size: 16
+  device: cuda
+  dtype: float16
+  resume: true
+metrics:
+  primary:
+    - selected_source_indices
+    - coverage
+    - wall_time
+notes:
+  - Captions 512 uniform candidate frames per video before top-128 question-conditioned selection.
+  - Model paths are resolved from experiments/frame_selectors/models.yaml unless overridden.

@@ -1,0 +1,31 @@
+id: frame_selectors_aks_128
+family: frame_selectors
+status: submitted
+slurm:
+  submitted_at: "2026-07-06"
+  job_id: 1616353
+  state_at_submission: R
+  script: outputs/frame_indices/aks_128/submit.sbatch
+question: Generate AKS-style fixed-budget 128-frame HLVid indices using local CLIP scoring.
+runner: scripts/frame_selectors/generate_aks_indices.py
+environment: autogaze
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+outputs:
+  root: outputs/frame_indices/aks_128
+command:
+  dataset_root: /storage/slurm/latn/data/AutoGaze/HLVid
+  output: outputs/frame_indices/aks_128.jsonl
+  num_frames: 128
+  score_backend: clip
+  candidate_stride_seconds: 1.0
+  device: cuda
+  resume: true
+metrics:
+  primary:
+    - selected_source_indices
+    - coverage
+    - wall_time
+notes:
+  - Model paths are resolved from experiments/frame_selectors/models.yaml unless overridden.

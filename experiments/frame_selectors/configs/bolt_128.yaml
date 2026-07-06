@@ -1,0 +1,31 @@
+id: frame_selectors_bolt_128
+family: frame_selectors
+status: planned
+question: Generate BOLT inverse-transform fixed-budget 128-frame HLVid indices from pre-extracted CLIP features.
+runner: scripts/frame_selectors/generate_bolt_indices.py
+environment: autogaze
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+features:
+  root: /storage/slurm/latn/data/AutoGaze/frame_selector_features/bolt/clip_vit_l14_fps1
+outputs:
+  root: outputs/frame_indices/bolt_128
+command:
+  dataset_root: /storage/slurm/latn/data/AutoGaze/HLVid
+  features_dir: /storage/slurm/latn/data/AutoGaze/frame_selector_features/bolt/clip_vit_l14_fps1
+  output: outputs/frame_indices/bolt_128.jsonl
+  model: clip
+  feature_fps: 1.0
+  num_frames: 128
+  power: -1.0
+  device: cuda
+  dtype: float16
+metrics:
+  primary:
+    - selected_source_indices
+    - coverage
+    - wall_time
+notes:
+  - Submit after frame_selectors_bolt_features_clip_fps1 has completed.
+  - Model paths are resolved from experiments/frame_selectors/models.yaml unless overridden.
