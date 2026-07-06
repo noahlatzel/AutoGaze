@@ -1,0 +1,47 @@
+id: hlvid_nvila_uniform_256_mtv1
+family: hlvid_nvila
+status: submitted
+slurm:
+  submitted_at: "2026-07-04"
+  job_id: 1614914
+  state_at_submission: PD
+  reason_at_submission: Priority
+  script: outputs/hlvid/uniform_256_mtv1/hlvid_nvila_uniform_256_mtv1/submit.sbatch
+question: Evaluate uniform 256-frame sampling on HLVid/NVILA with max_tiles_video=1 as a control for hierarchical temporal-density sampling.
+runner: scripts/runners/evaluate_hlvid_nvila.py
+environment: vila-autogaze-eval
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+models:
+  nvila: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video
+  autogaze: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+outputs:
+  root: outputs/hlvid/uniform_256_mtv1
+  summary: outputs/hlvid/uniform_256_mtv1/summary.json
+command:
+  dataset_root: /storage/slurm/latn/data/AutoGaze/HLVid
+  model_path: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video
+  autogaze_model_id: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+  frame_source: uniform
+  tile_len: 16
+  max_tiles_video: 1
+  num_video_frames: 256
+  num_video_frames_thumbnail: 64
+  max_new_tokens: 16
+  max_batch_size_autogaze: 16
+  max_batch_size_siglip: 32
+  torch_dtype: bfloat16
+  resume: true
+metrics:
+  primary:
+    - accuracy
+    - mean_visited_frames
+    - mean_visited_tiles
+    - by_category
+  secondary:
+    - prediction_counts
+    - visual_tokens
+    - end_to_end_seconds
+notes:
+  - Control baseline for hierarchical_temporal_density_mtv1 with the same 256-frame budget and max_tiles_video=1.

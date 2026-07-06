@@ -24,6 +24,12 @@ from autogaze.datasets.video_utils import transform_video_for_pytorch
 from autogaze.models.autogaze import AutoGaze, AutoGazeImageProcessor
 from extract_delta_probe_features import representation_features
 from hlvid_common import dtype_from_name, existing_question_ids, extract_letter, load_rows
+from run_hierarchical_coherence_dry_sweep import (
+    AUTOGAZE_METRICS,
+    SUPPORTED_METRICS as HIERARCHICAL_COHERENCE_METRICS,
+    CoherenceScorer,
+    build_hierarchy,
+)
 from train_delta_probe import build_delta_model
 
 
@@ -41,11 +47,12 @@ def parse_args():
     parser.add_argument("--num-video-frames-thumbnail", type=int, default=64)
     parser.add_argument(
         "--frame-source",
-        choices=["uniform", "dense"],
+        choices=["uniform", "dense", "hierarchical"],
         default="uniform",
         help=(
             "uniform: sample --num-video-frames over the full video, then apply tile skipping. "
-            "dense: apply tile skipping in original video-frame coordinates and load only visited tiles."
+            "dense: apply tile skipping in original video-frame coordinates and load only visited tiles. "
+            "hierarchical: build best-first coherent temporal leaves and load selected source frames."
         ),
     )
     parser.add_argument(
@@ -71,6 +78,25 @@ def parse_args():
     parser.add_argument("--delta-policy-dtype", default="float16", choices=["float32", "float16", "bfloat16"])
     parser.add_argument("--delta-policy-gazing-ratio", type=float, default=0.75)
     parser.add_argument("--delta-policy-task-loss-requirement", type=float, default=0.7)
+    parser.add_argument(
+        "--hierarchical-coherence-metric",
+        choices=list(HIERARCHICAL_COHERENCE_METRICS),
+        default="within_diversity",
+    )
+    parser.add_argument("--hierarchical-proxy-base-metric", default="pixel_mse")
+    parser.add_argument("--hierarchical-semantic-model", choices=["siglip", "dinov2"], default="dinov2")
+    parser.add_argument("--hierarchical-target-leaf-tiles", type=int, default=16)
+    parser.add_argument("--hierarchical-split-policy", choices=["best_first", "level_sync"], default="best_first")
+    parser.add_argument("--hierarchical-max-depth", type=int, default=5)
+    parser.add_argument("--hierarchical-min-interval-frames", type=int, default=64)
+    parser.add_argument("--hierarchical-resize", type=int, default=224)
+    parser.add_argument("--hierarchical-semantic-device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--hierarchical-semantic-dtype", choices=["float32", "float16", "bfloat16"], default="float16")
+    parser.add_argument("--hierarchical-max-batch-size-semantic", type=int, default=32)
+    parser.add_argument("--hierarchical-autogaze-device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--hierarchical-autogaze-dtype", choices=["float32", "float16", "bfloat16"], default="float16")
+    parser.add_argument("--hierarchical-autogaze-gazing-ratio", type=float, default=0.75)
+    parser.add_argument("--hierarchical-autogaze-task-loss-requirement", type=float, default=0.7)
     parser.add_argument("--max-tiles-video", type=int, default=48)
     parser.add_argument("--max-batch-size-autogaze", type=int, default=16)
     parser.add_argument("--max-batch-size-siglip", type=int, default=32)
@@ -346,6 +372,59 @@ def select_dense_inter_tile_delta_frames(video_path, tile_len, delta_gap, frame_
     return load_frames_by_indices(video_path, source_indices), tile_starts, frame_count
 
 
+def hierarchical_namespace(args):
+    return argparse.Namespace(
+        dataset_root=args.dataset_root,
+        output=args.output,
+        summary_output=args.summary_output,
+        limit_videos=None,
+        tile_len=args.tile_len,
+        resize=args.hierarchical_resize,
+        target_leaf_tiles=args.hierarchical_target_leaf_tiles,
+        max_depth=args.hierarchical_max_depth,
+        min_interval_frames=args.hierarchical_min_interval_frames,
+        split_policy=args.hierarchical_split_policy,
+        coherence_metric=args.hierarchical_coherence_metric,
+        proxy_base_metric=args.hierarchical_proxy_base_metric,
+        semantic_model=args.hierarchical_semantic_model,
+        siglip_model=f"{Path(args.model_path).parent}/google--siglip2-base-patch16-224",
+        dinov2_model=f"{Path(args.model_path).parent}/facebook--dinov2-with-registers-base",
+        autogaze_model=args.autogaze_model_id,
+        autogaze_device=args.hierarchical_autogaze_device,
+        autogaze_dtype=args.hierarchical_autogaze_dtype,
+        autogaze_gazing_ratio=args.hierarchical_autogaze_gazing_ratio,
+        autogaze_task_loss_requirement=args.hierarchical_autogaze_task_loss_requirement,
+        semantic_device=args.hierarchical_semantic_device,
+        semantic_dtype=args.hierarchical_semantic_dtype,
+        max_batch_size_semantic=args.hierarchical_max_batch_size_semantic,
+    )
+
+
+def select_hierarchical_frames(video_path, frame_count, scorer, hargs):
+    leaves, decisions = build_hierarchy(
+        video_path=video_path,
+        frame_count=frame_count,
+        args=hargs,
+        scorer=scorer,
+    )
+    source_indices = [index for leaf in leaves for index in leaf.sampled_indices]
+    return {
+        "tile_starts": [int(leaf.start) for leaf in leaves],
+        "source_indices": [int(index) for index in source_indices],
+        "leaf_intervals": [
+            {
+                "start": int(leaf.start),
+                "end": int(leaf.end),
+                "depth": int(leaf.depth),
+                "score": None if leaf.score is None else float(leaf.score),
+                "sampled_indices": [int(index) for index in leaf.sampled_indices],
+            }
+            for leaf in leaves
+        ],
+        "split_decisions": decisions,
+    }
+
+
 def summarize(results_path):
     rows = []
     with Path(results_path).open() as f:
@@ -432,6 +511,12 @@ def main():
             gazing_ratio=args.delta_policy_gazing_ratio,
             task_loss_requirement=args.delta_policy_task_loss_requirement,
         )
+    hierarchical_scorer = None
+    hierarchical_args = None
+    hierarchical_cache = {}
+    if args.frame_source == "hierarchical":
+        hierarchical_args = hierarchical_namespace(args)
+        hierarchical_scorer = CoherenceScorer(hierarchical_args)
 
     video_token = processor.tokenizer.video_token
     with output_path.open("a") as out:
@@ -447,6 +532,7 @@ def main():
             source_frame_count = None
             delta_policy_records = None
             delta_policy_effective_fps = None
+            hierarchical_record = None
             if args.frame_source == "uniform":
                 sampled_frames = load_uniform_frames(video_path, args.num_video_frames)
                 if delta_policy is None:
@@ -466,7 +552,7 @@ def main():
                         num_video_frames=args.num_video_frames,
                     )
                 num_source_frames = len(sampled_frames)
-            else:
+            elif args.frame_source == "dense":
                 max_source_tiles = args.max_source_tiles
                 if max_source_tiles is None:
                     max_source_tiles = args.max_tiles_video
@@ -477,6 +563,22 @@ def main():
                     frame_stride=args.dense_frame_stride,
                     max_source_tiles=max_source_tiles,
                 )
+                num_source_frames = source_frame_count
+            else:
+                video_meta = read_video_metadata(video_path)
+                source_frame_count = int(video_meta["frame_count"])
+                cache_key = str(video_path)
+                if cache_key not in hierarchical_cache:
+                    hierarchical_cache[cache_key] = select_hierarchical_frames(
+                        video_path,
+                        source_frame_count,
+                        hierarchical_scorer,
+                        hierarchical_args,
+                    )
+                cached = hierarchical_cache[cache_key]
+                visited_frames = load_frames_by_indices(video_path, cached["source_indices"])
+                tile_starts = cached["tile_starts"]
+                hierarchical_record = dict(cached)
                 num_source_frames = source_frame_count
             inputs = processor(text=prompt, videos=[visited_frames], return_tensors="pt")
             target_device = model.device if hasattr(model, "device") else next(model.parameters()).device
@@ -512,6 +614,11 @@ def main():
                 "delta_policy_checkpoint": args.delta_policy_checkpoint,
                 "delta_policy_records": delta_policy_records,
                 "delta_policy_effective_fps": delta_policy_effective_fps,
+                "hierarchical_coherence_metric": args.hierarchical_coherence_metric if args.frame_source == "hierarchical" else None,
+                "hierarchical_semantic_model": args.hierarchical_semantic_model if args.frame_source == "hierarchical" else None,
+                "hierarchical_target_leaf_tiles": args.hierarchical_target_leaf_tiles if args.frame_source == "hierarchical" else None,
+                "hierarchical_split_policy": args.hierarchical_split_policy if args.frame_source == "hierarchical" else None,
+                "hierarchical_record": hierarchical_record,
             }
             out.write(json.dumps(record) + "\n")
             out.flush()
@@ -532,6 +639,14 @@ def main():
             "delta_policy_checkpoint": args.delta_policy_checkpoint,
             "delta_policy_gazing_ratio": args.delta_policy_gazing_ratio,
             "delta_policy_task_loss_requirement": args.delta_policy_task_loss_requirement,
+            "hierarchical_coherence_metric": args.hierarchical_coherence_metric if args.frame_source == "hierarchical" else None,
+            "hierarchical_proxy_base_metric": args.hierarchical_proxy_base_metric if args.frame_source == "hierarchical" else None,
+            "hierarchical_semantic_model": args.hierarchical_semantic_model if args.frame_source == "hierarchical" else None,
+            "hierarchical_target_leaf_tiles": args.hierarchical_target_leaf_tiles if args.frame_source == "hierarchical" else None,
+            "hierarchical_split_policy": args.hierarchical_split_policy if args.frame_source == "hierarchical" else None,
+            "hierarchical_max_depth": args.hierarchical_max_depth if args.frame_source == "hierarchical" else None,
+            "hierarchical_min_interval_frames": args.hierarchical_min_interval_frames if args.frame_source == "hierarchical" else None,
+            "hierarchical_resize": args.hierarchical_resize if args.frame_source == "hierarchical" else None,
             "max_tiles_video": args.max_tiles_video,
             "max_batch_size_autogaze": args.max_batch_size_autogaze,
             "max_batch_size_siglip": args.max_batch_size_siglip,

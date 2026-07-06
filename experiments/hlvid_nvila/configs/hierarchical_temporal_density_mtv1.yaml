@@ -1,0 +1,92 @@
+id: hlvid_nvila_hierarchical_temporal_density_mtv1
+family: hlvid_nvila
+status: submitted
+slurm:
+  submitted_at: "2026-07-04"
+  state_at_submission: PD
+  reason_at_submission: Priority
+  jobs:
+    hlvid_hier_pixel_diversity_mtv1: 1614913
+    hlvid_hier_dino_semdiv_mtv1: 1614912
+    hlvid_hier_siglip_semdiv_mtv1: 1614910
+    hlvid_hier_autogaze_density_mtv1: 1614911
+question: Evaluate best-first hierarchical temporal-density frame sampling on HLVid/NVILA with max_tiles_video=1.
+runner: scripts/runners/evaluate_hlvid_nvila.py
+environment: vila-autogaze-eval
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+models:
+  nvila: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video
+  autogaze: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+outputs:
+  root: outputs/hlvid/hierarchical_temporal_density_mtv1
+  summary_glob: "*/summary.json"
+command:
+  dataset_root: /storage/slurm/latn/data/AutoGaze/HLVid
+  model_path: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video
+  autogaze_model_id: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+  frame_source: hierarchical
+  tile_len: 16
+  max_tiles_video: 1
+  num_video_frames: 256
+  num_video_frames_thumbnail: 64
+  hierarchical_target_leaf_tiles: 16
+  hierarchical_split_policy: best_first
+  hierarchical_max_depth: 5
+  hierarchical_min_interval_frames: 64
+  hierarchical_resize: 224
+  hierarchical_semantic_dtype: float16
+  hierarchical_max_batch_size_semantic: 32
+  hierarchical_autogaze_dtype: float16
+  hierarchical_autogaze_gazing_ratio: 0.75
+  hierarchical_autogaze_task_loss_requirement: 0.7
+  max_new_tokens: 16
+  max_batch_size_autogaze: 16
+  max_batch_size_siglip: 32
+  torch_dtype: bfloat16
+  resume: true
+metrics:
+  primary:
+    - accuracy
+    - mean_visited_frames
+    - mean_visited_tiles
+    - by_category
+  secondary:
+    - prediction_counts
+    - hierarchical leaf depth distribution
+    - hierarchical source-frame distribution
+notes:
+  - research/hierarchical_coherent_tile_sampling.md
+  - Coherence scoring uses 224px thumbnails only; NVILA receives reloaded selected source frames through the normal processor.
+runs:
+  - id: hlvid_hier_pixel_diversity_mtv1
+    status: resubmitted_h100_after_oom
+    slurm_job_id: 1614913
+    previous_slurm_job_id: 1614909
+    output_dir: outputs/hlvid/hierarchical_temporal_density_mtv1/pixel_diversity
+    command:
+      hierarchical_coherence_metric: within_diversity
+      hierarchical_proxy_base_metric: pixel_mse
+  - id: hlvid_hier_dino_semdiv_mtv1
+    status: submitted
+    slurm_job_id: 1614912
+    output_dir: outputs/hlvid/hierarchical_temporal_density_mtv1/dino_semdiv
+    command:
+      hierarchical_coherence_metric: semantic_diversity
+      hierarchical_semantic_model: dinov2
+  - id: hlvid_hier_siglip_semdiv_mtv1
+    status: submitted
+    slurm_job_id: 1614910
+    output_dir: outputs/hlvid/hierarchical_temporal_density_mtv1/siglip_semdiv
+    command:
+      hierarchical_coherence_metric: semantic_diversity
+      hierarchical_semantic_model: siglip
+  - id: hlvid_hier_autogaze_density_mtv1
+    status: submitted
+    slurm_job_id: 1614911
+    output_dir: outputs/hlvid/hierarchical_temporal_density_mtv1/autogaze_gaze_density
+    command:
+      hierarchical_coherence_metric: autogaze_gaze_density
+      hierarchical_autogaze_gazing_ratio: 0.75
+      hierarchical_autogaze_task_loss_requirement: 0.7

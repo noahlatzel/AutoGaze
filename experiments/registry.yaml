@@ -43,6 +43,14 @@ families:
       - experiments/hlvid_nvila/configs/default_autogaze.yaml
       - experiments/hlvid_nvila/configs/fixed_delta.yaml
       - experiments/hlvid_nvila/configs/learned_delta_dino_semnovel_l001_mtv1.yaml
+      - experiments/hlvid_nvila/configs/hierarchical_temporal_density_mtv1.yaml
+      - experiments/hlvid_nvila/configs/uniform_256_mtv1.yaml
+      - experiments/hlvid_nvila/configs/hierarchical_temporal_density_mtv48.yaml
+      - experiments/hlvid_nvila/configs/uniform_256_mtv48.yaml
+      - experiments/hlvid_nvila/configs/hierarchical_temporal_density_128_mtv1.yaml
+      - experiments/hlvid_nvila/configs/uniform_128_mtv1.yaml
+      - experiments/hlvid_nvila/configs/hierarchical_temporal_density_128_mtv48.yaml
+      - experiments/hlvid_nvila/configs/uniform_128_mtv48.yaml
     manifests:
       - experiments/hlvid_nvila/manifests/completed.yaml
       - experiments/hlvid_nvila/manifests/planned.yaml

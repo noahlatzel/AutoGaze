@@ -1,6 +1,136 @@
 version: 1
 updated: "2026-06-26"
 runs:
+  - id: hlvid_nvila_uniform_128_mtv1
+    status: submitted
+    question: Evaluate uniform 128-frame sampling on HLVid/NVILA with max_tiles_video=1.
+    config: experiments/hlvid_nvila/configs/uniform_128_mtv1.yaml
+    output_root: outputs/hlvid/uniform_128_mtv1
+    slurm_job_id: 1615392
+    slurm_state_at_submission: PD
+    metrics:
+      - accuracy
+      - mean_visited_frames
+      - mean_visited_tiles
+      - by_category
+  - id: hlvid_nvila_hierarchical_temporal_density_128_mtv1
+    status: submitted
+    question: Evaluate four best-first hierarchical temporal-density samplers on HLVid/NVILA with num_video_frames=128 and max_tiles_video=1.
+    config: experiments/hlvid_nvila/configs/hierarchical_temporal_density_128_mtv1.yaml
+    output_root: outputs/hlvid/hierarchical_temporal_density_128_mtv1
+    slurm_job_ids:
+      pixel_diversity: 1615395
+      dino_semdiv: 1615394
+      siglip_semdiv: 1615396
+      autogaze_gaze_density: 1615393
+    slurm_state_at_submission: PD
+    metrics:
+      - accuracy
+      - mean_visited_frames
+      - mean_visited_tiles
+      - by_category
+  - id: hlvid_nvila_uniform_128_mtv48
+    status: submitted
+    question: Evaluate uniform 128-frame sampling on HLVid/NVILA with max_tiles_video=48.
+    config: experiments/hlvid_nvila/configs/uniform_128_mtv48.yaml
+    output_root: outputs/hlvid/uniform_128_mtv48
+    slurm_job_id: 1615397
+    slurm_state_at_submission: PD
+    metrics:
+      - accuracy
+      - mean_visited_frames
+      - mean_visited_tiles
+      - by_category
+      - visual_tokens
+  - id: hlvid_nvila_hierarchical_temporal_density_128_mtv48
+    status: submitted
+    question: Evaluate four best-first hierarchical temporal-density samplers on HLVid/NVILA with num_video_frames=128 and max_tiles_video=48.
+    config: experiments/hlvid_nvila/configs/hierarchical_temporal_density_128_mtv48.yaml
+    output_root: outputs/hlvid/hierarchical_temporal_density_128_mtv48
+    slurm_job_ids:
+      pixel_diversity: 1615401
+      dino_semdiv: 1616017
+    previous_slurm_job_ids:
+      dino_semdiv: 1615400
+      siglip_semdiv: 1615399
+      autogaze_gaze_density: 1615398
+    slurm_state_at_submission: PD
+    metrics:
+      - accuracy
+      - mean_visited_frames
+      - mean_visited_tiles
+      - by_category
+      - visual_tokens
+  - id: hlvid_nvila_uniform_256_mtv48
+    status: submitted
+    question: Evaluate uniform 256-frame sampling on HLVid/NVILA with max_tiles_video=48 as a control for hierarchical temporal-density sampling.
+    config: experiments/hlvid_nvila/configs/uniform_256_mtv48.yaml
+    output_root: outputs/hlvid/uniform_256_mtv48
+    slurm_job_id: 1615346
+    previous_slurm_job_id: 1614915
+    slurm_state_at_submission: PD
+    slurm_reason_at_submission: Priority
+    metrics:
+      - accuracy
+      - mean_visited_frames
+      - mean_visited_tiles
+      - by_category
+      - visual_tokens
+  - id: hlvid_nvila_hierarchical_temporal_density_mtv48
+    status: submitted
+    question: Evaluate four best-first hierarchical temporal-density samplers on HLVid/NVILA with max_tiles_video=48.
+    config: experiments/hlvid_nvila/configs/hierarchical_temporal_density_mtv48.yaml
+    output_root: outputs/hlvid/hierarchical_temporal_density_mtv48
+    slurm_job_ids:
+      pixel_diversity: 1615347
+      dino_semdiv: 1615349
+      siglip_semdiv: 1615350
+      autogaze_gaze_density: 1615348
+    previous_slurm_job_ids:
+      pixel_diversity: 1614916
+      dino_semdiv: 1614917
+      siglip_semdiv: 1614918
+      autogaze_gaze_density: 1614919
+    slurm_state_at_submission: PD
+    slurm_reason_at_submission: Priority
+    metrics:
+      - accuracy
+      - mean_visited_frames
+      - mean_visited_tiles
+      - by_category
+      - visual_tokens
+  - id: hlvid_nvila_uniform_256_mtv1
+    status: submitted
+    question: Evaluate uniform 256-frame sampling on HLVid/NVILA with max_tiles_video=1 as a control for hierarchical temporal-density sampling.
+    config: experiments/hlvid_nvila/configs/uniform_256_mtv1.yaml
+    output_root: outputs/hlvid/uniform_256_mtv1
+    slurm_job_id: 1614914
+    slurm_state_at_submission: PD
+    slurm_reason_at_submission: Priority
+    metrics:
+      - accuracy
+      - mean_visited_frames
+      - mean_visited_tiles
+      - by_category
+  - id: hlvid_nvila_hierarchical_temporal_density_mtv1
+    status: submitted
+    question: Evaluate four best-first hierarchical temporal-density samplers on HLVid/NVILA with max_tiles_video=1.
+    config: experiments/hlvid_nvila/configs/hierarchical_temporal_density_mtv1.yaml
+    output_root: outputs/hlvid/hierarchical_temporal_density_mtv1
+    slurm_job_ids:
+      pixel_diversity: 1614913
+      dino_semdiv: 1614912
+      siglip_semdiv: 1614910
+      autogaze_gaze_density: 1614911
+    previous_slurm_job_ids:
+      pixel_diversity: 1614909
+    slurm_state_at_submission: PD
+    slurm_reason_at_submission: Priority
+    metrics:
+      - accuracy
+      - mean_visited_frames
+      - mean_visited_tiles
+      - by_category
   - id: hlvid_nvila_learned_delta_dino_semnovel_l001_mtv1
     status: submitted
     question: Evaluate a supervised dino semnovel l001 delta policy in the direct HLVid/NVILA path with max_tiles_video=1.
