@@ -47,13 +47,24 @@ def parse_args():
     parser.add_argument("--num-video-frames-thumbnail", type=int, default=64)
     parser.add_argument(
         "--frame-source",
-        choices=["uniform", "dense", "hierarchical"],
+        choices=["uniform", "dense", "hierarchical", "selected_indices"],
         default="uniform",
         help=(
             "uniform: sample --num-video-frames over the full video, then apply tile skipping. "
             "dense: apply tile skipping in original video-frame coordinates and load only visited tiles. "
-            "hierarchical: build best-first coherent temporal leaves and load selected source frames."
+            "hierarchical: build best-first coherent temporal leaves and load selected source frames. "
+            "selected_indices: load source-frame indices from --selected-indices."
         ),
+    )
+    parser.add_argument(
+        "--selected-indices",
+        default=None,
+        help="JSONL file mapping question_id to selected_source_indices for --frame-source selected_indices.",
+    )
+    parser.add_argument(
+        "--allow-selected-index-count-mismatch",
+        action="store_true",
+        help="Allow selected-index records whose length differs from --num-video-frames.",
     )
     parser.add_argument(
         "--dense-frame-stride",
@@ -283,6 +294,29 @@ def load_frames_by_indices(video_path, indices):
             raise ValueError(f"Could not extract requested frames from video: {video_path}")
         frames.extend([frames[-1]] * (len(indices) - len(frames)))
     return frames
+
+
+def load_selected_index_records(path, expected_num_frames=None, allow_count_mismatch=False):
+    if path is None:
+        raise ValueError("--selected-indices is required when --frame-source selected_indices.")
+    records = {}
+    with Path(path).open() as f:
+        for line_no, line in enumerate(f, start=1):
+            if not line.strip():
+                continue
+            record = json.loads(line)
+            question_id = str(record["question_id"])
+            if question_id in records:
+                raise ValueError(f"Duplicate question_id in selected indices at line {line_no}: {question_id}")
+            indices = [int(index) for index in record["selected_source_indices"]]
+            if expected_num_frames is not None and len(indices) != expected_num_frames and not allow_count_mismatch:
+                raise ValueError(
+                    f"Selected-index record for {question_id} has {len(indices)} indices; "
+                    f"expected {expected_num_frames}. Pass --allow-selected-index-count-mismatch to allow this."
+                )
+            records[question_id] = {**record, "question_id": question_id, "selected_source_indices": indices}
+    return records
+
 
 
 def select_inter_tile_delta_frames(frames, tile_len, delta_gap):
@@ -517,6 +551,13 @@ def main():
     if args.frame_source == "hierarchical":
         hierarchical_args = hierarchical_namespace(args)
         hierarchical_scorer = CoherenceScorer(hierarchical_args)
+    selected_index_records = None
+    if args.frame_source == "selected_indices":
+        selected_index_records = load_selected_index_records(
+            args.selected_indices,
+            expected_num_frames=args.num_video_frames,
+            allow_count_mismatch=args.allow_selected_index_count_mismatch,
+        )
 
     video_token = processor.tokenizer.video_token
     with output_path.open("a") as out:
@@ -533,6 +574,7 @@ def main():
             delta_policy_records = None
             delta_policy_effective_fps = None
             hierarchical_record = None
+            selected_index_record = None
             if args.frame_source == "uniform":
                 sampled_frames = load_uniform_frames(video_path, args.num_video_frames)
                 if delta_policy is None:
@@ -563,6 +605,22 @@ def main():
                     frame_stride=args.dense_frame_stride,
                     max_source_tiles=max_source_tiles,
                 )
+                num_source_frames = source_frame_count
+            elif args.frame_source == "selected_indices":
+                video_meta = read_video_metadata(video_path)
+                source_frame_count = int(video_meta["frame_count"])
+                selected_index_record = selected_index_records.get(str(row["question_id"]))
+                if selected_index_record is None:
+                    raise KeyError(f"No selected-index record for question_id={row['question_id']}")
+                source_indices = [int(index) for index in selected_index_record["selected_source_indices"]]
+                for index in source_indices:
+                    if index < 0 or index >= source_frame_count:
+                        raise ValueError(
+                            f"Selected source index {index} is out of range for {video_path} "
+                            f"with {source_frame_count} frames."
+                        )
+                visited_frames = load_frames_by_indices(video_path, source_indices)
+                tile_starts = list(range(0, len(source_indices), args.tile_len))
                 num_source_frames = source_frame_count
             else:
                 video_meta = read_video_metadata(video_path)
@@ -619,6 +677,9 @@ def main():
                 "hierarchical_target_leaf_tiles": args.hierarchical_target_leaf_tiles if args.frame_source == "hierarchical" else None,
                 "hierarchical_split_policy": args.hierarchical_split_policy if args.frame_source == "hierarchical" else None,
                 "hierarchical_record": hierarchical_record,
+                "selected_indices_path": args.selected_indices if args.frame_source == "selected_indices" else None,
+                "selected_index_method": selected_index_record.get("method") if selected_index_record else None,
+                "selected_index_record": selected_index_record,
             }
             out.write(json.dumps(record) + "\n")
             out.flush()
@@ -632,6 +693,7 @@ def main():
             "num_video_frames": args.num_video_frames,
             "num_video_frames_thumbnail": args.num_video_frames_thumbnail,
             "frame_source": args.frame_source,
+            "selected_indices": args.selected_indices if args.frame_source == "selected_indices" else None,
             "dense_frame_stride": args.dense_frame_stride,
             "max_source_tiles": args.max_source_tiles,
             "tile_len": args.tile_len,

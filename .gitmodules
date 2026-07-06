@@ -1,0 +1,9 @@
+[submodule "external/frame_selectors/AKS"]
+	path = external/frame_selectors/AKS
+	url = https://github.com/ncTimTang/AKS.git
+[submodule "external/frame_selectors/BOLT"]
+	path = external/frame_selectors/BOLT
+	url = https://github.com/sming256/BOLT.git
+[submodule "external/frame_selectors/Sealing"]
+	path = external/frame_selectors/Sealing
+	url = https://github.com/declare-lab/Sealing.git

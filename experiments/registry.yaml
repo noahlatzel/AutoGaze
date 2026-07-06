@@ -36,6 +36,11 @@ families:
     manifests:
       - experiments/delta_policy/manifests/completed.yaml
       - experiments/delta_policy/manifests/planned.yaml
+  frame_selectors:
+    description: External fixed-budget frame-selection baselines for HLVid.
+    readme: experiments/frame_selectors/README.md
+    configs:
+      - experiments/frame_selectors/configs/external_128.yaml
   hlvid_nvila:
     description: NVILA-HD-Video default and fixed-delta baselines on HLVid.
     readme: experiments/hlvid_nvila/README.md

@@ -31,6 +31,9 @@ as documented defaults or config values, not hard-coded into AutoGaze internals.
   facebook--vit-mae-large/
   facebook--dinov2-with-registers-base/
   google--siglip2-base-patch16-224/
+  openai--clip-vit-large-patch14/
+  microsoft--git-base-coco/
+  iarfmoose--bert-base-cased-qa-evaluator/
   nvidia--AutoGaze/
   nvidia--NVILA-8B-HD-Video/
 ```

@@ -1,0 +1,36 @@
+id: external_frame_selectors_128
+family: frame_selectors
+status: planned
+question: Generate fixed-budget 128-frame HLVid indices for external baseline selectors.
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+outputs:
+  root: outputs/frame_indices
+schema:
+  question_id: str
+  video_path: str
+  method: str
+  num_frames: 128
+  selected_source_indices: list[int]
+runs:
+  - id: aks_128
+    status: planned
+    method: aks
+    output: outputs/frame_indices/aks_128.jsonl
+    adapter: scripts/frame_selectors/generate_aks_indices.py
+  - id: bolt_128
+    status: planned
+    method: bolt
+    output: outputs/frame_indices/bolt_128.jsonl
+    adapter: scripts/frame_selectors/generate_bolt_indices.py
+  - id: sealing_mif_128
+    status: planned
+    method: sealing_mif
+    output: outputs/frame_indices/sealing_mif_128.jsonl
+    adapter: scripts/frame_selectors/generate_sealing_indices.py
+  - id: sealing_mdf_128
+    status: planned
+    method: sealing_mdf
+    output: outputs/frame_indices/sealing_mdf_128.jsonl
+    adapter: scripts/frame_selectors/generate_sealing_indices.py

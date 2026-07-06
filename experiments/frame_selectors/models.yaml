@@ -1,0 +1,33 @@
+id: frame_selector_model_registry
+family: frame_selectors
+status: active
+model_root: /storage/slurm/latn/data/AutoGaze/hf_models
+hf_home: /storage/slurm/latn/data/huggingface_cache
+models:
+  clip_vit_l14:
+    hf_id: openai/clip-vit-large-patch14
+    local_path: /storage/slurm/latn/data/AutoGaze/hf_models/openai--clip-vit-large-patch14
+    role: CLIP image/text encoder for AKS CLIP scoring and BOLT CLIP features.
+    used_by:
+      - scripts/frame_selectors/generate_aks_indices.py
+      - scripts/frame_selectors/extract_bolt_features.py
+      - scripts/frame_selectors/generate_bolt_indices.py
+  siglip2_base_patch16_224:
+    hf_id: google/siglip2-base-patch16-224
+    local_path: /storage/slurm/latn/data/AutoGaze/hf_models/google--siglip2-base-patch16-224
+    role: SigLIP image/text encoder for optional BOLT SigLIP features.
+    used_by:
+      - scripts/frame_selectors/extract_bolt_features.py
+      - scripts/frame_selectors/generate_bolt_indices.py
+  git_base_coco:
+    hf_id: microsoft/git-base-coco
+    local_path: /storage/slurm/latn/data/AutoGaze/hf_models/microsoft--git-base-coco
+    role: GIT caption model for Sealing MIF and trained GIT vision encoder for Sealing MDF.
+    used_by:
+      - scripts/frame_selectors/generate_sealing_indices.py
+  qa_evaluator:
+    hf_id: iarfmoose/bert-base-cased-qa-evaluator
+    local_path: /storage/slurm/latn/data/AutoGaze/hf_models/iarfmoose--bert-base-cased-qa-evaluator
+    role: Question-caption similarity scorer for Sealing MIF.
+    used_by:
+      - scripts/frame_selectors/generate_sealing_indices.py
