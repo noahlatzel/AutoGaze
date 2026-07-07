@@ -1,6 +1,11 @@
 id: frame_selectors_bolt_128
 family: frame_selectors
-status: planned
+status: submitted
+slurm:
+  submitted_at: "2026-07-07"
+  job_id: 1616957
+  state_at_submission: PD
+  script: outputs/frame_indices/bolt_128/frame_selectors_bolt_128/submit.sbatch
 question: Generate BOLT inverse-transform fixed-budget 128-frame HLVid indices from pre-extracted CLIP features.
 runner: scripts/frame_selectors/generate_bolt_indices.py
 environment: autogaze
