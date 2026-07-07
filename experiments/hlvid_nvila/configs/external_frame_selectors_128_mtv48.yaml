@@ -1,0 +1,77 @@
+id: hlvid_nvila_external_frame_selectors_128_mtv48
+family: hlvid_nvila
+status: submitted
+slurm:
+  submitted_at: "2026-07-07"
+  state_at_submission: PD
+  jobs:
+    hlvid_external_aks_128_mtv48: 1617049
+    hlvid_external_bolt_128_mtv48: 1617050
+    hlvid_external_sealing_mdf_128_mtv48: 1617051
+    hlvid_external_sealing_mif_128_mtv48: 1617052
+runner: scripts/runners/evaluate_hlvid_nvila.py
+environment: vila-autogaze-eval
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+models:
+  nvila: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video
+  autogaze: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+question: Evaluate external 128-frame selected-index sampling baselines on HLVid/NVILA with max_tiles_video=48.
+outputs:
+  root: outputs/hlvid/external_frame_selectors_128_mtv48
+  summary_glob: "*/summary.json"
+command:
+  dataset_root: /storage/slurm/latn/data/AutoGaze/HLVid
+  model_path: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video
+  autogaze_model_id: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+  frame_source: selected_indices
+  tile_len: 16
+  max_tiles_video: 48
+  num_video_frames: 128
+  num_video_frames_thumbnail: 64
+  max_new_tokens: 16
+  max_batch_size_autogaze: 16
+  max_batch_size_siglip: 32
+  torch_dtype: bfloat16
+  resume: true
+metrics:
+  primary:
+    - accuracy
+    - mean_visited_frames
+    - mean_visited_tiles
+    - by_category
+  secondary:
+    - prediction_counts
+    - visual_tokens
+    - end_to_end_seconds
+    - resource_usage/gpu.csv
+    - resource_usage/ram_processes.log
+notes:
+  - Resource usage is logged under each run's output_dir/resource_usage.
+  - Submitted on H100 NVL nodes with 128 GB RAM to measure mtv48 resource requirements.
+runs:
+  - id: hlvid_external_aks_128_mtv48
+    status: submitted
+    slurm_job_id: 1617049
+    output_dir: outputs/hlvid/external_frame_selectors_128_mtv48/aks
+    command:
+      selected_indices: outputs/frame_indices/aks_128.jsonl
+  - id: hlvid_external_bolt_128_mtv48
+    status: submitted
+    slurm_job_id: 1617050
+    output_dir: outputs/hlvid/external_frame_selectors_128_mtv48/bolt
+    command:
+      selected_indices: outputs/frame_indices/bolt_128.jsonl
+  - id: hlvid_external_sealing_mdf_128_mtv48
+    status: submitted
+    slurm_job_id: 1617051
+    output_dir: outputs/hlvid/external_frame_selectors_128_mtv48/sealing_mdf
+    command:
+      selected_indices: outputs/frame_indices/sealing_mdf_128.jsonl
+  - id: hlvid_external_sealing_mif_128_mtv48
+    status: submitted
+    slurm_job_id: 1617052
+    output_dir: outputs/hlvid/external_frame_selectors_128_mtv48/sealing_mif
+    command:
+      selected_indices: outputs/frame_indices/sealing_mif_128.jsonl
