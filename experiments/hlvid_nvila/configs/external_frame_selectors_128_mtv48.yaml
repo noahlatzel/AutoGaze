@@ -5,10 +5,12 @@ slurm:
   submitted_at: "2026-07-07"
   state_at_submission: PD
   jobs:
-    hlvid_external_aks_128_mtv48: 1617049
+    hlvid_external_aks_128_mtv48: 1617698
     hlvid_external_bolt_128_mtv48: 1617050
     hlvid_external_sealing_mdf_128_mtv48: 1617051
     hlvid_external_sealing_mif_128_mtv48: 1617052
+  previous_jobs:
+    hlvid_external_aks_128_mtv48_timeout: 1617049
 runner: scripts/runners/evaluate_hlvid_nvila.py
 environment: vila-autogaze-eval
 dataset:
@@ -52,8 +54,9 @@ notes:
   - Submitted on H100 NVL nodes with 128 GB RAM to measure mtv48 resource requirements.
 runs:
   - id: hlvid_external_aks_128_mtv48
-    status: submitted
-    slurm_job_id: 1617049
+    status: resubmitted_after_timeout
+    slurm_job_id: 1617698
+    previous_slurm_job_id: 1617049
     output_dir: outputs/hlvid/external_frame_selectors_128_mtv48/aks
     command:
       selected_indices: outputs/frame_indices/aks_128.jsonl
