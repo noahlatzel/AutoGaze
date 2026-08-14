@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:rtx_6000:1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=64G
+#SBATCH --mem=32G
 #SBATCH --time=01:00:00
 #SBATCH --output=/storage/user/latn/slurm/logs/gaze-center-check-%j.out
 
