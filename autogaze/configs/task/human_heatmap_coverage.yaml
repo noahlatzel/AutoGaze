@@ -1,0 +1,6 @@
+_target_: autogaze.tasks.human_heatmap_coverage.HumanHeatmapCoverage
+clip_len: 16
+actions_per_frame: 265
+fine_action_offset: 69
+exact_budget: 16
+report_budgets: [1, 2, 4, 8, 16]

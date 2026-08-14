@@ -10,6 +10,9 @@
 # limitations under the License.
 
 import os
+import json
+import time
+from contextlib import nullcontext
 import torch
 import wandb
 import shutil
@@ -27,13 +30,14 @@ from autogaze.train import seed_everything
 class Trainer:
     def __init__(self, gaze_model, task, algorithm, train_loader, val_loader, optimizer, n_epochs, temp_schedule_args, 
                  train_gaze=True, train_task=True, detach_task=False, val_nsteps=100, save_nsteps=300, save_dir=None, grad_acc_steps=1, resume=False, gaze_weights=None, task_weights=None, 
-                 val_only=False, gaze_processor=None, **config):
+                 val_only=False, gaze_processor=None, reference_gaze_model=None, **config):
 
         # Core modules
         self.gaze_model = gaze_model
         self.gaze_processor = gaze_processor
         self.task = task
         self.algorithm = algorithm
+        self.reference_gaze_model = reference_gaze_model
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.optimizer = optimizer
@@ -108,6 +112,27 @@ class Trainer:
             self.load_checkpoint(resume=True)
         elif resume:
             self.load_checkpoint(resume_path=resume, resume=True)
+
+        self.max_train_steps = self.config.get("max_train_steps")
+        self.validate_at_start = self.config.get("validate_at_start", True)
+        self.save_at_start = self.config.get("save_at_start", True)
+        self.skip_final_validation = self.config.get("skip_final_validation", False)
+        self.save_at_end = self.config.get("save_at_end", True)
+        self.started_at = time.time()
+        if torch.distributed.get_rank() == 0 and not resume:
+            for filename in ("training_metrics.jsonl", "validation_metrics.jsonl"):
+                with open(os.path.join(self.save_dir, filename), "w", encoding="utf-8"):
+                    pass
+
+    def _append_metrics(self, filename, values):
+        if torch.distributed.get_rank() != 0:
+            return
+        record = {
+            key: float(value.detach().cpu()) if isinstance(value, torch.Tensor) else value
+            for key, value in values.items()
+        }
+        with open(os.path.join(self.save_dir, filename), "a", encoding="utf-8") as handle:
+            handle.write(json.dumps(record, sort_keys=True) + "\n")
 
     def save_checkpoint(self, epoch, iteration):
         task_ckpt = self.task.state_dict()
@@ -191,7 +216,21 @@ class Trainer:
         # temperature annealing
         self.temperature = get_scheduled_temperature(self.train_step, self.total_steps, self.temp_schedule_args)
         # Predict the gaze
-        gaze_outputs = self.gaze_model(inputs, temperature=self.temperature, **getattr(self.task.module, 'gaze_model_kwargs', {}))
+        task_module = unwrap_model(self.task)
+        gaze_model_kwargs = getattr(task_module, 'gaze_model_kwargs', {})
+        gaze_outputs = self.gaze_model(inputs, temperature=self.temperature, **gaze_model_kwargs)
+        if self.reference_gaze_model is not None:
+            gazing_info = {
+                key: gaze_outputs[key]
+                for key in ("gazing_pos", "num_gazing_each_frame", "if_padded_gazing")
+            }
+            with torch.no_grad():
+                reference_outputs = self.reference_gaze_model(
+                    inputs, gazing_info=gazing_info, **gaze_model_kwargs
+                )
+            gaze_outputs["reference_action_log_probs_all"] = reference_outputs[
+                "action_log_probs_all"
+            ]
 
         # Run through the task
         if self.detach_task:
@@ -210,7 +249,11 @@ class Trainer:
         gt_gazing_info = inputs['gt_gazing_info']
 
         # Get the probability of gazing
-        gaze_outputs = self.gaze_model(inputs, gazing_info=gt_gazing_info, **getattr(self.task.module, 'gaze_model_kwargs', {}))
+        gaze_outputs = self.gaze_model(
+            inputs,
+            gazing_info=gt_gazing_info,
+            **getattr(unwrap_model(self.task), 'gaze_model_kwargs', {}),
+        )
 
         # Get the task losses from the GT gazing info
         task_outputs = {}
@@ -233,12 +276,16 @@ class Trainer:
         return metrics
 
     def train_epoch(self, ep, start_iter):
+        if hasattr(self.train_loader.sampler, "set_epoch"):
+            self.train_loader.sampler.set_epoch(ep)
         pbar = tqdm(total=(len(self.train_loader) // self.grad_acc_steps)) if torch.distributed.get_rank() == 0 else None
         self.gaze_model.train()
         self.task.train()
         has_unapplied_grads = False
         accum_metrics = defaultdict(float)
         for i, inputs in enumerate(self.train_loader):
+            if self.max_train_steps is not None and self.train_step >= self.max_train_steps:
+                break
             # Skip the first start_iter iterations
             if i < start_iter:
                 if (i % self.grad_acc_steps) == (self.grad_acc_steps - 1) and pbar is not None:
@@ -246,12 +293,20 @@ class Trainer:
                 continue
 
             # Check for validation
-            if self.train_step % self.val_nsteps == 0 and not has_unapplied_grads:
+            if (
+                self.train_step % self.val_nsteps == 0
+                and not has_unapplied_grads
+                and (self.train_step > 0 or self.validate_at_start)
+            ):
                 logger.info(f'Validation at step {self.train_step}')
                 self.validate()
             
             # Check for saving checkpoint
-            if self.train_step % self.save_nsteps == 0 and not has_unapplied_grads:
+            if (
+                self.train_step % self.save_nsteps == 0
+                and not has_unapplied_grads
+                and (self.train_step > 0 or self.save_at_start)
+            ):
                 if torch.distributed.get_rank() == 0:
                     logger.info(f'Saving checkpoint at step {self.train_step}')
                     self.save_checkpoint(ep, i)
@@ -283,7 +338,8 @@ class Trainer:
                 # Gradient clipping
                 if self.truncate_grads:
                     torch.nn.utils.clip_grad_norm_(self.gaze_model.parameters(), self.grad_norm)
-                    torch.nn.utils.clip_grad_norm_(self.task.parameters(), self.grad_norm)
+                    if self.train_task:
+                        torch.nn.utils.clip_grad_norm_(self.task.parameters(), self.grad_norm)
 
                 # Step the optimizer
                 self.optimizer.step()
@@ -307,6 +363,18 @@ class Trainer:
                     to_log[f'train/{k}'] = accum_metrics[k].item()
 
                 wandb.log(to_log)
+                self._append_metrics(
+                    "training_metrics.jsonl",
+                    {
+                        "train_step": self.train_step,
+                        "epoch": ep,
+                        "iteration": i,
+                        "lr": self.last_lr,
+                        "temperature": self.temperature,
+                        "elapsed_seconds": time.time() - self.started_at,
+                        **{key: value for key, value in accum_metrics.items()},
+                    },
+                )
 
                 accum_metrics = defaultdict(float)
 
@@ -316,8 +384,10 @@ class Trainer:
                 self.train_step += 1
 
             else:
-                with self.gaze_model.no_sync():
-                    with self.task.no_sync():
+                gaze_sync = self.gaze_model.no_sync() if hasattr(self.gaze_model, "no_sync") else nullcontext()
+                task_sync = self.task.no_sync() if hasattr(self.task, "no_sync") else nullcontext()
+                with gaze_sync:
+                    with task_sync:
                         # Forward gaze, task, RL algorithm, and get metrics                
                         if self.train_w_ntp:
                             gaze_outputs, task_outputs, alg_outputs = self._one_step_ntp(inputs)
@@ -359,11 +429,14 @@ class Trainer:
         pbar = tqdm(total=len(self.val_loader)) if torch.distributed.get_rank() == 0 else None
         total = 0
         accum_metrics = defaultdict(float)
+        per_sample_metrics = defaultdict(lambda: defaultdict(lambda: [0.0, 0]))
         for inputs in self.val_loader:
             inputs = move_inputs_to_cuda(inputs)
 
             # Forward gaze, task, and get metrics
-            gaze_outputs = self.gaze_model(inputs, **getattr(self.task.module, 'gaze_model_kwargs', {}))
+            gaze_outputs = self.gaze_model(
+                inputs, **getattr(unwrap_model(self.task), 'gaze_model_kwargs', {})
+            )
             task_outputs = self.task(inputs, gaze_outputs)
             metrics = self.extract_metrics(gaze_outputs, task_outputs)
 
@@ -372,9 +445,14 @@ class Trainer:
             for k in metrics:
                 accum_metrics[k] += metrics[k] * B
             total += B
+            for metric_name, values in task_outputs.get("per_sample_metrics", {}).items():
+                for source, video_id, value in zip(inputs["source"], inputs["video_id"], values):
+                    entry = per_sample_metrics[metric_name][(source, video_id)]
+                    entry[0] += float(value)
+                    entry[1] += 1
 
             # Visualizations
-            self.task.module.visualize(inputs, gaze_outputs, task_outputs)
+            unwrap_model(self.task).visualize(inputs, gaze_outputs, task_outputs)
 
             if pbar is not None:
                 pbar.update(1)
@@ -392,9 +470,42 @@ class Trainer:
             torch.distributed.all_reduce(accum_metrics[k], torch.distributed.ReduceOp.SUM, async_op=False)
             accum_metrics[k] = accum_metrics[k].item() / total
 
+        local_entries = [
+            (metric, source, video_id, value_sum, count)
+            for metric, videos in per_sample_metrics.items()
+            for (source, video_id), (value_sum, count) in videos.items()
+        ]
+        gathered_entries = [None for _ in range(torch.distributed.get_world_size())]
+        torch.distributed.all_gather_object(gathered_entries, local_entries)
+        merged = defaultdict(lambda: defaultdict(lambda: [0.0, 0]))
+        for rank_entries in gathered_entries:
+            for metric, source, video_id, value_sum, count in rank_entries:
+                entry = merged[metric][(source, video_id)]
+                entry[0] += value_sum
+                entry[1] += count
+        for metric, videos in merged.items():
+            by_source = defaultdict(list)
+            for (source, _video_id), (value_sum, count) in videos.items():
+                by_source[source].append(value_sum / count)
+            source_means = []
+            for source, values in sorted(by_source.items()):
+                source_mean = sum(values) / len(values)
+                accum_metrics[f"{metric}_source_{source}"] = source_mean
+                source_means.append(source_mean)
+            accum_metrics[f"{metric}_macro_source"] = sum(source_means) / len(source_means)
+
         # Command line logging
         for k in accum_metrics:
             logger.info(f'Validation {k}: {accum_metrics[k]:.4f}')
+        self._append_metrics(
+            "validation_metrics.jsonl",
+            {
+                "train_step": self.train_step,
+                "val_step": self.val_step,
+                "elapsed_seconds": time.time() - self.started_at,
+                **dict(accum_metrics),
+            },
+        )
 
         # WandB logging
         to_log = {
@@ -409,6 +520,7 @@ class Trainer:
         self.task.train()
 
         seed_everything(self.train_step + torch.distributed.get_rank())
+        return dict(accum_metrics)
     
     def trainval(self):
         if self.val_only:
@@ -419,5 +531,10 @@ class Trainer:
             logger.info(f"Epoch {ep}")
             self.train_epoch(ep, start_iter=self.start_iteration if ep == self.start_epoch else 0)
 
-        logger.info("Final validation")
-        self.validate()
+        if self.save_at_end and torch.distributed.get_rank() == 0:
+            logger.info("Saving final checkpoint")
+            self.save_checkpoint(self.n_epochs, 0)
+        torch.distributed.barrier()
+        if not self.skip_final_validation:
+            logger.info("Final validation")
+            self.validate()

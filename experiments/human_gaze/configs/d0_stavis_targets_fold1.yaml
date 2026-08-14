@@ -1,0 +1,7 @@
+dataset_root: /storage/user/zverev/datasets/av-gaze-stavis
+input_manifest: outputs/human_gaze/d0_stavis_fold1/clips.jsonl
+input_summary: outputs/human_gaze/d0_stavis_fold1/summary.json
+image_size: 224
+grid_size: 14
+num_workers: 8
+output_dir: outputs/human_gaze/d0_stavis_fold1_validated

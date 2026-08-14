@@ -10,6 +10,7 @@
 # limitations under the License.
 
 import os
+from copy import deepcopy
 from datetime import datetime
 import itertools
 import hydra
@@ -31,11 +32,18 @@ from autogaze.utils import (
     dump_cfg, suppress_print, suppress_wandb, suppress_logging
 )
 from autogaze.datasets.collate import collate_fn
+from autogaze.datasets.av_gaze_stavis import AVGazeStavisDataset, BalancedSourceSampler
 from autogaze.models.autogaze import AutoGaze, AutoGazeConfig
 from autogaze.models.autogaze.processing_autogaze import AutoGazeImageProcessor
 
 
-def _determine_batch_size(global_batch_size, per_gpu_max_size, world_size, global_rank):
+def _determine_batch_size(
+    global_batch_size,
+    per_gpu_max_size,
+    world_size,
+    global_rank,
+    per_gpu_max_val_size=None,
+):
 
     if global_rank == 0:
         logging.info(f'Requested global batch size: {global_batch_size} with per GPU max size: {per_gpu_max_size} and world size: {world_size}')
@@ -61,7 +69,7 @@ def _determine_batch_size(global_batch_size, per_gpu_max_size, world_size, globa
         logger.info(f'Global (train) batch size: {global_batch_size} ({local_batch_size} x {grad_acc_steps} x {world_size})')
 
     # Determine the val batch size
-    val_batch_size = min(local_batch_size, per_gpu_max_size)
+    val_batch_size = per_gpu_max_val_size or per_gpu_max_size
     if global_rank == 0:
         logger.info(f'Global (val) batch size: {val_batch_size * world_size} ({val_batch_size} x {world_size})')
     return local_batch_size, val_batch_size, grad_acc_steps
@@ -142,16 +150,46 @@ def main(cfg: DictConfig):
     cfg.model.max_num_frames = cfg.dataset.clip_len
     model_cfg = AutoGazeConfig(**OmegaConf.to_container(cfg.model))
     model = AutoGaze(model_cfg)
+    gaze_weights = cfg.trainer.gaze_weights
+    if gaze_weights is not None:
+        pretrained = AutoGaze.from_pretrained(gaze_weights, local_files_only=True)
+        missing_keys, unexpected_keys = model.load_state_dict(pretrained.state_dict(), strict=False)
+        logger.info(f"Preloaded gaze model from {gaze_weights}")
+        logger.info(f"Missing keys: {missing_keys}")
+        logger.info(f"Unexpected keys: {unexpected_keys}")
+    if cfg.trainer.get("freeze_gaze_vision", False):
+        for parameter in model.gazing_model.vision_model.parameters():
+            parameter.requires_grad = False
+    if cfg.trainer.get("freeze_gaze_connector", False):
+        for parameter in model.gazing_model.connector.parameters():
+            parameter.requires_grad = False
+    reference_gaze_model = None
+    if float(cfg.algorithm.get("kl_coefficient", 0.0)) > 0:
+        reference_gaze_model = deepcopy(model).cuda().eval()
+        for parameter in reference_gaze_model.parameters():
+            parameter.requires_grad = False
     cur_device = torch.cuda.current_device()
-    ddp_model = DDP(model.cuda(), find_unused_parameters=True, device_ids=[cur_device], output_device=cur_device)
+    decoder_only = cfg.trainer.get("freeze_gaze_vision", False) and cfg.trainer.get(
+        "freeze_gaze_connector", False
+    )
+    ddp_model = DDP(
+        model.cuda(),
+        find_unused_parameters=not decoder_only,
+        device_ids=[cur_device],
+        output_device=cur_device,
+    )
 
     # Create task
     task = instantiate(cfg.task)
     cur_device = torch.cuda.current_device()
-    ddp_task = DDP(task.cuda(), find_unused_parameters=True, device_ids=[cur_device], output_device=cur_device)
+    task = task.cuda()
+    if any(parameter.requires_grad for parameter in task.parameters()):
+        ddp_task = DDP(task, find_unused_parameters=True, device_ids=[cur_device], output_device=cur_device)
+    else:
+        ddp_task = task
 
     # Create transforms: AutoGaze uses its own preprocessing config but overrides size with task's scales
-    task_scales = sorted([int(s) for s in str(cfg.task.scales).split('+')])
+    task_scales = sorted([int(s) for s in str(task.scales).split('+')])
     preprocessing_cfg = OmegaConf.to_container(cfg.model.preprocessing, resolve=True)
     preprocessing_cfg['size'] = {"shortest_edge": task_scales[-1]}
     gaze_transform = AutoGazeImageProcessor(**preprocessing_cfg)
@@ -159,19 +197,38 @@ def main(cfg: DictConfig):
     # Create datasets with separate transforms for gaze model and task
     train_dataset = instantiate(cfg.dataset, split='train', gaze_transform=gaze_transform, task_transform=task.transform)
     val_dataset = instantiate(cfg.dataset, split='val', gaze_transform=gaze_transform, task_transform=task.transform)
-    train_sampler = DistributedSampler(train_dataset, shuffle=True)
+    if isinstance(train_dataset, AVGazeStavisDataset):
+        train_sampler = BalancedSourceSampler(
+            train_dataset,
+            seed=cfg.trainer.seed,
+            num_replicas=world_size,
+            rank=global_rank,
+        )
+    else:
+        train_sampler = DistributedSampler(train_dataset, shuffle=True)
     val_sampler = DistributedSampler(val_dataset, shuffle=False)
 
     # Determine the batch size
-    local_train_batch_size, local_val_batch_size, grad_acc_steps = _determine_batch_size(cfg.trainer.batch_size, cfg.trainer.per_gpu_max_batch_size, world_size, global_rank)
+    local_train_batch_size, local_val_batch_size, grad_acc_steps = _determine_batch_size(
+        cfg.trainer.batch_size,
+        cfg.trainer.per_gpu_max_batch_size,
+        world_size,
+        global_rank,
+        cfg.trainer.get("per_gpu_max_val_batch_size"),
+    )
     train_loader = DataLoader(train_dataset, local_train_batch_size,  num_workers=4, drop_last=True, shuffle=False, sampler=train_sampler, worker_init_fn=seed_worker, collate_fn=collate_fn)
     val_loader = DataLoader(val_dataset, local_val_batch_size, num_workers=4, drop_last=False, shuffle=False, sampler=val_sampler, worker_init_fn=seed_worker, collate_fn=collate_fn)
 
     # Create optimizer
+    trainable_parameters = [
+        parameter
+        for parameter in itertools.chain(ddp_model.parameters(), ddp_task.parameters())
+        if parameter.requires_grad
+    ]
     if cfg.trainer.optimizer == 'adam':
-        optimizer = torch.optim.Adam(itertools.chain(ddp_model.parameters(), ddp_task.parameters()), cfg.trainer.lr)
+        optimizer = torch.optim.Adam(trainable_parameters, cfg.trainer.lr)
     elif cfg.trainer.optimizer == 'sgd':
-        optimizer = torch.optim.SGD(itertools.chain(ddp_model.parameters(), ddp_task.parameters()), cfg.trainer.lr)
+        optimizer = torch.optim.SGD(trainable_parameters, cfg.trainer.lr)
     else:
         raise ValueError(f"Invalid optimizer: {cfg.trainer.optimizer}")
 
@@ -187,6 +244,8 @@ def main(cfg: DictConfig):
         save_dir=exp_path,
         grad_acc_steps=grad_acc_steps,
         gaze_processor=gaze_transform,
+        reference_gaze_model=reference_gaze_model,
+        gaze_weights=None,
     )
 
     # Start training

@@ -32,6 +32,7 @@ from .modeling_llama_multi_token_pred import LlamaForCausalLM_MultiTokenPred
 class AutoGazeOutput(ModelOutput):
     gaze_logits: Optional[torch.FloatTensor] = None
     gaze_probs: Optional[torch.FloatTensor] = None
+    gaze_log_probs_all: Optional[torch.FloatTensor] = None
     loss: Optional[torch.FloatTensor] = None
     logits: torch.FloatTensor = None
     past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None
@@ -63,6 +64,46 @@ class NoEosTokenLogitsProcessor(LogitsProcessor):
         # scores: (batch_size, vocab_size) or (batch_size, num_multi_token_pred, vocab_size)
         scores[..., -1] = -float("inf")
         return scores
+
+
+class AllowedTokensLogitsProcessor(LogitsProcessor):
+    """Mask every vocabulary entry outside a fixed set of action IDs."""
+
+    def __init__(self, allowed_token_ids):
+        super().__init__()
+        self.allowed_token_ids = tuple(int(token_id) for token_id in allowed_token_ids)
+        if not self.allowed_token_ids:
+            raise ValueError("allowed_token_ids must not be empty")
+
+    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
+        if min(self.allowed_token_ids) < 0 or max(self.allowed_token_ids) >= scores.shape[-1]:
+            raise ValueError("allowed token ID is outside the model vocabulary")
+        masked = torch.full_like(scores, -float("inf"))
+        masked[..., list(self.allowed_token_ids)] = scores[..., list(self.allowed_token_ids)]
+        return masked
+
+
+def mask_previously_selected(
+    probabilities: torch.Tensor,
+    gaze_pos_ids_split,
+) -> torch.Tensor:
+    """Renormalize each step after removing earlier actions in that frame."""
+    available = torch.ones_like(probabilities, dtype=torch.bool)
+    offset = 0
+    for frame_ids in gaze_pos_ids_split:
+        for step in range(frame_ids.shape[1]):
+            if step:
+                available[:, offset + step].scatter_(
+                    1,
+                    frame_ids[:, :step],
+                    False,
+                )
+        offset += frame_ids.shape[1]
+    masked = probabilities * available
+    normalizer = masked.sum(dim=-1, keepdim=True)
+    if (normalizer <= 0).any():
+        raise ValueError("No valid actions remain after applying the no-repeat mask")
+    return masked / normalizer
 
 
 class AutoGazeModel(nn.Module):
@@ -144,6 +185,7 @@ class AutoGazeModel(nn.Module):
         past_inputs_embeds=None,
         past_attention_mask=None,
         past_conv_values=None,
+        allowed_token_ids=None,
         **generation_kwargs,
     ):
         """
@@ -194,12 +236,15 @@ class AutoGazeModel(nn.Module):
             is_gradient_checkpointing = self.gaze_decoder.is_gradient_checkpointing
             if is_gradient_checkpointing:
                 self.gaze_decoder.gradient_checkpointing_disable()
+            logits_processor = LogitsProcessorList(list(self.logits_processor))
+            if allowed_token_ids is not None:
+                logits_processor.append(AllowedTokensLogitsProcessor(allowed_token_ids))
             gaze_outputs = self.gaze_decoder.generate(
                 inputs_embeds=torch.cat(inputs_embeds, dim=1),  # We need to pass the whole sequence of inputs_embeds (both current and past) to the model even when we use use_cache=True!!!
                 attention_mask=torch.cat(attention_mask, dim=1),
                 position_ids=torch.cat(attention_mask, dim=1).cumsum(dim=-1) - 1,
                 max_new_tokens=max_gaze_tokens,
-                logits_processor=self.logits_processor,
+                logits_processor=logits_processor,
                 pad_token_id=self.gaze_decoder_config.eos_token_id,
                 eos_token_id=self.gaze_decoder_config.eos_token_id,
                 past_key_values=past_key_values,
@@ -247,7 +292,7 @@ class AutoGazeModel(nn.Module):
         }
         return to_return
 
-    def forward(self, video, gazing_info, **kwargs):
+    def forward(self, video, gazing_info, allowed_token_ids=None, **kwargs):
         # Unpack gazing_info
         gaze_pos_ids = gazing_info["gazing_pos"]
         num_gazing_each_frame = gazing_info["num_gazing_each_frame"]
@@ -286,6 +331,10 @@ class AutoGazeModel(nn.Module):
         logits_multi_token_pred = outputs.logits
         task_loss_prediction_multi_token_pred = outputs.task_loss_prediction  # B * N * num_multi_token_pred
         logits_multi_token_pred = rearrange(logits_multi_token_pred, 'b n (k c) -> b n k c', k=self.num_multi_token_pred)
+        if allowed_token_ids is not None:
+            masked_logits = torch.full_like(logits_multi_token_pred, -float("inf"))
+            masked_logits[..., list(allowed_token_ids)] = logits_multi_token_pred[..., list(allowed_token_ids)]
+            logits_multi_token_pred = masked_logits
         gaze_probs_all_multi_token_pred = F.softmax(logits_multi_token_pred, dim=-1)
 
         shifted_probs = []
@@ -302,12 +351,21 @@ class AutoGazeModel(nn.Module):
         gaze_input_token_pos = torch.nonzero(gaze_token_mask, as_tuple=True)[0]
         gaze_probs_all = gaze_probs_all[:, gaze_input_token_pos, :]
         task_loss_prediction = task_loss_prediction[:, gaze_input_token_pos]
+        if allowed_token_ids is not None:
+            gaze_probs_all = mask_previously_selected(
+                gaze_probs_all,
+                gaze_pos_ids_split,
+            )
+            gaze_log_probs_all = torch.log(gaze_probs_all[..., list(allowed_token_ids)] + 1e-8)
+        else:
+            gaze_log_probs_all = torch.log(gaze_probs_all + 1e-8)
         B, N = gaze_probs_all.shape[:2]
         gaze_probs = gaze_probs_all.reshape(B * N, -1)[torch.arange(B * N), torch.cat(gaze_pos_ids_split, dim=1).flatten()].reshape(B, N)  # [B, T]
 
 
         outputs = AutoGazeOutput(
             gaze_probs=gaze_probs,
+            gaze_log_probs_all=gaze_log_probs_all,
             loss=outputs.loss,
             logits=outputs.logits,
             past_key_values=outputs.past_key_values,

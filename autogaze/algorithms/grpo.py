@@ -14,10 +14,17 @@ import torch.nn.functional as F
 
 
 class GRPO:
-    def __init__(self, group_size, discount_factor, optimize_task_loss_prediction=False):
+    def __init__(
+        self,
+        group_size,
+        discount_factor,
+        optimize_task_loss_prediction=False,
+        kl_coefficient=0.0,
+    ):
         self.group_size = group_size
         self.discount_factor = discount_factor
         self.optimize_task_loss_prediction = optimize_task_loss_prediction
+        self.kl_coefficient = kl_coefficient
 
     def preprocess_inputs(self, inputs):
         """
@@ -176,17 +183,30 @@ class GRPO:
         """
         grpo_loss = self.grpo_loss(inputs, gaze_outputs, task_outputs)
         task_loss_prediction_loss = self.task_loss_prediction_loss(inputs, gaze_outputs, task_outputs)
+        if self.kl_coefficient > 0:
+            current = gaze_outputs["action_log_probs_all"]
+            reference = gaze_outputs["reference_action_log_probs_all"]
+            token_kl = (current.exp() * (current - reference)).sum(dim=-1)
+            loss_mask = self.get_loss_mask(inputs, gaze_outputs, task_outputs)
+            average_length = loss_mask.sum() / loss_mask.shape[0] + 1e-6
+            policy_kl = (token_kl * loss_mask).sum(dim=-1) / average_length
+            kl_loss = self.kl_coefficient * policy_kl
+        else:
+            policy_kl = torch.zeros_like(grpo_loss)
+            kl_loss = torch.zeros_like(grpo_loss)
 
         losses = {
             "grpo_loss": grpo_loss,
             "task_loss_prediction_loss": task_loss_prediction_loss,
+            "kl_loss": kl_loss,
         }
-        return losses
+        return losses, policy_kl
 
     def __call__(self, inputs, gaze_outputs, task_outputs):
-        losses = self.loss(inputs, gaze_outputs, task_outputs)
+        losses, policy_kl = self.loss(inputs, gaze_outputs, task_outputs)
         loss = sum(losses.values())
         metrics = {k: v.mean() for k, v in losses.items()}
+        metrics["policy_kl"] = policy_kl.mean()
 
         to_return = {
             'loss': loss,

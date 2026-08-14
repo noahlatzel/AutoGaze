@@ -1,0 +1,9 @@
+_target_: autogaze.datasets.av_gaze_stavis.AVGazeStavisDataset
+root: /storage/user/zverev/datasets/av-gaze-stavis
+manifest_path: outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+cell_mass_path: outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+clip_len: 16
+image_size: 224
+grid_size: 14
+load_rgb: true
+load_heatmap: false
