@@ -9,7 +9,7 @@
 #SBATCH --array=0-5
 #SBATCH --output=/storage/user/latn/slurm/logs/gaze-grpo-%A_%a.out
 
-set -euo pipefail
+set -eo pipefail
 
 arms=(no_kl no_kl no_kl small_kl small_kl small_kl)
 seeds=(140826 140827 140828 140826 140827 140828)
