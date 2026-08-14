@@ -204,7 +204,9 @@ def main() -> None:
         handle.write("\n")
 
     frequency = selection_counts.reshape(grid_size, grid_size).to(torch.float64) / total_frames
-    figure, axis = plt.subplots(figsize=(6.5, 5.7), constrained_layout=True)
+    figure, (axis, bar_axis) = plt.subplots(
+        1, 2, figsize=(12.5, 5.7), constrained_layout=True
+    )
     image = axis.imshow(frequency.numpy(), cmap="magma", vmin=0, vmax=1)
     for cell in center.tolist():
         row, column = divmod(cell, grid_size)
@@ -213,6 +215,34 @@ def main() -> None:
     axis.set_ylabel("Fine-grid row")
     axis.set_title("Learned exact-16 selection frequency (Center-16 outlined)")
     figure.colorbar(image, ax=axis, label="Fraction of validation frames selecting cell")
+
+    sources = list(coverage["actual"][str(budget)]["per_source"])
+    x = np.arange(len(sources))
+    bar_methods = (
+        ("actual", "Learned", "#1677b8"),
+        ("center", "Center-16", "#666666"),
+        ("selection_frequency_top16", "Static learned Top-16", "#d95f02"),
+        ("shuffled", "Same-source shuffled video", "#7b3294"),
+    )
+    width = 0.19
+    for method_index, (method, label, color) in enumerate(bar_methods):
+        values = [
+            coverage[method][str(budget)]["per_source"][source]["mean_video_coverage"]
+            for source in sources
+        ]
+        bar_axis.bar(
+            x + (method_index - 1.5) * width,
+            values,
+            width=width,
+            label=label,
+            color=color,
+        )
+    bar_axis.set_xticks(x, sources, rotation=25, ha="right")
+    bar_axis.set_ylim(0, 0.55)
+    bar_axis.set_ylabel("Validation K=16 mean-video coverage")
+    bar_axis.set_title("Dynamic and static policy controls by source")
+    bar_axis.grid(axis="y", alpha=0.2)
+    bar_axis.legend(frameon=False, fontsize=9)
     args.output_plot.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(args.output_plot, dpi=180)
     plt.close(figure)
