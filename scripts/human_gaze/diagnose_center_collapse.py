@@ -13,7 +13,7 @@ import numpy as np
 import torch
 from matplotlib.patches import Rectangle
 from omegaconf import OmegaConf
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 
 from autogaze.datasets.av_gaze_stavis import AVGazeStavisDataset
 from autogaze.human_gaze.coverage import (
@@ -71,6 +71,17 @@ def main() -> None:
         shuffle=False,
         pin_memory=True,
     )
+    shuffle_offset = len(dataset) // 2
+    shuffled_indices = [
+        (index + shuffle_offset) % len(dataset) for index in range(len(dataset))
+    ]
+    shuffled_loader = DataLoader(
+        Subset(dataset, shuffled_indices),
+        batch_size=int(cfg["batch_size"]),
+        num_workers=int(cfg["num_workers"]),
+        shuffle=False,
+        pin_memory=True,
+    )
 
     grid_size = int(round(math.sqrt(int(cfg["actions_per_frame"]) - int(cfg["fine_action_offset"]))))
     num_cells = grid_size * grid_size
@@ -86,12 +97,14 @@ def main() -> None:
     processed = 0
 
     with torch.inference_mode():
-        for batch in loader:
+        for batch, shuffled_batch in zip(loader, shuffled_loader):
             if args.max_clips is not None and processed >= args.max_clips:
                 break
             video = batch["video"].cuda(non_blocking=True)
             actual = generate_fine(model, video, cfg, allowed)
-            shuffled = generate_fine(model, video.roll(1, dims=0), cfg, allowed)
+            shuffled = generate_fine(
+                model, shuffled_batch["video"].cuda(non_blocking=True), cfg, allowed
+            )
             for index in range(actual.shape[0]):
                 if args.max_clips is not None and processed >= args.max_clips:
                     break
@@ -130,6 +143,7 @@ def main() -> None:
         "checkpoint": checkpoint,
         "split": args.split,
         "processed_clips": processed,
+        "shuffle_offset_clips": shuffle_offset,
         "coverage": coverage,
         "diagnostics": {
             "actual_minus_shuffled_macro": macro["actual"] - macro["shuffled"],
