@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "dataset": {
+    "root": "/storage/user/zverev/datasets/av-gaze-stavis",
+    "manifest": "outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl",
+    "cell_mass": "outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy",
+    "split": "fold1_video_disjoint"
+  },
+  "initial_checkpoint": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze",
+  "experiment_code_commits": {
+    "pipeline": "6f0550c",
+    "exact_epoch_budget": "8eb4848",
+    "five_epoch_comparison": "c62d874",
+    "low_lr_continuation": "26c93f8",
+    "replicated_continuations": "46414d8",
+    "duration_probe": "7fbcd0c",
+    "protected_test_launcher": "5749ea1",
+    "final_center_diagnostic": "fc2be97"
+  },
+  "slurm_jobs": {
+    "matched_five_epoch_array": "1670172",
+    "continuation_seed_240826": "1670267",
+    "continuation_seeds_240827_240828": "1670310",
+    "duration_probe": "1670329",
+    "protected_test_array": "1670367",
+    "center_diagnostic": "1670388"
+  },
+  "heavy_artifacts": {
+    "training_runs": "outputs/human_gaze/grpo/",
+    "test_predictions": "outputs/human_gaze/test/",
+    "center_diagnostic": "outputs/human_gaze/diagnostics/t0_no_kl_cont_lr3e6_seed240826/center_collapse_val_within_source.json"
+  },
+  "figures": {
+    "validation_curve": "../wiki_gazing/assets/grpo_validation_macro_k16.png",
+    "center_diagnostic": "../wiki_gazing/assets/learned_policy_selection_frequency_val.png"
+  }
+}
