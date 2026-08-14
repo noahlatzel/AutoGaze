@@ -2,8 +2,8 @@
 #SBATCH --job-name=gaze-grpo
 #SBATCH --partition=NORMAL
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:nvidia_h100_nvl:1
-#SBATCH --cpus-per-task=8
+#SBATCH --gres=gpu:nvidia_rtx_6000_ada_generation:1
+#SBATCH --cpus-per-task=5
 #SBATCH --mem=64G
 #SBATCH --time=04:00:00
 #SBATCH --array=0-5
@@ -24,7 +24,7 @@ cd /home/stud/latn/master-thesis/AutoGaze
 
 export HF_HOME=/storage/slurm/latn/data/huggingface_cache
 export WANDB_MODE=disabled
-export OMP_NUM_THREADS=8
+export OMP_NUM_THREADS=5
 
 python -m autogaze.train \
   --config-name "$config" \
