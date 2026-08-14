@@ -33,8 +33,10 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--runs-root", type=Path, required=True)
     parser.add_argument("--pattern", default="*_5ep_seed*")
-    parser.add_argument("--continuation-run", type=Path)
-    parser.add_argument("--continuation-offset", type=int, default=0)
+    parser.add_argument("--continuation-run", type=Path, action="append")
+    parser.add_argument("--continuation-offset", type=int, action="append")
+    parser.add_argument("--probe-run", type=Path)
+    parser.add_argument("--probe-offset", type=int, default=0)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -71,18 +73,53 @@ def main() -> None:
         axis.plot(complete_steps, means, color=color, linewidth=2.5, label=f"{arm} mean")
         axis.fill_between(complete_steps, means - stds, means + stds, color=color, alpha=0.15)
 
-    if args.continuation_run is not None:
-        records = read_history(args.continuation_run / "validation_metrics.jsonl")
-        steps = [args.continuation_offset + record["train_step"] for record in records]
+    if args.continuation_run:
+        offsets = args.continuation_offset or [0]
+        if len(offsets) == 1:
+            offsets *= len(args.continuation_run)
+        if len(offsets) != len(args.continuation_run):
+            raise ValueError("Provide one continuation offset or one per continuation run")
+        by_step = defaultdict(list)
+        for run_dir, offset in zip(args.continuation_run, offsets):
+            records = read_history(run_dir / "validation_metrics.jsonl")
+            steps = [offset + record["train_step"] for record in records]
+            values = [record["coverage_k16_macro_source"] for record in records]
+            axis.plot(steps, values, color="#2a9d55", alpha=0.3, linewidth=1.2)
+            for step, value in zip(steps, values):
+                by_step[step].append(value)
+        complete_steps = sorted(
+            step
+            for step, values in by_step.items()
+            if len(values) == len(args.continuation_run)
+        )
+        means = np.array([np.mean(by_step[step]) for step in complete_steps])
+        stds = np.array([np.std(by_step[step]) for step in complete_steps])
+        axis.plot(
+            complete_steps,
+            means,
+            color="#2a9d55",
+            linewidth=2.5,
+            marker="o",
+            markersize=3,
+            label="No KL low-LR continuation mean",
+        )
+        axis.fill_between(
+            complete_steps, means - stds, means + stds, color="#2a9d55", alpha=0.15
+        )
+
+    if args.probe_run is not None:
+        records = read_history(args.probe_run / "validation_metrics.jsonl")
+        steps = [args.probe_offset + record["train_step"] for record in records]
         values = [record["coverage_k16_macro_source"] for record in records]
         axis.plot(
             steps,
             values,
-            color="#2a9d55",
-            linewidth=2.0,
+            color="#7b3294",
+            linestyle="--",
+            linewidth=1.8,
             marker="o",
             markersize=3,
-            label="No KL low-LR continuation",
+            label="Single-seed duration probe",
         )
 
     baseline_styles = ["--", ":", "-."]
