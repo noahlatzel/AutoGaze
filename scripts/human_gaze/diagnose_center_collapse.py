@@ -47,10 +47,12 @@ def main() -> None:
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--split", default="val")
     parser.add_argument("--max-clips", type=int)
+    parser.add_argument("--batch-size", type=int)
     parser.add_argument("--output-json", type=Path, required=True)
     parser.add_argument("--output-plot", type=Path, required=True)
     args = parser.parse_args()
     cfg = OmegaConf.to_container(OmegaConf.load(args.config), resolve=True)
+    batch_size = args.batch_size or int(cfg["batch_size"])
 
     checkpoint = str(args.checkpoint)
     processor = AutoGazeImageProcessor.from_pretrained(checkpoint, local_files_only=True)
@@ -66,7 +68,7 @@ def main() -> None:
     )
     loader = DataLoader(
         dataset,
-        batch_size=int(cfg["batch_size"]),
+        batch_size=batch_size,
         num_workers=int(cfg["num_workers"]),
         shuffle=False,
         pin_memory=True,
@@ -77,7 +79,7 @@ def main() -> None:
     ]
     shuffled_loader = DataLoader(
         Subset(dataset, shuffled_indices),
-        batch_size=int(cfg["batch_size"]),
+        batch_size=batch_size,
         num_workers=int(cfg["num_workers"]),
         shuffle=False,
         pin_memory=True,
