@@ -86,8 +86,8 @@ def setup_dist():
         os.environ['LOCAL_RANK'] = '0'
         os.environ['RANK'] = '0'
         os.environ['WORLD_SIZE'] = '1'
-        os.environ['MASTER_ADDR'] = 'localhost'
-        os.environ['MASTER_PORT'] = '12355'
+        os.environ.setdefault('MASTER_ADDR', 'localhost')
+        os.environ.setdefault('MASTER_PORT', '12355')
         init_process_group(backend='nccl', init_method='env://', rank=0, world_size=1)
         local_rank = 0
         global_rank = 0

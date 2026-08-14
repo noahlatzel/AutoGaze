@@ -25,6 +25,7 @@ cd /home/stud/latn/master-thesis/AutoGaze
 export HF_HOME=/storage/slurm/latn/data/huggingface_cache
 export WANDB_MODE=disabled
 export OMP_NUM_THREADS=5
+export MASTER_PORT="$((20000 + SLURM_JOB_ID % 10000 + SLURM_ARRAY_TASK_ID))"
 
 python -m autogaze.train \
   --config-name "$config" \
