@@ -3,10 +3,19 @@
   "dataset": {
     "root": "/storage/user/zverev/datasets/av-gaze-stavis",
     "manifest": "outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl",
+    "manifest_sha256": "0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10",
     "cell_mass": "outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy",
+    "cell_mass_sha256": "fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8",
     "split": "fold1_video_disjoint"
   },
   "initial_checkpoint": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze",
+  "environment": {
+    "conda": "/home/stud/latn/miniconda3/envs/autogaze",
+    "python": "3.11.15",
+    "torch": "2.11.0+cu130",
+    "cuda_build": "13.0",
+    "training_gpu": "RTX 6000 24 GB"
+  },
   "experiment_code_commits": {
     "pipeline": "6f0550c",
     "exact_epoch_budget": "8eb4848",
@@ -33,5 +42,8 @@
   "figures": {
     "validation_curve": "../wiki_gazing/assets/grpo_validation_macro_k16.png",
     "center_diagnostic": "../wiki_gazing/assets/learned_policy_selection_frequency_val.png"
-  }
+  },
+  "recording_limitations": [
+    "The upstream trainer did not embed a machine-readable dirty-worktree flag in each output directory; launchers and scientific configs were committed before their corresponding jobs."
+  ]
 }

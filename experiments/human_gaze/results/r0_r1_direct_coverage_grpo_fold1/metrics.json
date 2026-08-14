@@ -19,6 +19,8 @@
   },
   "matched_five_epoch_validation": {
     "optimizer_updates": 2315,
+    "clip_trajectories_per_seed": 37040,
+    "sampled_action_decisions_per_seed": 9482240,
     "no_kl": {
       "seeds": [140826, 140827, 140828],
       "values": [0.3527331752165676, 0.3508849561499989, 0.352572658425548],
@@ -39,6 +41,8 @@
   "selected_no_kl_low_lr_continuation_validation": {
     "cumulative_optimizer_updates": 3241,
     "continuation_updates": 926,
+    "cumulative_clip_trajectories_per_seed": 51856,
+    "cumulative_sampled_action_decisions_per_seed": 13275136,
     "continuation_lr": 0.000003,
     "seeds": [240826, 240827, 240828],
     "values": [0.3839897778077123, 0.38095016588705083, 0.383628202395065],
@@ -47,6 +51,8 @@
     "range": 0.003039611920661489,
     "mean_minus_center16": 0.013945501255899888,
     "mean_minus_prior16": -0.0409238674711902,
+    "fraction_of_oracle16": 0.4506716006496561,
+    "pooled_prefix_coverage_mean": {"1": 0.035512967656056084, "2": 0.0708881417910258, "4": 0.13838879267374674, "8": 0.25780046979586285, "16": 0.39660881956418353},
     "per_source_mean": {
       "AVAD": 0.3255763244297769,
       "Coutrot_db1": 0.39422486515508753,
@@ -72,6 +78,8 @@
     "range": 0.0033147705228410707,
     "mean_minus_center16": 0.00943973445084311,
     "mean_minus_prior16": -0.060973028430563014,
+    "fraction_of_oracle16": 0.4365680057332981,
+    "pooled_prefix_coverage_mean": {"1": 0.026425487926062242, "2": 0.05454729183040121, "4": 0.11020092627585192, "8": 0.22163593596886066, "16": 0.35581413474329127},
     "per_source_mean": {
       "AVAD": 0.40144602495890397,
       "Coutrot_db1": 0.3023921399584247,
@@ -91,6 +99,8 @@
   "single_seed_duration_probe_validation": {
     "seed": 340826,
     "selection_use": "exploratory_only",
+    "final_cumulative_clip_trajectories": 66672,
+    "final_cumulative_sampled_action_decisions": 17068032,
     "cumulative_optimizer_updates": [3241, 3341, 3441, 3541, 3641, 3741, 3841, 3941, 4041, 4141, 4167],
     "values": [0.3839897778077123, 0.3876263715500903, 0.38924206934688615, 0.389768963722142, 0.3936364696419133, 0.3944629900577616, 0.3949583338414681, 0.39613843732010307, 0.39762282746070654, 0.3992669648831932, 0.3996429291938987],
     "final_minus_start": 0.01565315138618638,
