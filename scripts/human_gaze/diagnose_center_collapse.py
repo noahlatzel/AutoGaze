@@ -154,7 +154,19 @@ def main() -> None:
                     frame_masks.add(tuple(sorted(actual_set)))
                 processed += 1
 
-    methods = ("actual", "shuffled", "center")
+    frequency_top16 = torch.topk(selection_counts, budget).indices
+    for record in dataset.records[:processed]:
+        cache_index = record["cell_mass_index"]
+        cell_mass = torch.from_numpy(np.array(dataset.cell_mass[cache_index], copy=True))
+        accumulator.add(
+            "selection_frequency_top16",
+            budget,
+            record["source"],
+            record["video_id"],
+            selected_coverage(cell_mass, frequency_top16),
+        )
+
+    methods = ("actual", "shuffled", "center", "selection_frequency_top16")
     coverage = accumulator.finalize(methods, [budget])
     total_frames = processed * int(cfg["clip_len"])
     probabilities = selection_counts.to(torch.float64) / selection_counts.sum()
@@ -171,9 +183,13 @@ def main() -> None:
         "diagnostics": {
             "actual_minus_shuffled_macro": macro["actual"] - macro["shuffled"],
             "actual_minus_center_macro": macro["actual"] - macro["center"],
+            "actual_minus_selection_frequency_top16_macro": (
+                macro["actual"] - macro["selection_frequency_top16"]
+            ),
             "mean_center16_overlap_fraction": float(np.mean(center_overlap)),
             "mean_actual_shuffled_overlap_fraction": float(np.mean(shuffled_overlap)),
             "normalized_selection_entropy": normalized_entropy,
+            "selection_frequency_top16_cells": frequency_top16.tolist(),
             "unique_frame_selection_sets": len(frame_masks),
             "unique_frame_selection_fraction": len(frame_masks) / total_frames,
             "selection_frequency_per_frame": (
