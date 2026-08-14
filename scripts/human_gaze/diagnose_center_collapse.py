@@ -6,6 +6,7 @@
 import argparse
 import json
 import math
+from collections import defaultdict
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -41,6 +42,29 @@ def generate_fine(model, video, cfg, allowed):
     ).cpu()
 
 
+def within_source_different_video_indices(records):
+    """Pair each clip with a deterministic clip from another same-source video."""
+    source_videos = defaultdict(lambda: defaultdict(list))
+    for index, record in enumerate(records):
+        source_videos[record["source"]][record["video_id"]].append(index)
+    shuffled = [None] * len(records)
+    for videos in source_videos.values():
+        video_ids = sorted(videos)
+        if len(video_ids) == 1:
+            indices = videos[video_ids[0]]
+            offset = max(1, len(indices) // 2)
+            for position, index in enumerate(indices):
+                shuffled[index] = indices[(position + offset) % len(indices)]
+            continue
+        for video_position, video_id in enumerate(video_ids):
+            target = videos[video_ids[(video_position + 1) % len(video_ids)]]
+            for clip_position, index in enumerate(videos[video_id]):
+                shuffled[index] = target[clip_position % len(target)]
+    if any(index is None for index in shuffled):
+        raise AssertionError("Failed to assign a shuffled clip")
+    return shuffled
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
@@ -73,10 +97,7 @@ def main() -> None:
         shuffle=False,
         pin_memory=True,
     )
-    shuffle_offset = len(dataset) // 2
-    shuffled_indices = [
-        (index + shuffle_offset) % len(dataset) for index in range(len(dataset))
-    ]
+    shuffled_indices = within_source_different_video_indices(dataset.records)
     shuffled_loader = DataLoader(
         Subset(dataset, shuffled_indices),
         batch_size=batch_size,
@@ -145,7 +166,7 @@ def main() -> None:
         "checkpoint": checkpoint,
         "split": args.split,
         "processed_clips": processed,
-        "shuffle_offset_clips": shuffle_offset,
+        "shuffle_strategy": "within_source_different_video",
         "coverage": coverage,
         "diagnostics": {
             "actual_minus_shuffled_macro": macro["actual"] - macro["shuffled"],

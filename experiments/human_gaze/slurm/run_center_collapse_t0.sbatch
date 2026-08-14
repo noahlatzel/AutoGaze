@@ -23,5 +23,5 @@ python scripts/human_gaze/diagnose_center_collapse.py \
   --checkpoint outputs/human_gaze/grpo/t0_no_kl_cont_lr3e6_seed240826/checkpoint_latest_gaze \
   --split val \
   --batch-size 4 \
-  --output-json outputs/human_gaze/diagnostics/t0_no_kl_cont_lr3e6_seed240826/center_collapse_val.json \
+  --output-json outputs/human_gaze/diagnostics/t0_no_kl_cont_lr3e6_seed240826/center_collapse_val_within_source.json \
   --output-plot ../wiki_gazing/assets/learned_policy_selection_frequency_val.png
