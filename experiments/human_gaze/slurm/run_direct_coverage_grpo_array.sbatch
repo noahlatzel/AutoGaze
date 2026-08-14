@@ -2,7 +2,7 @@
 #SBATCH --job-name=gaze-grpo
 #SBATCH --partition=NORMAL
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:nvidia_rtx_6000_ada_generation:1
+#SBATCH --gres=gpu:rtx_6000:1
 #SBATCH --cpus-per-task=5
 #SBATCH --mem=64G
 #SBATCH --time=04:00:00
