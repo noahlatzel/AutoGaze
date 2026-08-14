@@ -197,9 +197,22 @@ def main(cfg: DictConfig):
     # Create datasets with separate transforms for gaze model and task
     train_dataset = instantiate(cfg.dataset, split='train', gaze_transform=gaze_transform, task_transform=task.transform)
     val_dataset = instantiate(cfg.dataset, split='val', gaze_transform=gaze_transform, task_transform=task.transform)
+
+    # Determine the batch size before fixing the sampler's exact epoch length.
+    local_train_batch_size, local_val_batch_size, grad_acc_steps = _determine_batch_size(
+        cfg.trainer.batch_size,
+        cfg.trainer.per_gpu_max_batch_size,
+        world_size,
+        global_rank,
+        cfg.trainer.get("per_gpu_max_val_batch_size"),
+    )
     if isinstance(train_dataset, AVGazeStavisDataset):
+        samples_per_update_per_rank = local_train_batch_size * grad_acc_steps
+        global_samples_per_update = samples_per_update_per_rank * world_size
+        updates_per_epoch = len(train_dataset) // global_samples_per_update
         train_sampler = BalancedSourceSampler(
             train_dataset,
+            num_samples=updates_per_epoch * samples_per_update_per_rank,
             seed=cfg.trainer.seed,
             num_replicas=world_size,
             rank=global_rank,
@@ -208,14 +221,6 @@ def main(cfg: DictConfig):
         train_sampler = DistributedSampler(train_dataset, shuffle=True)
     val_sampler = DistributedSampler(val_dataset, shuffle=False)
 
-    # Determine the batch size
-    local_train_batch_size, local_val_batch_size, grad_acc_steps = _determine_batch_size(
-        cfg.trainer.batch_size,
-        cfg.trainer.per_gpu_max_batch_size,
-        world_size,
-        global_rank,
-        cfg.trainer.get("per_gpu_max_val_batch_size"),
-    )
     train_loader = DataLoader(train_dataset, local_train_batch_size,  num_workers=4, drop_last=True, shuffle=False, sampler=train_sampler, worker_init_fn=seed_worker, collate_fn=collate_fn)
     val_loader = DataLoader(val_dataset, local_val_batch_size, num_workers=4, drop_last=False, shuffle=False, sampler=val_sampler, worker_init_fn=seed_worker, collate_fn=collate_fn)
 
