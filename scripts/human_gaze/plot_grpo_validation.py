@@ -33,6 +33,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--runs-root", type=Path, required=True)
     parser.add_argument("--pattern", default="*_5ep_seed*")
+    parser.add_argument("--continuation-run", type=Path)
+    parser.add_argument("--continuation-offset", type=int, default=0)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -68,6 +70,20 @@ def main() -> None:
         stds = np.array([np.std(by_step[step]) for step in complete_steps])
         axis.plot(complete_steps, means, color=color, linewidth=2.5, label=f"{arm} mean")
         axis.fill_between(complete_steps, means - stds, means + stds, color=color, alpha=0.15)
+
+    if args.continuation_run is not None:
+        records = read_history(args.continuation_run / "validation_metrics.jsonl")
+        steps = [args.continuation_offset + record["train_step"] for record in records]
+        values = [record["coverage_k16_macro_source"] for record in records]
+        axis.plot(
+            steps,
+            values,
+            color="#2a9d55",
+            linewidth=2.0,
+            marker="o",
+            markersize=3,
+            label="No KL low-LR continuation",
+        )
 
     baseline_styles = ["--", ":", "-."]
     for (label, value), style in zip(BASELINES.items(), baseline_styles):
