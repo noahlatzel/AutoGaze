@@ -1,0 +1,45 @@
+schema_version: 1
+experiment_id: r2b_fresh20k_continuation
+base_seeds: [440826, 440827, 440828, 440829, 440830, 440831]
+continuation_seeds: [540826, 540827, 540828, 540829, 540830, 540831]
+stage1_updates: 2315
+stage2_updates: 7685
+stage3_final_step: 17685
+stage3_milestone_step: 12685
+total_updates: 20000
+validation_interval: 100
+stage1_run_template: r2_fresh10k_stage1_seed{base_seed}
+stage2_run_template: r2_fresh10k_stage2_base{base_seed}_seed{continuation_seed}
+stage3_run_template: r2b_fresh20k_stage3_base{base_seed}_seed{continuation_seed}
+baseline_metrics: experiments/human_gaze/results/b0_coverage_baselines_fold1/metrics.json
+baselines:
+  pretrained: 0.1190542392324096
+  center16: 0.36891054740813767
+  prior16: 0.4237799161677996
+training:
+  continuation_from: r2_fresh10k_stage2
+  trainable: autoregressive_decoder_only
+  frozen: [vision_encoder, connector, task_model]
+  optimizer: adam_preserved
+  learning_rate: 3.0e-6
+  schedule: constant
+  temperature: 0.3
+  new_updates_per_seed: 10000
+  endpoint_selection: fixed_step_20000
+diagnostics:
+  checkpoints_cumulative: [10000, 15000, 20000]
+  final_per_seed_controls:
+    - dynamic_policy
+    - center16
+    - static_selection_frequency_top16
+    - same_source_shuffled_video
+  aggregate_plots:
+    - validation_macro_with_rolling_1000_step_gain
+    - validation_per_source
+    - center_collapse_longitudinal
+    - per_video_delta_to_prior16
+slurm:
+  partition: NORMAL
+  gpu_type: rtx_5000
+  gpus_per_seed: 1
+  requested_memory_gb: 48

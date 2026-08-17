@@ -114,6 +114,9 @@ class Trainer:
             self.load_checkpoint(resume_path=resume, resume=True)
 
         self.max_train_steps = self.config.get("max_train_steps")
+        self.save_train_steps = {
+            int(step) for step in self.config.get("save_train_steps", [])
+        }
         self.validate_at_start = self.config.get("validate_at_start", True)
         self.save_at_start = self.config.get("save_at_start", True)
         self.skip_final_validation = self.config.get("skip_final_validation", False)
@@ -303,7 +306,10 @@ class Trainer:
             
             # Check for saving checkpoint
             if (
-                self.train_step % self.save_nsteps == 0
+                (
+                    self.train_step % self.save_nsteps == 0
+                    or self.train_step in self.save_train_steps
+                )
                 and not has_unapplied_grads
                 and (self.train_step > 0 or self.save_at_start)
             ):

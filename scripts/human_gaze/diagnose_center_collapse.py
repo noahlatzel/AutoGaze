@@ -65,10 +65,37 @@ def within_source_different_video_indices(records):
     return shuffled
 
 
+def resolve_checkpoint(
+    checkpoint: Path | None,
+    run_dir: Path | None,
+    train_step: int | None,
+) -> Path:
+    """Resolve either a direct model directory or an exact saved train step."""
+    if checkpoint is not None:
+        if run_dir is not None or train_step is not None:
+            raise ValueError("Use --checkpoint or --run-dir/--train-step, not both")
+        return checkpoint
+    if run_dir is None or train_step is None:
+        raise ValueError("--run-dir and --train-step must be provided together")
+    matches = []
+    for state_path in run_dir.glob("checkpoint_ep*/checkpoint_train.pt"):
+        state = torch.load(state_path, map_location="cpu", weights_only=False)
+        if int(state["train_step"]) == train_step:
+            matches.append(state_path.parent / "checkpoint_gaze")
+    if len(matches) != 1:
+        raise ValueError(
+            f"Expected one checkpoint at train step {train_step} in {run_dir}, "
+            f"found {len(matches)}"
+        )
+    return matches[0]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--checkpoint", type=Path, required=True)
+    parser.add_argument("--checkpoint", type=Path)
+    parser.add_argument("--run-dir", type=Path)
+    parser.add_argument("--train-step", type=int)
     parser.add_argument("--split", default="val")
     parser.add_argument("--max-clips", type=int)
     parser.add_argument("--batch-size", type=int)
@@ -80,7 +107,7 @@ def main() -> None:
     batch_size = args.batch_size or int(cfg["batch_size"])
     num_workers = args.num_workers if args.num_workers is not None else int(cfg["num_workers"])
 
-    checkpoint = str(args.checkpoint)
+    checkpoint = str(resolve_checkpoint(args.checkpoint, args.run_dir, args.train_step))
     processor = AutoGazeImageProcessor.from_pretrained(checkpoint, local_files_only=True)
     model = AutoGaze.from_pretrained(checkpoint, local_files_only=True).cuda().eval()
     dataset = AVGazeStavisDataset(

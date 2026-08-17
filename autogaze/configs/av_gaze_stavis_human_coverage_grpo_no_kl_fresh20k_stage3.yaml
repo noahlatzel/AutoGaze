@@ -1,0 +1,23 @@
+defaults:
+  - av_gaze_stavis_human_coverage_grpo_no_kl_fresh10k_stage2
+  - _self_
+
+trainer:
+  # Stage-relative ceiling: 2315 stage-one updates + 17685 resumed updates = 20k.
+  n_epochs: 40
+  max_train_steps: 17685
+  exp_name: r2b_fresh20k_stage3_seed${trainer.seed}
+  lr: 3e-6
+  lr_schedule: constant
+  val_nsteps: 100
+  # Retain one exact 15k-cumulative checkpoint without filling storage with
+  # dense periodic snapshots. The final 20k checkpoint is saved at shutdown.
+  save_nsteps: 10000
+  save_train_steps: [12685]
+  save_at_start: false
+  save_at_end: true
+  temp_schedule_args:
+    mode: exp
+    exp:
+      temp_start: 0.3
+      temp_end: 0.3
