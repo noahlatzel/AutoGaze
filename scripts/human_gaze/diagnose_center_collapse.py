@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Diagnose whether a learned exact-16 policy collapsed to a static center prior."""
+"""Diagnose whether an exact-budget policy collapsed to a static center prior."""
 
 import argparse
 import json
@@ -96,6 +96,7 @@ def main() -> None:
     parser.add_argument("--checkpoint", type=Path)
     parser.add_argument("--run-dir", type=Path)
     parser.add_argument("--train-step", type=int)
+    parser.add_argument("--exact-budget", type=int)
     parser.add_argument("--split", default="val")
     parser.add_argument("--max-clips", type=int)
     parser.add_argument("--batch-size", type=int)
@@ -104,6 +105,8 @@ def main() -> None:
     parser.add_argument("--output-plot", type=Path, required=True)
     args = parser.parse_args()
     cfg = OmegaConf.to_container(OmegaConf.load(args.config), resolve=True)
+    if args.exact_budget is not None:
+        cfg["exact_budget"] = args.exact_budget
     batch_size = args.batch_size or int(cfg["batch_size"])
     num_workers = args.num_workers if args.num_workers is not None else int(cfg["num_workers"])
 
@@ -183,25 +186,54 @@ def main() -> None:
                     frame_masks.add(tuple(sorted(actual_set)))
                 processed += 1
 
-    frequency_top16 = torch.topk(selection_counts, budget).indices
+    static_method = f"selection_frequency_top{budget}"
+    frequency_topk = torch.topk(selection_counts, budget).indices
     for record in dataset.records[:processed]:
         cache_index = record["cell_mass_index"]
         cell_mass = torch.from_numpy(np.array(dataset.cell_mass[cache_index], copy=True))
         accumulator.add(
-            "selection_frequency_top16",
+            static_method,
             budget,
             record["source"],
             record["video_id"],
-            selected_coverage(cell_mass, frequency_top16),
+            selected_coverage(cell_mass, frequency_topk),
         )
 
-    methods = ("actual", "shuffled", "center", "selection_frequency_top16")
+    methods = ("actual", "shuffled", "center", static_method)
     coverage = accumulator.finalize(methods, [budget])
     total_frames = processed * int(cfg["clip_len"])
     probabilities = selection_counts.to(torch.float64) / selection_counts.sum()
     nonzero = probabilities[probabilities > 0]
     normalized_entropy = float(-(nonzero * nonzero.log()).sum() / math.log(num_cells))
     macro = {method: coverage[method][str(budget)]["macro_source_mean"] for method in methods}
+    diagnostics = {
+        "actual_minus_shuffled_macro": macro["actual"] - macro["shuffled"],
+        "actual_minus_center_macro": macro["actual"] - macro["center"],
+        "actual_minus_static_topk_macro": macro["actual"] - macro[static_method],
+        "mean_center_overlap_fraction": float(np.mean(center_overlap)),
+        "mean_actual_shuffled_overlap_fraction": float(np.mean(shuffled_overlap)),
+        "normalized_selection_entropy": normalized_entropy,
+        "selection_frequency_topk_cells": frequency_topk.tolist(),
+        "unique_frame_selection_sets": len(frame_masks),
+        "unique_frame_selection_fraction": len(frame_masks) / total_frames,
+        "selection_frequency_per_frame": (
+            selection_counts.to(torch.float64) / total_frames
+        ).tolist(),
+        "center_cells": center.tolist(),
+    }
+    if budget == 16:
+        diagnostics.update(
+            {
+                "actual_minus_selection_frequency_top16_macro": (
+                    macro["actual"] - macro[static_method]
+                ),
+                "mean_center16_overlap_fraction": diagnostics[
+                    "mean_center_overlap_fraction"
+                ],
+                "selection_frequency_top16_cells": frequency_topk.tolist(),
+                "center16_cells": center.tolist(),
+            }
+        )
     report = {
         "schema_version": 1,
         "checkpoint": checkpoint,
@@ -209,23 +241,7 @@ def main() -> None:
         "processed_clips": processed,
         "shuffle_strategy": "within_source_different_video",
         "coverage": coverage,
-        "diagnostics": {
-            "actual_minus_shuffled_macro": macro["actual"] - macro["shuffled"],
-            "actual_minus_center_macro": macro["actual"] - macro["center"],
-            "actual_minus_selection_frequency_top16_macro": (
-                macro["actual"] - macro["selection_frequency_top16"]
-            ),
-            "mean_center16_overlap_fraction": float(np.mean(center_overlap)),
-            "mean_actual_shuffled_overlap_fraction": float(np.mean(shuffled_overlap)),
-            "normalized_selection_entropy": normalized_entropy,
-            "selection_frequency_top16_cells": frequency_top16.tolist(),
-            "unique_frame_selection_sets": len(frame_masks),
-            "unique_frame_selection_fraction": len(frame_masks) / total_frames,
-            "selection_frequency_per_frame": (
-                selection_counts.to(torch.float64) / total_frames
-            ).tolist(),
-            "center16_cells": center.tolist(),
-        },
+        "diagnostics": diagnostics,
     }
     args.output_json.parent.mkdir(parents=True, exist_ok=True)
     with args.output_json.open("w", encoding="utf-8") as handle:
@@ -242,23 +258,27 @@ def main() -> None:
         axis.add_patch(Rectangle((column - 0.5, row - 0.5), 1, 1, fill=False, edgecolor="cyan", linewidth=1.2))
     axis.set_xlabel("Fine-grid column")
     axis.set_ylabel("Fine-grid row")
-    axis.set_title("Learned exact-16 selection frequency (Center-16 outlined)")
+    axis.set_title(
+        f"Learned exact-{budget} selection frequency (Center-{budget} outlined)"
+    )
     figure.colorbar(image, ax=axis, label="Fraction of validation frames selecting cell")
 
     sources = list(coverage["actual"][str(budget)]["per_source"])
     x = np.arange(len(sources))
     bar_methods = (
         ("actual", "Learned", "#1677b8"),
-        ("center", "Center-16", "#666666"),
-        ("selection_frequency_top16", "Static learned Top-16", "#d95f02"),
+        ("center", f"Center-{budget}", "#666666"),
+        (static_method, f"Static learned Top-{budget}", "#d95f02"),
         ("shuffled", "Same-source shuffled video", "#7b3294"),
     )
     width = 0.19
+    bar_max = 0.0
     for method_index, (method, label, color) in enumerate(bar_methods):
         values = [
             coverage[method][str(budget)]["per_source"][source]["mean_video_coverage"]
             for source in sources
         ]
+        bar_max = max(bar_max, max(values))
         bar_axis.bar(
             x + (method_index - 1.5) * width,
             values,
@@ -267,8 +287,8 @@ def main() -> None:
             color=color,
         )
     bar_axis.set_xticks(x, sources, rotation=25, ha="right")
-    bar_axis.set_ylim(0, 0.55)
-    bar_axis.set_ylabel("Validation K=16 mean-video coverage")
+    bar_axis.set_ylim(0, min(1.0, bar_max * 1.12))
+    bar_axis.set_ylabel(f"Validation K={budget} mean-video coverage")
     bar_axis.set_title("Dynamic and static policy controls by source")
     bar_axis.grid(axis="y", alpha=0.2)
     bar_axis.legend(frameon=False, fontsize=9)

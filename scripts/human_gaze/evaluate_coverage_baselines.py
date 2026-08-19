@@ -72,13 +72,21 @@ def main() -> None:
     with output_path.open("w", encoding="utf-8") as handle:
         json.dump(results, handle, indent=2, sort_keys=True)
         handle.write("\n")
-    print(json.dumps({
-        split: {
-            method: metrics["16"]["macro_source_mean"]
-            for method, metrics in split_results.items()
-        }
-        for split, split_results in results["splits"].items()
-    }, sort_keys=True))
+    print(
+        json.dumps(
+            {
+                split: {
+                    method: {
+                        str(budget): metrics[str(budget)]["macro_source_mean"]
+                        for budget in cfg["budgets"]
+                    }
+                    for method, metrics in split_results.items()
+                }
+                for split, split_results in results["splits"].items()
+            },
+            sort_keys=True,
+        )
+    )
 
 
 if __name__ == "__main__":

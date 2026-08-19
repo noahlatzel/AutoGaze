@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Evaluate pretrained AutoGaze with fine-only, no-repeat, exact-16 actions."""
+"""Evaluate AutoGaze with a fine-only, no-repeat, exact action budget."""
 
 import argparse
 import json
@@ -27,6 +27,8 @@ def main() -> None:
     parser.add_argument("--smoke-one-per-source", action="store_true")
     parser.add_argument("--checkpoint", type=Path)
     parser.add_argument("--evaluation-splits", nargs="+")
+    parser.add_argument("--exact-budget", type=int)
+    parser.add_argument("--report-budgets", nargs="+", type=int)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     cfg = OmegaConf.to_container(OmegaConf.load(args.config), resolve=True)
@@ -35,7 +37,13 @@ def main() -> None:
     cfg["checkpoint"] = checkpoint
     evaluation_splits = args.evaluation_splits or cfg["evaluation_splits"]
     cfg["evaluation_splits"] = evaluation_splits
-    report_budgets = [int(value) for value in cfg.get("report_budgets", [1, 2, 4, 8, 16])]
+    if args.exact_budget is not None:
+        cfg["exact_budget"] = args.exact_budget
+    report_budgets = args.report_budgets or cfg.get("report_budgets", [1, 2, 4, 8, 16])
+    report_budgets = [int(value) for value in report_budgets]
+    cfg["report_budgets"] = report_budgets
+    if max(report_budgets) > int(cfg["exact_budget"]):
+        raise ValueError("report_budgets cannot exceed exact_budget")
     processor = AutoGazeImageProcessor.from_pretrained(checkpoint, local_files_only=True)
     model = AutoGaze.from_pretrained(checkpoint, local_files_only=True).cuda().eval()
     allowed = list(range(int(cfg["fine_action_offset"]), int(cfg["actions_per_frame"])))
