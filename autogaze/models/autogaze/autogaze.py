@@ -161,7 +161,13 @@ class AutoGaze(PreTrainedModel):
         
         return task_loss_requirement
 
-    def get_mask_from_gazing_pos(self, video, gazing_pos, if_padded_gazing):
+    def get_mask_from_gazing_pos(
+        self,
+        video,
+        gazing_pos,
+        if_padded_gazing,
+        num_gazing_each_frame,
+    ):
         """
         Create the video gazing mask from the gazing positions.
 
@@ -173,12 +179,29 @@ class AutoGaze(PreTrainedModel):
             mask: list of B * T * N_each_scale
         """
         B, T = video.shape[:2]
-        mask = torch.zeros(B, self.num_vision_tokens_each_frame * (T // self.frame_sampling_rate) + 1, device=video.device)  # +1 for the padded gazing positions
-        tmp_gazing_pos = gazing_pos.clone()
-        tmp_gazing_pos[if_padded_gazing] = mask.shape[1] - 1  # Set the padded gazing positions to the last position
-        mask[torch.arange(B)[:, None], tmp_gazing_pos] = 1
-        mask = mask[:, :-1]  # Remove the last position (padded gazing positions)
-        mask = mask.reshape(B, T // self.frame_sampling_rate, self.num_vision_tokens_each_frame)
+        mask = torch.zeros(
+            B,
+            T // self.frame_sampling_rate,
+            self.num_vision_tokens_each_frame,
+            device=video.device,
+        )
+        positions = gazing_pos.split(num_gazing_each_frame.tolist(), dim=1)
+        padded = if_padded_gazing.split(num_gazing_each_frame.tolist(), dim=1)
+        for frame_index, (frame_positions, frame_padded) in enumerate(
+            zip(positions, padded)
+        ):
+            local_positions = (
+                frame_positions
+                - frame_index * self.num_vision_tokens_each_frame
+            )
+            spatial = (
+                (local_positions >= 0)
+                & (local_positions < self.num_vision_tokens_each_frame)
+                & ~frame_padded
+            )
+            for batch_index in range(B):
+                selected = local_positions[batch_index, spatial[batch_index]]
+                mask[batch_index, frame_index, selected] = 1
         mask = [mask[:, :, sum(self.num_vision_tokens_each_scale_each_frame[:i]):sum(self.num_vision_tokens_each_scale_each_frame[:i+1])] for i in range(len(self.scales))]  # list of B * T * N_each_scale
 
         return mask
@@ -283,6 +306,8 @@ class AutoGaze(PreTrainedModel):
         gazing_ratio=None,
         max_gaze_tokens_each_frame=None,
         allowed_token_ids=None,
+        allow_eos=False,
+        min_gaze_tokens_each_frame=0,
         task_loss_requirement=None,
         generate_only=False,
         use_cache=False,
@@ -371,6 +396,8 @@ class AutoGaze(PreTrainedModel):
                         past_attention_mask=past_attention_mask,
                         past_conv_values=past_conv_values,
                         allowed_token_ids=allowed_token_ids,
+                        allow_eos=allow_eos,
+                        min_gaze_tokens_each_frame=min_gaze_tokens_each_frame,
                     )
                 else:
                     gazing_info = self.gazing_model.generate(
@@ -384,6 +411,8 @@ class AutoGaze(PreTrainedModel):
                         past_attention_mask=past_attention_mask,
                         past_conv_values=past_conv_values,
                         allowed_token_ids=allowed_token_ids,
+                        allow_eos=allow_eos,
+                        min_gaze_tokens_each_frame=min_gaze_tokens_each_frame,
                     )
 
         # Unpack gazing_info
@@ -400,7 +429,11 @@ class AutoGaze(PreTrainedModel):
         if not generate_only:
             with torch.autocast("cuda", dtype=torch.bfloat16):
                 forward_outputs = self.gazing_model(
-                    video, gazing_info, allowed_token_ids=allowed_token_ids
+                    video,
+                    gazing_info,
+                    allowed_token_ids=allowed_token_ids,
+                    allow_eos=allow_eos,
+                    min_gaze_tokens_each_frame=min_gaze_tokens_each_frame,
                 )  # B * N
                 action_probs = forward_outputs.gaze_probs
                 action_log_probs_all = forward_outputs.gaze_log_probs_all
@@ -412,7 +445,12 @@ class AutoGaze(PreTrainedModel):
             task_loss_prediction = None
 
         # Generate (multi-scale) gazing masks for ease of visualization
-        mask = self.get_mask_from_gazing_pos(video, gazing_pos, if_padded_gazing)
+        mask = self.get_mask_from_gazing_pos(
+            video,
+            gazing_pos,
+            if_padded_gazing,
+            num_gazing_each_frame,
+        )
 
         to_return = {
             'gazing_pos': gazing_pos,

@@ -7,6 +7,9 @@ import torch
 from autogaze.human_gaze.coverage import global_positions_to_fine_cells
 from autogaze.models.autogaze.modeling_autogaze import (
     AllowedTokensLogitsProcessor,
+    MinimumGazeTokensLogitsProcessor,
+    eos_padding_mask,
+    mask_eos_before_minimum,
     mask_previously_selected,
 )
 
@@ -51,3 +54,33 @@ def test_rescoring_masks_previous_actions_within_each_frame() -> None:
     torch.testing.assert_close(rescored[0, 1], torch.tensor([0.0, 0.5, 0.5]))
     torch.testing.assert_close(rescored[0, 2], torch.full((3,), 1 / 3))
     torch.testing.assert_close(rescored[0, 3], torch.tensor([0.5, 0.0, 0.5]))
+
+
+def test_minimum_length_processor_handles_parallel_predictions() -> None:
+    processor = MinimumGazeTokensLogitsProcessor(eos_token_id=3, minimum_tokens=4)
+    scores = processor(torch.tensor([[0, 1]]), torch.zeros(1, 5, 4))
+    assert torch.isneginf(scores[0, :2, 3]).all()
+    assert torch.isfinite(scores[0, 2:, 3]).all()
+
+
+def test_first_eos_is_action_and_later_eos_is_padding() -> None:
+    tokens = torch.tensor([[4, 5, 5, 5], [1, 2, 3, 4]])
+    padding = eos_padding_mask(tokens, eos_token_id=5, first_eos_is_action=True)
+    assert padding.tolist() == [
+        [False, False, True, True],
+        [False, False, False, False],
+    ]
+
+
+def test_rescoring_masks_eos_only_before_minimum() -> None:
+    probabilities = torch.full((1, 6, 4), 0.25)
+    rescored = mask_eos_before_minimum(
+        probabilities,
+        [torch.tensor([[0, 1, 3]]), torch.tensor([[1, 2, 3]])],
+        eos_token_id=3,
+        minimum_tokens=2,
+    )
+    assert torch.equal(rescored[0, :2, 3], torch.zeros(2))
+    assert rescored[0, 2, 3] > 0
+    assert torch.equal(rescored[0, 3:5, 3], torch.zeros(2))
+    assert rescored[0, 5, 3] > 0

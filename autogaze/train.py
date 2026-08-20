@@ -157,6 +157,24 @@ def main(cfg: DictConfig):
         logger.info(f"Preloaded gaze model from {gaze_weights}")
         logger.info(f"Missing keys: {missing_keys}")
         logger.info(f"Unexpected keys: {unexpected_keys}")
+    if cfg.trainer.get("initialize_eos_from_spatial_mean", False):
+        eos_token_id = model.gazing_model.gaze_decoder_config.eos_token_id
+        first_spatial_id = int(cfg.task.get("fine_action_offset", 0))
+        model.gazing_model.gaze_decoder.initialize_output_token_from_mean(
+            eos_token_id,
+            source_token_ids=list(range(first_spatial_id, eos_token_id)),
+        )
+        logger.info(
+            "Initialized EOS output rows from spatial action IDs "
+            f"{first_spatial_id}--{eos_token_id - 1}"
+        )
+    eos_logit_bias = float(cfg.trainer.get("eos_logit_bias", 0.0))
+    if eos_logit_bias:
+        eos_token_id = model.gazing_model.gaze_decoder_config.eos_token_id
+        model.gazing_model.gaze_decoder.set_output_token_logit_bias(
+            eos_token_id, eos_logit_bias
+        )
+        logger.info(f"Set EOS output-logit bias to {eos_logit_bias}")
     if cfg.trainer.get("freeze_gaze_vision", False):
         for parameter in model.gazing_model.vision_model.parameters():
             parameter.requires_grad = False

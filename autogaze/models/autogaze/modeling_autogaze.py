@@ -83,6 +83,69 @@ class AllowedTokensLogitsProcessor(LogitsProcessor):
         return masked
 
 
+class MinimumGazeTokensLogitsProcessor(LogitsProcessor):
+    """Keep EOS masked until a minimum number of spatial actions is reached."""
+
+    def __init__(self, eos_token_id: int, minimum_tokens: int):
+        super().__init__()
+        self.eos_token_id = int(eos_token_id)
+        self.minimum_tokens = int(minimum_tokens)
+        if self.minimum_tokens < 0:
+            raise ValueError("minimum_tokens must be non-negative")
+
+    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
+        generated = input_ids.shape[1]
+        if scores.ndim == 3:
+            masked_predictions = min(
+                max(self.minimum_tokens - generated, 0),
+                scores.shape[1],
+            )
+            if masked_predictions:
+                scores[:, :masked_predictions, self.eos_token_id] = -float("inf")
+        elif generated < self.minimum_tokens:
+            scores[..., self.eos_token_id] = -float("inf")
+        return scores
+
+
+def eos_padding_mask(
+    token_ids: torch.Tensor,
+    eos_token_id: int,
+    first_eos_is_action: bool,
+) -> torch.Tensor:
+    """Mark EOS padding while optionally retaining the first EOS as an action."""
+    eos_mask = token_ids == eos_token_id
+    if not first_eos_is_action:
+        return eos_mask
+    return torch.cat(
+        [
+            torch.zeros_like(eos_mask[:, :1]),
+            eos_mask[:, :-1].cumsum(dim=1) > 0,
+        ],
+        dim=1,
+    )
+
+
+def mask_eos_before_minimum(
+    probabilities: torch.Tensor,
+    gaze_pos_ids_split,
+    eos_token_id: int,
+    minimum_tokens: int,
+) -> torch.Tensor:
+    """Match the generation-time minimum-length mask during trajectory rescoring."""
+    if minimum_tokens <= 0:
+        return probabilities
+    masked = probabilities.clone()
+    offset = 0
+    for frame_ids in gaze_pos_ids_split:
+        stop = offset + min(int(minimum_tokens), frame_ids.shape[1])
+        masked[:, offset:stop, eos_token_id] = 0
+        offset += frame_ids.shape[1]
+    normalizer = masked.sum(dim=-1, keepdim=True)
+    if (normalizer <= 0).any():
+        raise ValueError("No valid actions remain after applying the minimum-length mask")
+    return masked / normalizer
+
+
 def mask_previously_selected(
     probabilities: torch.Tensor,
     gaze_pos_ids_split,
@@ -121,10 +184,10 @@ class AutoGazeModel(nn.Module):
         self.connector = Connector(gaze_model_config.connector_config)
         self.gaze_decoder = LlamaForCausalLM_MultiTokenPred(gaze_model_config.gaze_decoder_config)
 
-        # Add logits processors to prevent the model from repeating the same token and generating eos token during gazing.
+        # Exact action IDs never repeat. EOS masking is selected per generation
+        # call because variable-length tasks need to learn a stopping action.
         self.logits_processor = LogitsProcessorList()
         self.logits_processor.append(NoRepeatTokensLogitsProcessor())  # don't allow repeated gazing
-        self.logits_processor.append(NoEosTokenLogitsProcessor())  # don't allow generating eos token duing gazing
 
     def embed(self, video=None, gaze_pos_ids=None, use_cache=False, past_conv_values=None):
         """
@@ -186,6 +249,8 @@ class AutoGazeModel(nn.Module):
         past_attention_mask=None,
         past_conv_values=None,
         allowed_token_ids=None,
+        allow_eos=False,
+        min_gaze_tokens_each_frame=0,
         **generation_kwargs,
     ):
         """
@@ -237,6 +302,15 @@ class AutoGazeModel(nn.Module):
             if is_gradient_checkpointing:
                 self.gaze_decoder.gradient_checkpointing_disable()
             logits_processor = LogitsProcessorList(list(self.logits_processor))
+            if not allow_eos:
+                logits_processor.append(NoEosTokenLogitsProcessor())
+            elif min_gaze_tokens_each_frame:
+                logits_processor.append(
+                    MinimumGazeTokensLogitsProcessor(
+                        self.gaze_decoder_config.eos_token_id,
+                        min_gaze_tokens_each_frame,
+                    )
+                )
             if allowed_token_ids is not None:
                 logits_processor.append(AllowedTokensLogitsProcessor(allowed_token_ids))
             gaze_outputs = self.gaze_decoder.generate(
@@ -268,7 +342,13 @@ class AutoGazeModel(nn.Module):
 
             # Update auxiliary information
             num_gazing_each_frame.append(gaze_pos_ids.shape[1])
-            if_padded_gazing.append(gaze_pos_ids == self.gaze_decoder_config.eos_token_id)
+            if_padded_gazing.append(
+                eos_padding_mask(
+                    gaze_pos_ids,
+                    self.gaze_decoder_config.eos_token_id,
+                    first_eos_is_action=allow_eos,
+                )
+            )
 
             # Update attention mask
             attention_mask.append((gaze_pos_ids != self.gaze_decoder_config.eos_token_id).to(torch.long))
@@ -292,7 +372,15 @@ class AutoGazeModel(nn.Module):
         }
         return to_return
 
-    def forward(self, video, gazing_info, allowed_token_ids=None, **kwargs):
+    def forward(
+        self,
+        video,
+        gazing_info,
+        allowed_token_ids=None,
+        allow_eos=False,
+        min_gaze_tokens_each_frame=0,
+        **kwargs,
+    ):
         # Unpack gazing_info
         gaze_pos_ids = gazing_info["gazing_pos"]
         num_gazing_each_frame = gazing_info["num_gazing_each_frame"]
@@ -331,10 +419,22 @@ class AutoGazeModel(nn.Module):
         logits_multi_token_pred = outputs.logits
         task_loss_prediction_multi_token_pred = outputs.task_loss_prediction  # B * N * num_multi_token_pred
         logits_multi_token_pred = rearrange(logits_multi_token_pred, 'b n (k c) -> b n k c', k=self.num_multi_token_pred)
-        if allowed_token_ids is not None:
-            masked_logits = torch.full_like(logits_multi_token_pred, -float("inf"))
-            masked_logits[..., list(allowed_token_ids)] = logits_multi_token_pred[..., list(allowed_token_ids)]
-            logits_multi_token_pred = masked_logits
+        effective_allowed_ids = (
+            list(allowed_token_ids)
+            if allowed_token_ids is not None
+            else list(range(self.gaze_decoder_config.vocab_size))
+        )
+        if not allow_eos:
+            effective_allowed_ids = [
+                token_id
+                for token_id in effective_allowed_ids
+                if token_id != self.gaze_decoder_config.eos_token_id
+            ]
+        masked_logits = torch.full_like(logits_multi_token_pred, -float("inf"))
+        masked_logits[..., effective_allowed_ids] = logits_multi_token_pred[
+            ..., effective_allowed_ids
+        ]
+        logits_multi_token_pred = masked_logits
         gaze_probs_all_multi_token_pred = F.softmax(logits_multi_token_pred, dim=-1)
 
         shifted_probs = []
@@ -351,14 +451,20 @@ class AutoGazeModel(nn.Module):
         gaze_input_token_pos = torch.nonzero(gaze_token_mask, as_tuple=True)[0]
         gaze_probs_all = gaze_probs_all[:, gaze_input_token_pos, :]
         task_loss_prediction = task_loss_prediction[:, gaze_input_token_pos]
-        if allowed_token_ids is not None:
-            gaze_probs_all = mask_previously_selected(
+        if allow_eos:
+            gaze_probs_all = mask_eos_before_minimum(
                 gaze_probs_all,
                 gaze_pos_ids_split,
+                self.gaze_decoder_config.eos_token_id,
+                min_gaze_tokens_each_frame,
             )
-            gaze_log_probs_all = torch.log(gaze_probs_all[..., list(allowed_token_ids)] + 1e-8)
-        else:
-            gaze_log_probs_all = torch.log(gaze_probs_all + 1e-8)
+        gaze_probs_all = mask_previously_selected(
+            gaze_probs_all,
+            gaze_pos_ids_split,
+        )
+        gaze_log_probs_all = torch.log(
+            gaze_probs_all[..., effective_allowed_ids] + 1e-8
+        )
         B, N = gaze_probs_all.shape[:2]
         gaze_probs = gaze_probs_all.reshape(B * N, -1)[torch.arange(B * N), torch.cat(gaze_pos_ids_split, dim=1).flatten()].reshape(B, N)  # [B, T]
 

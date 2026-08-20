@@ -121,6 +121,14 @@ class Trainer:
         self.save_at_start = self.config.get("save_at_start", True)
         self.skip_final_validation = self.config.get("skip_final_validation", False)
         self.save_at_end = self.config.get("save_at_end", True)
+        self.max_periodic_checkpoints = self.config.get(
+            "max_periodic_checkpoints", 2
+        )
+        if (
+            self.max_periodic_checkpoints is not None
+            and self.max_periodic_checkpoints < 1
+        ):
+            raise ValueError("max_periodic_checkpoints must be positive or null")
         self.started_at = time.time()
         if torch.distributed.get_rank() == 0 and not resume:
             for filename in ("training_metrics.jsonl", "validation_metrics.jsonl"):
@@ -167,14 +175,15 @@ class Trainer:
         torch.save(task_ckpt, os.path.join(checkpoint_dir, 'checkpoint_task.pt'))
         torch.save(train_ckpt, os.path.join(checkpoint_dir, 'checkpoint_train.pt'))
 
-        # Keep only latest 2 checkpoint folders
+        # Retain a configurable number for longitudinal research diagnostics.
         checkpoint_folders = [d for d in os.listdir(self.save_dir) 
                             if os.path.isdir(os.path.join(self.save_dir, d)) 
                             and d.startswith('checkpoint_ep')]
         checkpoint_folders.sort(key=lambda x: os.path.getctime(os.path.join(self.save_dir, x)))
-        while len(checkpoint_folders) > 2:
-            oldest_folder = checkpoint_folders.pop(0)
-            shutil.rmtree(os.path.join(self.save_dir, oldest_folder))
+        if self.max_periodic_checkpoints is not None:
+            while len(checkpoint_folders) > self.max_periodic_checkpoints:
+                oldest_folder = checkpoint_folders.pop(0)
+                shutil.rmtree(os.path.join(self.save_dir, oldest_folder))
 
     def load_checkpoint(self, gaze_model_path=None, task_path=None, resume_path=None, resume=False):
         if resume:

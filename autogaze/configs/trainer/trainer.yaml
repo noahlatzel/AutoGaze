@@ -12,9 +12,12 @@ train_task: True
 detach_task: False  # Add torch.no_grad() to the task forward function.
 freeze_gaze_vision: False
 freeze_gaze_connector: False
+initialize_eos_from_spatial_mean: False
+eos_logit_bias: 0.0
 
 val_nsteps: 1000
 save_nsteps: 300
+max_periodic_checkpoints: 2
 n_epochs: 10
 logdir: 'exps/'
 exp_name:

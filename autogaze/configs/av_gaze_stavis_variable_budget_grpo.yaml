@@ -1,0 +1,67 @@
+defaults:
+  - algorithm: grpo
+  - dataset: av_gaze_stavis
+  - model: autogaze
+  - task: variable_human_heatmap_coverage
+  - trainer: trainer
+  - _self_
+
+hydra:
+  run:
+    dir: .
+  output_subdir: null
+
+model:
+  scales: '32+64+112+224'
+  num_vision_tokens_each_frame: 265
+  use_flash_attn: false
+  has_task_loss_requirement_during_training: false
+  has_task_loss_requirement_during_inference: false
+  gaze_model_config:
+    gaze_decoder_config:
+      num_multi_token_pred: 10
+
+algorithm:
+  group_size: 4
+  discount_factor: 1
+  optimize_task_loss_prediction: false
+  kl_coefficient: 0.0
+
+trainer:
+  batch_size: 4
+  per_gpu_max_batch_size: 1
+  per_gpu_max_val_batch_size: 16
+  lr: 3e-6
+  min_lr: 3e-6
+  lr_schedule: constant
+  optimizer: adam
+  train_gaze: true
+  train_task: false
+  detach_task: true
+  freeze_gaze_vision: true
+  freeze_gaze_connector: true
+  initialize_eos_from_spatial_mean: true
+  eos_logit_bias: 2.5
+  val_nsteps: 100
+  save_nsteps: 5000
+  max_periodic_checkpoints: 4
+  n_epochs: 44
+  logdir: outputs/human_gaze/grpo
+  exp_name: r2d_variable_k16_seed${trainer.seed}
+  resume: false
+  gaze_weights: null
+  task_weights: null
+  seed: 640826
+  val_only: false
+  truncate_grads: true
+  grad_norm: 1.0
+  max_train_steps: 20000
+  validate_at_start: true
+  save_at_start: false
+  save_at_end: true
+  skip_final_validation: false
+  temp_schedule_args:
+    mode: exp
+    exp:
+      temp_start: 1.0
+      temp_end: 0.3
