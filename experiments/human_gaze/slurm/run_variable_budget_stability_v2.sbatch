@@ -5,7 +5,7 @@
 #SBATCH --gres=gpu:rtx_5000:1
 #SBATCH --cpus-per-task=5
 #SBATCH --mem=48G
-#SBATCH --time=02:00:00
+#SBATCH --time=03:00:00
 #SBATCH --output=/storage/user/latn/slurm/logs/gaze-var-stability-%j.out
 
 set -eo pipefail
@@ -33,3 +33,11 @@ python -m autogaze.train \
   task.dual_lr=2.5e-7 \
   task.dual_ema_decay=0.995 \
   task.max_token_cost=0.02
+
+python scripts/human_gaze/diagnose_variable_budget.py \
+  --config experiments/human_gaze/configs/r2d_variable_budget_v2.yaml \
+  --checkpoint outputs/human_gaze/grpo/r2d_variable_stability_v2_base440826_seed840826/checkpoint_latest_gaze \
+  --output-json outputs/human_gaze/diagnostics/r2d_variable_stability_v2_base440826_seed840826/variable_budget_val.json \
+  --output-plot /home/stud/latn/master-thesis/wiki_gazing/assets/r2d_variable_stability_v2_diagnostics.png \
+  --batch-size 8 \
+  --num-workers 4
