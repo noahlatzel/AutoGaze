@@ -1,0 +1,48 @@
+experiment: r2e_hlvid_nvila_mtv48
+status: preregistered
+date: 2026-08-21
+question: >-
+  Does a human-gaze-trained fixed spatial policy preserve or improve HLVid QA
+  accuracy when integrated into NVILA-HD-Video with max_tiles_video=48?
+dataset:
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+  split: test
+  examples: 268
+models:
+  nvila: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video
+  pretrained_autogaze: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+protocol:
+  frame_source: uniform
+  num_video_frames: 128
+  num_video_frames_thumbnail: 64
+  max_tiles_video: 48
+  tile_len: 16
+  max_new_tokens: 16
+  thumbnails: full
+  tile_policy:
+    exact_decoder_actions_per_autogaze_frame: budget
+    allowed_action_ids: [69, 264]
+    allow_eos: false
+  primary_metric: exact_match_multiple_choice_accuracy
+  baseline:
+    policy: pretrained_autogaze
+    accuracy: 0.48507462686567165
+selection:
+  method: one independent uniform random draw from each budget's three seeds
+  command: printf seeds | shuf -n 1
+  selected:
+    - budget: 24
+      base_seed: 440827
+      training_array_task: "1675510_1"
+      checkpoint: outputs/human_gaze/grpo/r2c_fixedk24_stage3_base440827_seed540827/checkpoint_latest_gaze
+    - budget: 36
+      base_seed: 440826
+      training_array_task: "1675510_3"
+      checkpoint: outputs/human_gaze/grpo/r2c_fixedk36_stage3_base440826_seed540826/checkpoint_latest_gaze
+outputs:
+  root: outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_mtv48
+interpretation_boundary: >-
+  This two-seed downstream probe estimates utility and is not a replicated
+  budget comparison. K24 and K36 each have one random seed; differences may be
+  seed noise. The fixed decoder-action count is recorded separately from the
+  retained target-patch count after NVILA resolution adaptation.
