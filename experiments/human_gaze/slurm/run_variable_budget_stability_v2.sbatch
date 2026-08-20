@@ -41,3 +41,8 @@ python scripts/human_gaze/diagnose_variable_budget.py \
   --output-plot /home/stud/latn/master-thesis/wiki_gazing/assets/r2d_variable_stability_v2b_diagnostics.png \
   --batch-size 8 \
   --num-workers 4
+
+python scripts/human_gaze/check_variable_budget_stability.py \
+  --history outputs/human_gaze/grpo/r2d_variable_stability_v2b_base440826_seed840826/validation_metrics.jsonl \
+  --diagnostics outputs/human_gaze/diagnostics/r2d_variable_stability_v2b_base440826_seed840826/variable_budget_val.json \
+  --reference-fixed-k16 0.45216500477354366
