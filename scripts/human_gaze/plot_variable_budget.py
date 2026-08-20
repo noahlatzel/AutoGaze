@@ -63,7 +63,9 @@ def fixed_k16_endpoints(cfg, root: Path) -> list[float]:
     return values
 
 
-def plot_learning(cfg, histories, fixed_values, baselines, output: Path) -> None:
+def plot_learning(
+    cfg, histories, fixed_values, baselines, output: Path, x_max: int | None = None
+) -> None:
     figure, axes = plt.subplots(3, 1, figsize=(11.5, 10), sharex=True, constrained_layout=True)
     metrics = (
         ("coverage_macro_source", "Validation macro-source coverage"),
@@ -110,7 +112,7 @@ def plot_learning(cfg, histories, fixed_values, baselines, output: Path) -> None
     axes[1].axhline(16, color="#1b9e77", linestyle="--")
     axes[1].legend(frameon=False)
     axes[-1].set_xlabel("Additional optimizer updates from fixed-K16 initialization")
-    axes[-1].set_xlim(0, int(cfg["total_updates"]))
+    axes[-1].set_xlim(0, int(cfg["total_updates"]) if x_max is None else x_max)
     output.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(output, dpi=180)
     plt.close(figure)
@@ -245,20 +247,31 @@ def main() -> None:
     parser.add_argument("--runs-root", type=Path, required=True)
     parser.add_argument("--diagnostics-root", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument(
+        "--learning-only",
+        action="store_true",
+        help="Render available learning curves without requiring endpoint diagnostics.",
+    )
+    parser.add_argument("--x-max", type=int)
     args = parser.parse_args()
     cfg = OmegaConf.to_container(OmegaConf.load(args.config), resolve=True)
     histories = []
-    reports = []
     for base_seed, training_seed in zip(cfg["base_seeds"], cfg["training_seeds"]):
         run = run_name(cfg, int(base_seed), int(training_seed))
         histories.append(read_history(args.runs_root / run / "validation_metrics.jsonl"))
-        reports.append(read_json(args.diagnostics_root / run / "variable_budget_val.json"))
     fixed_values = fixed_k16_endpoints(cfg, Path("."))
     baselines = read_json(Path(cfg["fixed_baselines"]))
     plot_learning(
         cfg, histories, fixed_values, baselines,
         args.output_dir / "r2d_variable_budget_learning.png",
+        x_max=args.x_max,
     )
+    if args.learning_only:
+        return
+    reports = []
+    for base_seed, training_seed in zip(cfg["base_seeds"], cfg["training_seeds"]):
+        run = run_name(cfg, int(base_seed), int(training_seed))
+        reports.append(read_json(args.diagnostics_root / run / "variable_budget_val.json"))
     plot_per_source(
         cfg, histories, baselines,
         args.output_dir / "r2d_variable_budget_by_source.png",
