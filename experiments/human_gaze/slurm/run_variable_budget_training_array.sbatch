@@ -31,3 +31,11 @@ python -m autogaze.train \
   trainer.seed="$training_seed" \
   trainer.gaze_weights="outputs/human_gaze/grpo/${initial_run}/checkpoint_latest_gaze" \
   trainer.exp_name="$run"
+
+python scripts/human_gaze/diagnose_variable_budget.py \
+  --config experiments/human_gaze/configs/r2d_variable_budget.yaml \
+  --checkpoint "outputs/human_gaze/grpo/${run}/checkpoint_latest_gaze" \
+  --output-json "outputs/human_gaze/diagnostics/${run}/variable_budget_val.json" \
+  --output-plot "/home/stud/latn/master-thesis/wiki_gazing/assets/r2d_variable_seed${base_seed}_diagnostics.png" \
+  --batch-size 8 \
+  --num-workers 4

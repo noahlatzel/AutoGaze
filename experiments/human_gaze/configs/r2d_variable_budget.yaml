@@ -51,3 +51,4 @@ slurm:
   gpu_type: rtx_5000
   training_gpus: 3
   requested_memory_gb: 48
+  diagnostics: sequential_in_each_seed_training_job
