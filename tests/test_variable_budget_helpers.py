@@ -5,6 +5,7 @@ import pytest
 import torch
 
 from autogaze.human_gaze.variable_budget import (
+    coverage_for_padded_variable_cells,
     coverage_for_variable_lengths,
     variable_global_positions_to_fine_cells,
 )
@@ -43,4 +44,23 @@ def test_variable_positions_reject_repeats() -> None:
             max_budget=2,
             actions_per_frame=5,
             fine_action_offset=1,
+        )
+
+
+def test_coverage_uses_actual_padded_variable_cells() -> None:
+    mass = torch.tensor([[[0.4, 0.3, 0.2, 0.1], [0.1, 0.2, 0.3, 0.4]]])
+    selected = torch.tensor([[[2, 0, -1], [3, 1, 0]]])
+    lengths = torch.tensor([[2, 3]])
+    torch.testing.assert_close(
+        coverage_for_padded_variable_cells(mass, selected, lengths),
+        torch.tensor([[0.6, 0.7]]),
+    )
+
+
+def test_coverage_rejects_invalid_active_padded_cell() -> None:
+    with pytest.raises(ValueError, match="active selected cell"):
+        coverage_for_padded_variable_cells(
+            torch.full((1, 1, 4), 0.25),
+            torch.tensor([[[-1, 0]]]),
+            torch.tensor([[1]]),
         )

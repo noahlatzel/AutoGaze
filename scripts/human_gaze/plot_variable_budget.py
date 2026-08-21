@@ -159,14 +159,15 @@ def plot_endpoint(cfg, reports, fixed_values, output: Path) -> None:
     methods = (
         ("variable", "Variable K", "#1677b8"),
         ("forced_k16", "Forced K16", "#666666"),
+        ("actual_k_forced_order", "Actual K on forced order", "#e6ab02"),
         ("same_source_shuffled_k", "Shuffled K", "#7b3294"),
         ("oracle_variable", "Oracle variable", "#1b9e77"),
     )
     x = np.arange(len(reports))
-    width = 0.19
+    width = 0.15
     for index, (method, label, color) in enumerate(methods):
         values = [report["coverage"][method]["16"]["macro_source_mean"] for report in reports]
-        axes[0, 0].bar(x + (index - 1.5) * width, values, width, label=label, color=color)
+        axes[0, 0].bar(x + (index - 2) * width, values, width, label=label, color=color)
     axes[0, 0].plot(x, fixed_values, color="black", marker="o", linestyle="--", label="Matched fixed K16")
     axes[0, 0].set_xticks(x, [str(seed) for seed in cfg["training_seeds"]])
     axes[0, 0].set_ylabel("Validation macro-source coverage")

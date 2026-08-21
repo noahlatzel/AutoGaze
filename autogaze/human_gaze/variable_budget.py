@@ -90,3 +90,27 @@ def coverage_for_variable_lengths(
         ranked_cells.shape[-1], device=lengths.device
     ).reshape(1, 1, -1) < lengths.unsqueeze(-1)
     return (selected_mass * active.to(selected_mass.dtype)).sum(dim=-1)
+
+
+def coverage_for_padded_variable_cells(
+    cell_mass: torch.Tensor,
+    selected_cells: torch.Tensor,
+    lengths: torch.Tensor,
+) -> torch.Tensor:
+    """Return coverage for variable rollouts padded with negative cell IDs."""
+    if cell_mass.ndim != 3 or selected_cells.ndim != 3 or lengths.ndim != 2:
+        raise ValueError("Expected cell_mass/selected_cells/lengths with ranks 3/3/2")
+    if cell_mass.shape[:2] != selected_cells.shape[:2] or lengths.shape != cell_mass.shape[:2]:
+        raise ValueError("Batch and frame dimensions must match")
+    if lengths.min() < 0 or lengths.max() > selected_cells.shape[-1]:
+        raise ValueError("lengths lie outside the padded trajectory")
+    active = torch.arange(
+        selected_cells.shape[-1], device=lengths.device
+    ).reshape(1, 1, -1) < lengths.unsqueeze(-1)
+    if ((selected_cells < 0) & active).any():
+        raise ValueError("An active selected cell is negative")
+    if ((selected_cells >= cell_mass.shape[-1]) & active).any():
+        raise ValueError("An active selected cell is out of range")
+    safe_cells = selected_cells.clamp(min=0, max=cell_mass.shape[-1] - 1)
+    selected_mass = cell_mass.gather(2, safe_cells)
+    return (selected_mass * active.to(selected_mass.dtype)).sum(dim=-1)

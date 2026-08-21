@@ -26,6 +26,7 @@ from autogaze.human_gaze.coverage import (
     global_positions_to_fine_cells,
 )
 from autogaze.human_gaze.variable_budget import (
+    coverage_for_padded_variable_cells,
     coverage_for_variable_lengths,
     variable_global_positions_to_fine_cells,
 )
@@ -76,10 +77,10 @@ def variable_generate(model, video, cfg):
     )
 
 
-def forced_generate(model, video, cfg) -> torch.Tensor:
+def forced_generate(model, video, cfg, exact_budget: int) -> torch.Tensor:
     gaze = model(
         {"video": video},
-        max_gaze_tokens_each_frame=int(cfg["max_budget"]),
+        max_gaze_tokens_each_frame=int(exact_budget),
         allowed_token_ids=list(
             range(int(cfg["fine_action_offset"]), int(cfg["actions_per_frame"]))
         ),
@@ -88,7 +89,7 @@ def forced_generate(model, video, cfg) -> torch.Tensor:
     return global_positions_to_fine_cells(
         gaze["gazing_pos"],
         num_frames=int(cfg["clip_len"]),
-        exact_budget=int(cfg["max_budget"]),
+        exact_budget=int(exact_budget),
         actions_per_frame=int(cfg["actions_per_frame"]),
         fine_action_offset=int(cfg["fine_action_offset"]),
     )
@@ -306,9 +307,13 @@ def main() -> None:
         pin_memory=True,
     )
     masses = []
-    rankings = []
+    variable_rankings = []
+    forced_k16_rankings = []
+    forced_k36_rankings = []
     lengths = []
     eos_flags = []
+    prefix_match_count = 0
+    prefix_comparison_count = 0
     with torch.inference_mode():
         for batch in loader:
             video = batch["video"].cuda(non_blocking=True)
@@ -324,22 +329,32 @@ def main() -> None:
                     fine_action_offset=int(cfg["fine_action_offset"]),
                 )
             )
-            forced = forced_generate(model, video, cfg)
+            forced_k16 = forced_generate(
+                model, video, cfg, int(cfg["target_mean_budget"])
+            )
+            forced_k36 = forced_generate(model, video, cfg, int(cfg["max_budget"]))
+            prefix_matches = []
             for cells, ordered, frame_lengths in zip(
-                variable_cells, forced, variable_lengths
+                variable_cells, forced_k36, variable_lengths
             ):
                 for selected, ranking, length in zip(cells, ordered, frame_lengths):
-                    if not torch.equal(selected[: int(length)], ranking[: int(length)]):
-                        raise AssertionError(
-                            "Variable spatial prefix differs from forced fine ordering"
-                        )
+                    prefix_matches.append(
+                        torch.equal(selected[: int(length)], ranking[: int(length)])
+                    )
             masses.append(batch["cell_mass"].cpu())
-            rankings.append(forced.cpu())
+            variable_rankings.append(variable_cells.cpu())
+            forced_k16_rankings.append(forced_k16.cpu())
+            forced_k36_rankings.append(forced_k36.cpu())
             lengths.append(variable_lengths.cpu())
             eos_flags.append(emitted_eos.cpu())
 
+            prefix_match_count += sum(prefix_matches)
+            prefix_comparison_count += len(prefix_matches)
+
     cell_mass = torch.cat(masses)
-    ranked_cells = torch.cat(rankings)
+    variable_cells = torch.cat(variable_rankings)
+    forced_k16_cells = torch.cat(forced_k16_rankings)
+    forced_k36_cells = torch.cat(forced_k36_rankings)
     actual_lengths = torch.cat(lengths)
     emitted_eos = torch.cat(eos_flags)
     shuffled_indices = within_source_different_video_indices(dataset.records)
@@ -351,14 +366,17 @@ def main() -> None:
     ]
 
     frame_values = {
-        "variable": coverage_for_variable_lengths(
-            cell_mass, ranked_cells, actual_lengths
+        "variable": coverage_for_padded_variable_cells(
+            cell_mass, variable_cells, actual_lengths
         ),
         "forced_k16": coverage_for_variable_lengths(
-            cell_mass, ranked_cells, fixed_lengths
+            cell_mass, forced_k16_cells, fixed_lengths
+        ),
+        "actual_k_forced_order": coverage_for_variable_lengths(
+            cell_mass, forced_k36_cells, actual_lengths
         ),
         "same_source_shuffled_k": coverage_for_variable_lengths(
-            cell_mass, ranked_cells, shuffled_lengths
+            cell_mass, forced_k36_cells, shuffled_lengths
         ),
         "oracle_variable": coverage_for_variable_lengths(
             cell_mass, oracle_ranking, oracle_k
@@ -389,7 +407,7 @@ def main() -> None:
     normalized_entropy = -(
         cell_mass.clamp_min(1e-12) * cell_mass.clamp_min(1e-12).log()
     ).sum(dim=-1) / math.log(cell_mass.shape[-1])
-    selected_mass = cell_mass.gather(2, ranked_cells)
+    selected_mass = cell_mass.gather(2, forced_k36_cells)
     length_groups = {
         "short_4_12": actual_lengths <= 12,
         "medium_13_20": (actual_lengths >= 13) & (actual_lengths <= 20),
@@ -405,7 +423,7 @@ def main() -> None:
         )
         group_frequency[name] = (
             selection_frequency(
-                ranked_cells[mask].reshape(1, -1, ranked_cells.shape[-1]),
+                variable_cells[mask].reshape(1, -1, variable_cells.shape[-1]),
                 actual_lengths[mask].reshape(1, -1),
                 cell_mass.shape[-1],
             ).tolist()
@@ -414,18 +432,18 @@ def main() -> None:
         )
 
     frequency = selection_frequency(
-        ranked_cells, actual_lengths, cell_mass.shape[-1]
+        variable_cells, actual_lengths, cell_mass.shape[-1]
     )
     center_membership = torch.zeros(cell_mass.shape[-1], dtype=torch.bool)
     center_membership[center16] = True
     active = torch.arange(int(cfg["max_budget"])).reshape(1, 1, -1) < actual_lengths.unsqueeze(-1)
     center_overlap = (
-        (center_membership[ranked_cells] & active).sum(dim=-1)
+        (center_membership[variable_cells.clamp(min=0)] & active).sum(dim=-1)
         / actual_lengths.clamp(min=1)
     ).float()
     histogram = Counter(int(value) for value in actual_lengths.flatten())
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
         "checkpoint": str(args.checkpoint),
         "split": "val",
         "processed_clips": len(dataset),
@@ -454,6 +472,9 @@ def main() -> None:
                 (actual_lengths == int(cfg["max_budget"])).float().mean()
             ),
             "mean_center16_overlap_fraction": float(center_overlap.mean()),
+            "variable_forced_k36_prefix_match_rate": (
+                prefix_match_count / prefix_comparison_count
+            ),
             "length_entropy_correlation": correlation(
                 actual_lengths, normalized_entropy
             ),
@@ -505,11 +526,12 @@ def main() -> None:
     methods = (
         ("variable", "Variable K", "#1677b8"),
         ("forced_k16", "Forced K16", "#666666"),
+        ("actual_k_forced_order", "Actual K on forced order", "#e6ab02"),
         ("same_source_shuffled_k", "Shuffled K", "#7b3294"),
         ("oracle_variable", "Oracle variable", "#1b9e77"),
     )
     x = np.arange(len(STAVIS_SOURCES))
-    width = 0.2
+    width = 0.16
     for method_index, (method, label, color) in enumerate(methods):
         values = [
             coverage[method]["16"]["per_source"][source][
@@ -518,7 +540,7 @@ def main() -> None:
             for source in STAVIS_SOURCES
         ]
         axes[1, 0].bar(
-            x + (method_index - 1.5) * width,
+            x + (method_index - 2) * width,
             values,
             width,
             label=label,
@@ -555,6 +577,9 @@ def main() -> None:
         "val_mean_k": length_metrics["variable"]["macro_source_mean"],
         "variable_macro": coverage["variable"]["16"]["macro_source_mean"],
         "forced_k16_macro": coverage["forced_k16"]["16"]["macro_source_mean"],
+        "actual_k_forced_order_macro": coverage[
+            "actual_k_forced_order"
+        ]["16"]["macro_source_mean"],
         "shuffled_k_macro": coverage["same_source_shuffled_k"]["16"]["macro_source_mean"],
         "oracle_variable_macro": coverage["oracle_variable"]["16"]["macro_source_mean"],
     }
