@@ -33,9 +33,11 @@ run_name="r2e_fixedk${budget}_seed${base_seed}_mtv48"
 checkpoint="outputs/human_gaze/grpo/r2c_fixedk${budget}_stage3_base${base_seed}_seed${continuation_seed}/checkpoint_latest_gaze"
 output_dir="outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_mtv48/${run_name}"
 
+module load cuda/12.8.1
+set +u
 source /home/stud/latn/miniconda3/etc/profile.d/conda.sh
 conda activate vila-autogaze-eval
-module load cuda/12.8.1
+set -u
 cd /storage/user/latn/worktrees/autogaze-r2e-hlvid
 
 export HF_HOME=/storage/slurm/latn/data/huggingface_cache
