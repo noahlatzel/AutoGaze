@@ -156,7 +156,9 @@ def calibrate_eos_bias(model, loader, cfg) -> dict:
 def aggregate_scalar(records, values: torch.Tensor) -> dict:
     videos = defaultdict(lambda: defaultdict(list))
     for record, clip_values in zip(records, values):
-        videos[record["source"]][record["video_id"]].append(float(clip_values.mean()))
+        videos[record["source"]][record["video_id"]].append(
+            float(clip_values.float().mean())
+        )
     per_source = {}
     source_means = []
     for source in STAVIS_SOURCES:

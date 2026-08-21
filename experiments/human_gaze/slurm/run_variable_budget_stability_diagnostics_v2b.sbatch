@@ -19,13 +19,13 @@ export WANDB_MODE=disabled
 export OMP_NUM_THREADS=5
 
 run=r2d_variable_stability_v2b_base440826_seed840826
-diagnostic_run=${run}_diag_a5b6400
+diagnostic_run=${run}_diag_v3
 
 python scripts/human_gaze/diagnose_variable_budget.py \
   --config experiments/human_gaze/configs/r2d_variable_budget_v2.yaml \
   --checkpoint "outputs/human_gaze/grpo/${run}/checkpoint_latest_gaze" \
   --output-json "outputs/human_gaze/diagnostics/${diagnostic_run}/variable_budget_val.json" \
-  --output-plot "/home/stud/latn/master-thesis/wiki_gazing/assets/r2d_variable_stability_v2b_diagnostics_a5b6400.png" \
+  --output-plot "/home/stud/latn/master-thesis/wiki_gazing/assets/r2d_variable_stability_v2b_diagnostics_v3.png" \
   --batch-size 8 \
   --num-workers 4
 
