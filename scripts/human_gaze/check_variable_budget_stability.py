@@ -23,6 +23,8 @@ def main() -> None:
     parser.add_argument("--max-raw-mean-k", type=float, default=20.0)
     parser.add_argument("--max-token-cost", type=float, default=0.0195)
     parser.add_argument("--max-forced-k16-drop", type=float, default=0.02)
+    parser.add_argument("--max-single-boundary-rate", type=float, default=0.5)
+    parser.add_argument("--max-total-boundary-rate", type=float, default=0.6)
     parser.add_argument("--min-calibrated-mean-k", type=float, default=15.5)
     parser.add_argument("--max-calibrated-mean-k", type=float, default=16.5)
     args = parser.parse_args()
@@ -40,7 +42,16 @@ def main() -> None:
     forced_k16 = float(
         report["coverage"]["forced_k16"]["16"]["macro_source_mean"]
     )
-    values = (raw_mean_k, token_cost, calibrated_mean_k, forced_k16)
+    min_rate = float(report["diagnostics"]["min_rate"])
+    cap_rate = float(report["diagnostics"]["cap_rate"])
+    values = (
+        raw_mean_k,
+        token_cost,
+        calibrated_mean_k,
+        forced_k16,
+        min_rate,
+        cap_rate,
+    )
     if not all(math.isfinite(value) for value in values):
         raise SystemExit("stability gate failed: endpoint contains a non-finite value")
 
@@ -64,10 +75,22 @@ def main() -> None:
             f"calibrated mean K {calibrated_mean_k:.4f} outside "
             f"[{args.min_calibrated_mean_k:.1f}, {args.max_calibrated_mean_k:.1f}]"
         )
+    if max(min_rate, cap_rate) > args.max_single_boundary_rate:
+        failures.append(
+            f"single-boundary rate {max(min_rate, cap_rate):.4f} exceeds "
+            f"{args.max_single_boundary_rate:.4f}"
+        )
+    if min_rate + cap_rate > args.max_total_boundary_rate:
+        failures.append(
+            f"combined boundary rate {min_rate + cap_rate:.4f} exceeds "
+            f"{args.max_total_boundary_rate:.4f}"
+        )
 
     summary = {
         "calibrated_mean_k": calibrated_mean_k,
         "forced_k16_macro": forced_k16,
+        "cap_rate": cap_rate,
+        "min_rate": min_rate,
         "raw_mean_k": raw_mean_k,
         "reference_fixed_k16": args.reference_fixed_k16,
         "token_cost": token_cost,
