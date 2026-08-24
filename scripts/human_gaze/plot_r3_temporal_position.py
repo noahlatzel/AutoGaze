@@ -126,7 +126,7 @@ def plot_sources_and_gate(runs, output_path):
 
     gate_curves = []
     for seed in SEEDS:
-        rows = runs["position"][seed]["training"]
+        rows = runs["position"][seed]["validation"]
         steps = np.asarray([row["train_step"] for row in rows])
         gate = np.asarray([row["temporal_position_gate"] for row in rows])
         gate_curves.append(gate)
@@ -218,7 +218,11 @@ def summarize(runs, steps, curves, source_deltas, center):
         "matched_curve_auc_paired_delta": dict(zip(map(str, SEEDS), auc_pairs.tolist())),
         "source_mean_paired_delta": dict(zip(STAVIS_SOURCES, source_deltas.mean(0).tolist())),
         "treatment_final_gate": {
-            str(seed): runs["position"][seed]["training"][-1]["temporal_position_gate"]
+            str(seed): runs["position"][seed]["endpoint"]["temporal_position_gate"]
+            for seed in SEEDS
+        },
+        "treatment_final_signal_to_feature_rms": {
+            str(seed): runs["position"][seed]["endpoint"]["temporal_signal_to_feature_rms"]
             for seed in SEEDS
         },
         "dynamic_minus_static": dynamic_minus_static,

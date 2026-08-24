@@ -20,6 +20,8 @@ def fake_runs(delta=0.006):
                 row = {
                     "train_step": step,
                     "coverage_k16_macro_source": 0.45 + treatment_delta * step / 10000,
+                    "temporal_position_gate": treatment_delta * step / 10000,
+                    "temporal_signal_to_feature_rms": abs(treatment_delta * step / 10000),
                 }
                 row.update(
                     {
