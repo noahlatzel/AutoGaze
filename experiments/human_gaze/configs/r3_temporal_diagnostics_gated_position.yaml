@@ -28,6 +28,7 @@ diagnostics:
 architecture:
   budget: 16
   paired_seeds: [440826, 440827, 440828]
+  training_seed_offset: 200000
   initialization_cumulative_updates: 20000
   continuation_updates: 10000
   validation_interval: 100

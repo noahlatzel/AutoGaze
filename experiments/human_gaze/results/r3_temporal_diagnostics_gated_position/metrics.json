@@ -1,0 +1,36 @@
+{
+  "phase1": {
+    "history_audit": {
+      "alternative_history_selection_change": 0.49403760692533333,
+      "alternative_minus_normal_final_frame_coverage": -0.09726970381635236,
+      "current_frame_invariant": true,
+      "ground_truth_centroid_displacement_per_frame": 0.8272051276756878,
+      "normal_policy_centroid_displacement_per_frame": 0.49826236078967817,
+      "processed_clips_per_seed": 427,
+      "reset_history_selection_change": 0.6052650965672927,
+      "reset_minus_normal_final_frame_coverage": -0.09696679641422597,
+      "seeds": {
+        "440826": {"alternative_change": 0.48839774006327313, "reset_change": 0.593641912997599},
+        "440827": {"alternative_change": 0.48611619091730096, "reset_change": 0.5998858293724867},
+        "440828": {"alternative_change": 0.4961617771249223, "reset_change": 0.6138970153648506},
+        "440829": {"alternative_change": 0.5002829503087335, "reset_change": 0.614907072045894},
+        "440830": {"alternative_change": 0.497392608212723, "reset_change": 0.5994312976279017},
+        "440831": {"alternative_change": 0.49587437492504716, "reset_change": 0.6098274519950238}
+      }
+    },
+    "target_temporal_structure": {
+      "abrupt_transition_definition": "adjacent JSD >= pooled train p95",
+      "train_p95_jsd": 0.38166941297294077,
+      "per_source": {
+        "AVAD": {"jsd_lag1": 0.13801607296377977, "jsd_lag8": 0.273471357896451, "jsd_nonadjacent": 0.273471357896451, "top16_jaccard_lag1": 0.48428572416367993},
+        "Coutrot_db1": {"jsd_lag1": 0.15828285506535444, "jsd_lag8": 0.32083168888070296, "jsd_nonadjacent": 0.3543323112242219, "top16_jaccard_lag1": 0.45322355684980836},
+        "Coutrot_db2": {"jsd_lag1": 0.07572122122896453, "jsd_lag8": 0.18940586976305382, "jsd_nonadjacent": 0.30375948680558595, "top16_jaccard_lag1": 0.5697060890492655},
+        "DIEM": {"jsd_lag1": 0.10798636544455989, "jsd_lag8": 0.299424864852462, "jsd_nonadjacent": 0.375253383047648, "top16_jaccard_lag1": 0.5856894574343552},
+        "ETMD_av": {"jsd_lag1": 0.20194376901964672, "jsd_lag8": 0.37789471460106955, "jsd_nonadjacent": 0.44328540551656537, "top16_jaccard_lag1": 0.4445380245004801},
+        "SumMe": {"jsd_lag1": 0.20663863071092448, "jsd_lag8": 0.373421290344791, "jsd_nonadjacent": 0.5101419833993878, "top16_jaccard_lag1": 0.42151877655415576}
+      }
+    }
+  },
+  "phase2": null,
+  "schema_version": 1
+}

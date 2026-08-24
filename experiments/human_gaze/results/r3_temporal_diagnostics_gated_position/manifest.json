@@ -1,0 +1,12 @@
+{
+  "code_commit_before_implementation": "0282e155f938f6bffe7251dd32aab2e13fc752eb",
+  "diagnostics_code_commit": "5905d6c",
+  "heavy_artifacts": {
+    "policy_history": "outputs/human_gaze/r3a_temporal_diagnostics/policy_history_metrics.json",
+    "target_temporal": "outputs/human_gaze/r3a_temporal_diagnostics/target_temporal_metrics.json"
+  },
+  "history_audit_elapsed_seconds": 423.31,
+  "run_id": "20260824-r3a_temporal_diagnostics_0282e15",
+  "schema_version": 1,
+  "test_split_opened": false
+}

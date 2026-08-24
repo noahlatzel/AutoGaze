@@ -1,0 +1,28 @@
+defaults:
+  - av_gaze_stavis_human_coverage_grpo_no_kl_fresh20k_stage3
+  - _self_
+
+model:
+  gaze_model_config:
+    temporal_position_encoding: none
+    temporal_position_max_frequency: 8.0
+
+trainer:
+  # Both arms start from the same fixed 20k model weights, with new Adam state.
+  resume: false
+  n_epochs: 30
+  max_train_steps: 10000
+  lr: 3e-6
+  lr_schedule: constant
+  val_nsteps: 100
+  save_nsteps: 10000
+  save_train_steps: []
+  validate_at_start: true
+  save_at_start: false
+  save_at_end: true
+  skip_final_validation: false
+  temp_schedule_args:
+    mode: exp
+    exp:
+      temp_start: 0.3
+      temp_end: 0.3

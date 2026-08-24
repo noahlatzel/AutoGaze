@@ -10,6 +10,7 @@
 # limitations under the License.
 
 from copy import deepcopy
+import math
 from typing import Optional, Tuple
 from dataclasses import dataclass
 from einops import rearrange
@@ -178,6 +179,14 @@ class AutoGazeModel(nn.Module):
         self.frame_sampling_rate = gaze_model_config.vision_model_config.temporal_patch_size
         self.num_multi_token_pred = gaze_model_config.gaze_decoder_config.num_multi_token_pred
         self.gaze_decoder_config = gaze_model_config.gaze_decoder_config  # Store for reference
+        temporal_mode = gaze_model_config.temporal_position_encoding
+        if temporal_mode == "normalized_sinusoidal_scalar_gate":
+            self.temporal_position_signal = TemporalPositionSignal(
+                gaze_model_config.gaze_decoder_config.hidden_size,
+                max_frequency=gaze_model_config.temporal_position_max_frequency,
+            )
+        elif temporal_mode != "none":
+            raise ValueError(f"Unknown temporal position encoding: {temporal_mode}")
 
         # Create the vision model, connector, and gaze decoder
         self.vision_model = ShallowVideoConvNet(gaze_model_config.vision_model_config)
@@ -210,6 +219,8 @@ class AutoGazeModel(nn.Module):
             vision_features = vision_features.transpose(1, 2)
             vision_features = rearrange(vision_features, 'b t c h w -> b t (h w) c')
             vision_features = self.connector(vision_features)
+            if hasattr(self, "temporal_position_signal"):
+                vision_features = self.temporal_position_signal(vision_features)
             vision_attention_mask = [torch.ones(B, vision_features.shape[2], device=vision_features.device).long() for _ in range(vision_features.shape[1])]
 
         if gaze_pos_ids is not None:
@@ -604,3 +615,49 @@ class Connector(nn.Module):
         """
         x = x + self.pos_embed[None, None]
         return x
+
+
+class TemporalPositionSignal(nn.Module):
+    """RMS-controlled deterministic relative-time signal with one scalar gate."""
+
+    def __init__(self, hidden_dim: int, max_frequency: float = 8.0):
+        super().__init__()
+        if hidden_dim < 2 or max_frequency < 1:
+            raise ValueError("hidden_dim must be >= 2 and max_frequency must be >= 1")
+        self.hidden_dim = int(hidden_dim)
+        self.max_frequency = float(max_frequency)
+        self.gate = nn.Parameter(torch.zeros(()))
+
+    def encoding(self, num_frames: int, *, device, dtype):
+        if num_frames < 1:
+            raise ValueError("num_frames must be positive")
+        positions = torch.linspace(0.0, 1.0, num_frames, device=device, dtype=torch.float32)
+        pairs = math.ceil(self.hidden_dim / 2)
+        frequencies = torch.logspace(
+            0.0,
+            math.log10(self.max_frequency),
+            pairs,
+            device=device,
+            dtype=torch.float32,
+        )
+        angles = 2.0 * math.pi * positions[:, None] * frequencies[None]
+        signal = torch.stack((angles.sin(), angles.cos()), dim=-1).flatten(-2)[
+            :, : self.hidden_dim
+        ]
+        signal = signal / signal.square().mean(dim=-1, keepdim=True).sqrt().clamp_min(1e-8)
+        return signal.to(dtype=dtype)
+
+    def forward(self, features):
+        if features.ndim != 4 or features.shape[-1] != self.hidden_dim:
+            raise ValueError("Expected features shaped (batch, frames, tokens, hidden_dim)")
+        signal = self.encoding(
+            features.shape[1], device=features.device, dtype=features.dtype
+        )[None, :, None, :]
+        feature_rms = features.detach().square().mean(dim=(-2, -1), keepdim=True).sqrt()
+        return features + self.gate.to(features.dtype) * feature_rms * signal
+
+    def diagnostics(self):
+        return {
+            "temporal_position_gate": self.gate.detach(),
+            "temporal_signal_to_feature_rms": self.gate.detach().abs(),
+        }

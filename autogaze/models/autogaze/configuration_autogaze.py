@@ -200,6 +200,8 @@ class GazeModelConfig(PretrainedConfig):
         gaze_decoder_config={},
         num_vision_tokens_each_frame=196,
         attn_mode="sdpa",
+        temporal_position_encoding="none",
+        temporal_position_max_frequency=8.0,
         **kwargs,
     ):
         self.input_img_size = input_img_size
@@ -218,6 +220,8 @@ class GazeModelConfig(PretrainedConfig):
         self.gaze_decoder_config = GazeDecoderConfig(**gaze_decoder_config)
 
         self.num_vision_tokens_each_frame = num_vision_tokens_each_frame
+        self.temporal_position_encoding = temporal_position_encoding
+        self.temporal_position_max_frequency = temporal_position_max_frequency
 
         super().__init__(**kwargs)
 
@@ -326,4 +330,3 @@ __all__ = [
     "ConnectorConfig",
     "GazeDecoderConfig",
 ]
-

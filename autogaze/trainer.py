@@ -285,6 +285,9 @@ class Trainer:
             metrics.update(task_outputs['metrics'])
         if alg_outputs is not None:
             metrics.update(alg_outputs['metrics'])
+        gaze_model = unwrap_model(self.gaze_model).gazing_model
+        if hasattr(gaze_model, "temporal_position_signal"):
+            metrics.update(gaze_model.temporal_position_signal.diagnostics())
         return metrics
 
     def train_epoch(self, ep, start_iter):
