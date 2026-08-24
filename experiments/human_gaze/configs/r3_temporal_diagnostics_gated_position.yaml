@@ -39,6 +39,7 @@ architecture:
   treatment: normalized_sinusoidal_frame_position_scalar_gate
   gate_initial_value: 0.0
   temporal_signal_scaling: feature_rms_relative
+  max_endpoint_signal_to_feature_rms: 0.25
   frozen: [vision_encoder, connector, task_model]
   unchanged: [reward, clip_len, sampling, exact_budget, group_size, temperature, preprocessing]
 decision:
@@ -48,6 +49,7 @@ decision:
   fail_max_delta: 0.0
   fail_min_nonpositive_seed_pairs: 2
   require_dynamic_minus_static_positive: true
+  require_endpoint_signal_to_feature_rms_at_most: 0.25
   prohibit_best_checkpoint_selection: true
 compute:
   partition: NORMAL

@@ -26,3 +26,4 @@ architecture:
   treatment: normalized_sinusoidal_frame_position_scalar_gate
   gate_initial_value: 0.0
   temporal_signal_scaling: feature_rms_relative
+  max_endpoint_signal_to_feature_rms: 0.25
