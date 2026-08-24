@@ -1,5 +1,17 @@
 {
   "phase1": {
+    "image_change": {
+      "definition": "mean absolute RGB change after 64x64 bilinear resize",
+      "train_p95_rgb_change": 0.20768293738365173,
+      "val_spearman_rgb_change_vs_gaze_jsd": {
+        "AVAD": 0.35381322797053133,
+        "Coutrot_db1": 0.29276048940706845,
+        "Coutrot_db2": 0.03478153174428246,
+        "DIEM": 0.19473917815932332,
+        "ETMD_av": 0.334895307360079,
+        "SumMe": 0.2255587547189843
+      }
+    },
     "history_audit": {
       "alternative_history_selection_change": 0.49403760692533333,
       "alternative_minus_normal_final_frame_coverage": -0.09726970381635236,
