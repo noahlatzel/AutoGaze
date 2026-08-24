@@ -170,6 +170,8 @@ def main():
     parser.add_argument("--num-workers", type=int, default=4)
     parser.add_argument("--max-clips", type=int)
     parser.add_argument("--seeds", nargs="+", type=int)
+    parser.add_argument("--checkpoint-template")
+    parser.add_argument("--checkpoint-seed-offset", type=int)
     parser.add_argument("--output-json", type=Path, required=True)
     parser.add_argument("--output-plot", type=Path, required=True)
     parser.add_argument("--trajectory-plot", type=Path, required=True)
@@ -180,8 +182,15 @@ def main():
     if frame_index != int(config["dataset"]["clip_len"]) - 1:
         raise ValueError("This audit requires the final frame so all preceding frames are causal history")
 
-    checkpoint_template = config["diagnostics"]["checkpoint_template"]
-    first_checkpoint = checkpoint_template.format(seed=seeds[0], continuation_seed=seeds[0] + 100000)
+    checkpoint_template = args.checkpoint_template or config["diagnostics"]["checkpoint_template"]
+    checkpoint_seed_offset = (
+        args.checkpoint_seed_offset
+        if args.checkpoint_seed_offset is not None
+        else int(config["diagnostics"]["continuation_seed_offset"])
+    )
+    first_checkpoint = checkpoint_template.format(
+        seed=seeds[0], continuation_seed=seeds[0] + checkpoint_seed_offset
+    )
     processor = AutoGazeImageProcessor.from_pretrained(first_checkpoint, local_files_only=True)
     dataset = AVGazeStavisDataset(
         root=config["dataset"]["root"],
@@ -210,7 +219,9 @@ def main():
     report_seeds = {}
 
     for seed in seeds:
-        checkpoint = checkpoint_template.format(seed=seed, continuation_seed=seed + 100000)
+        checkpoint = checkpoint_template.format(
+            seed=seed, continuation_seed=seed + checkpoint_seed_offset
+        )
         model = AutoGaze.from_pretrained(checkpoint, local_files_only=True).cuda().eval()
         values = defaultdict(lambda: defaultdict(list))
         processed = 0
