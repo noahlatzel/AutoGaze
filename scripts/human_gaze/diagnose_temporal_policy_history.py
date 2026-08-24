@@ -193,8 +193,28 @@ def plot_motion_response(report, output_path):
         np.mean([seed["per_source"][source]["gt_centroid_step"]["mean"] for seed in report["seeds"].values()])
         for source in sources
     ]
-    axes[0].bar(x - width / 2, target, width, label="GT gaze", color="#444444")
-    axes[0].bar(x + width / 2, predicted, width, label="Policy", color="#4c78a8")
+    predicted_p10 = [np.mean([seed["per_source"][source]["normal_centroid_step"]["p10"] for seed in report["seeds"].values()]) for source in sources]
+    predicted_p90 = [np.mean([seed["per_source"][source]["normal_centroid_step"]["p90"] for seed in report["seeds"].values()]) for source in sources]
+    target_p10 = [np.mean([seed["per_source"][source]["gt_centroid_step"]["p10"] for seed in report["seeds"].values()]) for source in sources]
+    target_p90 = [np.mean([seed["per_source"][source]["gt_centroid_step"]["p90"] for seed in report["seeds"].values()]) for source in sources]
+    axes[0].bar(
+        x - width / 2,
+        target,
+        width,
+        yerr=np.asarray([np.asarray(target) - target_p10, np.asarray(target_p90) - target]),
+        capsize=3,
+        label="GT gaze (p10–p90)",
+        color="#444444",
+    )
+    axes[0].bar(
+        x + width / 2,
+        predicted,
+        width,
+        yerr=np.asarray([np.asarray(predicted) - predicted_p10, np.asarray(predicted_p90) - predicted]),
+        capsize=3,
+        label="Policy (p10–p90)",
+        color="#4c78a8",
+    )
     axes[0].set_xticks(x, sources, rotation=25, ha="right")
     axes[0].set_ylabel("Centroid displacement / frame (cells)")
     axes[0].set_title("Policy versus target motion")

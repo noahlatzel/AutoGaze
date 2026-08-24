@@ -91,6 +91,25 @@ def plot_report(report, output_path):
     plt.close(figure)
 
 
+def plot_topk_report(report, output_path):
+    lags = [int(value) for value in report["config"]["lags"]]
+    topk = [int(value) for value in report["config"]["topk"]]
+    figure, axes = plt.subplots(1, len(topk), figsize=(15.5, 4.8), sharey=True, constrained_layout=True)
+    for axis, budget in zip(np.atleast_1d(axes), topk):
+        metric = f"top{budget}_jaccard"
+        for source in STAVIS_SOURCES:
+            values = [report["splits"]["val"]["lags"][str(lag)][source][metric]["mean"] for lag in lags]
+            axis.plot(lags, values, marker="o", label=source)
+        axis.set_title(f"GT Top-{budget} overlap")
+        axis.set_xlabel("Lag (3 Hz samples)")
+        axis.grid(alpha=0.25)
+    np.atleast_1d(axes)[0].set_ylabel("Selection-set Jaccard")
+    np.atleast_1d(axes)[0].legend(frameon=False, fontsize=8, ncol=2)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(output_path, dpi=180)
+    plt.close(figure)
+
+
 def _rank(values):
     order = np.argsort(values, kind="mergesort")
     ranks = np.empty_like(order, dtype=np.float64)
@@ -196,6 +215,7 @@ def main():
     parser.add_argument("--topk", nargs="+", type=int, default=[16, 24, 32])
     parser.add_argument("--output-json", type=Path, required=True)
     parser.add_argument("--output-plot", type=Path, required=True)
+    parser.add_argument("--topk-plot", type=Path)
     parser.add_argument("--dataset-root", type=Path)
     parser.add_argument("--image-change-plot", type=Path)
     args = parser.parse_args()
@@ -238,6 +258,8 @@ def main():
     args.output_json.parent.mkdir(parents=True, exist_ok=True)
     args.output_json.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     plot_report(report, args.output_plot)
+    if args.topk_plot is not None:
+        plot_topk_report(report, args.topk_plot)
     if args.image_change_plot is not None:
         if "image_change" not in report:
             raise ValueError("--image-change-plot requires --dataset-root")
