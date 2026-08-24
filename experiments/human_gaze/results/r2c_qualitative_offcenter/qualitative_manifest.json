@@ -16,6 +16,10 @@
             "k24": 0.1469559222459793,
             "k32": 0.17188169062137604
           },
+          "native_display_size": [
+            256,
+            340
+          ],
           "outside_center32_mass": 0.9998289942741394,
           "selected_cells": {
             "k16": [
@@ -107,6 +111,10 @@
             "k24": 0.0022097122855484486,
             "k32": 0.011820754036307335
           },
+          "native_display_size": [
+            256,
+            340
+          ],
           "outside_center32_mass": 1.0,
           "selected_cells": {
             "k16": [
@@ -198,6 +206,10 @@
             "k24": 0.00019694861839525402,
             "k32": 0.04191610962152481
           },
+          "native_display_size": [
+            256,
+            340
+          ],
           "outside_center32_mass": 1.0,
           "selected_cells": {
             "k16": [
@@ -289,6 +301,10 @@
             "k24": 0.0,
             "k32": 0.01753508299589157
           },
+          "native_display_size": [
+            256,
+            340
+          ],
           "outside_center32_mass": 1.0,
           "selected_cells": {
             "k16": [
@@ -391,6 +407,10 @@
             "k24": 0.0,
             "k32": 0.0
           },
+          "native_display_size": [
+            256,
+            340
+          ],
           "outside_center32_mass": 1.0,
           "selected_cells": {
             "k16": [
@@ -482,6 +502,10 @@
             "k24": 0.0,
             "k32": 0.0
           },
+          "native_display_size": [
+            256,
+            340
+          ],
           "outside_center32_mass": 1.0,
           "selected_cells": {
             "k16": [
@@ -573,6 +597,10 @@
             "k24": 0.009908696636557579,
             "k32": 0.01068698801100254
           },
+          "native_display_size": [
+            256,
+            340
+          ],
           "outside_center32_mass": 1.0,
           "selected_cells": {
             "k16": [
@@ -664,6 +692,10 @@
             "k24": 0.0348389595746994,
             "k32": 0.23344720900058746
           },
+          "native_display_size": [
+            256,
+            340
+          ],
           "outside_center32_mass": 0.9994710683822632,
           "selected_cells": {
             "k16": [
@@ -766,6 +798,10 @@
             "k24": 0.3362458050251007,
             "k32": 0.3776398003101349
           },
+          "native_display_size": [
+            256,
+            340
+          ],
           "outside_center32_mass": 0.989704966545105,
           "selected_cells": {
             "k16": [
@@ -857,6 +893,10 @@
             "k24": 0.6248348355293274,
             "k32": 0.6003449559211731
           },
+          "native_display_size": [
+            256,
+            340
+          ],
           "outside_center32_mass": 0.9883908629417419,
           "selected_cells": {
             "k16": [
@@ -948,6 +988,10 @@
             "k24": 0.5293161869049072,
             "k32": 0.5469340682029724
           },
+          "native_display_size": [
+            256,
+            340
+          ],
           "outside_center32_mass": 0.9294280409812927,
           "selected_cells": {
             "k16": [
@@ -1039,6 +1083,10 @@
             "k24": 0.5425541400909424,
             "k32": 0.5701476335525513
           },
+          "native_display_size": [
+            256,
+            340
+          ],
           "outside_center32_mass": 0.9258825182914734,
           "selected_cells": {
             "k16": [
@@ -1152,7 +1200,8 @@
     "criterion": "highest mean ground-truth mass outside Center-32 over a consecutive frame window",
     "distinct_sources": true,
     "frames_per_clip": 4,
-    "model_independent": true
+    "model_independent": true,
+    "render_geometry": "native-aspect RGB and heatmap with normalized 14x14 cells mapped back from the model's direct full-field 224x224 input"
   },
   "split": "val"
 }

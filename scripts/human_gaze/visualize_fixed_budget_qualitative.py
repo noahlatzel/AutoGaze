@@ -12,11 +12,12 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+from matplotlib.colors import to_rgba
 from matplotlib.patches import Rectangle
+from PIL import Image
 
 from autogaze.datasets.av_gaze_stavis import AVGazeStavisDataset
 from autogaze.human_gaze.coverage import (
-    center_order,
     global_positions_to_fine_cells,
     selected_coverage,
 )
@@ -89,7 +90,35 @@ def generate_cells(
     )[0].cpu()
 
 
-def add_heatmap(axis, heatmap: np.ndarray) -> None:
+def load_native_frame(
+    root: Path,
+    source: str,
+    video_id: str,
+    frame_number: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Load RGB and gaze at native display aspect without changing model input."""
+    rgb_path = root / "video_frames" / source / video_id / f"img_{frame_number:05d}.jpg"
+    heatmap_path = (
+        root
+        / "annotations"
+        / source
+        / video_id
+        / "maps"
+        / f"eyeMap_{frame_number:05d}.jpg"
+    )
+    with Image.open(rgb_path) as image:
+        rgb = np.asarray(image.convert("RGB"), dtype=np.uint8).copy()
+    with Image.open(heatmap_path) as image:
+        heatmap_image = image.convert("L")
+        if heatmap_image.size != (rgb.shape[1], rgb.shape[0]):
+            heatmap_image = heatmap_image.resize(
+                (rgb.shape[1], rgb.shape[0]), resample=Image.Resampling.BILINEAR
+            )
+        heatmap = np.asarray(heatmap_image, dtype=np.float32).copy()
+    return rgb, heatmap
+
+
+def add_heatmap(axis, heatmap: np.ndarray, max_alpha: float) -> None:
     peak = float(heatmap.max())
     normalized = heatmap / peak if peak > 0 else heatmap
     axis.imshow(
@@ -97,55 +126,57 @@ def add_heatmap(axis, heatmap: np.ndarray) -> None:
         cmap="magma",
         vmin=0,
         vmax=1,
-        alpha=np.clip(np.sqrt(normalized) * 0.72, 0, 0.72),
+        alpha=np.clip(np.sqrt(normalized) * max_alpha, 0, max_alpha),
     )
-
-
-def add_center_reference(axis, image_size: int = 224, grid_size: int = 14) -> None:
-    cell_size = image_size / grid_size
-    for cell in center_order(grid_size)[:16].tolist():
-        row, column = divmod(cell, grid_size)
-        axis.add_patch(
-            Rectangle(
-                (column * cell_size, row * cell_size),
-                cell_size,
-                cell_size,
-                fill=False,
-                edgecolor="white",
-                linewidth=0.55,
-                linestyle=(0, (2.5, 2.5)),
-                alpha=0.9,
-            )
+    if peak > 0:
+        axis.contour(
+            normalized,
+            levels=(0.35, 0.7),
+            colors=("#ff4fd8", "white"),
+            linewidths=(1.15, 1.5),
+            alpha=min(1.0, max_alpha + 0.18),
         )
 
 
-def add_prediction(axis, cells: torch.Tensor, color: str, image_size: int = 224) -> None:
-    cell_size = image_size / 14
+def add_prediction(
+    axis,
+    cells: torch.Tensor,
+    color: str,
+    image_height: int,
+    image_width: int,
+) -> None:
+    cell_height = image_height / 14
+    cell_width = image_width / 14
     for cell in cells.tolist():
         row, column = divmod(cell, 14)
         axis.add_patch(
             Rectangle(
-                (column * cell_size, row * cell_size),
-                cell_size,
-                cell_size,
-                facecolor=color,
+                (column * cell_width, row * cell_height),
+                cell_width,
+                cell_height,
+                facecolor=to_rgba(color, 0.30),
                 edgecolor=color,
-                linewidth=1.0,
-                alpha=0.20,
+                linewidth=1.65,
             )
         )
 
 
-def gaze_centroid(cell_mass: torch.Tensor, image_size: int = 224) -> tuple[float, float]:
-    cell_size = image_size / 14
+def gaze_centroid(
+    cell_mass: torch.Tensor,
+    image_height: int,
+    image_width: int,
+) -> tuple[float, float]:
+    cell_height = image_height / 14
+    cell_width = image_width / 14
     rows = torch.arange(14).repeat_interleave(14).to(cell_mass)
     columns = torch.arange(14).repeat(14).to(cell_mass)
-    x = float(((columns + 0.5) * cell_size * cell_mass).sum())
-    y = float(((rows + 0.5) * cell_size * cell_mass).sum())
+    x = float(((columns + 0.5) * cell_width * cell_mass).sum())
+    y = float(((rows + 0.5) * cell_height * cell_mass).sum())
     return x, y
 
 
 def render_clip(
+    root: Path,
     item: dict,
     example: dict,
     predictions: dict[str, torch.Tensor],
@@ -154,10 +185,17 @@ def render_clip(
 ) -> list[dict]:
     start = int(example["window_start"])
     positions = list(range(start, start + frames_per_clip))
+    first_rgb, _ = load_native_frame(
+        root,
+        item["source"],
+        item["video_id"],
+        int(item["frame_numbers"][positions[0]]),
+    )
+    display_aspect = first_rgb.shape[0] / first_rgb.shape[1]
     figure, axes = plt.subplots(
         frames_per_clip,
         4,
-        figsize=(13.6, 3.15 * frames_per_clip),
+        figsize=(15.2, (3.45 * display_aspect + 0.42) * frames_per_clip),
         constrained_layout=True,
     )
     if frames_per_clip == 1:
@@ -165,28 +203,40 @@ def render_clip(
     column_titles = ("Ground-truth gaze",) + tuple(policy[2] for policy in POLICIES)
     frame_reports = []
     for row_index, position in enumerate(positions):
-        rgb = item["video"][position].permute(1, 2, 0).numpy()
-        heatmap = item["heatmap"][position].numpy()
+        frame_number = int(item["frame_numbers"][position])
+        rgb, heatmap = load_native_frame(
+            root, item["source"], item["video_id"], frame_number
+        )
+        image_height, image_width = rgb.shape[:2]
         mass = item["cell_mass"][position]
-        centroid = gaze_centroid(mass)
+        centroid = gaze_centroid(mass, image_height, image_width)
         frame_report = {
             "clip_position": position,
-            "source_frame": int(item["frame_numbers"][position]),
+            "source_frame": frame_number,
             "timestamp_seconds": float(item["timestamps_seconds"][position]),
+            "native_display_size": [image_height, image_width],
             "outside_center32_mass": float(example["outside_center_mass"][position]),
             "coverage": {},
             "selected_cells": {},
         }
         for column_index, axis in enumerate(axes[row_index]):
             axis.imshow(rgb)
-            add_heatmap(axis, heatmap)
-            add_center_reference(axis)
+            add_heatmap(axis, heatmap, max_alpha=0.92 if column_index == 0 else 0.40)
             axis.scatter(
                 [centroid[0]],
                 [centroid[1]],
                 marker="+",
-                s=82,
-                linewidths=1.7,
+                s=125,
+                linewidths=4.2,
+                color="black",
+                zorder=19,
+            )
+            axis.scatter(
+                [centroid[0]],
+                [centroid[1]],
+                marker="+",
+                s=125,
+                linewidths=2.2,
                 color="#ff4fd8",
                 zorder=20,
             )
@@ -194,7 +244,7 @@ def render_clip(
                 key, budget, _, color = POLICIES[column_index - 1]
                 cells = predictions[key][position]
                 coverage = float(selected_coverage(mass.unsqueeze(0), cells).item())
-                add_prediction(axis, cells, color)
+                add_prediction(axis, cells, color, image_height, image_width)
                 axis.text(
                     0.98,
                     0.025,
@@ -221,8 +271,8 @@ def render_clip(
                     transform=axis.transAxes,
                     fontsize=9,
                 )
-            axis.set_xlim(-0.5, 223.5)
-            axis.set_ylim(223.5, -0.5)
+            axis.set_xlim(-0.5, image_width - 0.5)
+            axis.set_ylim(image_height - 0.5, -0.5)
             axis.axis("off")
         frame_reports.append(frame_report)
 
@@ -263,7 +313,7 @@ def main() -> None:
         manifest_path=args.manifest,
         split=args.split,
         load_rgb=True,
-        load_heatmap=True,
+        load_heatmap=False,
         cell_mass_path=args.cell_mass,
     )
 
@@ -292,7 +342,7 @@ def main() -> None:
             slug = f"{order:02d}_{item['source']}_{item['video_id']}".replace("/", "-")
             output_path = args.output_dir / f"offcenter_{slug}.png"
             frame_reports = render_clip(
-                item, example, predictions, args.frames_per_clip, output_path
+                Path(args.root), item, example, predictions, args.frames_per_clip, output_path
             )
             report_examples.append(
                 {
@@ -312,6 +362,10 @@ def main() -> None:
             "distinct_sources": True,
             "center_budget": args.center_budget,
             "frames_per_clip": args.frames_per_clip,
+            "render_geometry": (
+                "native-aspect RGB and heatmap with normalized 14x14 cells mapped back from "
+                "the model's direct full-field 224x224 input"
+            ),
         },
         "dataset": {
             "root": args.root,

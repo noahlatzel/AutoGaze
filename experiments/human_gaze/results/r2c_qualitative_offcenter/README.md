@@ -2,6 +2,8 @@
 
 This result selects three distinct-source validation clips using only ground-truth gaze mass outside Center-32, then renders four consecutive 3 Hz samples with ground-truth heatmaps and learned K16, K24, and K32 gaze cells.
 
+The model still receives its direct full-field 224×224 input. The figures restore the native display aspect ratio and map the normalized 14×14 cells back onto that geometry so the source video is easier to inspect.
+
 `qualitative_manifest.json` records the selection rule, checkpoints, clips, frame numbers, selected cells, and per-frame coverage. The K32 cells are exact-32 inference from the K36-trained decoder, not a separately trained K32 model.
 
 The rendered figures live in the wrapper vault at `wiki_gazing/assets/r2c_qualitative_offcenter/` and are interpreted in `wiki_gazing/Experiments/R2c Qualitative Off-Center Examples.md`.
