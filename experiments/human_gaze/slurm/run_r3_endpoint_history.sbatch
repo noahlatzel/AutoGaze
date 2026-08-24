@@ -24,5 +24,6 @@ for arm in control position; do
     --num-workers 4 \
     --output-json "outputs/human_gaze/r3b_temporal_diagnostics/${arm}_policy_history.json" \
     --output-plot "/home/stud/latn/master-thesis/wiki_gazing/assets/r3b_temporal_${arm}_history_sensitivity.png" \
-    --trajectory-plot "/home/stud/latn/master-thesis/wiki_gazing/assets/r3b_temporal_${arm}_trajectory_examples.png"
+    --trajectory-plot "/home/stud/latn/master-thesis/wiki_gazing/assets/r3b_temporal_${arm}_trajectory_examples.png" \
+    --motion-plot "/home/stud/latn/master-thesis/wiki_gazing/assets/r3b_temporal_${arm}_motion_response.png"
 done

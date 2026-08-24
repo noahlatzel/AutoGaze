@@ -69,6 +69,8 @@ def selected_coverage_batch(cell_mass, cells):
 
 def summarize(values):
     array = np.asarray(values, dtype=np.float64)
+    if not array.size:
+        return {"count": 0, "mean": None, "median": None, "p10": None, "p90": None}
     return {
         "count": int(array.size),
         "mean": float(array.mean()),
@@ -76,6 +78,17 @@ def summarize(values):
         "p10": float(np.quantile(array, 0.1)),
         "p90": float(np.quantile(array, 0.9)),
     }
+
+
+def adjacent_jsd(cell_mass):
+    left = cell_mass[:-1].to(torch.float64).clamp_min(0)
+    right = cell_mass[1:].to(torch.float64).clamp_min(0)
+    left = left / left.sum(-1, keepdim=True).clamp_min(1e-12)
+    right = right / right.sum(-1, keepdim=True).clamp_min(1e-12)
+    middle = 0.5 * (left + right)
+    left_term = torch.where(left > 0, left * (left.clamp_min(1e-12).log() - middle.log()), 0)
+    right_term = torch.where(right > 0, right * (right.clamp_min(1e-12).log() - middle.log()), 0)
+    return 0.5 * (left_term.sum(-1) + right_term.sum(-1))
 
 
 def choose_trajectory_examples(dataset, grid_size):
@@ -163,6 +176,55 @@ def plot_trajectory_examples(examples, trajectories, output_path, grid_size):
     plt.close(figure)
 
 
+def plot_motion_response(report, output_path):
+    sources = [
+        source
+        for source in STAVIS_SOURCES
+        if all(seed["per_source"][source] for seed in report["seeds"].values())
+    ]
+    figure, axes = plt.subplots(1, 2, figsize=(13.5, 5.2), constrained_layout=True)
+    x = np.arange(len(sources))
+    width = 0.36
+    predicted = [
+        np.mean([seed["per_source"][source]["normal_centroid_step"]["mean"] for seed in report["seeds"].values()])
+        for source in sources
+    ]
+    target = [
+        np.mean([seed["per_source"][source]["gt_centroid_step"]["mean"] for seed in report["seeds"].values()])
+        for source in sources
+    ]
+    axes[0].bar(x - width / 2, target, width, label="GT gaze", color="#444444")
+    axes[0].bar(x + width / 2, predicted, width, label="Policy", color="#4c78a8")
+    axes[0].set_xticks(x, sources, rotation=25, ha="right")
+    axes[0].set_ylabel("Centroid displacement / frame (cells)")
+    axes[0].set_title("Policy versus target motion")
+    axes[0].grid(axis="y", alpha=0.25)
+    axes[0].legend(frameon=False)
+
+    other = [
+        np.mean([seed["per_source"][source]["centroid_velocity_error_other"]["mean"] for seed in report["seeds"].values()])
+        for source in sources
+    ]
+    abrupt = []
+    for source in sources:
+        available = [
+            seed["per_source"][source]["centroid_velocity_error_abrupt"]["mean"]
+            for seed in report["seeds"].values()
+            if seed["per_source"][source]["centroid_velocity_error_abrupt"]["mean"] is not None
+        ]
+        abrupt.append(np.mean(available) if available else np.nan)
+    axes[1].bar(x - width / 2, other, width, label="Other transitions", color="#72b7b2")
+    axes[1].bar(x + width / 2, abrupt, width, label="Abrupt GT transitions", color="#e45756")
+    axes[1].set_xticks(x, sources, rotation=25, ha="right")
+    axes[1].set_ylabel("Centroid velocity-vector error (cells)")
+    axes[1].set_title("Response to abrupt target motion")
+    axes[1].grid(axis="y", alpha=0.25)
+    axes[1].legend(frameon=False)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(output_path, dpi=180)
+    plt.close(figure)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
@@ -175,10 +237,18 @@ def main():
     parser.add_argument("--output-json", type=Path, required=True)
     parser.add_argument("--output-plot", type=Path, required=True)
     parser.add_argument("--trajectory-plot", type=Path, required=True)
+    parser.add_argument("--motion-plot", type=Path, required=True)
+    parser.add_argument(
+        "--target-metrics",
+        type=Path,
+        default=Path("outputs/human_gaze/r3a_temporal_diagnostics/target_temporal_metrics.json"),
+    )
     args = parser.parse_args()
     config = OmegaConf.to_container(OmegaConf.load(args.config), resolve=True)
     seeds = args.seeds or [int(value) for value in config["diagnostics"]["k16_seeds"]]
     frame_index = int(config["diagnostics"]["history_audit_frame_index"])
+    target_metrics = json.loads(args.target_metrics.read_text())
+    abrupt_jsd_threshold = float(target_metrics["abrupt_transition"]["train_p95_jsd"])
     if frame_index != int(config["dataset"]["clip_len"]) - 1:
         raise ValueError("This audit requires the final frame so all preceding frames are causal history")
 
@@ -249,6 +319,21 @@ def main():
                     values[source]["reset_minus_normal_coverage"].extend((selected_coverage_batch(final_mass, final_reset) - normal_coverage).tolist())
                     values[source]["normal_centroid_step"].extend(torch.linalg.vector_norm(normal_points[batch_index, 1:] - normal_points[batch_index, :-1], dim=-1).tolist())
                     values[source]["gt_centroid_step"].extend(torch.linalg.vector_norm(gt_points[batch_index, 1:] - gt_points[batch_index, :-1], dim=-1).tolist())
+                    normal_jaccard = set_jaccard(normal[batch_index, :-1], normal[batch_index, 1:])
+                    gaze_jsd = adjacent_jsd(mass[batch_index])
+                    abrupt = gaze_jsd >= abrupt_jsd_threshold
+                    predicted_velocity = normal_points[batch_index, 1:] - normal_points[batch_index, :-1]
+                    target_velocity = gt_points[batch_index, 1:] - gt_points[batch_index, :-1]
+                    velocity_error = torch.linalg.vector_norm(predicted_velocity - target_velocity, dim=-1)
+                    selection_change = 1.0 - normal_jaccard
+                    values[source]["normal_set_jaccard_step"].extend(normal_jaccard.tolist())
+                    values[source]["normal_selection_change_step"].extend(selection_change.tolist())
+                    values[source]["centroid_velocity_error"].extend(velocity_error.tolist())
+                    values[source]["centroid_velocity_error_abrupt"].extend(velocity_error[abrupt].tolist())
+                    values[source]["centroid_velocity_error_other"].extend(velocity_error[~abrupt].tolist())
+                    values[source]["selection_change_abrupt"].extend(selection_change[abrupt].tolist())
+                    values[source]["selection_change_other"].extend(selection_change[~abrupt].tolist())
+                    values[source]["target_jsd_step"].extend(gaze_jsd.tolist())
                     global_index = indices[processed + batch_index]
                     if global_index in example_by_index:
                         trajectories[example_by_index[global_index]][seed] = normal_points[batch_index].numpy()
@@ -272,6 +357,7 @@ def main():
         "current_frame_invariant": True,
         "reset_definition": "the current RGB frame alone as a one-frame clip",
         "alternative_definition": "frames 0-14 from a deterministic same-source different-video clip; actual frame 15 retained",
+        "abrupt_transition_definition": f"adjacent target JSD >= pooled train p95 ({abrupt_jsd_threshold})",
         "seeds": report_seeds,
         "trajectory_examples": {source: dataset.records[value[0]]["clip_id"] for source, value in examples.items()},
     }
@@ -280,6 +366,7 @@ def main():
     plot_history(report, args.output_plot)
     if args.max_clips is None:
         plot_trajectory_examples(examples, trajectories, args.trajectory_plot, grid_size)
+    plot_motion_response(report, args.motion_plot)
 
 
 if __name__ == "__main__":
