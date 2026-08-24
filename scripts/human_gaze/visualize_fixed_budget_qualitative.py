@@ -16,12 +16,15 @@ from matplotlib.colors import to_rgba
 from matplotlib.patches import Rectangle
 from PIL import Image
 
-from autogaze.datasets.av_gaze_stavis import AVGazeStavisDataset
+from autogaze.datasets.av_gaze_stavis import AVGazeStavisDataset, STAVIS_SOURCES
 from autogaze.human_gaze.coverage import (
     global_positions_to_fine_cells,
     selected_coverage,
 )
-from autogaze.human_gaze.qualitative import select_off_center_examples
+from autogaze.human_gaze.qualitative import (
+    select_off_center_examples,
+    select_off_center_examples_per_source,
+)
 from autogaze.models.autogaze import AutoGaze, AutoGazeImageProcessor
 
 
@@ -42,6 +45,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--k32-checkpoint", type=Path, required=True)
     parser.add_argument("--split", default="val")
     parser.add_argument("--num-clips", type=int, default=3)
+    parser.add_argument("--clips-per-source", type=int)
     parser.add_argument("--frames-per-clip", type=int, default=4)
     parser.add_argument("--center-budget", type=int, default=32)
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -301,13 +305,23 @@ def main() -> None:
         load_heatmap=False,
         cell_mass_path=args.cell_mass,
     )
-    examples = select_off_center_examples(
-        selection_dataset.records,
-        selection_dataset.cell_mass,
-        num_clips=args.num_clips,
-        frame_count=args.frames_per_clip,
-        center_budget=args.center_budget,
-    )
+    if args.clips_per_source is None:
+        examples = select_off_center_examples(
+            selection_dataset.records,
+            selection_dataset.cell_mass,
+            num_clips=args.num_clips,
+            frame_count=args.frames_per_clip,
+            center_budget=args.center_budget,
+        )
+    else:
+        examples = select_off_center_examples_per_source(
+            selection_dataset.records,
+            selection_dataset.cell_mass,
+            sources=STAVIS_SOURCES,
+            clips_per_source=args.clips_per_source,
+            frame_count=args.frames_per_clip,
+            center_budget=args.center_budget,
+        )
     raw_dataset = AVGazeStavisDataset(
         root=args.root,
         manifest_path=args.manifest,
@@ -339,8 +353,17 @@ def main() -> None:
                 key: generate_cells(models[key], video, budget)
                 for key, budget, _, _ in POLICIES
             }
-            slug = f"{order:02d}_{item['source']}_{item['video_id']}".replace("/", "-")
-            output_path = args.output_dir / f"offcenter_{slug}.png"
+            if args.clips_per_source is None:
+                slug = f"{order:02d}_{item['source']}_{item['video_id']}".replace("/", "-")
+                output_path = args.output_dir / f"offcenter_{slug}.png"
+            else:
+                source_slug = item["source"].replace("/", "-")
+                video_slug = item["video_id"].replace("/", "-").replace(" ", "_")
+                output_path = (
+                    args.output_dir
+                    / source_slug
+                    / f"{int(example['source_rank']):02d}_{video_slug}.png"
+                )
             frame_reports = render_clip(
                 Path(args.root), item, example, predictions, args.frames_per_clip, output_path
             )
@@ -359,7 +382,10 @@ def main() -> None:
         "selection": {
             "criterion": "highest mean ground-truth mass outside Center-32 over a consecutive frame window",
             "model_independent": True,
-            "distinct_sources": True,
+            "distinct_sources": args.clips_per_source is None,
+            "source_balanced": args.clips_per_source is not None,
+            "clips_per_source": args.clips_per_source,
+            "prefer_distinct_videos_within_source": args.clips_per_source is not None,
             "center_budget": args.center_budget,
             "frames_per_clip": args.frames_per_clip,
             "render_geometry": (

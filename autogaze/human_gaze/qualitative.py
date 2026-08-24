@@ -84,3 +84,74 @@ def select_off_center_examples(
             f"Requested {num_clips} distinct-source clips, found only {len(selected)}"
         )
     return selected
+
+
+def select_off_center_examples_per_source(
+    records: Sequence[Mapping],
+    cell_mass: np.ndarray,
+    sources: Sequence[str],
+    clips_per_source: int = 4,
+    frame_count: int = 4,
+    center_budget: int = 32,
+    grid_size: int = 14,
+) -> list[dict]:
+    """Select off-center clips per source, preferring distinct videos."""
+    if clips_per_source <= 0:
+        raise ValueError("clips_per_source must be positive")
+
+    candidates_by_source = {source: [] for source in sources}
+    for dataset_index, record in enumerate(records):
+        source = record["source"]
+        if source not in candidates_by_source:
+            continue
+        cache_index = int(record["cell_mass_index"])
+        start, score, outside = strongest_off_center_window(
+            cell_mass[cache_index],
+            frame_count=frame_count,
+            center_budget=center_budget,
+            grid_size=grid_size,
+        )
+        candidates_by_source[source].append(
+            {
+                "dataset_index": dataset_index,
+                "clip_id": record["clip_id"],
+                "source": source,
+                "video_id": record["video_id"],
+                "window_start": start,
+                "off_center_score": score,
+                "outside_center_mass": outside.tolist(),
+            }
+        )
+
+    selected = []
+    for source in sources:
+        candidates = sorted(
+            candidates_by_source[source],
+            key=lambda value: (-value["off_center_score"], value["clip_id"]),
+        )
+        source_selected = []
+        used_clips = set()
+        used_videos = set()
+        for candidate in candidates:
+            if candidate["video_id"] in used_videos:
+                continue
+            source_selected.append(candidate)
+            used_clips.add(candidate["clip_id"])
+            used_videos.add(candidate["video_id"])
+            if len(source_selected) == clips_per_source:
+                break
+        for candidate in candidates:
+            if len(source_selected) == clips_per_source:
+                break
+            if candidate["clip_id"] in used_clips:
+                continue
+            source_selected.append(candidate)
+            used_clips.add(candidate["clip_id"])
+        if len(source_selected) < clips_per_source:
+            raise ValueError(
+                f"Requested {clips_per_source} clips for {source}, found only "
+                f"{len(source_selected)}"
+            )
+        for source_rank, candidate in enumerate(source_selected, start=1):
+            selected.append({**candidate, "source_rank": source_rank})
+    return selected
