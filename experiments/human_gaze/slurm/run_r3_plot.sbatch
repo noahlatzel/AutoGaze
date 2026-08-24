@@ -13,6 +13,10 @@ conda activate autogaze
 cd /storage/user/latn/worktrees/autogaze-r3-analysis
 export OMP_NUM_THREADS=2
 
+python scripts/human_gaze/verify_r3_temporal_position.py \
+  --output-json outputs/human_gaze/r3b_temporal_diagnostics/verification.json \
+  --max-signal-ratio 0.25
+
 python scripts/human_gaze/plot_r3_temporal_position.py \
   --output-dir /home/stud/latn/master-thesis/wiki_gazing/assets \
   --summary-json outputs/human_gaze/r3b_temporal_diagnostics/summary.json
