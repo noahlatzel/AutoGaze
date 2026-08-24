@@ -22,6 +22,9 @@ diagnostics:
   k16_seeds: [440826, 440827, 440828, 440829, 440830, 440831]
   checkpoint_template: outputs/human_gaze/grpo/r2b_fresh20k_stage3_base{seed}_seed{continuation_seed}/checkpoint_latest_gaze
   continuation_seed_offset: 100000
+  history_audit_frame_index: 15
+  history_audit_scope: every_validation_clip
+  history_audit_note: current RGB is held fixed; only frames 0-14 are reset or replaced
 architecture:
   budget: 16
   paired_seeds: [440826, 440827, 440828]
