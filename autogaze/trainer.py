@@ -288,6 +288,8 @@ class Trainer:
         gaze_model = unwrap_model(self.gaze_model).gazing_model
         if hasattr(gaze_model, "temporal_position_signal"):
             metrics.update(gaze_model.temporal_position_signal.diagnostics())
+        if hasattr(gaze_model, "causal_difference_signal"):
+            metrics.update(gaze_model.causal_difference_signal.diagnostics())
         return metrics
 
     def train_epoch(self, ep, start_iter):

@@ -185,6 +185,10 @@ class AutoGazeModel(nn.Module):
                 gaze_model_config.gaze_decoder_config.hidden_size,
                 max_frequency=gaze_model_config.temporal_position_max_frequency,
             )
+        elif temporal_mode == "causal_connector_difference_scalar_gate":
+            self.causal_difference_signal = CausalConnectorDifferenceSignal(
+                gaze_model_config.gaze_decoder_config.hidden_size,
+            )
         elif temporal_mode != "none":
             raise ValueError(f"Unknown temporal position encoding: {temporal_mode}")
 
@@ -221,6 +225,8 @@ class AutoGazeModel(nn.Module):
             vision_features = self.connector(vision_features)
             if hasattr(self, "temporal_position_signal"):
                 vision_features = self.temporal_position_signal(vision_features)
+            elif hasattr(self, "causal_difference_signal"):
+                vision_features = self.causal_difference_signal(vision_features)
             vision_attention_mask = [torch.ones(B, vision_features.shape[2], device=vision_features.device).long() for _ in range(vision_features.shape[1])]
 
         if gaze_pos_ids is not None:
@@ -660,4 +666,39 @@ class TemporalPositionSignal(nn.Module):
         return {
             "temporal_position_gate": self.gate.detach(),
             "temporal_signal_to_feature_rms": self.gate.detach().abs(),
+        }
+
+
+class CausalConnectorDifferenceSignal(nn.Module):
+    """Framewise RMS-normalized causal connector difference with one gate."""
+
+    def __init__(self, hidden_dim: int):
+        super().__init__()
+        if hidden_dim < 1:
+            raise ValueError("hidden_dim must be positive")
+        self.hidden_dim = int(hidden_dim)
+        self.gate = nn.Parameter(torch.zeros(()))
+
+    def normalized_difference(self, features):
+        if features.ndim != 4 or features.shape[-1] != self.hidden_dim:
+            raise ValueError("Expected features shaped (batch, frames, tokens, hidden_dim)")
+        fixed_features = features.detach()
+        difference = torch.zeros_like(fixed_features)
+        difference[:, 1:] = fixed_features[:, 1:] - fixed_features[:, :-1]
+        difference_rms = difference.square().mean(dim=(-2, -1), keepdim=True).sqrt()
+        return torch.where(
+            difference_rms > 1e-8,
+            difference / difference_rms.clamp_min(1e-8),
+            torch.zeros_like(difference),
+        )
+
+    def forward(self, features):
+        signal = self.normalized_difference(features)
+        feature_rms = features.detach().square().mean(dim=(-2, -1), keepdim=True).sqrt()
+        return features + self.gate.to(features.dtype) * feature_rms * signal
+
+    def diagnostics(self):
+        return {
+            "causal_difference_gate": self.gate.detach(),
+            "causal_difference_signal_to_feature_rms_ceiling": self.gate.detach().abs(),
         }
