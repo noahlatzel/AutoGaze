@@ -48,6 +48,37 @@
       }
     }
   },
-  "phase2": null,
+  "phase2": {
+    "decision": "inconclusive",
+    "dynamic_minus_static_positive_all_treatment_seeds": true,
+    "endpoint_paired_delta": {
+      "440826": 0.0018510279972164256,
+      "440827": 0.00023527802205119963,
+      "440828": 0.00039860264742908047
+    },
+    "endpoint_paired_mean_delta": 0.0008283028888989019,
+    "endpoint_paired_sample_std": 0.0008894626010693335,
+    "endpoint_paired_t95_ci": [-0.001381244701692065, 0.0030378504794898687],
+    "history_and_motion_change": {
+      "centroid_velocity_error_mean_delta": -0.0022207567412028486,
+      "normal_vs_alternative_jaccard_mean_delta": -0.0006813637229145705,
+      "normal_vs_reset_jaccard_mean_delta": -0.0024110017066712266
+    },
+    "matched_curve_auc_mean_delta": -0.00008684274393044498,
+    "maximum_endpoint_signal_to_feature_rms": 0.0006719521479681134,
+    "maximum_observed_signal_to_feature_rms": 0.0006767601007595658,
+    "minimum_source_mean_delta": -0.000048924754891136825,
+    "norm_controlled": true,
+    "positive_seed_pairs": 3,
+    "source_mean_paired_delta": {
+      "AVAD": 0.0008695142136679879,
+      "Coutrot_db1": -0.000048924754891136825,
+      "Coutrot_db2": 0.0019337250427766313,
+      "DIEM": 0.0005105725012176469,
+      "ETMD_av": 0.0003588932875947896,
+      "SumMe": 0.0013460370430279367
+    },
+    "test_split_opened": false
+  },
   "schema_version": 1
 }

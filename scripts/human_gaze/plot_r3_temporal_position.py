@@ -12,9 +12,26 @@ import numpy as np
 
 from autogaze.datasets.av_gaze_stavis import STAVIS_SOURCES
 
-
 SEEDS = (440826, 440827, 440828)
 TRAINING_SEED_OFFSET = 200000
+T95_DF2 = 4.302652729911275
+
+HISTORY_METRICS = (
+    "normal_vs_reset_jaccard",
+    "normal_vs_alternative_jaccard",
+    "reset_centroid_shift",
+    "alternative_centroid_shift",
+    "reset_minus_normal_coverage",
+    "alternative_minus_normal_coverage",
+    "normal_set_jaccard_step",
+    "normal_centroid_step",
+    "gt_centroid_step",
+    "centroid_velocity_error",
+    "centroid_velocity_error_abrupt",
+    "centroid_velocity_error_other",
+    "selection_change_abrupt",
+    "selection_change_other",
+)
 
 
 def run_name(arm, seed):
@@ -35,7 +52,9 @@ def load_runs(root):
             training = read_jsonl(directory / "training_metrics.jsonl")
             endpoint = [row for row in validation if int(row["train_step"]) == 10000]
             if len(endpoint) != 1:
-                raise ValueError(f"Expected one fixed endpoint in {directory}, found {len(endpoint)}")
+                raise ValueError(
+                    f"Expected one fixed endpoint in {directory}, found {len(endpoint)}"
+                )
             runs[arm][seed] = {
                 "validation": validation,
                 "training": training,
@@ -56,7 +75,11 @@ def matched_curves(runs, key):
         curves[arm] = np.asarray(
             [
                 [
-                    next(row[key] for row in runs[arm][seed]["validation"] if int(row["train_step"]) == step)
+                    next(
+                        row[key]
+                        for row in runs[arm][seed]["validation"]
+                        if int(row["train_step"]) == step
+                    )
                     for step in steps
                 ]
                 for seed in SEEDS
@@ -76,9 +99,15 @@ def plot_learning(runs, output_path):
         mean = curves[arm].mean(0)
         std = curves[arm].std(0, ddof=1)
         axes[0].plot(steps, mean, color=colors[arm], linewidth=2.3, label=arm.title())
-        axes[0].fill_between(steps, mean - std, mean + std, color=colors[arm], alpha=0.14)
-    axes[0].axhline(0.4237799161677996, color="#555555", linestyle="--", label="Prior-16")
-    axes[0].axhline(0.36891054740813767, color="#999999", linestyle=":", label="Center-16")
+        axes[0].fill_between(
+            steps, mean - std, mean + std, color=colors[arm], alpha=0.14
+        )
+    axes[0].axhline(
+        0.4237799161677996, color="#555555", linestyle="--", label="Prior-16"
+    )
+    axes[0].axhline(
+        0.36891054740813767, color="#999999", linestyle=":", label="Center-16"
+    )
     axes[0].set_xlabel("Continuation updates")
     axes[0].set_ylabel("Validation macro-source K16 coverage")
     axes[0].set_title("Paired fixed-step learning curves")
@@ -88,9 +117,13 @@ def plot_learning(runs, output_path):
     paired = curves["position"] - curves["control"]
     for seed, curve in zip(SEEDS, paired):
         axes[1].plot(steps, curve, alpha=0.45, linewidth=1, label=str(seed))
-    axes[1].plot(steps, paired.mean(0), color="black", linewidth=2.4, label="Paired mean")
+    axes[1].plot(
+        steps, paired.mean(0), color="black", linewidth=2.4, label="Paired mean"
+    )
     axes[1].axhline(0, color="#777777", linewidth=1)
-    axes[1].axhline(0.005, color="#2ca02c", linestyle="--", linewidth=1, label="Pass effect size")
+    axes[1].axhline(
+        0.005, color="#2ca02c", linestyle="--", linewidth=1, label="Pass effect size"
+    )
     axes[1].set_xlabel("Continuation updates")
     axes[1].set_ylabel("Position − control macro K16")
     axes[1].set_title("Matched-seed treatment effect")
@@ -117,7 +150,14 @@ def plot_sources_and_gate(runs, output_path):
     )
     axes[0].bar(x, source_deltas.mean(0), color="#e45756", alpha=0.8)
     for seed_index, seed in enumerate(SEEDS):
-        axes[0].scatter(x, source_deltas[seed_index], color="black", s=20, alpha=0.65, label=str(seed) if seed_index == 0 else None)
+        axes[0].scatter(
+            x,
+            source_deltas[seed_index],
+            color="black",
+            s=20,
+            alpha=0.65,
+            label=str(seed) if seed_index == 0 else None,
+        )
     axes[0].axhline(0, color="black", linewidth=1)
     axes[0].set_xticks(x, STAVIS_SOURCES, rotation=25, ha="right")
     axes[0].set_ylabel("Position − control endpoint coverage")
@@ -131,7 +171,13 @@ def plot_sources_and_gate(runs, output_path):
         gate = np.asarray([row["temporal_position_gate"] for row in rows])
         gate_curves.append(gate)
         axes[1].plot(steps, gate, alpha=0.38, linewidth=1, label=str(seed))
-    axes[1].plot(steps, np.asarray(gate_curves).mean(0), color="black", linewidth=2.2, label="Mean")
+    axes[1].plot(
+        steps,
+        np.asarray(gate_curves).mean(0),
+        color="black",
+        linewidth=2.2,
+        label="Mean",
+    )
     axes[1].axhline(0, color="#777777", linewidth=1)
     axes[1].set_xlabel("Continuation updates")
     axes[1].set_ylabel("Learned scalar gate (= signal/feature RMS with sign)")
@@ -148,12 +194,75 @@ def load_center_diagnostics(diagnostics_root):
     return {
         arm: {
             seed: json.loads(
-                (diagnostics_root / run_name(arm, seed) / "center_collapse_val.json").read_text()
+                (
+                    diagnostics_root / run_name(arm, seed) / "center_collapse_val.json"
+                ).read_text()
             )
             for seed in SEEDS
         }
         for arm in ("control", "position")
     }
+
+
+def load_history_diagnostics(diagnostics_root):
+    return {
+        arm: json.loads((diagnostics_root / f"{arm}_policy_history.json").read_text())
+        for arm in ("control", "position")
+    }
+
+
+def paired_summary(values):
+    values = np.asarray(values, dtype=np.float64)
+    sample_std = float(values.std(ddof=1))
+    standard_error = sample_std / np.sqrt(values.size)
+    half_width = T95_DF2 * standard_error
+    mean = float(values.mean())
+    return {
+        "mean": mean,
+        "sample_std": sample_std,
+        "standard_error": float(standard_error),
+        "t95_ci": [mean - half_width, mean + half_width],
+    }
+
+
+def weighted_history_mean(seed_report, metric):
+    summaries = [source[metric] for source in seed_report["per_source"].values()]
+    count = sum(int(summary["count"]) for summary in summaries)
+    if count == 0:
+        return float("nan")
+    return (
+        sum(float(summary["mean"]) * int(summary["count"]) for summary in summaries)
+        / count
+    )
+
+
+def summarize_history(history):
+    result = {"arm_seed_global_means": {}, "paired_position_minus_control": {}}
+    arm_values = {}
+    for arm in ("control", "position"):
+        arm_values[arm] = {}
+        result["arm_seed_global_means"][arm] = {}
+        for seed in SEEDS:
+            seed_report = history[arm]["seeds"][str(seed)]
+            metrics = {
+                metric: weighted_history_mean(seed_report, metric)
+                for metric in HISTORY_METRICS
+            }
+            arm_values[arm][seed] = metrics
+            result["arm_seed_global_means"][arm][str(seed)] = metrics
+    for metric in HISTORY_METRICS:
+        deltas = np.asarray(
+            [
+                arm_values["position"][seed][metric]
+                - arm_values["control"][seed][metric]
+                for seed in SEEDS
+            ]
+        )
+        result["paired_position_minus_control"][metric] = {
+            "by_seed": dict(zip(map(str, SEEDS), deltas.tolist())),
+            **paired_summary(deltas),
+        }
+    return result
 
 
 def plot_controls(center, output_path):
@@ -165,20 +274,33 @@ def plot_controls(center, output_path):
     width = 0.19
     for method_index, (method, label, color) in enumerate(zip(methods, labels, colors)):
         means = [
-            np.mean([center[arm][seed]["coverage"][method]["16"]["macro_source_mean"] for seed in SEEDS])
+            np.mean(
+                [
+                    center[arm][seed]["coverage"][method]["16"]["macro_source_mean"]
+                    for seed in SEEDS
+                ]
+            )
             for arm in ("control", "position")
         ]
-        axes[0].bar(x + (method_index - 1.5) * width, means, width, label=label, color=color)
+        axes[0].bar(
+            x + (method_index - 1.5) * width, means, width, label=label, color=color
+        )
     axes[0].set_xticks(x, ("Control", "Temporal position"))
     axes[0].set_ylabel("Endpoint macro-source K16 coverage")
     axes[0].set_title("Dynamic and static endpoint controls")
     axes[0].grid(axis="y", alpha=0.25)
     axes[0].legend(frameon=False, fontsize=8)
 
-    diagnostic_keys = ("mean_center16_overlap_fraction", "mean_actual_shuffled_overlap_fraction")
+    diagnostic_keys = (
+        "mean_center16_overlap_fraction",
+        "mean_actual_shuffled_overlap_fraction",
+    )
     diagnostic_labels = ("Center-16 overlap", "Shuffled-video overlap")
     for index, (key, label) in enumerate(zip(diagnostic_keys, diagnostic_labels)):
-        means = [np.mean([center[arm][seed]["diagnostics"][key] for seed in SEEDS]) for arm in ("control", "position")]
+        means = [
+            np.mean([center[arm][seed]["diagnostics"][key] for seed in SEEDS])
+            for arm in ("control", "position")
+        ]
         axes[1].bar(x + (index - 0.5) * 0.34, means, 0.34, label=label)
     axes[1].set_xticks(x, ("Control", "Temporal position"))
     axes[1].set_ylabel("Mean selection overlap fraction")
@@ -190,9 +312,11 @@ def plot_controls(center, output_path):
     plt.close(figure)
 
 
-def summarize(runs, steps, curves, source_deltas, center):
+def summarize(runs, steps, curves, source_deltas, center, history=None):
     endpoint_pairs = curves["position"][:, -1] - curves["control"][:, -1]
-    auc_pairs = np.trapezoid(curves["position"] - curves["control"], steps, axis=1) / (steps[-1] - steps[0])
+    auc_pairs = np.trapezoid(curves["position"] - curves["control"], steps, axis=1) / (
+        steps[-1] - steps[0]
+    )
     dynamic_minus_static = {
         arm: [
             center[arm][seed]["diagnostics"]["actual_minus_static_topk_macro"]
@@ -203,46 +327,114 @@ def summarize(runs, steps, curves, source_deltas, center):
     mean_delta = float(endpoint_pairs.mean())
     positive = int((endpoint_pairs > 0).sum())
     dynamic_positive = all(value > 0 for value in dynamic_minus_static["position"])
-    if mean_delta >= 0.005 and positive >= 2 and dynamic_positive:
+    norm_ratios = np.asarray(
+        [
+            runs["position"][seed]["endpoint"]["temporal_signal_to_feature_rms"]
+            for seed in SEEDS
+        ]
+    )
+    norm_controlled = bool(
+        np.isfinite(norm_ratios).all() and (norm_ratios <= 0.25).all()
+    )
+    if mean_delta >= 0.005 and positive >= 2 and dynamic_positive and norm_controlled:
         decision = "pass"
     elif mean_delta <= 0 and int((endpoint_pairs <= 0).sum()) >= 2:
         decision = "fail"
     else:
         decision = "inconclusive"
-    return {
+    source_by_seed = {
+        source: dict(zip(map(str, SEEDS), source_deltas[:, source_index].tolist()))
+        for source_index, source in enumerate(STAVIS_SOURCES)
+    }
+    center_controls = {
+        arm: {
+            str(seed): {
+                "actual_minus_center_macro": center[arm][seed]["diagnostics"][
+                    "actual_minus_center_macro"
+                ],
+                "actual_minus_static_topk_macro": center[arm][seed]["diagnostics"][
+                    "actual_minus_static_topk_macro"
+                ],
+                "actual_minus_shuffled_macro": center[arm][seed]["diagnostics"][
+                    "actual_minus_shuffled_macro"
+                ],
+                "mean_center16_overlap_fraction": center[arm][seed]["diagnostics"][
+                    "mean_center16_overlap_fraction"
+                ],
+                "mean_actual_shuffled_overlap_fraction": center[arm][seed][
+                    "diagnostics"
+                ]["mean_actual_shuffled_overlap_fraction"],
+                "normalized_selection_entropy": center[arm][seed]["diagnostics"][
+                    "normalized_selection_entropy"
+                ],
+            }
+            for seed in SEEDS
+        }
+        for arm in ("control", "position")
+    }
+    report = {
         "schema_version": 1,
         "fixed_endpoint_step": 10000,
         "endpoint_paired_delta": dict(zip(map(str, SEEDS), endpoint_pairs.tolist())),
         "endpoint_mean_paired_delta": mean_delta,
+        "endpoint_paired_uncertainty": paired_summary(endpoint_pairs),
         "positive_seed_pairs": positive,
-        "matched_curve_auc_paired_delta": dict(zip(map(str, SEEDS), auc_pairs.tolist())),
-        "source_mean_paired_delta": dict(zip(STAVIS_SOURCES, source_deltas.mean(0).tolist())),
+        "matched_curve_auc_paired_delta": dict(
+            zip(map(str, SEEDS), auc_pairs.tolist())
+        ),
+        "matched_curve_auc_paired_uncertainty": paired_summary(auc_pairs),
+        "source_mean_paired_delta": dict(
+            zip(STAVIS_SOURCES, source_deltas.mean(0).tolist())
+        ),
+        "source_paired_delta_by_seed": source_by_seed,
+        "minimum_source_mean_paired_delta": float(source_deltas.mean(0).min()),
         "treatment_final_gate": {
             str(seed): runs["position"][seed]["endpoint"]["temporal_position_gate"]
             for seed in SEEDS
         },
         "treatment_final_signal_to_feature_rms": {
-            str(seed): runs["position"][seed]["endpoint"]["temporal_signal_to_feature_rms"]
+            str(seed): runs["position"][seed]["endpoint"][
+                "temporal_signal_to_feature_rms"
+            ]
             for seed in SEEDS
         },
         "dynamic_minus_static": dynamic_minus_static,
+        "dynamic_minus_static_positive_all_treatment_seeds": dynamic_positive,
+        "center_controls": center_controls,
+        "norm_controlled": norm_controlled,
+        "maximum_treatment_signal_to_feature_rms": float(norm_ratios.max()),
         "decision": decision,
     }
+    if history is not None:
+        report["history_and_motion_secondary"] = summarize_history(history)
+    return report
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--run-root", type=Path, default=Path("outputs/human_gaze/grpo"))
-    parser.add_argument("--diagnostics-root", type=Path, default=Path("outputs/human_gaze/diagnostics"))
+    parser.add_argument(
+        "--run-root", type=Path, default=Path("outputs/human_gaze/grpo")
+    )
+    parser.add_argument(
+        "--diagnostics-root", type=Path, default=Path("outputs/human_gaze/diagnostics")
+    )
+    parser.add_argument("--history-root", type=Path)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--summary-json", type=Path, required=True)
     args = parser.parse_args()
     runs = load_runs(args.run_root)
-    steps, curves = plot_learning(runs, args.output_dir / "r3b_temporal_position_learning_curves.png")
-    source_deltas = plot_sources_and_gate(runs, args.output_dir / "r3b_temporal_position_sources_and_gate.png")
+    steps, curves = plot_learning(
+        runs, args.output_dir / "r3b_temporal_position_learning_curves.png"
+    )
+    source_deltas = plot_sources_and_gate(
+        runs, args.output_dir / "r3b_temporal_position_sources_and_gate.png"
+    )
     center = load_center_diagnostics(args.diagnostics_root)
-    plot_controls(center, args.output_dir / "r3b_temporal_position_endpoint_controls.png")
-    summary = summarize(runs, steps, curves, source_deltas, center)
+    plot_controls(
+        center, args.output_dir / "r3b_temporal_position_endpoint_controls.png"
+    )
+    history = load_history_diagnostics(args.history_root or args.summary_json.parent)
+    summary = summarize(runs, steps, curves, source_deltas, center, history)
     args.summary_json.parent.mkdir(parents=True, exist_ok=True)
     args.summary_json.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n")
     print(json.dumps(summary, sort_keys=True))
