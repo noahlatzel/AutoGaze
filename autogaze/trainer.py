@@ -290,6 +290,8 @@ class Trainer:
             metrics.update(gaze_model.temporal_position_signal.diagnostics())
         if hasattr(gaze_model, "causal_difference_signal"):
             metrics.update(gaze_model.causal_difference_signal.diagnostics())
+        if hasattr(gaze_model, "feature_transport_bias"):
+            metrics.update(gaze_model.feature_transport_bias.diagnostics())
         return metrics
 
     def train_epoch(self, ep, start_iter):

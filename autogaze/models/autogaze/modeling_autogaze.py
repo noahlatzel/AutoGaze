@@ -84,6 +84,24 @@ class AllowedTokensLogitsProcessor(LogitsProcessor):
         return masked
 
 
+class AdditiveTokenBiasLogitsProcessor(LogitsProcessor):
+    """Add one batch-specific token bias to every active prediction head."""
+
+    def __init__(self, token_bias):
+        super().__init__()
+        if token_bias.ndim != 2:
+            raise ValueError("token_bias must have shape (batch, vocabulary)")
+        self.token_bias = token_bias
+
+    def __call__(self, input_ids, scores):
+        del input_ids
+        if scores.ndim == 2:
+            return scores + self.token_bias
+        if scores.ndim == 3:
+            return scores + self.token_bias[:, None, :]
+        raise ValueError("scores must have shape (batch, vocabulary) or (batch, heads, vocabulary)")
+
+
 class MinimumGazeTokensLogitsProcessor(LogitsProcessor):
     """Keep EOS masked until a minimum number of spatial actions is reached."""
 
@@ -188,6 +206,11 @@ class AutoGazeModel(nn.Module):
         elif temporal_mode == "causal_connector_difference_scalar_gate":
             self.causal_difference_signal = CausalConnectorDifferenceSignal(
                 gaze_model_config.gaze_decoder_config.hidden_size,
+            )
+        elif temporal_mode == "causal_feature_transport_logit_bias":
+            self.feature_transport_bias = CausalFeatureTransportLogitBias(
+                gaze_model_config.gaze_decoder_config.hidden_size,
+                temperature=gaze_model_config.feature_transport_temperature,
             )
         elif temporal_mode != "none":
             raise ValueError(f"Unknown temporal position encoding: {temporal_mode}")
@@ -294,6 +317,7 @@ class AutoGazeModel(nn.Module):
 
         # Generate gaze position IDs for each frame
         gaze_pos_ids_list = []
+        previous_gaze_pos_ids = None
         inputs_embeds = [] if past_inputs_embeds is None else past_inputs_embeds
         attention_mask = [] if past_attention_mask is None else past_attention_mask
         past_key_values = None if past_key_values is None else past_key_values
@@ -319,6 +343,26 @@ class AutoGazeModel(nn.Module):
             if is_gradient_checkpointing:
                 self.gaze_decoder.gradient_checkpointing_disable()
             logits_processor = LogitsProcessorList(list(self.logits_processor))
+            if hasattr(self, "feature_transport_bias"):
+                if allowed_token_ids is None:
+                    raise ValueError("Feature transport requires explicit allowed_token_ids")
+                if t:
+                    previous_appearance = (
+                        video_embeds[t - 1] - self.connector.pos_embed[None]
+                    )
+                    current_appearance = video_embeds[t] - self.connector.pos_embed[None]
+                    transport_scores = self.feature_transport_bias.normalized_scores(
+                        previous_appearance,
+                        current_appearance,
+                        previous_gaze_pos_ids,
+                        allowed_token_ids,
+                    )
+                    token_bias = self.feature_transport_bias.token_bias(
+                        transport_scores,
+                        allowed_token_ids,
+                        self.gaze_decoder_config.vocab_size,
+                    )
+                    logits_processor.append(AdditiveTokenBiasLogitsProcessor(token_bias))
             if not allow_eos:
                 logits_processor.append(NoEosTokenLogitsProcessor())
             elif min_gaze_tokens_each_frame:
@@ -350,6 +394,7 @@ class AutoGazeModel(nn.Module):
             # Get the predicted gaze ids
             gaze_pos_ids = gaze_outputs.sequences  # B * N
             gaze_pos_ids_list.append(gaze_pos_ids + self.num_vision_tokens_each_frame * t)
+            previous_gaze_pos_ids = gaze_pos_ids
 
             # Update inputs_embeds for the next frame
             inputs_embeds.append(self.gaze_decoder.model.embed_tokens(gaze_pos_ids))
@@ -424,6 +469,18 @@ class AutoGazeModel(nn.Module):
         gaze_pred_source_relative = torch.cat(gaze_pred_source_relative, dim=0)  # N
         attention_mask = torch.cat(attention_mask, dim=1)  # B * N
 
+        effective_allowed_ids = (
+            list(allowed_token_ids)
+            if allowed_token_ids is not None
+            else list(range(self.gaze_decoder_config.vocab_size))
+        )
+        if not allow_eos:
+            effective_allowed_ids = [
+                token_id
+                for token_id in effective_allowed_ids
+                if token_id != self.gaze_decoder_config.eos_token_id
+            ]
+
         # Run model forward
         outputs = self.gaze_decoder(
             inputs_embeds=inputs_embeds,
@@ -436,17 +493,47 @@ class AutoGazeModel(nn.Module):
         logits_multi_token_pred = outputs.logits
         task_loss_prediction_multi_token_pred = outputs.task_loss_prediction  # B * N * num_multi_token_pred
         logits_multi_token_pred = rearrange(logits_multi_token_pred, 'b n (k c) -> b n k c', k=self.num_multi_token_pred)
-        effective_allowed_ids = (
-            list(allowed_token_ids)
-            if allowed_token_ids is not None
-            else list(range(self.gaze_decoder_config.vocab_size))
-        )
-        if not allow_eos:
-            effective_allowed_ids = [
-                token_id
-                for token_id in effective_allowed_ids
-                if token_id != self.gaze_decoder_config.eos_token_id
+        if hasattr(self, "feature_transport_bias"):
+            if allowed_token_ids is None:
+                raise ValueError("Feature transport requires explicit allowed_token_ids")
+            vision_features = inputs_embeds[:, gaze_token_mask == 0].reshape(
+                B,
+                len(gaze_pos_ids_split),
+                self.connector.num_tokens,
+                -1,
+            )
+            appearance_features = (
+                vision_features - self.connector.pos_embed[None, None]
+            )
+            frame_biases = [
+                torch.zeros(
+                    B,
+                    self.gaze_decoder_config.vocab_size,
+                    device=inputs_embeds.device,
+                    dtype=logits_multi_token_pred.dtype,
+                )
             ]
+            for frame_index in range(1, len(gaze_pos_ids_split)):
+                transport_scores = self.feature_transport_bias.normalized_scores(
+                    appearance_features[:, frame_index - 1],
+                    appearance_features[:, frame_index],
+                    gaze_pos_ids_split[frame_index - 1],
+                    effective_allowed_ids,
+                )
+                frame_biases.append(
+                    self.feature_transport_bias.token_bias(
+                        transport_scores,
+                        effective_allowed_ids,
+                        self.gaze_decoder_config.vocab_size,
+                    )
+                )
+            logits_multi_token_pred = self.feature_transport_bias.apply_to_predictions(
+                logits_multi_token_pred,
+                torch.stack(frame_biases, dim=1),
+                gaze_token_mask,
+                gaze_pred_source_relative,
+                num_gazing_each_frame,
+            )
         masked_logits = torch.full_like(logits_multi_token_pred, -float("inf"))
         masked_logits[..., effective_allowed_ids] = logits_multi_token_pred[
             ..., effective_allowed_ids
@@ -701,4 +788,116 @@ class CausalConnectorDifferenceSignal(nn.Module):
         return {
             "causal_difference_gate": self.gate.detach(),
             "causal_difference_signal_to_feature_rms_ceiling": self.gate.detach().abs(),
+        }
+
+
+class CausalFeatureTransportLogitBias(nn.Module):
+    """Transport previous gaze through frozen appearance-feature similarity."""
+
+    def __init__(self, hidden_dim: int, temperature: float = 0.1):
+        super().__init__()
+        if hidden_dim < 1:
+            raise ValueError("hidden_dim must be positive")
+        if temperature <= 0:
+            raise ValueError("temperature must be positive")
+        self.hidden_dim = int(hidden_dim)
+        self.temperature = float(temperature)
+        self.gate = nn.Parameter(torch.zeros(()))
+
+    def normalized_scores(
+        self,
+        previous_features,
+        current_features,
+        previous_token_ids,
+        allowed_token_ids,
+    ):
+        if previous_features.ndim != 3 or current_features.shape != previous_features.shape:
+            raise ValueError("features must share shape (batch, tokens, hidden_dim)")
+        if previous_features.shape[-1] != self.hidden_dim:
+            raise ValueError("feature hidden dimension does not match the module")
+        if previous_token_ids.ndim != 2 or previous_token_ids.shape[0] != previous_features.shape[0]:
+            raise ValueError("previous_token_ids must have shape (batch, selections)")
+        allowed = torch.as_tensor(allowed_token_ids, device=current_features.device, dtype=torch.long)
+        if allowed.numel() < 2:
+            raise ValueError("at least two allowed candidates are required")
+        num_tokens = previous_features.shape[1]
+        action_offset = int(allowed[0])
+        expected = torch.arange(
+            action_offset,
+            action_offset + num_tokens,
+            device=allowed.device,
+        )
+        if not torch.equal(allowed, expected):
+            raise ValueError(
+                "feature transport requires one contiguous fine-action range "
+                "matching the visual feature grid"
+            )
+
+        fixed_previous = F.normalize(previous_features.detach().float(), dim=-1)
+        fixed_current = F.normalize(current_features.detach().float(), dim=-1)
+        previous_feature_ids = previous_token_ids - action_offset
+        valid_previous = (previous_feature_ids >= 0) & (previous_feature_ids < num_tokens)
+        safe_previous = previous_feature_ids.clamp(0, num_tokens - 1)
+        selected_previous = fixed_previous.gather(
+            1,
+            safe_previous[..., None].expand(-1, -1, self.hidden_dim),
+        )
+        similarity = torch.einsum("bic,bkc->bik", fixed_current, selected_previous)
+        similarity = similarity.masked_fill(~valid_previous[:, None], -float("inf"))
+        pooled = torch.logsumexp(similarity / self.temperature, dim=-1)
+        has_previous = valid_previous.any(dim=-1, keepdim=True)
+        pooled = torch.where(has_previous, pooled, torch.zeros_like(pooled))
+        centered = pooled - pooled.mean(dim=-1, keepdim=True)
+        rms = centered.square().mean(dim=-1, keepdim=True).sqrt()
+        normalized = torch.where(
+            has_previous & (rms > 1e-8),
+            centered / rms.clamp_min(1e-8),
+            torch.zeros_like(centered),
+        )
+        return normalized.to(current_features.dtype)
+
+    def token_bias(self, normalized_scores, allowed_token_ids, vocab_size):
+        allowed = torch.as_tensor(
+            allowed_token_ids,
+            device=normalized_scores.device,
+            dtype=torch.long,
+        )
+        if normalized_scores.shape[-1] != allowed.numel():
+            raise ValueError("score count must equal the number of allowed tokens")
+        bias = torch.zeros(
+            *normalized_scores.shape[:-1],
+            vocab_size,
+            device=normalized_scores.device,
+            dtype=normalized_scores.dtype,
+        )
+        bias[..., allowed] = self.gate.to(normalized_scores.dtype) * normalized_scores
+        return bias
+
+    def apply_to_predictions(
+        self,
+        logits,
+        frame_biases,
+        gaze_token_mask,
+        gaze_pred_source_relative,
+        num_gazing_each_frame,
+    ):
+        gaze_positions = torch.nonzero(gaze_token_mask, as_tuple=True)[0]
+        relative = gaze_pred_source_relative[gaze_positions]
+        source_positions = gaze_positions + relative
+        head_indices = -relative - 1
+        frame_indices = torch.repeat_interleave(
+            torch.arange(len(num_gazing_each_frame), device=logits.device),
+            num_gazing_each_frame,
+        )
+        result = logits.clone()
+        result[:, source_positions, head_indices, :] = (
+            result[:, source_positions, head_indices, :]
+            + frame_biases[:, frame_indices, :]
+        )
+        return result
+
+    def diagnostics(self):
+        return {
+            "feature_transport_logit_gate": self.gate.detach(),
+            "feature_transport_logit_bias_rms": self.gate.detach().abs(),
         }

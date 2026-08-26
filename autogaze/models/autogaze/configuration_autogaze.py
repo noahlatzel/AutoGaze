@@ -202,6 +202,7 @@ class GazeModelConfig(PretrainedConfig):
         attn_mode="sdpa",
         temporal_position_encoding="none",
         temporal_position_max_frequency=8.0,
+        feature_transport_temperature=0.1,
         **kwargs,
     ):
         self.input_img_size = input_img_size
@@ -222,6 +223,7 @@ class GazeModelConfig(PretrainedConfig):
         self.num_vision_tokens_each_frame = num_vision_tokens_each_frame
         self.temporal_position_encoding = temporal_position_encoding
         self.temporal_position_max_frequency = temporal_position_max_frequency
+        self.feature_transport_temperature = feature_transport_temperature
 
         super().__init__(**kwargs)
 
