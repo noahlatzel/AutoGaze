@@ -13,8 +13,16 @@ dataset:
   protected_split: test
   target_fps: 3.0
   clip_len: 16
+diagnostics:
+  k16_seeds: [440826, 440827, 440828]
+  continuation_seed_offset: 200000
+  history_audit_frame_index: 15
+  checkpoint_template: outputs/human_gaze/grpo/r5_feature_transport_base{seed}_seed{continuation_seed}/checkpoint_latest_gaze
 architecture:
   budget: 16
+  actions_per_frame: 265
+  fine_action_offset: 69
+  grid_size: 14
   paired_base_seeds: [440826, 440827, 440828]
   training_seed_offset: 200000
   source_cumulative_updates: 20000
