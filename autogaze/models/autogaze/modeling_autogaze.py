@@ -297,6 +297,7 @@ class AutoGazeModel(nn.Module):
         allowed_token_ids=None,
         allow_eos=False,
         min_gaze_tokens_each_frame=0,
+        recurrent_frame_biases_override=None,
         **generation_kwargs,
     ):
         """
@@ -330,6 +331,17 @@ class AutoGazeModel(nn.Module):
         if hasattr(self, "recurrent_state_bias"):
             if allowed_token_ids is None:
                 raise ValueError("Recurrent state requires explicit allowed_token_ids")
+            if recurrent_frame_biases_override is not None:
+                expected_shape = (
+                    B,
+                    len(video_embeds),
+                    self.gaze_decoder_config.vocab_size,
+                )
+                if tuple(recurrent_frame_biases_override.shape) != expected_shape:
+                    raise ValueError(
+                        "recurrent_frame_biases_override must have shape "
+                        f"{expected_shape}"
+                    )
             recurrent_state = self.recurrent_state_bias.initial_state(
                 B,
                 device=video_embeds[0].device,
@@ -382,11 +394,17 @@ class AutoGazeModel(nn.Module):
                     logits_processor.append(AdditiveTokenBiasLogitsProcessor(token_bias))
             elif hasattr(self, "recurrent_state_bias"):
                 recurrent_states.append(recurrent_state)
-                token_bias = self.recurrent_state_bias.token_bias(
-                    recurrent_state,
-                    allowed_token_ids,
-                    self.gaze_decoder_config.vocab_size,
-                )
+                if recurrent_frame_biases_override is None:
+                    token_bias = self.recurrent_state_bias.token_bias(
+                        recurrent_state,
+                        allowed_token_ids,
+                        self.gaze_decoder_config.vocab_size,
+                    )
+                else:
+                    token_bias = recurrent_frame_biases_override[:, t].to(
+                        device=recurrent_state.device,
+                        dtype=recurrent_state.dtype,
+                    )
                 recurrent_biases.append(token_bias)
                 logits_processor.append(AdditiveTokenBiasLogitsProcessor(token_bias))
             if not allow_eos:

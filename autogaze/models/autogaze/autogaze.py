@@ -315,6 +315,7 @@ class AutoGaze(PreTrainedModel):
         past_inputs_embeds=None,
         past_attention_mask=None,
         past_conv_values=None,
+        recurrent_frame_biases_override=None,
     ):
         """
         inputs:
@@ -398,6 +399,7 @@ class AutoGaze(PreTrainedModel):
                         allowed_token_ids=allowed_token_ids,
                         allow_eos=allow_eos,
                         min_gaze_tokens_each_frame=min_gaze_tokens_each_frame,
+                        recurrent_frame_biases_override=recurrent_frame_biases_override,
                     )
                 else:
                     gazing_info = self.gazing_model.generate(
@@ -413,6 +415,7 @@ class AutoGaze(PreTrainedModel):
                         allowed_token_ids=allowed_token_ids,
                         allow_eos=allow_eos,
                         min_gaze_tokens_each_frame=min_gaze_tokens_each_frame,
+                        recurrent_frame_biases_override=recurrent_frame_biases_override,
                     )
 
         # Unpack gazing_info
