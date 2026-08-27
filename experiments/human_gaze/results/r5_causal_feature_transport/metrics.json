@@ -1,0 +1,40 @@
+{
+  "decision": "inconclusive",
+  "descriptive_transport_minus_r4_endpoint": {
+    "by_seed": {"440826": -0.0005870290979577142, "440827": 0.0009836071462792084, "440828": 0.0011053842382318657},
+    "mean": 0.0005006540955177866,
+    "standard_error": 0.0005449765933988693,
+    "t95_ci": [-0.0018441909318076054, 0.0028454991228431784]
+  },
+  "dynamic_minus_static_by_seed": {"440826": 0.08549419095527355, "440827": 0.08945925081667883, "440828": 0.08771631836294308},
+  "endpoint_absolute_logit_gate_by_seed": {"440826": 0.0022024260833859444, "440827": 0.0018945566844195127, "440828": 0.0025397862773388624},
+  "fixed_endpoint_step": 10000,
+  "history_and_motion_treatment_minus_control": {
+    "centroid_velocity_error_mean": -0.002883883,
+    "centroid_velocity_error_abrupt_mean": -0.001222630,
+    "normal_centroid_step_mean": -0.004972138,
+    "normal_vs_reset_jaccard_mean": 0.000001150,
+    "selection_change_abrupt_mean": -0.004026366
+  },
+  "matched_curve_auc_transport_minus_control": {
+    "by_seed": {"440826": -0.00020711920684828993, "440827": -0.00005366263603578336, "440828": 0.00010553767051755897},
+    "mean": -0.00005174805745550477,
+    "standard_error": 0.00009026134268407473,
+    "t95_ci": [-0.00044011126996059595, 0.0003366151550495864]
+  },
+  "primary_paired_transport_minus_control": {
+    "by_seed": {"440826": 0.0008258641580867754, "440827": 0.0007143553496353761, "440828": 0.0003805249685511769},
+    "mean": 0.0006402481587577761,
+    "standard_error": 0.00013379169784766506,
+    "t95_ci": [0.00006458894477405562, 0.0012159073727414965]
+  },
+  "source_mean_paired_deltas": {"AVAD": 0.00022808876302506573, "Coutrot_db1": -0.00007743812683554581, "Coutrot_db2": 0.003198034835584229, "DIEM": 0.0009990819726899969, "ETMD_av": -0.000023699277996021746, "SumMe": -0.00048257921392106756},
+  "test_split_opened": false,
+  "transport_prior_validation_frames_1_to_15": {
+    "actual_policy_macro_source_mean": 0.45308700728958645,
+    "feature_match_minus_same_coordinate_high_motion": -0.25904925955467667,
+    "feature_match_minus_same_coordinate_low_motion": -0.34822761089418064,
+    "feature_match_top16_macro_source_mean": 0.15427614904928647,
+    "same_coordinate_macro_source_mean": 0.4426514439982509
+  }
+}

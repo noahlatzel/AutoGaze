@@ -1,0 +1,29 @@
+schema_version: 1
+experiment_id: r5_causal_feature_transport
+dataset:
+  root: /storage/user/zverev/datasets/av-gaze-stavis
+  manifest: outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+  manifest_sha256: 0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10
+  cell_mass: outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+  cell_mass_sha256: fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8
+  design_split: train
+  evaluation_split: val
+  protected_split: test
+architecture:
+  budget: 16
+  paired_base_seeds: [440826, 440827, 440828]
+  training_seed_offset: 200000
+  continuation_updates: 10000
+  validation_interval: 100
+  learning_rate: 3.0e-6
+  schedule: constant
+  optimizer: adam_reset
+  control: reuse_immutable_r3_control
+  treatment: causal_previous_gaze_feature_transport_logit_bias
+  appearance_features: frozen_connector_features_minus_spatial_position
+  previous_state: previous_frame_predicted_nonpadding_fine_actions
+  correspondence: cosine_logsumexp
+  correspondence_temperature: 0.1
+  candidate_normalization: per_frame_zero_mean_unit_rms
+  gate_initial_value: 0.0
+  max_absolute_logit_gate: 1.0
