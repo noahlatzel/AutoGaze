@@ -292,7 +292,32 @@ class Trainer:
             metrics.update(gaze_model.causal_difference_signal.diagnostics())
         if hasattr(gaze_model, "feature_transport_bias"):
             metrics.update(gaze_model.feature_transport_bias.diagnostics())
+        if hasattr(gaze_model, "recurrent_state_bias"):
+            metrics.update(gaze_model.recurrent_state_bias.diagnostics())
         return metrics
+
+    def _recurrent_gradient_metrics(self):
+        gaze_model = unwrap_model(self.gaze_model).gazing_model
+        if not hasattr(gaze_model, "recurrent_state_bias"):
+            return {}
+        module = gaze_model.recurrent_state_bias
+
+        def gradient_norm(parameters):
+            squared = None
+            for parameter in parameters:
+                if parameter.grad is None:
+                    continue
+                value = parameter.grad.detach().float().square().sum()
+                squared = value if squared is None else squared + value
+            if squared is None:
+                return module.gate.detach().new_zeros(())
+            return squared.sqrt()
+
+        return {
+            "recurrent_state_gate_grad_norm": gradient_norm([module.gate]),
+            "recurrent_state_cell_grad_norm": gradient_norm(module.state_cell.parameters()),
+            "recurrent_state_readout_grad_norm": gradient_norm(module.action_readout.parameters()),
+        }
 
     def train_epoch(self, ep, start_iter):
         if hasattr(self.train_loader.sampler, "set_epoch"):
@@ -356,6 +381,7 @@ class Trainer:
                 # Backward pass
                 loss /= self.grad_acc_steps
                 loss.backward()
+                metrics.update(self._recurrent_gradient_metrics())
 
                 # Gradient clipping
                 if self.truncate_grads:

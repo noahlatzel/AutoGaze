@@ -203,6 +203,7 @@ class GazeModelConfig(PretrainedConfig):
         temporal_position_encoding="none",
         temporal_position_max_frequency=8.0,
         feature_transport_temperature=0.1,
+        recurrent_state_hidden_dim=192,
         **kwargs,
     ):
         self.input_img_size = input_img_size
@@ -224,6 +225,7 @@ class GazeModelConfig(PretrainedConfig):
         self.temporal_position_encoding = temporal_position_encoding
         self.temporal_position_max_frequency = temporal_position_max_frequency
         self.feature_transport_temperature = feature_transport_temperature
+        self.recurrent_state_hidden_dim = recurrent_state_hidden_dim
 
         super().__init__(**kwargs)
 

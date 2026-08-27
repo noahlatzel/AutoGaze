@@ -212,6 +212,12 @@ class AutoGazeModel(nn.Module):
                 gaze_model_config.gaze_decoder_config.hidden_size,
                 temperature=gaze_model_config.feature_transport_temperature,
             )
+        elif temporal_mode == "selection_conditioned_recurrent_state_logit_bias":
+            self.recurrent_state_bias = SelectionConditionedRecurrentStateLogitBias(
+                gaze_model_config.gaze_decoder_config.hidden_size,
+                gaze_model_config.connector_config.num_tokens,
+                state_hidden_dim=gaze_model_config.recurrent_state_hidden_dim,
+            )
         elif temporal_mode != "none":
             raise ValueError(f"Unknown temporal position encoding: {temporal_mode}")
 
@@ -318,6 +324,17 @@ class AutoGazeModel(nn.Module):
         # Generate gaze position IDs for each frame
         gaze_pos_ids_list = []
         previous_gaze_pos_ids = None
+        recurrent_state = None
+        recurrent_states = []
+        recurrent_biases = []
+        if hasattr(self, "recurrent_state_bias"):
+            if allowed_token_ids is None:
+                raise ValueError("Recurrent state requires explicit allowed_token_ids")
+            recurrent_state = self.recurrent_state_bias.initial_state(
+                B,
+                device=video_embeds[0].device,
+                dtype=video_embeds[0].dtype,
+            )
         inputs_embeds = [] if past_inputs_embeds is None else past_inputs_embeds
         attention_mask = [] if past_attention_mask is None else past_attention_mask
         past_key_values = None if past_key_values is None else past_key_values
@@ -363,6 +380,15 @@ class AutoGazeModel(nn.Module):
                         self.gaze_decoder_config.vocab_size,
                     )
                     logits_processor.append(AdditiveTokenBiasLogitsProcessor(token_bias))
+            elif hasattr(self, "recurrent_state_bias"):
+                recurrent_states.append(recurrent_state)
+                token_bias = self.recurrent_state_bias.token_bias(
+                    recurrent_state,
+                    allowed_token_ids,
+                    self.gaze_decoder_config.vocab_size,
+                )
+                recurrent_biases.append(token_bias)
+                logits_processor.append(AdditiveTokenBiasLogitsProcessor(token_bias))
             if not allow_eos:
                 logits_processor.append(NoEosTokenLogitsProcessor())
             elif min_gaze_tokens_each_frame:
@@ -395,6 +421,13 @@ class AutoGazeModel(nn.Module):
             gaze_pos_ids = gaze_outputs.sequences  # B * N
             gaze_pos_ids_list.append(gaze_pos_ids + self.num_vision_tokens_each_frame * t)
             previous_gaze_pos_ids = gaze_pos_ids
+            if hasattr(self, "recurrent_state_bias"):
+                recurrent_state = self.recurrent_state_bias.update(
+                    recurrent_state,
+                    video_embeds[t],
+                    gaze_pos_ids,
+                    allowed_token_ids,
+                )
 
             # Update inputs_embeds for the next frame
             inputs_embeds.append(self.gaze_decoder.model.embed_tokens(gaze_pos_ids))
@@ -414,6 +447,12 @@ class AutoGazeModel(nn.Module):
 
             # Update attention mask
             attention_mask.append((gaze_pos_ids != self.gaze_decoder_config.eos_token_id).to(torch.long))
+
+        if hasattr(self, "recurrent_state_bias"):
+            self.recurrent_state_bias.record_diagnostics(
+                torch.stack(recurrent_states, dim=1),
+                torch.stack(recurrent_biases, dim=1),
+            )
 
         # Concatenate gaze position IDs from all frames
         gaze_pos_ids = torch.cat(gaze_pos_ids_list, dim=1)
@@ -533,6 +572,32 @@ class AutoGazeModel(nn.Module):
                 gaze_token_mask,
                 gaze_pred_source_relative,
                 num_gazing_each_frame,
+            )
+        elif hasattr(self, "recurrent_state_bias"):
+            if allowed_token_ids is None:
+                raise ValueError("Recurrent state requires explicit allowed_token_ids")
+            vision_features = inputs_embeds[:, gaze_token_mask == 0].reshape(
+                B,
+                len(gaze_pos_ids_split),
+                self.connector.num_tokens,
+                -1,
+            )
+            frame_biases, recurrent_states = self.recurrent_state_bias.sequence_biases(
+                vision_features,
+                gaze_pos_ids_split,
+                effective_allowed_ids,
+                self.gaze_decoder_config.vocab_size,
+            )
+            logits_multi_token_pred = self.recurrent_state_bias.apply_to_predictions(
+                logits_multi_token_pred,
+                frame_biases,
+                gaze_token_mask,
+                gaze_pred_source_relative,
+                num_gazing_each_frame,
+            )
+            self.recurrent_state_bias.record_diagnostics(
+                recurrent_states,
+                frame_biases,
             )
         masked_logits = torch.full_like(logits_multi_token_pred, -float("inf"))
         masked_logits[..., effective_allowed_ids] = logits_multi_token_pred[
@@ -901,3 +966,204 @@ class CausalFeatureTransportLogitBias(nn.Module):
             "feature_transport_logit_gate": self.gate.detach(),
             "feature_transport_logit_bias_rms": self.gate.detach().abs(),
         }
+
+
+class SelectionConditionedRecurrentStateLogitBias(nn.Module):
+    """Carry a learned clip-local state across completed frame selections."""
+
+    def __init__(self, input_dim: int, num_tokens: int, state_hidden_dim: int):
+        super().__init__()
+        if input_dim < 1 or num_tokens < 2 or state_hidden_dim < 1:
+            raise ValueError("input_dim, num_tokens, and state_hidden_dim must be positive")
+        if input_dim != state_hidden_dim:
+            raise ValueError(
+                "R6 keeps input and state widths equal to avoid an extra projection"
+            )
+        self.input_dim = int(input_dim)
+        self.num_tokens = int(num_tokens)
+        self.state_hidden_dim = int(state_hidden_dim)
+        self.state_cell = nn.GRUCell(self.input_dim, self.state_hidden_dim)
+        self.action_readout = nn.Linear(
+            self.state_hidden_dim,
+            self.num_tokens,
+            bias=False,
+        )
+        self.gate = nn.Parameter(torch.zeros(()))
+        self._last_diagnostics = {}
+
+    def initial_state(self, batch_size: int, *, device, dtype):
+        if batch_size < 1:
+            raise ValueError("batch_size must be positive")
+        return torch.zeros(
+            batch_size,
+            self.state_hidden_dim,
+            device=device,
+            dtype=dtype,
+        )
+
+    def _action_mapping(self, allowed_token_ids, *, device):
+        allowed = torch.as_tensor(allowed_token_ids, device=device, dtype=torch.long)
+        if allowed.numel() != self.num_tokens:
+            raise ValueError("allowed actions must match the recurrent spatial readout")
+        offset = int(allowed[0])
+        expected = torch.arange(offset, offset + self.num_tokens, device=device)
+        if not torch.equal(allowed, expected):
+            raise ValueError(
+                "recurrent state requires one contiguous fine-action range"
+            )
+        return allowed, offset
+
+    def selected_summary(self, frame_features, completed_token_ids, allowed_token_ids):
+        if frame_features.ndim != 3 or frame_features.shape[-1] != self.input_dim:
+            raise ValueError("frame_features must have shape (batch, tokens, input_dim)")
+        if frame_features.shape[1] != self.num_tokens:
+            raise ValueError("frame feature count does not match the recurrent readout")
+        if completed_token_ids.ndim != 2:
+            raise ValueError("completed_token_ids must have shape (batch, selections)")
+        if completed_token_ids.shape[0] != frame_features.shape[0]:
+            raise ValueError("feature and selection batches do not match")
+        _, action_offset = self._action_mapping(
+            allowed_token_ids,
+            device=frame_features.device,
+        )
+        feature_ids = completed_token_ids - action_offset
+        valid = (feature_ids >= 0) & (feature_ids < self.num_tokens)
+        safe_ids = feature_ids.clamp(0, self.num_tokens - 1)
+        selected = frame_features.detach().gather(
+            1,
+            safe_ids[..., None].expand(-1, -1, self.input_dim),
+        )
+        weights = valid[..., None].to(selected.dtype)
+        count = weights.sum(dim=1).clamp_min(1.0)
+        return (selected * weights).sum(dim=1) / count
+
+    def update(self, state, frame_features, completed_token_ids, allowed_token_ids):
+        if state.ndim != 2 or state.shape[-1] != self.state_hidden_dim:
+            raise ValueError("state must have shape (batch, state_hidden_dim)")
+        summary = self.selected_summary(
+            frame_features,
+            completed_token_ids,
+            allowed_token_ids,
+        )
+        return self.state_cell(summary, state)
+
+    def normalized_action_scores(self, state):
+        scores = self.action_readout(state)
+        centered = scores - scores.mean(dim=-1, keepdim=True)
+        mean_square = centered.square().mean(dim=-1, keepdim=True)
+        return torch.where(
+            mean_square > 1e-16,
+            centered / (mean_square + 1e-8).sqrt(),
+            torch.zeros_like(centered),
+        )
+
+    def token_bias(self, state, allowed_token_ids, vocab_size):
+        allowed, _ = self._action_mapping(allowed_token_ids, device=state.device)
+        scores = self.normalized_action_scores(state)
+        bias = torch.zeros(
+            state.shape[0],
+            vocab_size,
+            device=state.device,
+            dtype=state.dtype,
+        )
+        bias[..., allowed] = (
+            self.gate.to(state.dtype) * scores
+        ).to(state.dtype)
+        return bias
+
+    def sequence_biases(
+        self,
+        frame_features,
+        completed_token_ids_by_frame,
+        allowed_token_ids,
+        vocab_size,
+        *,
+        reset_each_frame=False,
+        history_features=None,
+        history_token_ids_by_frame=None,
+    ):
+        if frame_features.ndim != 4 or frame_features.shape[-2:] != (
+            self.num_tokens,
+            self.input_dim,
+        ):
+            raise ValueError(
+                "frame_features must have shape (batch, frames, tokens, input_dim)"
+            )
+        if len(completed_token_ids_by_frame) != frame_features.shape[1]:
+            raise ValueError("one completed selection tensor is required per frame")
+        update_features = frame_features if history_features is None else history_features
+        update_tokens = (
+            completed_token_ids_by_frame
+            if history_token_ids_by_frame is None
+            else history_token_ids_by_frame
+        )
+        if update_features.shape != frame_features.shape:
+            raise ValueError("alternative history features must match the current clip shape")
+        if len(update_tokens) != frame_features.shape[1]:
+            raise ValueError("alternative history must provide one selection tensor per frame")
+
+        state = self.initial_state(
+            frame_features.shape[0],
+            device=frame_features.device,
+            dtype=frame_features.dtype,
+        )
+        states = []
+        biases = []
+        for frame_index in range(frame_features.shape[1]):
+            states.append(state)
+            biases.append(self.token_bias(state, allowed_token_ids, vocab_size))
+            if reset_each_frame:
+                state = torch.zeros_like(state)
+            else:
+                state = self.update(
+                    state,
+                    update_features[:, frame_index],
+                    update_tokens[frame_index],
+                    allowed_token_ids,
+                )
+        return torch.stack(biases, dim=1), torch.stack(states, dim=1)
+
+    def apply_to_predictions(
+        self,
+        logits,
+        frame_biases,
+        gaze_token_mask,
+        gaze_pred_source_relative,
+        num_gazing_each_frame,
+    ):
+        gaze_positions = torch.nonzero(gaze_token_mask, as_tuple=True)[0]
+        relative = gaze_pred_source_relative[gaze_positions]
+        source_positions = gaze_positions + relative
+        head_indices = -relative - 1
+        frame_indices = torch.repeat_interleave(
+            torch.arange(len(num_gazing_each_frame), device=logits.device),
+            num_gazing_each_frame,
+        )
+        result = logits.clone()
+        result[:, source_positions, head_indices, :] = (
+            result[:, source_positions, head_indices, :]
+            + frame_biases[:, frame_indices, :]
+        )
+        return result
+
+    def record_diagnostics(self, states, frame_biases):
+        fixed_states = states.detach().float()
+        fixed_biases = frame_biases.detach().float()
+        state_rms = fixed_states.square().mean(dim=-1).sqrt()
+        finite = torch.isfinite(fixed_states).all() & torch.isfinite(fixed_biases).all()
+        self._last_diagnostics = {
+            "recurrent_state_rms_mean": state_rms.mean(),
+            "recurrent_state_rms_max": state_rms.max(),
+            "recurrent_state_absolute_max": fixed_states.abs().max(),
+            "recurrent_state_saturation_fraction": (fixed_states.abs() >= 0.99).float().mean(),
+            "recurrent_state_logit_bias_rms": fixed_biases.square().mean().sqrt(),
+            "recurrent_state_all_finite": finite.to(fixed_states.dtype),
+        }
+
+    def diagnostics(self):
+        diagnostics = {
+            "recurrent_state_logit_gate": self.gate.detach(),
+            "recurrent_state_logit_gate_abs": self.gate.detach().abs(),
+        }
+        diagnostics.update(self._last_diagnostics)
+        return diagnostics
