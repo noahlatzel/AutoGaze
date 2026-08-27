@@ -46,7 +46,9 @@ python -m autogaze.train \
   trainer.max_train_steps=2 \
   trainer.val_nsteps=100 \
   trainer.save_nsteps=100 \
-  trainer.n_epochs=1
+  trainer.n_epochs=1 \
+  trainer.validate_at_start=false \
+  trainer.skip_final_validation=true
 
 python scripts/human_gaze/verify_r6_smoke.py \
   --training-metrics "${smoke_run}/training_metrics.jsonl" \

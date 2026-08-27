@@ -22,7 +22,10 @@ def test_selected_summary_uses_only_completed_valid_fine_actions():
     )
     token_ids = torch.tensor([[69, 71, 265]])
     summary = recurrent.selected_summary(features, token_ids, ALLOWED)
-    torch.testing.assert_close(summary, torch.tensor([[0.5, 0.0, 1.5]]))
+    expected = torch.tensor([[0.5, 0.0, 1.5]])
+    expected = expected / expected.square().mean(dim=-1, keepdim=True).sqrt()
+    torch.testing.assert_close(summary, expected)
+    torch.testing.assert_close(summary.square().mean(dim=-1).sqrt(), torch.ones(1))
 
 
 def test_zero_gate_is_exact_control_identity_and_gate_is_zero_initialized():
@@ -56,8 +59,9 @@ def test_state_updates_once_after_each_completed_frame():
     _, states = recurrent.sequence_biases(features, selections, ALLOWED, 74)
     assert cell.calls == 3
     torch.testing.assert_close(states[:, 0], torch.zeros(1, 3))
-    torch.testing.assert_close(states[:, 1], torch.tensor([[1.0, 0.0, 0.0]]))
-    torch.testing.assert_close(states[:, 2], torch.tensor([[1.0, 2.0, 0.0]]))
+    root_three = 3**0.5
+    torch.testing.assert_close(states[:, 1], torch.tensor([[root_three, 0.0, 0.0]]))
+    torch.testing.assert_close(states[:, 2], torch.tensor([[root_three, root_three, 0.0]]))
 
 
 def test_future_features_and_selections_cannot_change_earlier_biases():

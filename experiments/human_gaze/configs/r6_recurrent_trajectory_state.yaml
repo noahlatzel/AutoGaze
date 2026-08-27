@@ -34,6 +34,7 @@ architecture:
   treatment_template: outputs/human_gaze/grpo/r6_recurrent_state_base{seed}_seed{training_seed}
   initial_state: zeros
   state_input: mean_completed_selected_frozen_connector_tokens
+  state_input_normalization: per_example_unit_rms
   update_order: once_after_completed_frame
   readout: bias_free_linear_hidden_to_196_then_zero_mean_unit_rms
   gate_initial_value: 0.0
@@ -91,6 +92,11 @@ preflight:
   require_grpo_gradient_to_gate_and_recurrent_parameters: true
   require_finite_state_norms: true
   require_real_data_two_update_smoke: true
+  numerical_amendment:
+    preregistered_before_training: true
+    trigger: initial_state_saturation_fraction_approximately_0.40_exceeded_0.25_limit
+    change: unit_rms_normalize_selected_connector_summary_before_gru
+    excluded_changes: [information_source, state_dimension, gate, readout, loss, training_protocol]
 compute:
   partition: NORMAL
   gpu: rtx_5000

@@ -1053,7 +1053,14 @@ class SelectionConditionedRecurrentStateLogitBias(nn.Module):
         )
         weights = valid[..., None].to(selected.dtype)
         count = weights.sum(dim=1).clamp_min(1.0)
-        return (selected * weights).sum(dim=1) / count
+        summary = (selected * weights).sum(dim=1) / count
+        mean_square = summary.float().square().mean(dim=-1, keepdim=True)
+        normalized = summary.float() / (mean_square + 1e-8).sqrt()
+        return torch.where(
+            mean_square > 1e-16,
+            normalized,
+            torch.zeros_like(normalized),
+        ).to(summary.dtype)
 
     def update(self, state, frame_features, completed_token_ids, allowed_token_ids):
         if state.ndim != 2 or state.shape[-1] != self.state_hidden_dim:

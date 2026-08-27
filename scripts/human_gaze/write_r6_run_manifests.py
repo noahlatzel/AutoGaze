@@ -54,6 +54,7 @@ def manifest(base_seed, job_id, task_id, code_commit):
         "temporal_position_encoding": "selection_conditioned_recurrent_state_logit_bias",
         "recurrent_state_hidden_dim": 192,
         "recurrent_update": "once_after_completed_frame",
+        "recurrent_state_input_normalization": "per_example_unit_rms",
         "recurrent_gate_initial_value": 0.0,
     }
 
