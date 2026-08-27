@@ -14,7 +14,7 @@ cd /storage/user/latn/worktrees/autogaze-r6-analysis
 export OMP_NUM_THREADS=2
 
 python scripts/human_gaze/verify_r6_recurrent_state.py \
-  --code-commit b5150dc \
+  --code-commit b5150dcfc939cb44d2a09583c2e05899347c45c5 \
   --output-json outputs/human_gaze/r6_recurrent_state_diagnostics/verification.json
 
 python scripts/human_gaze/plot_r6_recurrent_state.py \
