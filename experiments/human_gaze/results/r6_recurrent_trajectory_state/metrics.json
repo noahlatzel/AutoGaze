@@ -1,0 +1,85 @@
+{
+  "decision": "inconclusive",
+  "scientific_interpretation": "practically_null_do_not_adopt",
+  "fixed_endpoint_step": 10000,
+  "practical_effect_threshold": 0.005,
+  "endpoint_macro_k16": {
+    "recurrent_by_seed": {"440826": 0.4520687612844176, "440827": 0.4555640834730011, "440828": 0.45222324726228263},
+    "matched_r3_control_by_seed": {"440826": 0.45117677980301835, "440827": 0.4552533445695814, "440828": 0.4538442473499639}
+  },
+  "primary_paired_recurrent_minus_control": {
+    "by_seed": {"440826": 0.0008919814813992399, "440827": 0.000310738903419705, "440828": -0.0016210000876812902},
+    "mean": -0.00013942656762078176,
+    "sample_std": 0.0013155819264198023,
+    "standard_error": 0.0007595515793594794,
+    "t95_ci": [-0.003407513244060266, 0.0031286601088187024]
+  },
+  "matched_curve_auc_recurrent_minus_control": {
+    "by_seed": {"440826": -0.0003881346480574404, "440827": 0.00037242269596940653, "440828": 0.00003147496793834581},
+    "mean": 0.000005254338616770651,
+    "standard_error": 0.00021994507605294515,
+    "t95_ci": [-0.0009410929432929766, 0.000951601620526518]
+  },
+  "source_mean_paired_deltas": {
+    "AVAD": -0.0006433741913901558,
+    "Coutrot_db1": 0.0010755474213510936,
+    "Coutrot_db2": -0.0008722821419888671,
+    "DIEM": 0.00031722363303482437,
+    "ETMD_av": 0.0002401618272723042,
+    "SumMe": -0.0009538359540035938
+  },
+  "collapse_controls": {
+    "dynamic_minus_center_by_seed": {"440826": 0.0831582145260687, "440827": 0.08665354042246531, "440828": 0.0833126986096751},
+    "dynamic_minus_static_by_seed": {"440826": 0.08556030665439263, "440827": 0.08905563321284155, "440828": 0.08571479481091077},
+    "dynamic_minus_shuffle_by_seed": {"440826": 0.1052887156150848, "440827": 0.10970960502141391, "440828": 0.1043460262425423},
+    "center_collapse": false,
+    "static_collapse": false,
+    "shuffle_collapse": false
+  },
+  "recurrent_path": {
+    "endpoint_absolute_gate_by_seed": {"440826": 0.005786700639873743, "440827": 0.004155871924012899, "440828": 0.004046052694320679},
+    "maximum_state_rms_by_seed": {"440826": 0.4914550483226776, "440827": 0.4636656641960144, "440828": 0.5022583603858948},
+    "maximum_state_saturation_fraction_by_seed": {"440826": 0.0, "440827": 0.0, "440828": 0.0},
+    "state_normal_reset_jaccard_macro": 0.9909372347419851,
+    "state_normal_alternative_jaccard_macro": 0.9990577517691275,
+    "state_reset_minus_normal_coverage_weighted": 0.00028375,
+    "state_alternative_minus_normal_coverage_weighted": -0.00015631,
+    "stable": true,
+    "inert": false
+  },
+  "visual_history_sensitivity": {
+    "normal_reset_jaccard_recurrent": 0.4790303,
+    "normal_reset_jaccard_control": 0.4771409,
+    "normal_alternative_jaccard_recurrent": 0.5203851,
+    "normal_alternative_jaccard_control": 0.5171698,
+    "reset_minus_normal_coverage_recurrent": -0.0669534,
+    "reset_minus_normal_coverage_control": -0.0667245,
+    "alternative_minus_normal_coverage_recurrent": -0.0845095,
+    "alternative_minus_normal_coverage_control": -0.0842747
+  },
+  "trajectory_following": {
+    "previous_frame_selection_jaccard_weighted_recurrent": 0.72476293,
+    "previous_frame_selection_jaccard_weighted_control": 0.72206854,
+    "previous_frame_selection_jaccard_delta": 0.00269439,
+    "blind_copy": false,
+    "policy_centroid_displacement_cells_per_frame_recurrent": 0.4687603,
+    "policy_centroid_displacement_cells_per_frame_control": 0.4726891,
+    "target_centroid_displacement_cells_per_frame": 0.8497092,
+    "centroid_velocity_error_recurrent": 0.9924238,
+    "centroid_velocity_error_control": 0.9948799,
+    "centroid_velocity_error_abrupt_recurrent": 2.5393770,
+    "centroid_velocity_error_abrupt_control": 2.5389175,
+    "centroid_velocity_error_other_recurrent": 0.9040848,
+    "centroid_velocity_error_other_control": 0.9067075
+  },
+  "same_coordinate_carryover_frames_1_to_15": {
+    "learned_policy_macro_source_mean": 0.452382995,
+    "same_coordinate_macro_source_mean": 0.441779423,
+    "policy_minus_same_coordinate": 0.010603572
+  },
+  "motion_stratified_frame_coverage": {
+    "low_motion": {"learned_policy": 0.50998583, "same_coordinate": 0.50103580, "difference": 0.00895003},
+    "high_motion": {"learned_policy": 0.42025240, "same_coordinate": 0.40495896, "difference": 0.01529344}
+  },
+  "test_split_opened": false
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "status": "verified",
+  "training_code_commit": "b5150dcfc939cb44d2a09583c2e05899347c45c5",
+  "training_job_id": 1684879,
+  "fixed_updates": 10000,
+  "validation_interval": 100,
+  "validation_grid_complete": true,
+  "all_treatment_training_and_validation_rows_controlled": true,
+  "allowed_paired_config_differences": [
+    "model.gaze_model_config.recurrent_state_hidden_dim",
+    "model.gaze_model_config.temporal_position_encoding",
+    "trainer.exp_name"
+  ],
+  "reused_controls": [
+    "r3b_temporal_control_base440826_seed640826",
+    "r3b_temporal_control_base440827_seed640827",
+    "r3b_temporal_control_base440828_seed640828"
+  ],
+  "preflight": {
+    "focused_tests_passed": 31,
+    "zero_gate_generation_identity": "exact_tensor_equal",
+    "zero_gate_rescoring_identity": "exact_tensor_equal",
+    "future_frame_invariance": true,
+    "real_data_updates": 2,
+    "gradient_path_reaches_gate_cell_and_readout": true,
+    "amended_smoke_maximum_state_rms": 0.489036,
+    "amended_smoke_state_saturation_fraction": 0.0
+  },
+  "by_seed": {
+    "440826": {"first_gate_gradient_norm": 0.0014448165893554688, "maximum_absolute_gate": 0.005786700639873743, "maximum_cell_gradient_norm": 0.11743979156017303, "maximum_readout_gradient_norm": 0.11381923407316208, "maximum_state_rms": 0.4914550483226776, "maximum_state_saturation_fraction": 0.0},
+    "440827": {"first_gate_gradient_norm": 0.018600940704345703, "maximum_absolute_gate": 0.004155871924012899, "maximum_cell_gradient_norm": 0.09314874559640884, "maximum_readout_gradient_norm": 0.08338677138090134, "maximum_state_rms": 0.4636656641960144, "maximum_state_saturation_fraction": 0.0},
+    "440828": {"first_gate_gradient_norm": 0.17270398139953613, "maximum_absolute_gate": 0.004046052694320679, "maximum_cell_gradient_norm": 0.06344057619571686, "maximum_readout_gradient_norm": 0.06688333302736282, "maximum_state_rms": 0.5022583603858948, "maximum_state_saturation_fraction": 0.0}
+  },
+  "all_state_gate_and_bias_values_finite": true,
+  "stability_limits_passed": true,
+  "test_split_opened": false
+}
