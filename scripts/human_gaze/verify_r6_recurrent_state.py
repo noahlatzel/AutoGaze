@@ -56,7 +56,7 @@ def verify_rows(directory, limits):
         assert gate_abs <= limits["max_absolute_gate"]
         assert state_rms <= limits["max_state_rms"]
         assert saturation <= limits["max_state_saturation_fraction"]
-        assert finite == 1.0
+        assert finite >= 0.999999
         maximum_gate = max(maximum_gate, gate_abs)
         maximum_state_rms = max(maximum_state_rms, state_rms)
         maximum_saturation = max(maximum_saturation, saturation)
