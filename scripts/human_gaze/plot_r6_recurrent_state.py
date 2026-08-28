@@ -263,9 +263,12 @@ def main():
     control_overlap = global_history_mean(control_history, "normal_set_jaccard_step")
     treatment_velocity = global_history_mean(recurrent, "centroid_velocity_error")
     control_velocity = global_history_mean(control_history, "centroid_velocity_error")
-    blind_copy = treatment_overlap >= 0.95 or (
-        treatment_overlap - control_overlap >= 0.10
-        and treatment_velocity >= control_velocity
+    blind_copy = bool(
+        treatment_overlap >= 0.95
+        or (
+            treatment_overlap - control_overlap >= 0.10
+            and treatment_velocity >= control_velocity
+        )
     )
     inert = bool(np.any(gates < 1e-4) or reset_jaccard >= 0.999)
     stable = verification["status"] == "verified"
