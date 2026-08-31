@@ -83,7 +83,7 @@ compute:
   full_arms: 6
   array_concurrency: 2
   maximum_submitted_or_pending_jobs: 10
-  hardware: H100
+  hardware: A40_48GB_preflight_verified
 preflight:
   one_question_each_mode_for_seed: 440826
   required_before_wave: true

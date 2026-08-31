@@ -2,11 +2,11 @@
 #SBATCH --job-name=gaze-r2f-hlvid
 #SBATCH --partition=NORMAL
 #SBATCH --nodes=1
-#SBATCH --nodelist=node19,node20,node21
-#SBATCH --gres=gpu:nvidia_h100_nvl:1
+#SBATCH --nodelist=node17
+#SBATCH --gres=gpu:a40:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=128G
-#SBATCH --time=18:00:00
+#SBATCH --time=24:00:00
 #SBATCH --array=0-5%2
 #SBATCH --output=/storage/user/latn/slurm/logs/gaze-r2f-hlvid-%A_%a.out
 

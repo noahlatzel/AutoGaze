@@ -6,6 +6,9 @@ import argparse
 import hashlib
 import json
 import sys
+import subprocess
+
+import torch
 from pathlib import Path
 from typing import Any
 
@@ -221,7 +224,25 @@ def main() -> None:
     expected_examples = 1 if wrapper_args.preflight else ESTABLISHED_PROTOCOL["num_examples"]
     if int(summary.get("num_examples", -1)) != expected_examples:
         raise ValueError(f"HLVid output has {summary.get('num_examples')} examples; expected {expected_examples}")
+    repo_root = Path(__file__).resolve().parents[2]
+    code_commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=repo_root, text=True
+    ).strip()
+    code_dirty = bool(
+        subprocess.check_output(
+            ["git", "status", "--porcelain", "--untracked-files=no"],
+            cwd=repo_root,
+            text=True,
+        ).strip()
+    )
+    device = torch.cuda.get_device_properties(0)
     summary["r2d_hlvid_adapter"] = {
+        "execution": {
+            "code_commit": code_commit,
+            "code_dirty": code_dirty,
+            "cuda_device_name": device.name,
+            "cuda_total_memory_bytes": device.total_memory,
+        },
         "policy_label": wrapper_args.policy_label,
         "mode": wrapper_args.r2d_mode,
         "base_seed": wrapper_args.base_seed,

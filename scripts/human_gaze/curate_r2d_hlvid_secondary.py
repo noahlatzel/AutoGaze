@@ -100,6 +100,9 @@ def main() -> None:
             adapter = summary.get("r2d_hlvid_adapter") or {}
             if adapter.get("mode") != mode or int(adapter.get("base_seed", -1)) != seed:
                 raise ValueError(f"Arm identity mismatch under {arm_dir}")
+            execution = adapter.get("execution") or {}
+            if execution.get("code_commit") != args.code_commit or execution.get("code_dirty") is not False:
+                raise ValueError(f"Unfrozen execution provenance under {arm_dir}: {execution}")
             protocol = adapter.get("benchmark_protocol") or {}
             mismatches = {
                 key: {"expected": value, "actual": protocol.get(key)}
