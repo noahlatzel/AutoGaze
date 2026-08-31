@@ -1,0 +1,45 @@
+schema_version: 1
+experiment_id: r2d_variable_fine_token_budget
+preregistered_at: 2026-08-20
+dataset:
+  manifest: outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+  manifest_sha256: 0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10
+  cell_mass: outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+  cell_mass_sha256: fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8
+  target_fps: 3.0
+  clip_len: 16
+  evaluation_split: val
+  protected_split: test
+policy:
+  actions: unique_fine_cells_plus_eos
+  fine_grid: 14x14
+  min_budget: 4
+  max_budget: 36
+  target_mean_budget: 16.0
+  initial_token_cost: 0.005
+  dual_learning_rate_per_microbatch: 2.5e-7
+  token_cost_ema_decay: 0.995
+  maximum_token_cost: 0.02
+  training_temperature: 0.3
+  eos_calibration: one_dimensional_bias_on_source_balanced_training_subset
+training:
+  base_seeds: [440826, 440827, 440828]
+  training_seeds: [740826, 740827, 740828]
+  continuation_seed_offset: 100000
+  initialization_template: outputs/human_gaze/grpo/r2b_fresh20k_stage3_base{base_seed}_seed{continuation_seed}/checkpoint_latest_gaze
+  run_template: outputs/human_gaze/grpo/r2d_variable_k16_stable_base{base_seed}_seed{training_seed}
+  updates: 20000
+  validation_interval: 100
+  learning_rate: 3.0e-6
+  optimizer: adam
+  frozen: [vision_encoder, connector, coverage_task]
+decision:
+  matched_validation_mean_k_band: [15.5, 16.5]
+  require_variable_coverage_above_forced_k16: true
+  require_actual_length_coverage_above_same_source_shuffle: true
+  require_allocation_direction_in_at_least_seeds: 2
+  prohibit_best_checkpoint_selection: true
+  prohibit_test_evaluation: true
+artifacts:
+  diagnostics_template: outputs/human_gaze/diagnostics/r2d_variable_k16_stable_base{base_seed}_seed{training_seed}/variable_budget_val.json
+  result_dir: experiments/human_gaze/results/r2d_variable_fine_token_budget

@@ -1,0 +1,79 @@
+{
+  "decision": "negative_retain_fixed_k16",
+  "fixed_endpoint_updates": 20000,
+  "matched_compute_band": [15.5, 16.5],
+  "by_seed": {
+    "440826": {
+      "training_seed": 740826,
+      "matched_r2b_fixed_k16_initialization": 0.45216500477354366,
+      "calibrated_validation_mean_k": 15.073084939908059,
+      "variable_coverage": 0.3770950927625978,
+      "forced_k16_coverage": 0.41374059800299773,
+      "variable_minus_forced_k16": -0.036645505240399945,
+      "actual_k_on_forced_order": 0.34870511509337554,
+      "same_source_shuffled_k": 0.3409882901537173,
+      "allocation_lift": 0.007716824939658251
+    },
+    "440827": {
+      "training_seed": 740827,
+      "matched_r2b_fixed_k16_initialization": 0.45081003314679435,
+      "calibrated_validation_mean_k": 15.037720356238081,
+      "variable_coverage": 0.37810126007219247,
+      "forced_k16_coverage": 0.4175352719156433,
+      "variable_minus_forced_k16": -0.039434011843450856,
+      "actual_k_on_forced_order": 0.35212783887686544,
+      "same_source_shuffled_k": 0.3454055199619282,
+      "allocation_lift": 0.006722318914937242
+    },
+    "440828": {
+      "training_seed": 740828,
+      "matched_r2b_fixed_k16_initialization": 0.45196745426831963,
+      "calibrated_validation_mean_k": 15.357033957733362,
+      "variable_coverage": 0.38105822079303203,
+      "forced_k16_coverage": 0.42007413934256405,
+      "variable_minus_forced_k16": -0.039015918549532014,
+      "actual_k_on_forced_order": 0.3643871987141701,
+      "same_source_shuffled_k": 0.3555329700204244,
+      "allocation_lift": 0.008854228693745692
+    }
+  },
+  "three_seed_means": {
+    "matched_r2b_fixed_k16_initialization": 0.45164749739621923,
+    "calibrated_validation_mean_k": 15.155946417959834,
+    "pooled_frame_mean_k": 14.571282068888346,
+    "variable_coverage": 0.3787515245426074,
+    "forced_k16_coverage": 0.417116669753735,
+    "forced_k16_minus_initialization": -0.034530827642484184,
+    "variable_minus_forced_k16": -0.038365145211127605,
+    "variable_minus_forced_k16_t95_ci": [-0.04210092140780236, -0.03462936901445285],
+    "actual_k_on_forced_order": 0.355073384228137,
+    "same_source_shuffled_k": 0.3473089267120233,
+    "allocation_lift": 0.007764457516113728,
+    "allocation_lift_t95_ci": [0.005114496730131464, 0.010414418302095992],
+    "oracle_variable_coverage": 0.8625007675423109
+  },
+  "decision_conditions": {
+    "mean_k_in_matched_band": false,
+    "variable_coverage_above_forced_k16": false,
+    "allocation_lift_positive_in_at_least_two_seeds": true,
+    "allocation_lift_positive_seed_count": 3
+  },
+  "length_diagnostics_means": {
+    "frame_level_standard_deviation": 10.365869204203287,
+    "minimum_k4_rate": 0.1129488671819369,
+    "maximum_k36_rate": 0.051473457366228104,
+    "eos_rate": 0.9485265612602234,
+    "length_gaze_entropy_correlation": 0.012384597124974936,
+    "length_center16_mass_correlation": 0.07694630873641123,
+    "variable_forced_k36_prefix_match_rate": 0.07186768149882904
+  },
+  "source_means": {
+    "AVAD": {"mean_k": 19.298611111111114, "variable": 0.3867914262745115, "forced_k16": 0.38110405041111833, "variable_minus_forced": 0.0056873758633931475, "allocation_lift": -0.0038855158620410557},
+    "Coutrot_db1": {"mean_k": 13.517144097222223, "variable": 0.330383616564278, "forced_k16": 0.36599122509101606, "variable_minus_forced": -0.03560760852673813, "allocation_lift": -0.0007032729400735701},
+    "Coutrot_db2": {"mean_k": 15.563446969696969, "variable": 0.494962625431292, "forced_k16": 0.5538453617782303, "variable_minus_forced": -0.05888273634693838, "allocation_lift": 0.015267852129358236},
+    "DIEM": {"mean_k": 15.572422560383087, "variable": 0.37569844495365023, "forced_k16": 0.407955420550876, "variable_minus_forced": -0.03225697559722579, "allocation_lift": 0.007106105506278197},
+    "ETMD_av": {"mean_k": 15.601137258209627, "variable": 0.4289264320561372, "forced_k16": 0.4741167015883296, "variable_minus_forced": -0.045190269532192386, "allocation_lift": 0.003323680386064546},
+    "SumMe": {"mean_k": 11.382916511135996, "variable": 0.25574660197577564, "forced_k16": 0.31968725910283974, "variable_minus_forced": -0.06394065712706411, "allocation_lift": 0.025477895877096108}
+  },
+  "test_split_opened": false
+}
