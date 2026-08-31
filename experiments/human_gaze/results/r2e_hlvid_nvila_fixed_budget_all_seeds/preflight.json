@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "status": "pass",
+  "failures": [],
+  "config": "experiments/human_gaze/configs/r2e_hlvid_nvila_fixed_budget_all_seeds.yaml",
+  "config_sha256": "cdb08c60208e96d6f35f0ee6b56bf9f77bda78f82ea2b904f400d0da9fd773ca",
+  "implementation_files": {
+    "autogaze/human_gaze/hlvid.py": "1e40d62054eb890db68383310d1077b404c629618425c5213860c7b989794de9",
+    "scripts/human_gaze/evaluate_hlvid_nvila_fixed_budget.py": "6ffa385d17198624a40eec0f8a902231437390974575422b5fd242442d4f7e45",
+    "scripts/human_gaze/aggregate_hlvid_fixed_budget_all_seeds.py": "ef2d4e7b1e59fc55f5a6b66acd916fb576183fed78af55a15f996cffc307d7f9",
+    "experiments/human_gaze/slurm/run_hlvid_nvila_fixed_budget_all_seeds.sbatch": "1b7b2f79e6785e4be370a9ecae13248568c5d6806af264d4ec598cd30e74a3dd"
+  },
+  "code_commit": "6ed85ddd9d08dea021cb82644e3806155ad6a68a",
+  "code_dirty": false,
+  "verified_protocol": {
+    "frame_source": "uniform",
+    "num_video_frames": 128,
+    "num_video_frames_thumbnail": 64,
+    "max_tiles_video": 48,
+    "tile_len": 16,
+    "max_new_tokens": 16,
+    "thumbnails": "full",
+    "torch_dtype": "bfloat16",
+    "generation": "greedy",
+    "primary_metric": "exact_match_question_micro_accuracy"
+  },
+  "protocol_id": "hlvid_nvila_mtv48_uniform128_thumbnail64_v1",
+  "reference_artifact": {
+    "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_default_autogaze/summary.json",
+    "sha256": "d08fc9b0fa8d89cf584d2fad56549c19d3a79788f065662304dc3a5e0a6e132e",
+    "num_correct": 130,
+    "num_examples": 268,
+    "accuracy": 0.48507462686567165
+  },
+  "dataset": {
+    "path": "/storage/slurm/latn/data/AutoGaze/HLVid/data/test-00000-of-00001.parquet",
+    "sha256": "ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a",
+    "questions": 268,
+    "videos": 77,
+    "missing_video_count": 0,
+    "benchmark_split": "official_huggingface_test",
+    "human_gaze_protected_test_accessed": false
+  },
+  "checkpoints": [
+    {
+      "base_seed": 440826,
+      "continuation_seed": 540826,
+      "budget": 16,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440826_seed540826/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "d008a458e62a15c69a236e4585a248b185343e82c2b6ece205d6638d4578b9ff",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440826,
+      "continuation_seed": 540826,
+      "budget": 24,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2c_fixedk24_stage3_base440826_seed540826/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "78a8b5386be199d43a4fb9bd7061f6077481d46b231d954bc6901859d697152b",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440826,
+      "continuation_seed": 540826,
+      "budget": 36,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2c_fixedk36_stage3_base440826_seed540826/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "56d578316bd5d947ae437b3ac57bbf6aa5e5c5d7addc6fa02e2cc7f42f2cfbf2",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440827,
+      "continuation_seed": 540827,
+      "budget": 16,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440827_seed540827/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "669777ee6191c2a01ba1069f3492cb8e75aeaae307bdc5bf895ff13145c4f22a",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440827,
+      "continuation_seed": 540827,
+      "budget": 24,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2c_fixedk24_stage3_base440827_seed540827/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "54412e2ad43e0897790c4d0aecb7c4c12fbdc59f45472674aa9d1c3ed0f810ac",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440827,
+      "continuation_seed": 540827,
+      "budget": 36,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2c_fixedk36_stage3_base440827_seed540827/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "00af9355626bcbd85cf1e8f00567917dcd387f01f6c87e775a8927806552026f",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440828,
+      "continuation_seed": 540828,
+      "budget": 16,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440828_seed540828/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "83cdc62cda40d75d9dedf34134484715f38a984542d1e27e1dd78c9bcfa69596",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440828,
+      "continuation_seed": 540828,
+      "budget": 24,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2c_fixedk24_stage3_base440828_seed540828/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "3112c9c0760195f9c1346a5fd71589cbb6a524bdd01f2c99c201b6e71e6daab5",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440828,
+      "continuation_seed": 540828,
+      "budget": 36,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2c_fixedk36_stage3_base440828_seed540828/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "0b688a66cfbdac40d8292a33bcdfb96a0d8a20c0b282a9d51a471cc6af947f19",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440829,
+      "continuation_seed": 540829,
+      "budget": 16,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440829_seed540829/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "fe287cc2aaaf84153f277da87103b37c3c7949ce3f66c9ebbedfeeeebc37658d",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440830,
+      "continuation_seed": 540830,
+      "budget": 16,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440830_seed540830/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "ec287894d2f77b8fcd6e6fa102460c7b4533a671942dd713506ca8abc6788180",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440831,
+      "continuation_seed": 540831,
+      "budget": 16,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440831_seed540831/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "1721a2175adc3fbf95e2ad293736e80345ac4c89f1d2e3c514f4acd5261a7781",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    }
+  ],
+  "checkpoint_counts": {
+    "16": 6,
+    "24": 3,
+    "36": 3
+  },
+  "environment": {
+    "python": "3.11.15",
+    "torch": "2.11.0+cu130",
+    "torch_cuda": "13.0",
+    "transformers": "4.57.6",
+    "pyarrow": "24.0.0",
+    "opencv": "4.8.0",
+    "numpy": "1.26.4",
+    "safetensors": "0.7.0",
+    "cuda_available": true
+  },
+  "k32_status": {
+    "status": "awaiting_checkpoint_handoff",
+    "expected_base_seeds": [
+      440826,
+      440827,
+      440828
+    ],
+    "expected_continuation_seeds": [
+      540826,
+      540827,
+      540828
+    ],
+    "expected_template": "r2c_fixedk32_stage3_base{base_seed}_seed{continuation_seed}/checkpoint_latest_gaze",
+    "integration_point": "Set status to handed_off and add key 32 under checkpoints for the first three seed_matrix rows, rerun preflight, submit only those three seed tasks with EVAL_BUDGETS=32, then rerun the unchanged aggregator. Do not schedule before all handoff paths and hashes exist."
+  },
+  "planned_counted_jobs": 6,
+  "maximum_counted_jobs": 10
+}
