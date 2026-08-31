@@ -1,0 +1,85 @@
+import importlib.util
+from pathlib import Path
+
+import pytest
+import torch
+from safetensors.torch import save_file
+
+
+SCRIPT = Path(__file__).parents[1] / "scripts" / "human_gaze" / "evaluate_hlvid_nvila_fixed_budget.py"
+SPEC = importlib.util.spec_from_file_location("hlvid_fixed_budget_eval", SCRIPT)
+MODULE = importlib.util.module_from_spec(SPEC)
+assert SPEC.loader is not None
+SPEC.loader.exec_module(MODULE)
+
+
+def test_extract_letter_requires_standalone_option():
+    assert MODULE.extract_letter("Answer: c") == "C"
+    assert MODULE.extract_letter("The answer is (D).") == "D"
+    assert MODULE.extract_letter("CAB") == ""
+    assert MODULE.extract_letter("") == ""
+
+
+def test_summarize_reports_official_micro_and_video_macro():
+    records = [
+        {"video_path": "v1.mp4", "category": "av", "prediction_letter": "A", "is_correct": True},
+        {"video_path": "v1.mp4", "category": "av", "prediction_letter": "", "is_correct": False},
+        {"video_path": "v2.mp4", "category": "household", "prediction_letter": "B", "is_correct": True},
+    ]
+    result = MODULE.summarize(records)
+    assert result["num_examples"] == 3
+    assert result["num_correct"] == 2
+    assert result["accuracy"] == 2 / 3
+    assert result["macro_video_accuracy"] == 0.75
+    assert result["num_videos"] == 2
+    assert result["invalid_prediction_count"] == 1
+    assert result["by_category"]["av"]["accuracy"] == 0.5
+    assert result["by_category"]["household"]["accuracy"] == 1.0
+
+
+AGG_SCRIPT = Path(__file__).parents[1] / "scripts" / "human_gaze" / "aggregate_hlvid_fixed_budget_all_seeds.py"
+AGG_SPEC = importlib.util.spec_from_file_location("hlvid_fixed_budget_aggregate", AGG_SCRIPT)
+AGG = importlib.util.module_from_spec(AGG_SPEC)
+assert AGG_SPEC.loader is not None
+AGG_SPEC.loader.exec_module(AGG)
+
+
+def test_seed_interval_uses_frozen_t_interval():
+    low, high = AGG.seed_interval([0.4, 0.5, 0.6])
+    assert low < 0.4
+    assert high > 0.6
+    assert abs((low + high) / 2 - 0.5) < 1e-12
+
+
+def test_cluster_bootstrap_difference_preserves_pairing():
+    rows_a = [[
+        {"question_id": 1, "video_path": "v1", "is_correct": True},
+        {"question_id": 2, "video_path": "v2", "is_correct": True},
+    ]] * 3
+    rows_b = [[
+        {"question_id": 1, "video_path": "v1", "is_correct": False},
+        {"question_id": 2, "video_path": "v2", "is_correct": True},
+    ]] * 3
+    result = AGG.cluster_bootstrap_difference(rows_a, rows_b, iterations=200, seed=7)
+    assert result["difference"] == 0.5
+    assert result["ci90_low"] <= result["difference"] <= result["ci90_high"]
+    assert result["num_video_clusters"] == 2
+
+
+def test_checkpoint_compatibility_accepts_only_known_zero_buffer(tmp_path):
+    bias_name = "gazing_model.gaze_decoder.output_token_logit_bias"
+    checkpoint = tmp_path / "model.safetensors"
+    save_file({"saved.weight": torch.ones(2)}, checkpoint)
+
+    class FakeModel:
+        def __init__(self, bias):
+            self.bias = bias
+
+        def state_dict(self):
+            return {"saved.weight": torch.ones(2), bias_name: self.bias}
+
+    result = MODULE.verify_loaded_checkpoint(FakeModel(torch.zeros(3)), checkpoint)
+    assert result["accepted_runtime_only_keys"] == [bias_name]
+    assert result["max_absolute_value"] == 0.0
+    with pytest.raises(ValueError, match="compatibility buffer is not zero"):
+        MODULE.verify_loaded_checkpoint(FakeModel(torch.ones(3)), checkpoint)
