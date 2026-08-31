@@ -1,0 +1,90 @@
+experiment: r2f_r2d_hlvid_secondary
+status: preregistered
+date: 2026-09-01
+question: >-
+  On the established NVILA-HLVid MTV48 benchmark, how does each completed R2d
+  checkpoint perform under its actual calibrated variable-EOS allocation policy
+  versus the same checkpoint's coherent exact forced-K16 spatial rollout?
+positioning: >-
+  Secondary transfer evidence reported separately from the primary fixed-budget
+  K16/K24/K32/K36 comparison. It cannot change or delay that primary conclusion.
+dataset:
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+  split: test
+  examples: 268
+  parquet_sha256: ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a
+models:
+  nvila: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video
+  r2d_heavy_root: /storage/user/latn/worktrees/autogaze-r2d-variable-budget
+established_protocol:
+  frame_source: uniform
+  num_video_frames: 128
+  num_video_frames_thumbnail: 64
+  thumbnail_sampling: full
+  max_tiles_video: 48
+  tile_len: 16
+  delta_gap: 0
+  max_new_tokens: 16
+  max_batch_size_autogaze: 16
+  max_batch_size_siglip: 32
+  torch_dtype: bfloat16
+  primary_metric: exact_match_multiple_choice_accuracy
+  runner: /home/stud/latn/AutoGaze/scripts/runners/evaluate_hlvid_nvila.py
+  runner_sha256: f7281533b556e508b6c82fc419e66a138d93e151be68932a7a632c8585c6de1e
+  common_sha256: d390fd54b8fca681e2d530c3fb53ee15fdddcb06c379ef86d7720a914949e0b4
+arms:
+  - base_seed: 440826
+    training_seed: 740826
+    checkpoint: outputs/human_gaze/grpo/r2d_variable_k16_stable_base440826_seed740826/checkpoint_latest_gaze
+    checkpoint_model_sha256: 91398442482aa9faf3bfa61aafb235095a7d6f36dd3796f826420e2b1530dbaa
+    checkpoint_config_sha256: 2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887
+    calibration: outputs/human_gaze/diagnostics/r2d_variable_k16_stable_base440826_seed740826/variable_budget_val.json
+    calibration_sha256: 95bb0ebfe145510669b1a5d256092146ff5c55170b074dbdc74d96a224246ccf
+    eos_logit_bias: 2.3046875
+    calibration_mean_tokens: 16.091145833333332
+  - base_seed: 440827
+    training_seed: 740827
+    checkpoint: outputs/human_gaze/grpo/r2d_variable_k16_stable_base440827_seed740827/checkpoint_latest_gaze
+    checkpoint_model_sha256: 0d1736f07c381e4c77a4f297fa09cfa61b4483c48f02303a8e16ccdf09ee5363
+    checkpoint_config_sha256: 2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887
+    calibration: outputs/human_gaze/diagnostics/r2d_variable_k16_stable_base440827_seed740827/variable_budget_val.json
+    calibration_sha256: c7c8b5041f081aab7f2bed40408a181a4f30d0bc9cba5a95faba126262e519eb
+    eos_logit_bias: 2.421875
+    calibration_mean_tokens: 16.00390625
+  - base_seed: 440828
+    training_seed: 740828
+    checkpoint: outputs/human_gaze/grpo/r2d_variable_k16_stable_base440828_seed740828/checkpoint_latest_gaze
+    checkpoint_model_sha256: 297e436cc599a6904478554763a746f6733854c544faabf9a3aa652179f370c9
+    checkpoint_config_sha256: 2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887
+    calibration: outputs/human_gaze/diagnostics/r2d_variable_k16_stable_base440828_seed740828/variable_budget_val.json
+    calibration_sha256: 15756e1577173a7b1be3a67f81544d13f2cc819370f3caf42cacb198ce7ba3e8
+    eos_logit_bias: 2.3828125
+    calibration_mean_tokens: 16.098958333333332
+action_contracts:
+  variable:
+    min_spatial_actions: 4
+    max_generation_tokens: 36
+    fine_action_ids: [69, 264]
+    eos_action_id: 265
+    allow_eos: true
+    eos_bias_source: per_seed_immutable_r2d_calibration
+  forced_k16:
+    exact_spatial_actions: 16
+    allowed_action_ids: [69, 264]
+    allow_eos: false
+aggregation:
+  primary: per_seed_macro_video_exact_match_accuracy
+  aggregate: equal_seed_arithmetic_mean_of_macro_video_accuracy
+  secondary: question_micro_exact_match_accuracy
+  comparison: paired_variable_minus_forced_k16_within_seed
+  uncertainty: paired_video_cluster_bootstrap_90_percent_and_seed_t95
+  categories: established_runner_categories
+compute:
+  full_arms: 6
+  array_concurrency: 2
+  maximum_submitted_or_pending_jobs: 10
+  hardware: H100
+preflight:
+  one_question_each_mode_for_seed: 440826
+  required_before_wave: true
+  checks: [protocol_manifest, checkpoint_hash, calibration_hash, action_contract, output_schema]
