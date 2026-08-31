@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "run_id": "20260827-r5_causal_feature_transport_bb27e4d",
+  "training_code_commit": "bb27e4dd58acb4f011d5d7494bbaf2ac4a0cd0df",
+  "analysis_code_commit": "75beb6236ef8917189ae0211db4480150f89a61f",
+  "training_job_id": 1683083,
+  "successful_training_gpu_seconds": 126310,
+  "failed_initial_port_collision_gpu_seconds": 22,
+  "center_diagnostics_job_id": 1683880,
+  "history_diagnostics_job_id": 1683881,
+  "transport_prior_job_id": 1683882,
+  "verification_and_plot_job_id": 1683883,
+  "heavy_artifacts": {
+    "run_template": "outputs/human_gaze/grpo/r5_feature_transport_base{seed}_seed{training_seed}",
+    "center_diagnostics_template": "outputs/human_gaze/diagnostics/r5_feature_transport_base{seed}_seed{training_seed}/center_collapse_val.json",
+    "history": "outputs/human_gaze/r5_feature_transport_diagnostics/treatment_policy_history.json",
+    "transport_prior": "outputs/human_gaze/r5_feature_transport_diagnostics/transport_prior.json",
+    "summary": "outputs/human_gaze/r5_feature_transport_diagnostics/summary.json",
+    "verification": "outputs/human_gaze/r5_feature_transport_diagnostics/verification.json"
+  },
+  "test_split_opened": false
+}

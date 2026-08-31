@@ -10,5 +10,6 @@
 # limitations under the License.
 
 from .video_folder import VideoFolder
+from .av_gaze_stavis import AVGazeStavisDataset, BalancedSourceSampler
 
-__all__ = ["VideoFolder"]
+__all__ = ["AVGazeStavisDataset", "BalancedSourceSampler", "VideoFolder"]

@@ -1,0 +1,54 @@
+schema_version: 1
+experiment_id: r6_recurrent_trajectory_state
+preregistered_at: 2026-08-27
+dataset:
+  manifest: outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+  manifest_sha256: 0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10
+  cell_mass: outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+  cell_mass_sha256: fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8
+  evaluation_split: val
+  protected_split: test
+  target_fps: 3.0
+  clip_len: 16
+architecture:
+  budget: 16
+  grid_size: 14
+  connector_hidden_dim: 192
+  recurrent_hidden_dim: 192
+  treatment: selection_conditioned_gru_state_action_logit_bias
+  state_input: mean_completed_selected_frozen_connector_tokens
+  state_input_normalization: per_example_unit_rms
+  update_order: once_after_completed_frame
+  readout: bias_free_linear_hidden_to_196_then_zero_mean_unit_rms
+  gate_initial_value: 0.0
+  frozen: [vision_encoder, connector, task_model]
+training:
+  paired_base_seeds: [440826, 440827, 440828]
+  training_seed_offset: 200000
+  source_cumulative_updates: 20000
+  continuation_updates: 10000
+  validation_interval: 100
+  learning_rate: 3.0e-6
+  schedule: constant
+  optimizer: adam_reset
+  control: reuse_immutable_r3_control
+decision:
+  primary_metric: paired_treatment_minus_r3_control_val_macro_k16_at_fixed_endpoint
+  practical_effect_threshold: 0.005
+  pass_min_positive_seed_pairs: 2
+  fail_min_nonpositive_seed_pairs: 2
+  prohibit_best_checkpoint_selection: true
+  prohibit_test_evaluation: true
+  inert_gate_threshold: 1.0e-4
+  inert_normal_reset_jaccard_threshold: 0.999
+  stability:
+    max_absolute_gate: 1.0
+    max_state_rms: 1.000001
+    state_saturation_absolute_threshold: 0.99
+    max_state_saturation_fraction: 0.25
+compute:
+  training_job_id: 1684879
+  maximum_gpu_hours: 45
+artifacts:
+  training_template: outputs/human_gaze/grpo/r6_recurrent_state_base{seed}_seed{training_seed}
+  diagnostics: outputs/human_gaze/r6_recurrent_state_diagnostics

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "status": "verified",
+  "training_code_commit": "cdfd67f1adbe18e976199a63da6d55c0cf3b6f7d",
+  "training_job_id": 1676870,
+  "base_seeds": [440826, 440827, 440828],
+  "training_seeds": [740826, 740827, 740828],
+  "training_rows_per_seed": 20000,
+  "validation_rows_per_seed": 201,
+  "validation_steps": "0:100:20000",
+  "fixed_endpoint_complete": true,
+  "all_training_and_validation_metrics_finite": true,
+  "diagnostic_split": "val",
+  "diagnostic_clips_per_seed": 427,
+  "allowed_resolved_config_differences": [
+    "trainer.exp_name",
+    "trainer.gaze_weights",
+    "trainer.seed"
+  ],
+  "dataset_manifest_sha256": "0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10",
+  "cell_mass_sha256": "fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8",
+  "best_checkpoint_selection_used": false,
+  "train_only_eos_calibration": true,
+  "test_split_opened": false
+}

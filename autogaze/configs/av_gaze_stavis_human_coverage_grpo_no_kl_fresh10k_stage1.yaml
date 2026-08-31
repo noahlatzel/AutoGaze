@@ -1,0 +1,6 @@
+defaults:
+  - av_gaze_stavis_human_coverage_grpo_no_kl_5ep
+  - _self_
+
+trainer:
+  exp_name: r2_fresh10k_stage1_seed${trainer.seed}

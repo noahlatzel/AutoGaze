@@ -1,0 +1,62 @@
+defaults:
+  - algorithm: grpo
+  - dataset: av_gaze_stavis
+  - model: autogaze
+  - task: human_heatmap_coverage
+  - trainer: trainer
+  - _self_
+
+hydra:
+  run:
+    dir: .
+  output_subdir: null
+
+model:
+  scales: '32+64+112+224'
+  num_vision_tokens_each_frame: 265
+  use_flash_attn: false
+  has_task_loss_requirement_during_training: false
+  has_task_loss_requirement_during_inference: false
+  gaze_model_config:
+    gaze_decoder_config:
+      num_multi_token_pred: 10
+
+algorithm:
+  group_size: 4
+  discount_factor: 1
+  optimize_task_loss_prediction: false
+
+trainer:
+  batch_size: 4
+  per_gpu_max_batch_size: 1
+  per_gpu_max_val_batch_size: 16
+  lr: 1e-5
+  min_lr: 1e-6
+  lr_schedule: linear_w_warmup
+  optimizer: adam
+  train_gaze: true
+  train_task: false
+  detach_task: true
+  freeze_gaze_vision: true
+  freeze_gaze_connector: true
+  val_nsteps: 100
+  save_nsteps: 100
+  n_epochs: 1
+  logdir: outputs/human_gaze/grpo
+  resume: false
+  gaze_weights: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+  task_weights: null
+  seed: 140826
+  val_only: false
+  truncate_grads: true
+  grad_norm: 1.0
+  max_train_steps: null
+  validate_at_start: true
+  save_at_start: false
+  save_at_end: true
+  skip_final_validation: false
+  temp_schedule_args:
+    mode: exp
+    exp:
+      temp_start: 1.0
+      temp_end: 0.3

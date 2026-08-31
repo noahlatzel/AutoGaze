@@ -1,0 +1,7 @@
+defaults:
+  - av_gaze_stavis_r3_temporal_position
+  - _self_
+
+model:
+  gaze_model_config:
+    temporal_position_encoding: causal_connector_difference_scalar_gate

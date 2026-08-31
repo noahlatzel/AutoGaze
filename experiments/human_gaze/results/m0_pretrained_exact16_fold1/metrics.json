@@ -1,0 +1,229 @@
+{
+  "config": {
+    "actions_per_frame": 265,
+    "batch_size": 16,
+    "cell_mass_path": "outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy",
+    "checkpoint": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze",
+    "clip_len": 16,
+    "dataset_root": "/storage/user/zverev/datasets/av-gaze-stavis",
+    "evaluation_splits": [
+      "val",
+      "test"
+    ],
+    "exact_budget": 16,
+    "fine_action_offset": 69,
+    "manifest_path": "outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl",
+    "num_workers": 4,
+    "output_path": "experiments/human_gaze/results/m0_pretrained_exact16_fold1/metrics.json"
+  },
+  "metrics": {
+    "test": {
+      "16": {
+        "macro_source_mean": 0.14506010569401476,
+        "num_frames": 10608,
+        "per_source": {
+          "AVAD": {
+            "mean_video_coverage": 0.23474556565857851,
+            "num_clips": 13,
+            "num_videos": 13,
+            "video_coverage": {
+              "V10_News3": 0.0764167532324791,
+              "V13_Conservation2": 0.029850365594029427,
+              "V15_Drummer1": 0.07511058449745178,
+              "V17_Soccer1": 0.5890516638755798,
+              "V23_Tap3": 0.04081796854734421,
+              "V24_Tap4": 0.2102152407169342,
+              "V25_Piano1": 0.13087891042232513,
+              "V27_Piano3": 0.14907339215278625,
+              "V32_Dancers": 0.3302242159843445,
+              "V33_Harp": 0.14471127092838287,
+              "V41_Violin1": 0.29111248254776,
+              "V6_Basketball1": 0.5206650495529175,
+              "V9_News2": 0.4635644555091858
+            }
+          },
+          "Coutrot_db1": {
+            "mean_video_coverage": 0.1605813865084201,
+            "num_clips": 50,
+            "num_videos": 20,
+            "video_coverage": {
+              "clip10": 0.01718947011977434,
+              "clip14": 0.1065899208188057,
+              "clip15": 0.18356118351221085,
+              "clip16": 0.33783385902643204,
+              "clip17": 0.07726075127720833,
+              "clip22": 0.18446870241314173,
+              "clip24": 0.15771567076444626,
+              "clip26": 0.47411879897117615,
+              "clip32": 0.21432647109031677,
+              "clip37": 0.08847355842590332,
+              "clip38": 0.08641880005598068,
+              "clip39": 0.27130166441202164,
+              "clip4": 0.048787934705615044,
+              "clip44": 0.03489627689123154,
+              "clip47": 0.11178454849869013,
+              "clip48": 0.29551199823617935,
+              "clip5": 0.19620190809170404,
+              "clip50": 0.03526559844613075,
+              "clip56": 0.1994478814303875,
+              "clip58": 0.09047273298104604
+            }
+          },
+          "Coutrot_db2": {
+            "mean_video_coverage": 0.11816758285860515,
+            "num_clips": 38,
+            "num_videos": 5,
+            "video_coverage": {
+              "clip11": 0.06662793995605575,
+              "clip14": 0.11392325274646282,
+              "clip15": 0.10207366145082883,
+              "clip2": 0.10858409234788269,
+              "clip4": 0.19962896779179573
+            }
+          },
+          "DIEM": {
+            "mean_video_coverage": 0.1444424967255241,
+            "num_clips": 159,
+            "num_videos": 17,
+            "video_coverage": {
+              "BBC_life_in_cold_blood_1278x710": 0.1050384778174616,
+              "BBC_wildlife_serpent_1280x704": 0.01376270039472729,
+              "DIY_SOS_1280x712": 0.12442591773079974,
+              "advert_bbc4_bees_1024x576": 0.14526437435831344,
+              "advert_bbc4_library_1024x576": 0.17806899840278284,
+              "advert_iphone_1272x720": 0.30065432339906695,
+              "harry_potter_6_trailer_1280x544": 0.2082367410055465,
+              "music_gummybear_880x720": 0.09249251261353493,
+              "music_trailer_nine_inch_nails_1280x720": 0.38123779296875,
+              "nightlife_in_mozambique_1280x580": 0.1362228742800653,
+              "one_show_1280x712": 0.1926699059549719,
+              "pingpong_angle_shot_960x720": 0.09698779731988907,
+              "pingpong_no_bodies_960x720": 0.08364973263815045,
+              "sport_scramblers_1280x720": 0.0435835815862649,
+              "sport_wimbledon_federer_final_1280x704": 0.13435242560637348,
+              "tv_uni_challenge_final_1280x712": 0.1396093494258821,
+              "university_forum_construction_ionic_1280x720": 0.07926493883132935
+            }
+          },
+          "ETMD_av": {
+            "mean_video_coverage": 0.10060890649774971,
+            "num_clips": 153,
+            "num_videos": 4,
+            "video_coverage": {
+              "CHI_1_color": 0.14450830815507001,
+              "CHI_2_color": 0.1636060520242422,
+              "GLA_1_color": 0.06116402199199328,
+              "GLA_2_color": 0.03315724381969336
+            }
+          },
+          "SumMe": {
+            "mean_video_coverage": 0.11181469591521104,
+            "num_clips": 250,
+            "num_videos": 8,
+            "video_coverage": {
+              "Bearpark_climbing": 0.013677688589086755,
+              "Car_railcrossing": 0.15815368285703083,
+              "Cockpit_Landing": 0.07436313675134443,
+              "Fire_Domino": 0.3213275969028473,
+              "Notre_Dame": 0.054747801910998026,
+              "Playing_on_water_slide": 0.09985840335292251,
+              "Saving_dolphines": 0.13833037727489705,
+              "Valparaiso_Downhill": 0.03405887968256138
+            }
+          }
+        },
+        "pooled_frame_mean": 0.11451781768421236
+      }
+    },
+    "val": {
+      "16": {
+        "macro_source_mean": 0.11910520622811677,
+        "num_frames": 6832,
+        "per_source": {
+          "AVAD": {
+            "mean_video_coverage": 0.15073221952964863,
+            "num_clips": 6,
+            "num_videos": 6,
+            "video_coverage": {
+              "V16_Drummer2": 0.09838378429412842,
+              "V1_Speech1": 0.541175127029419,
+              "V36_Guitar1": 0.14945253729820251,
+              "V39_Guitar4": 0.01860515959560871,
+              "V40_Guitar5": 0.026159122586250305,
+              "V45_Darbuka2": 0.07061758637428284
+            }
+          },
+          "Coutrot_db1": {
+            "mean_video_coverage": 0.13310224618665717,
+            "num_clips": 23,
+            "num_videos": 8,
+            "video_coverage": {
+              "clip21": 0.011560935604696473,
+              "clip23": 0.025217192363925278,
+              "clip30": 0.20325519144535065,
+              "clip33": 0.010534355649724603,
+              "clip34": 0.08491290872916579,
+              "clip36": 0.2653525372346242,
+              "clip41": 0.016111598815768957,
+              "clip9": 0.4478732496500015
+            }
+          },
+          "Coutrot_db2": {
+            "mean_video_coverage": 0.15764617297629063,
+            "num_clips": 22,
+            "num_videos": 2,
+            "video_coverage": {
+              "clip12": 0.1789612170647491,
+              "clip9": 0.13633112888783216
+            }
+          },
+          "DIEM": {
+            "mean_video_coverage": 0.11982054920561948,
+            "num_clips": 214,
+            "num_videos": 13,
+            "video_coverage": {
+              "50_people_brooklyn_1280x720": 0.06418177015571432,
+              "ami_is1000a_left_720x576": 0.07378868998161384,
+              "documentary_adrenaline_rush_1280x720": 0.24275424666702747,
+              "documentary_coral_reef_adventure_1280x720": 0.18266048908440602,
+              "documentary_dolphins_1280x720": 0.08477661915515598,
+              "documentary_mystery_nile_1280x720": 0.05136114207562059,
+              "game_trailer_bullet_witch_1280x720": 0.115094914854992,
+              "home_movie_Charlie_bit_my_finger_again_960x720": 0.1483331721276045,
+              "pingpong_closeup_rallys_960x720": 0.06759401490645749,
+              "scottish_parliament_1152x864": 0.2497921665199101,
+              "sport_barcelona_extreme_1280x720": 0.06434558941982686,
+              "sport_football_best_goals_976x720": 0.13185245043908556,
+              "tv_graduates_1280x720": 0.08113187428563834
+            }
+          },
+          "ETMD_av": {
+            "mean_video_coverage": 0.07194257681435552,
+            "num_clips": 77,
+            "num_videos": 2,
+            "video_coverage": {
+              "CRA_1_color": 0.07752047335275282,
+              "CRA_2_color": 0.06636468027595822
+            }
+          },
+          "SumMe": {
+            "mean_video_coverage": 0.0813874726561291,
+            "num_clips": 85,
+            "num_videos": 3,
+            "video_coverage": {
+              "Bike_Polo": 0.06806113472894619,
+              "Kids_playing_in_leaves": 0.1078424492918298,
+              "Paintball": 0.0682588339476113
+            }
+          }
+        },
+        "pooled_frame_mean": 0.10992638853231916
+      }
+    }
+  },
+  "processed_clips": {
+    "test": 663,
+    "val": 427
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,13 @@
+dataset_root: /storage/user/zverev/datasets/av-gaze-stavis
+manifest_path: outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+cell_mass_path: outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+checkpoint: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+evaluation_splits: [val, test]
+clip_len: 16
+actions_per_frame: 265
+fine_action_offset: 69
+exact_budget: 16
+report_budgets: [1, 2, 4, 8, 16]
+batch_size: 16
+num_workers: 4
+output_path: experiments/human_gaze/results/m0_pretrained_exact16_fold1/metrics.json

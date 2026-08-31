@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "run_id": "20260828-r6_recurrent_trajectory_state_b5150dc",
+  "training_code_commit": "b5150dcfc939cb44d2a09583c2e05899347c45c5",
+  "diagnostic_code_commit": "0170cb2",
+  "dataset_manifest_sha256": "0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10",
+  "cell_mass_sha256": "fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8",
+  "training_job_id": 1684879,
+  "training_gpu_seconds_by_seed": {"440826": 46274, "440827": 42144, "440828": 46272},
+  "successful_training_gpu_seconds": 134690,
+  "diagnostic_jobs": {
+    "center_controls": 1686186,
+    "history_and_motion": 1686187,
+    "recurrent_state": 1686188,
+    "failed_cpu_plot_serialization": 1686190
+  },
+  "successful_diagnostic_gpu_seconds": 727,
+  "estimated_total_gpu_hours": 37.62,
+  "maximum_gpu_hours": 45,
+  "aborted_or_cancelled_attempts": {
+    "initial_local_preflight": "r6_recurrent_state_smoke_local_2step stopped during step-0 validation before optimizer update after preregistered saturation trigger",
+    "pending_cluster_preflight_job": "1684848 cancelled before allocation",
+    "plot_job_1686190": "CPU-only JSON serialization failure after figures; deterministic local rerun after fix"
+  },
+  "heavy_artifacts": {
+    "training_template": "outputs/human_gaze/grpo/r6_recurrent_state_base{seed}_seed{training_seed}",
+    "center_template": "outputs/human_gaze/diagnostics/r6_recurrent_state_base{seed}_seed{training_seed}/center_collapse_val.json",
+    "state_diagnostics": "outputs/human_gaze/r6_recurrent_state_diagnostics/recurrent_trajectory.json",
+    "history_diagnostics": "outputs/human_gaze/r6_recurrent_state_diagnostics/treatment_policy_history.json",
+    "summary": "outputs/human_gaze/r6_recurrent_state_diagnostics/summary.json",
+    "verification": "outputs/human_gaze/r6_recurrent_state_diagnostics/verification.json",
+    "amended_preflight": "outputs/human_gaze/r6_recurrent_state_smoke_local_rmsnorm"
+  },
+  "test_split_opened": false
+}

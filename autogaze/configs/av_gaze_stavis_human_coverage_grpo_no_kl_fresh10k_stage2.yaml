@@ -1,0 +1,8 @@
+defaults:
+  - av_gaze_stavis_human_coverage_grpo_no_kl_low_lr_cont
+  - _self_
+
+trainer:
+  n_epochs: 17
+  max_train_steps: 7685
+  exp_name: r2_fresh10k_stage2_seed${trainer.seed}

@@ -1,0 +1,8 @@
+defaults:
+  - av_gaze_stavis_r3_temporal_position
+  - _self_
+
+model:
+  gaze_model_config:
+    temporal_position_encoding: selection_conditioned_recurrent_state_logit_bias
+    recurrent_state_hidden_dim: 192

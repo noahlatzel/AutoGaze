@@ -1,0 +1,12 @@
+_target_: autogaze.tasks.variable_human_heatmap_coverage.VariableHumanHeatmapCoverage
+clip_len: 16
+actions_per_frame: 265
+fine_action_offset: 69
+min_budget: 4
+max_budget: 36
+target_mean_budget: 16.0
+initial_token_cost: 0.01
+dual_lr: 1.0e-5
+dual_ema_decay: 0.95
+max_token_cost: 0.1
+report_budgets: [1, 4, 8, 16, 24, 36]

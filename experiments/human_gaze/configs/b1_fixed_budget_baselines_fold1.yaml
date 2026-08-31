@@ -1,0 +1,11 @@
+dataset_root: /storage/user/zverev/datasets/av-gaze-stavis
+manifest_path: outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+cell_mass_path: outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+image_size: 224
+grid_size: 14
+num_workers: 4
+prefetch_factor: 2
+budgets: [16, 24, 36]
+random_seeds: [140826, 140827, 140828, 140829, 140830]
+evaluation_splits: [val]
+output_path: outputs/human_gaze/baselines/b1_fixed_budget_baselines_val.json

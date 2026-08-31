@@ -1,0 +1,63 @@
+schema_version: 1
+experiment_id: r3_temporal_diagnostics_gated_position
+preregistered_at: 2026-08-24
+code_commit_before_implementation: 0282e155f938f6bffe7251dd32aab2e13fc752eb
+dataset:
+  root: /storage/user/zverev/datasets/av-gaze-stavis
+  manifest: outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+  manifest_sha256: 0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10
+  cell_mass: outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+  cell_mass_sha256: fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8
+  design_split: train
+  evaluation_split: val
+  protected_split: test
+  target_fps: 3.0
+  clip_len: 16
+diagnostics:
+  lags: [1, 2, 4, 8]
+  topk: [16, 24, 32]
+  heatmap_metrics: [jensen_shannon_divergence, cosine_similarity]
+  motion_metrics: [centroid_cells, centroid_cells_per_second]
+  controls: [within_video_nonadjacent, deterministic_shuffled_history, history_reset]
+  k16_seeds: [440826, 440827, 440828, 440829, 440830, 440831]
+  checkpoint_template: outputs/human_gaze/grpo/r2b_fresh20k_stage3_base{seed}_seed{continuation_seed}/checkpoint_latest_gaze
+  continuation_seed_offset: 100000
+  history_audit_frame_index: 15
+  history_audit_scope: every_validation_clip
+  history_audit_note: current RGB is held fixed; only frames 0-14 are reset or replaced
+architecture:
+  budget: 16
+  paired_seeds: [440826, 440827, 440828]
+  training_seed_offset: 200000
+  initialization_cumulative_updates: 20000
+  continuation_updates: 10000
+  validation_interval: 100
+  learning_rate: 3.0e-6
+  schedule: constant
+  optimizer: adam_reset_both_arms
+  control: unchanged
+  treatment: normalized_sinusoidal_frame_position_scalar_gate
+  gate_initial_value: 0.0
+  temporal_signal_scaling: feature_rms_relative
+  max_endpoint_signal_to_feature_rms: 0.25
+  frozen: [vision_encoder, connector, task_model]
+  unchanged: [reward, clip_len, sampling, exact_budget, group_size, temperature, preprocessing]
+decision:
+  primary_metric: paired_treatment_minus_control_val_macro_k16_at_fixed_endpoint
+  pass_min_delta: 0.005
+  pass_min_positive_seed_pairs: 2
+  fail_max_delta: 0.0
+  fail_min_nonpositive_seed_pairs: 2
+  require_dynamic_minus_static_positive: true
+  require_endpoint_signal_to_feature_rms_at_most: 0.25
+  prohibit_best_checkpoint_selection: true
+compute:
+  partition: NORMAL
+  preferred_gpu: rtx_5000
+  max_concurrent_training_jobs: 6
+  max_monitor_sleep_hours: 2
+artifacts:
+  diagnostics_run_id: 20260824-r3a_temporal_diagnostics_0282e15
+  diagnostics_dir: outputs/human_gaze/r3a_temporal_diagnostics
+  training_template: outputs/human_gaze/grpo/r3b_temporal_{arm}_base{seed}_seed{continuation_seed}
+  result_dir: experiments/human_gaze/results/r3_temporal_diagnostics_gated_position

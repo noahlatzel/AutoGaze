@@ -2,6 +2,7 @@ _target_: autogaze.trainer.Trainer
 
 batch_size: 256
 per_gpu_max_batch_size: 64
+per_gpu_max_val_batch_size:
 lr: 3e-4
 min_lr: 1e-5
 lr_schedule: 'linear_w_warmup'
@@ -9,9 +10,14 @@ optimizer: 'sgd'
 train_gaze: True
 train_task: True
 detach_task: False  # Add torch.no_grad() to the task forward function.
+freeze_gaze_vision: False
+freeze_gaze_connector: False
+initialize_eos_from_spatial_mean: False
+eos_logit_bias: 0.0
 
 val_nsteps: 1000
 save_nsteps: 300
+max_periodic_checkpoints: 2
 n_epochs: 10
 logdir: 'exps/'
 exp_name:
@@ -20,6 +26,11 @@ gaze_weights:
 task_weights:
 seed: 666
 val_only: False
+max_train_steps:
+validate_at_start: True
+save_at_start: True
+save_at_end: True
+skip_final_validation: False
 
 temp_schedule_args:
     mode: 'exp'

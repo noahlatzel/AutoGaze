@@ -1,0 +1,7 @@
+defaults:
+  - av_gaze_stavis_human_coverage_grpo_no_kl
+  - _self_
+
+trainer:
+  n_epochs: 5
+  exp_name: human_coverage_no_kl_5ep_seed${trainer.seed}

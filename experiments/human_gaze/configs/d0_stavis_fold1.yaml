@@ -1,0 +1,8 @@
+dataset_root: /storage/user/zverev/datasets/av-gaze-stavis
+fold: 1
+target_fps: 3.0
+clip_len: 16
+clip_stride: 16
+validation_fraction: 0.2
+split_seed: 140826
+output_dir: outputs/human_gaze/d0_stavis_fold1

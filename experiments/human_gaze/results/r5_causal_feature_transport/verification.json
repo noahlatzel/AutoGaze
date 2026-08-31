@@ -1,0 +1,14 @@
+{
+  "all_treatment_training_and_validation_rows_controlled": true,
+  "allowed_paired_config_differences": ["model.gaze_model_config.feature_transport_temperature", "model.gaze_model_config.temporal_position_encoding", "trainer.exp_name"],
+  "code_commit": "bb27e4dd58acb4f011d5d7494bbaf2ac4a0cd0df",
+  "fixed_updates": 10000,
+  "job_id": 1683083,
+  "max_absolute_logit_gate": 1.0,
+  "maximum_observed_absolute_logit_gate_by_seed": {"440826": 0.0022179654333740473, "440827": 0.0018992834957316518, "440828": 0.0025397862773388624},
+  "reused_controls": ["r3b_temporal_control_base440826_seed640826", "r3b_temporal_control_base440827_seed640827", "r3b_temporal_control_base440828_seed640828"],
+  "schema_version": 1,
+  "status": "verified",
+  "test_split_opened": false,
+  "validation_grid": {"start": 0, "stop": 10000, "interval": 100, "count": 101}
+}

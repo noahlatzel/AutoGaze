@@ -1,0 +1,145 @@
+algorithm:
+  _target_: autogaze.algorithms.GRPO
+  group_size: 4
+  discount_factor: 1
+  optimize_task_loss_prediction: false
+  kl_coefficient: 0.0
+dataset:
+  _target_: autogaze.datasets.av_gaze_stavis.AVGazeStavisDataset
+  root: /storage/user/zverev/datasets/av-gaze-stavis
+  manifest_path: outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+  cell_mass_path: outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+  clip_len: 16
+  image_size: 224
+  grid_size: 14
+  load_rgb: true
+  load_heatmap: false
+model:
+  _target_: autogaze.models.autogaze.AutoGaze
+  gazing_ratio_config:
+    sample_strategy_during_training: fixed
+    sample_strategy_during_inference: fixed
+    fixed:
+      gazing_ratio: 0.5
+    uniform:
+      gazing_ratio_min: 0
+      gazing_ratio_max: 1
+    exponential:
+      gazing_ratio_min: 0
+      gazing_ratio_max: 1
+      lambda: 10
+  gazing_ratio_each_frame_config:
+    sample_strategy_during_training: uniform
+    sample_strategy_during_inference: uniform
+    uniform: null
+    dirichlet:
+      alpha: 0.5
+    self: null
+  scales: 32+64+112+224
+  num_vision_tokens_each_frame: 265
+  max_num_frames: 16
+  use_flash_attn: false
+  has_task_loss_requirement_during_training: false
+  has_task_loss_requirement_during_inference: false
+  task_loss_requirement_config:
+    sample_strategy_during_training: fixed
+    sample_strategy_during_inference: fixed
+    fixed:
+      task_loss_requirement: 0.7
+    uniform:
+      task_loss_requirement_min: 0.6
+      task_loss_requirement_max: 0.9
+  gaze_model_config:
+    input_img_size: 224
+    vision_model_config:
+      hidden_dim: 192
+      out_dim: 192
+      depth: 1
+      kernel_size: 16
+      temporal_patch_size: 1
+      trunk_temporal_kernel_size: 3
+      trunk_spatial_kernel_size: 3
+    connector_config:
+      hidden_dim: 192
+    gaze_decoder_config:
+      hidden_size: 192
+      intermediate_size: 384
+      max_position_embeddings: 131072
+      num_attention_heads: 6
+      num_hidden_layers: 4
+      rms_norm_eps: 1.0e-05
+      rope_scaling:
+        factor: 8.0
+        low_freq_factor: 1.0
+        high_freq_factor: 4.0
+        original_max_position_embeddings: 8192
+        rope_type: llama3
+      rope_theta: 500000.0
+      use_cache: true
+      num_multi_token_pred: 10
+  preprocessing:
+    do_resize: true
+    size:
+      shortest_edge: 224
+    do_center_crop: false
+    do_rescale: true
+    rescale_factor: 0.00784313725490196
+    offset: true
+    do_normalize: true
+    image_mean:
+    - 0.485
+    - 0.456
+    - 0.406
+    image_std:
+    - 0.229
+    - 0.224
+    - 0.225
+  max_batch_size: null
+task:
+  _target_: autogaze.tasks.human_heatmap_coverage.HumanHeatmapCoverage
+  clip_len: 16
+  actions_per_frame: 265
+  fine_action_offset: 69
+  exact_budget: 16
+  report_budgets:
+  - 1
+  - 2
+  - 4
+  - 8
+  - 16
+trainer:
+  _target_: autogaze.trainer.Trainer
+  batch_size: 4
+  per_gpu_max_batch_size: 1
+  per_gpu_max_val_batch_size: 16
+  lr: 1.0e-05
+  min_lr: 1.0e-06
+  lr_schedule: linear_w_warmup
+  optimizer: adam
+  train_gaze: true
+  train_task: false
+  detach_task: true
+  freeze_gaze_vision: true
+  freeze_gaze_connector: true
+  val_nsteps: 100
+  save_nsteps: 100
+  n_epochs: 5
+  logdir: outputs/human_gaze/grpo
+  exp_name: r0_no_kl_5ep_seed140826
+  resume: false
+  gaze_weights: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+  task_weights: null
+  seed: 140826
+  val_only: false
+  max_train_steps: null
+  validate_at_start: true
+  save_at_start: false
+  save_at_end: true
+  skip_final_validation: false
+  temp_schedule_args:
+    mode: exp
+    exp:
+      temp_start: 1.0
+      temp_end: 0.3
+  truncate_grads: true
+  grad_norm: 1.0

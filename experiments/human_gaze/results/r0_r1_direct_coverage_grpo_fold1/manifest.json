@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "dataset": {
+    "root": "/storage/user/zverev/datasets/av-gaze-stavis",
+    "manifest": "outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl",
+    "manifest_sha256": "0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10",
+    "cell_mass": "outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy",
+    "cell_mass_sha256": "fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8",
+    "split": "fold1_video_disjoint"
+  },
+  "initial_checkpoint": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze",
+  "environment": {
+    "conda": "/home/stud/latn/miniconda3/envs/autogaze",
+    "python": "3.11.15",
+    "torch": "2.11.0+cu130",
+    "cuda_build": "13.0",
+    "training_gpu": "RTX 6000 24 GB"
+  },
+  "experiment_code_commits": {
+    "pipeline": "6f0550c",
+    "exact_epoch_budget": "8eb4848",
+    "five_epoch_comparison": "c62d874",
+    "low_lr_continuation": "26c93f8",
+    "replicated_continuations": "46414d8",
+    "duration_probe": "7fbcd0c",
+    "protected_test_launcher": "5749ea1",
+    "final_center_diagnostic": "fc2be97"
+  },
+  "slurm_jobs": {
+    "matched_five_epoch_array": "1670172",
+    "continuation_seed_240826": "1670267",
+    "continuation_seeds_240827_240828": "1670310",
+    "duration_probe": "1670329",
+    "protected_test_array": "1670367",
+    "center_diagnostic": "1670388"
+  },
+  "heavy_artifacts": {
+    "training_runs": "outputs/human_gaze/grpo/",
+    "test_predictions": "outputs/human_gaze/test/",
+    "center_diagnostic": "outputs/human_gaze/diagnostics/t0_no_kl_cont_lr3e6_seed240826/center_collapse_val_within_source.json"
+  },
+  "figures": {
+    "validation_curve": "../wiki_gazing/assets/grpo_validation_macro_k16.png",
+    "center_diagnostic": "../wiki_gazing/assets/learned_policy_selection_frequency_val.png"
+  },
+  "recording_limitations": [
+    "The upstream trainer did not embed a machine-readable dirty-worktree flag in each output directory; launchers and scientific configs were committed before their corresponding jobs."
+  ]
+}

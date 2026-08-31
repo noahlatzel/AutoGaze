@@ -131,6 +131,11 @@ class LlamaForCausalLM_MultiTokenPred(LlamaPreTrainedModel, GenerationMixin):
         self.vocab_size = config.vocab_size
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size * config.num_multi_token_pred, bias=False)
         self.task_loss_prediction_head = nn.Linear(config.hidden_size, config.num_multi_token_pred, bias=False)
+        self.register_buffer(
+            "output_token_logit_bias",
+            torch.zeros(config.vocab_size),
+            persistent=True,
+        )
 
         # Initialize weights and apply final processing
         self.post_init()
@@ -146,6 +151,41 @@ class LlamaForCausalLM_MultiTokenPred(LlamaPreTrainedModel, GenerationMixin):
 
     def set_output_embeddings(self, new_embeddings):
         self.lm_head = new_embeddings
+
+    @torch.no_grad()
+    def initialize_output_token_from_mean(
+        self,
+        token_id: int,
+        source_token_ids: Optional[list[int]] = None,
+    ) -> None:
+        """Initialize one output token from the mean row of existing actions."""
+        if not 0 <= token_id < self.vocab_size:
+            raise ValueError(f"token_id must lie in [0, {self.vocab_size})")
+        if source_token_ids is None:
+            source_token_ids = [
+                candidate
+                for candidate in range(self.vocab_size)
+                if candidate != token_id
+            ]
+        if not source_token_ids:
+            raise ValueError("source_token_ids must not be empty")
+        if token_id in source_token_ids:
+            raise ValueError("source_token_ids must exclude token_id")
+        if min(source_token_ids) < 0 or max(source_token_ids) >= self.vocab_size:
+            raise ValueError("source_token_ids contain an out-of-range token")
+
+        rows = self.lm_head.weight.view(
+            self.config.num_multi_token_pred,
+            self.vocab_size,
+            self.config.hidden_size,
+        )
+        rows[:, token_id].copy_(rows[:, source_token_ids].mean(dim=1))
+
+    @torch.no_grad()
+    def set_output_token_logit_bias(self, token_id: int, bias: float) -> None:
+        if not 0 <= token_id < self.vocab_size:
+            raise ValueError(f"token_id must lie in [0, {self.vocab_size})")
+        self.output_token_logit_bias[token_id] = float(bias)
 
     def set_decoder(self, decoder):
         self.model = decoder
@@ -198,6 +238,13 @@ class LlamaForCausalLM_MultiTokenPred(LlamaPreTrainedModel, GenerationMixin):
         # Only compute necessary logits, and do not upcast them to float if we are not computing the loss
         slice_indices = slice(-logits_to_keep, None) if isinstance(logits_to_keep, int) else logits_to_keep
         logits = self.lm_head(hidden_states[:, slice_indices, :])
+        logits = logits.view(
+            *logits.shape[:-1],
+            self.config.num_multi_token_pred,
+            self.vocab_size,
+        )
+        logits = logits + self.output_token_logit_bias
+        logits = logits.flatten(-2)
         task_loss_prediction = self.task_loss_prediction_head(hidden_states[:, slice_indices, :])
 
         loss = None
@@ -289,6 +336,7 @@ class LlamaForCausalLM_MultiTokenPred(LlamaPreTrainedModel, GenerationMixin):
         return_dict_in_generate = generation_config.return_dict_in_generate
         do_sample = generation_config.do_sample
         task_loss_requirement = generation_config.task_loss_requirement
+        eos_token_ids = generation_config._eos_token_tensor
 
         # init attention / hidden states / scores tuples
         scores = () if (return_dict_in_generate and output_scores) else None
@@ -372,6 +420,7 @@ class LlamaForCausalLM_MultiTokenPred(LlamaPreTrainedModel, GenerationMixin):
             # token selection
             next_tokens_all = []
             early_stopped = False
+            block_unfinished = unfinished_sequences.bool()
             for i in range(self.config.num_multi_token_pred):
                 next_token_scores_i = next_token_scores_all[:, i, :]
 
@@ -390,10 +439,20 @@ class LlamaForCausalLM_MultiTokenPred(LlamaPreTrainedModel, GenerationMixin):
                 else:
                     next_tokens_i = torch.argmax(next_token_scores_i, dim=-1)
 
+                next_tokens_i = torch.where(
+                    block_unfinished,
+                    next_tokens_i,
+                    pad_token_id,
+                )
                 next_tokens_all.append(next_tokens_i)
 
                 # avoid repeating gazing
                 next_token_scores_all[torch.arange(next_tokens_i.shape[0]), i + 1:, next_tokens_i] = -float("inf")
+                if eos_token_ids is not None:
+                    emitted_eos = (
+                        next_tokens_i.unsqueeze(-1) == eos_token_ids
+                    ).any(dim=-1)
+                    block_unfinished = block_unfinished & ~emitted_eos
 
             next_tokens_all = torch.stack(next_tokens_all, dim=1)
 
@@ -421,7 +480,12 @@ class LlamaForCausalLM_MultiTokenPred(LlamaPreTrainedModel, GenerationMixin):
                     streamer.put(next_tokens_all[:, i].cpu())
 
             # Update the finishing flags
-            unfinished_sequences = unfinished_sequences & ~torch.any(meet_task_loss_requirement, dim=-1) & ~meet_max_new_tokens & ~early_stopped
+            unfinished_sequences = (
+                block_unfinished.to(unfinished_sequences.dtype)
+                & ~torch.any(meet_task_loss_requirement, dim=-1)
+                & ~meet_max_new_tokens
+                & ~early_stopped
+            )
             this_peer_finished = unfinished_sequences.max() == 0
             cur_len += 1
 

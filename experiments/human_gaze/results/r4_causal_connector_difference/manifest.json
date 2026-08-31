@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "run_id": "20260825-r4_causal_connector_difference_9c3c6d2",
+  "training_code_commit": "9c3c6d27ecc5aea85419b3f9671c4a8b29a07bc9",
+  "analysis_code_commit": "d0c5463bb6f433a1086b3793c2b64ed31d032374",
+  "training_job_id": 1681313,
+  "successful_training_gpu_seconds": 122352,
+  "failed_first_seed_440827_attempt_gpu_seconds": 5405,
+  "center_diagnostics_job_id": 1682436,
+  "history_diagnostics_job_id": 1682437,
+  "plot_job_id": 1682438,
+  "heavy_artifacts": {
+    "run_template": "outputs/human_gaze/grpo/r4_causal_difference_base{seed}_seed{training_seed}",
+    "center_diagnostics_template": "outputs/human_gaze/diagnostics/r4_causal_difference_base{seed}_seed{training_seed}/center_collapse_val.json",
+    "history": "outputs/human_gaze/r4_causal_difference_diagnostics/treatment_policy_history.json",
+    "summary": "outputs/human_gaze/r4_causal_difference_diagnostics/summary.json",
+    "verification": "outputs/human_gaze/r4_causal_difference_diagnostics/verification.json"
+  },
+  "test_split_opened": false
+}
