@@ -324,6 +324,9 @@ def main() -> None:
         "cell_mass_sha256": sha256(d0_root / "cell_mass.npy"),
         "baseline_sha256": sha256(Path(cfg["static_baselines"])),
         "pretrained_k32_sha256": sha256(Path(cfg["pretrained"])),
+        "k36_reference_config_sha256": sha256(Path(cfg["k36_config"])),
+        "verification_sha256": sha256(args.verification),
+        "curator_sha256": sha256(Path(__file__)),
         "heavy_artifacts": {
             "execution_root": str(Path.cwd()),
             "training_template": "outputs/human_gaze/grpo/r2c_k32_reproduction_stage{1,2,3}_*",
@@ -333,7 +336,7 @@ def main() -> None:
         "test_split_opened": False,
     }
     write_json(args.output_dir / "manifest.json", manifest)
-    readme = f"""# Exact-K32 fixed-budget reproduction\n\nThis bundle reproduces the completed R2c exact-K36 protocol at exact K32. The only scientific treatment change is the fixed fine-cell budget (36 to 32); run-identity paths and reporting prefixes change accordingly. All three matched seeds use the fixed 20,000-update endpoint on the unchanged train-derived validation population. The protected test split was not opened.\n\nThe learned K32 endpoint is `{endpoints[32]['mean']:.6f} ± {endpoints[32]['population_sd']:.6f}` (population SD) versus Prior-32 `{prior32:.6f}`, a delta of `{endpoints[32]['mean'] - prior32:+.6f}`. The frozen coverage rule is **{'pass' if coverage_pass else 'fail'}**. The endpoint dynamic/static/shuffled content-dependence rule is **{'pass' if content_pass else 'fail'}**.\n\n`metrics.json` contains per-seed endpoints, K16/K24/K32/K36 comparisons, per-source K32 estimates, and the complete longitudinal control suite. `verification.json` proves exact 32-per-frame / 512-per-clip accounting, all 20,000 updates, fixed validation schedules, matched seeds, and resolved-config parity with K36 except the budget and run identity. `manifest.json` records commits, jobs, hashes, compute, and heavy-artifact paths.\n"""
+    readme = f"""# Exact-K32 fixed-budget reproduction\n\nThis bundle reproduces the completed R2c exact-K36 protocol at exact K32. The only scientific treatment change is the fixed fine-cell budget (36 to 32); run-identity paths and reporting prefixes change accordingly. All three matched seeds use the fixed 20,000-update endpoint on the unchanged train-derived validation population. The protected test split was not opened.\n\nThe learned K32 endpoint is `{endpoints[32]['mean']:.6f} ± {endpoints[32]['population_sd']:.6f}` (population SD) versus Prior-32 `{prior32:.6f}`, a delta of `{endpoints[32]['mean'] - prior32:+.6f}`. The frozen coverage rule is **{'pass' if coverage_pass else 'fail'}**. The endpoint dynamic/static/shuffled content-dependence rule is **{'pass' if content_pass else 'fail'}**.\n\n`metrics.json` contains per-seed endpoints, K16/K24/K32/K36 comparisons, per-source K32 estimates, and the complete longitudinal control suite. `verification.json` proves exact 32-per-frame / 512-per-clip accounting, all 20,000 updates, fixed validation schedules, matched seeds, and resolved-config parity with K36 except the budget and run identity. `manifest.json` records commits, jobs, hashes, compute, and heavy-artifact paths. `figures/` contains the four summary plots plus the nine seed-by-checkpoint concentration heatmaps used by the diagnostics.\n"""
     (args.output_dir / "README.md").write_text(readme)
     print(json.dumps({"coverage_pass": coverage_pass, "content_dependence_pass": content_pass, "k32_mean": endpoints[32]["mean"], "prior32": prior32}, sort_keys=True))
 
