@@ -9,11 +9,15 @@ import argparse
 import hashlib
 import json
 import shutil
+import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 from omegaconf import OmegaConf
+
+if __package__ is None or __package__ == "":
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.human_gaze.verify_k32_fixed_budget import SOURCES, read_json, read_jsonl, run_names
 
