@@ -1,3 +1,6 @@
+import subprocess
+import sys
+
 import torch
 
 from autogaze.tasks.human_heatmap_coverage import HumanHeatmapCoverage
@@ -49,3 +52,15 @@ def test_parity_normalization_allows_only_budget_and_run_identity() -> None:
     assert nested_differences(
         normalized_for_budget_parity(k32), normalized_for_budget_parity(k36)
     ) == ["algorithm.kl_coefficient"]
+
+
+def test_curator_direct_script_entrypoint_imports_repository_modules() -> None:
+    completed = subprocess.run(
+        [sys.executable, "scripts/human_gaze/curate_k32_fixed_budget.py", "--help"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert "--verification" in completed.stdout
