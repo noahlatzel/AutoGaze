@@ -1,0 +1,104 @@
+{
+  "all_endpoint_diagnostics_complete": true,
+  "config_parity": {
+    "440826": {
+      "stage1": {
+        "config_parity_except_budget_and_run_identity": true,
+        "training_rows": 2315,
+        "validation_rows": 25
+      },
+      "stage2": {
+        "config_parity_except_budget_and_run_identity": true,
+        "training_rows": 7685,
+        "validation_rows": 78
+      },
+      "stage3": {
+        "config_parity_except_budget_and_run_identity": true,
+        "training_rows": 10000,
+        "validation_rows": 101
+      }
+    },
+    "440827": {
+      "stage1": {
+        "config_parity_except_budget_and_run_identity": true,
+        "training_rows": 2315,
+        "validation_rows": 25
+      },
+      "stage2": {
+        "config_parity_except_budget_and_run_identity": true,
+        "training_rows": 7685,
+        "validation_rows": 78
+      },
+      "stage3": {
+        "config_parity_except_budget_and_run_identity": true,
+        "training_rows": 10000,
+        "validation_rows": 101
+      }
+    },
+    "440828": {
+      "stage1": {
+        "config_parity_except_budget_and_run_identity": true,
+        "training_rows": 2315,
+        "validation_rows": 25
+      },
+      "stage2": {
+        "config_parity_except_budget_and_run_identity": true,
+        "training_rows": 7685,
+        "validation_rows": 78
+      },
+      "stage3": {
+        "config_parity_except_budget_and_run_identity": true,
+        "training_rows": 10000,
+        "validation_rows": 101
+      }
+    }
+  },
+  "endpoint_selection": "fixed_step_20000",
+  "endpoints": {
+    "440826": {
+      "coverage_k32_macro_source": 0.6309162485411913,
+      "coverage_k32_source_AVAD": 0.6095648209253947,
+      "coverage_k32_source_Coutrot_db1": 0.6041910277369121,
+      "coverage_k32_source_Coutrot_db2": 0.6807462261481718,
+      "coverage_k32_source_DIEM": 0.6333503404183308,
+      "coverage_k32_source_ETMD_av": 0.6879116453823613,
+      "coverage_k32_source_SumMe": 0.5697334306359779
+    },
+    "440827": {
+      "coverage_k32_macro_source": 0.6326960633344628,
+      "coverage_k32_source_AVAD": 0.6162670602401098,
+      "coverage_k32_source_Coutrot_db1": 0.6005744171949724,
+      "coverage_k32_source_Coutrot_db2": 0.6883426010608673,
+      "coverage_k32_source_DIEM": 0.6330525015316865,
+      "coverage_k32_source_ETMD_av": 0.6872907766768164,
+      "coverage_k32_source_SumMe": 0.5706490233023249
+    },
+    "440828": {
+      "coverage_k32_macro_source": 0.6330784327763187,
+      "coverage_k32_source_AVAD": 0.623310367266337,
+      "coverage_k32_source_Coutrot_db1": 0.6009508723703523,
+      "coverage_k32_source_Coutrot_db2": 0.6857925694097172,
+      "coverage_k32_source_DIEM": 0.6329626251805068,
+      "coverage_k32_source_ETMD_av": 0.684921088790604,
+      "coverage_k32_source_SumMe": 0.5705330736403947
+    }
+  },
+  "exact_actions_per_clip": 512,
+  "exact_actions_per_frame": 32,
+  "fixed_cumulative_optimizer_updates": 20000,
+  "matched_base_seeds": [
+    440826,
+    440827,
+    440828
+  ],
+  "matched_continuation_seeds": [
+    540826,
+    540827,
+    540828
+  ],
+  "mode": "complete",
+  "schema_version": 1,
+  "status": "verified",
+  "test_split_opened": false,
+  "validation_interval": 100
+}

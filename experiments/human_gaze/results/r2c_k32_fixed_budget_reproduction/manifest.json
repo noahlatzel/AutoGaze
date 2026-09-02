@@ -1,0 +1,28 @@
+{
+  "baseline_sha256": "bba9dae35232d0c908a3bb20efed6882aa2b154cfd034a77ebefa0fb3e4342b6",
+  "cell_mass_sha256": "fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8",
+  "curator_sha256": "d4708d4347a8a5d1acfac9fe2f83c3fc399f2bdf79ccae421d8d49e94c903c43",
+  "dataset_manifest_sha256": "0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10",
+  "diagnostics_job_id": 1690916,
+  "heavy_artifacts": {
+    "diagnostics_template": "outputs/human_gaze/diagnostics/r2c_k32_reproduction_*/center_collapse_val_step*.json",
+    "execution_root": "/storage/user/latn/worktrees/autogaze-r2c-k32-reproduction",
+    "k36_reference_root": "/storage/user/latn/worktrees/autogaze-r2c-fixed-budgets/outputs/human_gaze",
+    "training_template": "outputs/human_gaze/grpo/r2c_k32_reproduction_stage{1,2,3}_*"
+  },
+  "k36_execution_code_commit": "2e726b22674d372c7df16517970aaec6b4abee18",
+  "k36_reference_config_sha256": "88e7a8ee49090032fc53a8450519e1e5450a23233b7b8da9d0740fd7101b47b8",
+  "pretrained_k32_sha256": "960cacbbc56fec50d0c5189f3db523fa7f5854e930b3092336f67151efa2aa45",
+  "run_id": "20260901-r2c_k32_fixed_budget_reproduction_0dc1ade",
+  "schema_version": 1,
+  "successful_training_gpu_hours": 97.71522731853857,
+  "test_split_opened": false,
+  "training_code_commit": "0dc1ade02c23d5db278479d688404b50185f41b0",
+  "training_gpu_seconds_by_seed": {
+    "440826": 117133.08151698112,
+    "440827": 120068.15451908112,
+    "440828": 114573.58231067657
+  },
+  "training_job_id": 1690913,
+  "verification_sha256": "410388e5019e380182b6606077077520a76d12ab1949c871fa85f5322319ebe4"
+}
