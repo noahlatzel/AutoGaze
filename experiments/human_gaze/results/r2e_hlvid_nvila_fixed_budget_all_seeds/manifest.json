@@ -9,7 +9,9 @@
     "implementation_commit": "6ed85ddd9d08dea021cb82644e3806155ad6a68a",
     "evaluation_commit": "7835a4bf00c4abbb620d325fdc7c8a9514bd16df",
     "aggregation_base_commit": "7835a4bf00c4abbb620d325fdc7c8a9514bd16df",
-    "aggregation_script_sha256": "03b672a3806e326fe241ec77efe368f9c5a0dbc756b31eb9fda7822cfb6971f9"
+    "aggregation_script_sha256": "03b672a3806e326fe241ec77efe368f9c5a0dbc756b31eb9fda7822cfb6971f9",
+    "result_generation_commit": "e79405f",
+    "result_generation_commit_note": "Commit containing the validated aggregator, config, launcher, tables, figures, and pre-provenance manifest; this field is added by the following provenance-only commit."
   },
   "protocol_id": "hlvid_nvila_mtv48_uniform128_thumbnail64_v1",
   "verified_protocol": {
