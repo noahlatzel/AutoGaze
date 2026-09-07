@@ -1,0 +1,204 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "benchmark": "HLVid official test",
+  "primary_metric": "exact-match question-micro accuracy",
+  "protocol_id": "hlvid_nvila_mtv48_uniform128_thumbnail64_v1",
+  "verified_protocol": {
+    "num_video_frames": 128,
+    "num_video_frames_thumbnail": 64,
+    "max_tiles_video": 48,
+    "tile_len": 16,
+    "max_new_tokens": 16,
+    "thumbnails": "full",
+    "image_processor": "saved slow processor (use_fast=false)",
+    "generation": "greedy",
+    "torch_dtype": "bfloat16",
+    "max_batch_size_autogaze": 16,
+    "max_batch_size_siglip": 32,
+    "prompt_template": "<video>\n\nQuestion: {benchmark_question_with_choices_and_answer_instruction}",
+    "answer_parser": "first standalone A/B/C/D letter"
+  },
+  "preflight_sha256": "e68b8d93cae8a8419326a6df900d098dcbbd9376c3f8dd3f168e8298948be082",
+  "validated_checkpoint_fingerprints": 12,
+  "human_gaze_protected_test_accessed": false,
+  "validation": {
+    "status": "pass",
+    "completed_runs": 12,
+    "questions_per_run": 268,
+    "total_question_rows": 3216,
+    "dataset_identity_recomputed_from_parquet": true,
+    "uniform_128_frame_indices_recomputed": true,
+    "answer_parser_and_correctness_recomputed": true,
+    "summary_metrics_and_stream_hashes_recomputed": true,
+    "checkpoint_protocol_seed_and_split_provenance_verified": true
+  },
+  "budget_summaries": [
+    {
+      "budget": 16,
+      "num_seeds": 6,
+      "base_seeds": [
+        440826,
+        440827,
+        440828,
+        440829,
+        440830,
+        440831
+      ],
+      "question_micro_accuracy_mean": 0.5031094527363185,
+      "question_micro_accuracy_seed_sd": 0.010921219611201587,
+      "question_micro_accuracy_ci90_low": 0.4941252200513011,
+      "question_micro_accuracy_ci90_high": 0.5120936854213358,
+      "macro_video_accuracy_mean": 0.49986878201163915,
+      "macro_video_accuracy_seed_sd": 0.016501142531193128,
+      "macro_video_accuracy_ci90_low": 0.4862942812373099,
+      "macro_video_accuracy_ci90_high": 0.5134432827859684
+    },
+    {
+      "budget": 24,
+      "num_seeds": 3,
+      "base_seeds": [
+        440826,
+        440827,
+        440828
+      ],
+      "question_micro_accuracy_mean": 0.47885572139303484,
+      "question_micro_accuracy_seed_sd": 0.014126637676120093,
+      "question_micro_accuracy_ci90_low": 0.45504026625286276,
+      "question_micro_accuracy_ci90_high": 0.5026711765332069,
+      "macro_video_accuracy_mean": 0.482800136371565,
+      "macro_video_accuracy_seed_sd": 0.02021384630232484,
+      "macro_video_accuracy_ci90_low": 0.4487225334160422,
+      "macro_video_accuracy_ci90_high": 0.5168777393270878
+    },
+    {
+      "budget": 32,
+      "num_seeds": 3,
+      "base_seeds": [
+        440826,
+        440827,
+        440828
+      ],
+      "question_micro_accuracy_mean": 0.49129353233830847,
+      "question_micro_accuracy_seed_sd": 0.01199459049874746,
+      "question_micro_accuracy_ci90_low": 0.471072398442411,
+      "question_micro_accuracy_ci90_high": 0.5115146662342059,
+      "macro_video_accuracy_mean": 0.5186872651158366,
+      "macro_video_accuracy_seed_sd": 0.015453168973126511,
+      "macro_video_accuracy_ci90_low": 0.492635471271424,
+      "macro_video_accuracy_ci90_high": 0.5447390589602493
+    }
+  ],
+  "matched_budget_seeds": [
+    440826,
+    440827,
+    440828
+  ],
+  "matched_budget_summaries": [
+    {
+      "budget": 16,
+      "num_seeds": 3,
+      "base_seeds": [
+        440826,
+        440827,
+        440828
+      ],
+      "question_micro_accuracy_mean": 0.4975124378109453,
+      "question_micro_accuracy_seed_sd": 0.01199459049874744,
+      "question_micro_accuracy_ci90_low": 0.47729130391504787,
+      "question_micro_accuracy_ci90_high": 0.5177335717068428
+    },
+    {
+      "budget": 24,
+      "num_seeds": 3,
+      "base_seeds": [
+        440826,
+        440827,
+        440828
+      ],
+      "question_micro_accuracy_mean": 0.47885572139303484,
+      "question_micro_accuracy_seed_sd": 0.014126637676120093,
+      "question_micro_accuracy_ci90_low": 0.45504026625286276,
+      "question_micro_accuracy_ci90_high": 0.5026711765332069
+    },
+    {
+      "budget": 32,
+      "num_seeds": 3,
+      "base_seeds": [
+        440826,
+        440827,
+        440828
+      ],
+      "question_micro_accuracy_mean": 0.49129353233830847,
+      "question_micro_accuracy_seed_sd": 0.01199459049874746,
+      "question_micro_accuracy_ci90_low": 0.471072398442411,
+      "question_micro_accuracy_ci90_high": 0.5115146662342059
+    }
+  ],
+  "matched_budget_differences": [
+    {
+      "budget_a": 16,
+      "budget_b": 24,
+      "difference": 0.018656716417910446,
+      "ci90_low": -0.019444444444444445,
+      "ci90_high": 0.05368289637952559,
+      "cluster_unit": "video",
+      "num_video_clusters": 77,
+      "iterations": 10000,
+      "bootstrap_seed": 20262525
+    },
+    {
+      "budget_a": 16,
+      "budget_b": 32,
+      "difference": 0.006218905472636816,
+      "ci90_low": -0.05830087394847959,
+      "ci90_high": 0.06723911887298858,
+      "cluster_unit": "video",
+      "num_video_clusters": 77,
+      "iterations": 10000,
+      "bootstrap_seed": 20262533
+    },
+    {
+      "budget_a": 24,
+      "budget_b": 32,
+      "difference": -0.012437810945273632,
+      "ci90_low": -0.06060606060606061,
+      "ci90_high": 0.030012120192427508,
+      "cluster_unit": "video",
+      "num_video_clusters": 77,
+      "iterations": 10000,
+      "bootstrap_seed": 20263333
+    }
+  ],
+  "upstream_reference": {
+    "accuracy": 0.48507462686567165,
+    "artifact": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_default_autogaze/summary.json",
+    "artifact_sha256": "d08fc9b0fa8d89cf584d2fad56549c19d3a79788f065662304dc3a5e0a6e132e",
+    "comparison_boundary": "descriptive; not budget-matched or seed-matched"
+  },
+  "k32_status": {
+    "status": "completed_and_validated",
+    "base_seeds": [
+      440826,
+      440827,
+      440828
+    ],
+    "continuation_seeds": [
+      540826,
+      540827,
+      540828
+    ],
+    "fixed_cumulative_optimizer_updates": 20000,
+    "endpoint_selection": "fixed_step_20000_not_best_validation",
+    "training_commit": "0dc1ade02c23d5db278479d688404b50185f41b0",
+    "verification": "/storage/user/latn/worktrees/autogaze-r2c-k32-reproduction/outputs/human_gaze/r2c_k32_fixed_budget_reproduction/verification.json",
+    "verification_sha256": "410388e5019e380182b6606077077520a76d12ab1949c871fa85f5322319ebe4",
+    "protected_test_opened_during_training": false
+  },
+  "abandoned_k36": {
+    "status": "excluded_from_primary_reporting_by_user_direction",
+    "cancellation_date": "2026-09-03",
+    "preserve_existing_partial_artifacts": true,
+    "schedule_no_further_k36": true
+  }
+}

@@ -1,0 +1,130 @@
+schema_version: 2
+experiment_id: r2e_hlvid_nvila_fixed_budget_k16_k24_k32
+status: authorized_repair_and_k32_extension
+date: 2026-09-03
+question: >-
+  How do the available K16, K24, and K32 human-gaze-trained fixed spatial
+  policies transfer to HLVid under the established NVILA MTV48 protocol?
+authorization:
+  evaluation_type: external_cross_benchmark_test_evaluation
+  benchmark_split: HLVid official Hugging Face test
+  human_gaze_protected_test_accessed: false
+  note: >-
+    HLVid's only published split is named test and this task explicitly
+    authorizes benchmark evaluation. It is disjoint in purpose and storage
+    from the protected 663-clip AV-gaze-STAViS human-gaze test split, which is
+    not read by this evaluator.
+dataset:
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+  split: test
+  examples: 268
+  videos: 77
+  parquet: data/test-00000-of-00001.parquet
+  parquet_sha256: ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a
+  dataset_card_license_field: absent
+models:
+  nvila: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video
+  nvila_terms: CC-BY-NC-SA-4.0; research and development only
+  upstream_autogaze: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+  checkpoint_root: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo
+protocol:
+  protocol_id: hlvid_nvila_mtv48_uniform128_thumbnail64_v1
+  reference_artifact: /home/stud/latn/AutoGaze/outputs/hlvid/nvila_default_autogaze/summary.json
+  reference_artifact_sha256: d08fc9b0fa8d89cf584d2fad56549c19d3a79788f065662304dc3a5e0a6e132e
+  reference_accuracy: 0.48507462686567165
+  frame_source: uniform
+  source_index_rule: round(linspace(0, decodable_frame_count - 1, 128))
+  num_video_frames: 128
+  num_video_frames_thumbnail: 64
+  max_tiles_video: 48
+  tile_len: 16
+  max_new_tokens: 16
+  thumbnails: full
+  image_processor: saved slow processor (use_fast=false)
+  torch_dtype: bfloat16
+  generation: greedy
+  prompt: "<video>\n\nQuestion: {benchmark_question_with_choices_and_answer_instruction}"
+  answer_parser: first standalone A/B/C/D letter
+  primary_metric: exact_match_question_micro_accuracy
+  secondary_metrics:
+    - macro_video_accuracy
+    - category_accuracy
+  tile_policy:
+    exact_decoder_actions_per_autogaze_frame: budget
+    allowed_action_ids: [69, 264]
+    unique_actions: true
+    allow_eos: false
+  interpretation: >-
+    MTV48 means max_tiles_video=48. The preserved established run uses 128
+    uniformly sampled tiled frames and 64 full thumbnail frames; it is not a
+    48-frame temporal protocol.
+seed_matrix:
+  - base_seed: 440826
+    continuation_seed: 540826
+    checkpoints:
+      16: r2b_fresh20k_stage3_base440826_seed540826/checkpoint_latest_gaze
+      24: r2c_fixedk24_stage3_base440826_seed540826/checkpoint_latest_gaze
+      32: /storage/user/latn/worktrees/autogaze-r2c-k32-reproduction/outputs/human_gaze/grpo/r2c_k32_reproduction_stage3_base440826_seed540826/checkpoint_ep40_iter0/checkpoint_gaze
+  - base_seed: 440827
+    continuation_seed: 540827
+    checkpoints:
+      16: r2b_fresh20k_stage3_base440827_seed540827/checkpoint_latest_gaze
+      24: r2c_fixedk24_stage3_base440827_seed540827/checkpoint_latest_gaze
+      32: /storage/user/latn/worktrees/autogaze-r2c-k32-reproduction/outputs/human_gaze/grpo/r2c_k32_reproduction_stage3_base440827_seed540827/checkpoint_ep40_iter0/checkpoint_gaze
+  - base_seed: 440828
+    continuation_seed: 540828
+    checkpoints:
+      16: r2b_fresh20k_stage3_base440828_seed540828/checkpoint_latest_gaze
+      24: r2c_fixedk24_stage3_base440828_seed540828/checkpoint_latest_gaze
+      32: /storage/user/latn/worktrees/autogaze-r2c-k32-reproduction/outputs/human_gaze/grpo/r2c_k32_reproduction_stage3_base440828_seed540828/checkpoint_ep40_iter0/checkpoint_gaze
+  - base_seed: 440829
+    continuation_seed: 540829
+    checkpoints:
+      16: r2b_fresh20k_stage3_base440829_seed540829/checkpoint_latest_gaze
+  - base_seed: 440830
+    continuation_seed: 540830
+    checkpoints:
+      16: r2b_fresh20k_stage3_base440830_seed540830/checkpoint_latest_gaze
+  - base_seed: 440831
+    continuation_seed: 540831
+    checkpoints:
+      16: r2b_fresh20k_stage3_base440831_seed540831/checkpoint_latest_gaze
+analysis:
+  all_available_seed_summary: true
+  matched_budget_seeds: [440826, 440827, 440828]
+  confidence_level: 0.90
+  seed_interval: two-sided Student t interval over seed endpoints
+  paired_interval: video-cluster bootstrap of matched-seed mean correctness
+  bootstrap_iterations: 10000
+  bootstrap_seed: 20260901
+  no_checkpoint_selection: true
+k32_integration:
+  status: handed_off
+  base_seeds: [440826, 440827, 440828]
+  continuation_seeds: [540826, 540827, 540828]
+  fixed_cumulative_optimizer_updates: 20000
+  endpoint_selection: fixed_step_20000_not_best_validation
+  training_commit: 0dc1ade02c23d5db278479d688404b50185f41b0
+  verification: /storage/user/latn/worktrees/autogaze-r2c-k32-reproduction/outputs/human_gaze/r2c_k32_fixed_budget_reproduction/verification.json
+  verification_sha256: 410388e5019e380182b6606077077520a76d12ab1949c871fa85f5322319ebe4
+  protected_test_opened_during_training: false
+abandoned_k36:
+  status: excluded_from_primary_reporting_by_user_direction
+  cancellation_date: 2026-09-03
+  preserve_existing_partial_artifacts: true
+  schedule_no_further_k36: true
+slurm:
+  maximum_counted_jobs: 10
+  replacement_array_tasks: 3
+  reclaimed_cancelled_pending_tasks: 3
+  layout: >-
+    task 0 runs K32; task 1 resumes K24 then runs K32; task 2 resumes K16,
+    runs K24, then runs K32. No task runs K36.
+  concurrency: 3
+  task_budgets:
+    0: [32]
+    1: [24, 32]
+    2: [16, 24, 32]
+outputs:
+  raw_root: outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_all_seeds_mtv48
+  result_bundle: experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds

@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "status": "pass",
+  "verified_at": "2026-09-03T23:06:10+02:00",
+  "evaluation_commit": "7835a4bf00c4abbb620d325fdc7c8a9514bd16df",
+  "tracked_worktree_clean": true,
+  "config": "experiments/human_gaze/configs/r2e_hlvid_nvila_fixed_budget_k16_k24_k32.yaml",
+  "config_sha256": "1e11ec7bf3659a30bcc664ffc0fc2b5d7931c408008f9e2806a5d66c21b96fbd",
+  "existing_k16_k24_preflight": {
+    "path": "experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/preflight.json",
+    "sha256": "3e59c58f7552b0073c544f06caaa07c6bc8b59859b89d0c0b93a2a960cd7c36b",
+    "status": "pass"
+  },
+  "execution_files": {
+    "autogaze/human_gaze/hlvid.py": "1e40d62054eb890db68383310d1077b404c629618425c5213860c7b989794de9",
+    "scripts/human_gaze/evaluate_hlvid_nvila_fixed_budget.py": "6ffa385d17198624a40eec0f8a902231437390974575422b5fd242442d4f7e45",
+    "experiments/human_gaze/slurm/run_hlvid_nvila_k16_k24_k32_repair.sbatch": "23c2317b46d6d01161d477f5088550e2396574799c318fcd53cc8cc8427583e1"
+  },
+  "dataset": {
+    "split": "official_huggingface_test",
+    "questions": 268,
+    "videos": 77,
+    "parquet_sha256": "ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a",
+    "human_gaze_protected_test_accessed": false
+  },
+  "verified_protocol": {
+    "frame_source": "uniform",
+    "num_video_frames": 128,
+    "num_video_frames_thumbnail": 64,
+    "max_tiles_video": 48,
+    "tile_len": 16,
+    "max_new_tokens": 16,
+    "thumbnails": "full",
+    "torch_dtype": "bfloat16",
+    "generation": "greedy",
+    "answer_parser": "first standalone A/B/C/D letter",
+    "fixed_budget_action_ids": [69, 264],
+    "fixed_budget_unique_actions": true,
+    "allow_eos": false
+  },
+  "k32_handoff": {
+    "status": "verified",
+    "source_verification": "/storage/user/latn/worktrees/autogaze-r2c-k32-reproduction/outputs/human_gaze/r2c_k32_fixed_budget_reproduction/verification.json",
+    "source_verification_sha256": "410388e5019e380182b6606077077520a76d12ab1949c871fa85f5322319ebe4",
+    "training_commit": "0dc1ade02c23d5db278479d688404b50185f41b0",
+    "fixed_cumulative_optimizer_updates": 20000,
+    "endpoint_selection": "fixed_step_20000",
+    "exact_actions_per_frame": 32,
+    "test_split_opened_during_training": false,
+    "checkpoints": [
+      {
+        "base_seed": 440826,
+        "continuation_seed": 540826,
+        "path": "/storage/user/latn/worktrees/autogaze-r2c-k32-reproduction/outputs/human_gaze/grpo/r2c_k32_reproduction_stage3_base440826_seed540826/checkpoint_ep40_iter0/checkpoint_gaze",
+        "model_safetensors_sha256": "01c7868690745b376a0b5211cca13133763d30392ec733e13822c9cb975315f8",
+        "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+        "tensor_count": 49,
+        "tensor_schema_matches_upstream": true
+      },
+      {
+        "base_seed": 440827,
+        "continuation_seed": 540827,
+        "path": "/storage/user/latn/worktrees/autogaze-r2c-k32-reproduction/outputs/human_gaze/grpo/r2c_k32_reproduction_stage3_base440827_seed540827/checkpoint_ep40_iter0/checkpoint_gaze",
+        "model_safetensors_sha256": "4d4b2ab6df9efe723eae12b0255158028b7cd2d76d397ff2b0fa111aa8dba508",
+        "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+        "tensor_count": 49,
+        "tensor_schema_matches_upstream": true
+      },
+      {
+        "base_seed": 440828,
+        "continuation_seed": 540828,
+        "path": "/storage/user/latn/worktrees/autogaze-r2c-k32-reproduction/outputs/human_gaze/grpo/r2c_k32_reproduction_stage3_base440828_seed540828/checkpoint_ep40_iter0/checkpoint_gaze",
+        "model_safetensors_sha256": "a5d57aa099cf8382827d7fb4deb18eb471679fdcda01187c81c0dc672b3c99b8",
+        "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+        "tensor_count": 49,
+        "tensor_schema_matches_upstream": true
+      }
+    ]
+  },
+  "run_plan": {
+    "0": {"base_seed": 440826, "continuation_seed": 540826, "budgets": [32]},
+    "1": {"base_seed": 440827, "continuation_seed": 540827, "budgets": [24, 32]},
+    "2": {"base_seed": 440828, "continuation_seed": 540828, "budgets": [16, 24, 32]}
+  },
+  "k36": {
+    "status": "abandoned",
+    "scheduled": false,
+    "partial_artifacts_preserved": true,
+    "included_in_primary_reporting": false
+  }
+}

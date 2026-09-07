@@ -1,0 +1,914 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "experiment_id": "r2e_hlvid_nvila_fixed_budget_all_seeds",
+  "draft_updated_at": "2026-09-07T21:48:18+02:00",
+  "git": {
+    "repository": "AutoGaze",
+    "branch": "codex/hlvid-fixed-budget-all-seeds",
+    "implementation_commit": "6ed85ddd9d08dea021cb82644e3806155ad6a68a",
+    "evaluation_commit": "7835a4bf00c4abbb620d325fdc7c8a9514bd16df",
+    "aggregation_base_commit": "7835a4bf00c4abbb620d325fdc7c8a9514bd16df",
+    "aggregation_script_sha256": "03b672a3806e326fe241ec77efe368f9c5a0dbc756b31eb9fda7822cfb6971f9"
+  },
+  "protocol_id": "hlvid_nvila_mtv48_uniform128_thumbnail64_v1",
+  "verified_protocol": {
+    "frame_source": "uniform",
+    "num_video_frames": 128,
+    "num_video_frames_thumbnail": 64,
+    "max_tiles_video": 48,
+    "tile_len": 16,
+    "max_new_tokens": 16,
+    "thumbnails": "full",
+    "torch_dtype": "bfloat16",
+    "generation": "greedy",
+    "primary_metric": "exact_match_question_micro_accuracy"
+  },
+  "benchmark_split": "official_huggingface_test",
+  "human_gaze_protected_test_accessed": false,
+  "config": {
+    "path": "experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/config.yaml",
+    "sha256": "1e11ec7bf3659a30bcc664ffc0fc2b5d7931c408008f9e2806a5d66c21b96fbd"
+  },
+  "preflight": {
+    "path": "experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/preflight.json",
+    "sha256": "3e59c58f7552b0073c544f06caaa07c6bc8b59859b89d0c0b93a2a960cd7c36b",
+    "status": "pass",
+    "code_commit": "6ed85ddd9d08dea021cb82644e3806155ad6a68a",
+    "code_dirty": false
+  },
+  "artifacts": {
+    "raw_root": "/home/stud/latn/.codex/worktrees/3f12/master-thesis/AutoGaze/outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_all_seeds_mtv48",
+    "retention": "ignored heavy execution state; per-question JSONL and summaries",
+    "curated_files": {
+      "README.md": "a670e5f55cae0196e14001761acd760892d3570dda9fbbbc480a2e31aea5e615",
+      "config.yaml": "1e11ec7bf3659a30bcc664ffc0fc2b5d7931c408008f9e2806a5d66c21b96fbd",
+      "preflight.json": "3e59c58f7552b0073c544f06caaa07c6bc8b59859b89d0c0b93a2a960cd7c36b",
+      "preflight_k16_k24_k32.json": "e68b8d93cae8a8419326a6df900d098dcbbd9376c3f8dd3f168e8298948be082",
+      "metrics.json": "74df4626f099f6043bb2412c5df2c08b76b3868203964f2d96aeab42f4f2bbc6",
+      "per_seed.csv": "1804d97507d4f6d7ec405cb7b129c0f3e81906ee4f9a55fb8babbd5dd7beb3c0",
+      "per_category.csv": "b471790c8ce00640bf567772c9611f44716b3d392c49b4a192c0c7be0333cf81",
+      "matched_budget_differences.csv": "f7f5c673ba95099bd8812bed9235163ca9385e9cb86007ad59baaaebebc1fef3",
+      "hlvid_fixed_budget_all_seeds.png": "28bc47630bda184cc5e184f5d46afe6a9141ab38d3b8d0249b921f17216a61f0",
+      "hlvid_fixed_budget_all_seeds.pdf": "6bf24246882baf4c51b42dac07ac959fcb0457bb1c96b2c05545136983743009"
+    }
+  },
+  "slurm": {
+    "maximum_counted_jobs": 10,
+    "submitted_counted_jobs": 10,
+    "authorized_scope_change": {
+      "timestamp": "2026-09-03T23:10:06+02:00",
+      "directive": "Cancel all pending K36 work, preserve K16/K24, and replace the three pending K36-bearing tasks one-for-one with K16/K24 repair plus K32 evaluation.",
+      "cancelled_tasks": [
+        "1691118_1",
+        "1691118_2",
+        "1693594_0"
+      ],
+      "cancelled_task_states": "CANCELLED by user 18939",
+      "replacement_array": {
+        "job_id": 1694468,
+        "tasks": [
+          0,
+          1,
+          2
+        ],
+        "state_after_submission": "PENDING Priority",
+        "submitted_at": "2026-09-03T23:10:05+02:00",
+        "memory_request": "128G per task",
+        "concurrency_cap": 3,
+        "run_plan": {
+          "0": {
+            "base_seed": 440826,
+            "budgets": [
+              32
+            ]
+          },
+          "1": {
+            "base_seed": 440827,
+            "budgets": [
+              24,
+              32
+            ]
+          },
+          "2": {
+            "base_seed": 440828,
+            "budgets": [
+              16,
+              24,
+              32
+            ]
+          }
+        },
+        "launcher": "experiments/human_gaze/slurm/run_hlvid_nvila_k16_k24_k32_repair.sbatch",
+        "launcher_sha256": "23c2317b46d6d01161d477f5088550e2396574799c318fcd53cc8cc8427583e1",
+        "preflight": "experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/preflight_k16_k24_k32.json",
+        "scientific_protocol_change": false,
+        "terminal_state": "COMPLETED",
+        "completed_at": "2026-09-07T02:46:22+02:00",
+        "task_terminal": {
+          "0": {
+            "state": "COMPLETED",
+            "elapsed": "01:56:02",
+            "max_rss_kib": 114802308,
+            "gpu_uuid": "GPU-2d1fcdff-934e-20bb-f266-e31373855098",
+            "budgets": [
+              32
+            ]
+          },
+          "1": {
+            "state": "COMPLETED",
+            "elapsed": "15:44:11",
+            "max_rss_kib": 119636212,
+            "gpu_uuid": "GPU-10672285-9df8-d29f-9255-395597b22d33",
+            "budgets": [
+              24,
+              32
+            ]
+          },
+          "2": {
+            "state": "COMPLETED",
+            "elapsed": "1-02:56:16",
+            "max_rss_kib": 134182748,
+            "gpu_uuid": "GPU-c6d601f6-f393-b763-2670-03dd719b78af",
+            "budgets": [
+              16,
+              24,
+              32
+            ]
+          }
+        }
+      },
+      "counting": "Three cancelled pending task slots were replaced by three new tasks; no more than ten counted task slots remain scheduled under the user-authorized revised plan."
+    },
+    "smoke": {
+      "job_id": 1690929,
+      "state": "COMPLETED",
+      "elapsed": "00:14:14",
+      "exit_code": "0:0",
+      "max_rss_kib": 84406800,
+      "summary": "/home/stud/latn/.codex/worktrees/3f12/master-thesis/AutoGaze/outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_all_seeds_mtv48_smoke/summary.json",
+      "summary_sha256": "738f3a0a22e457ccc9bbf7081ad80235257357150417e7a1125bfd8b9d4d94b1"
+    },
+    "evaluation_array": {
+      "job_id": 1690942,
+      "tasks": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "concurrency_cap": 3,
+      "layout": "one task per base seed; K16/K24/K36 serial for tasks 0-2 and K16 for tasks 3-5",
+      "state": "terminal_mixed_with_all_primary_outputs_recovered",
+      "resource_adjustment": {
+        "timestamp": "2026-09-01T04:57:35+02:00",
+        "scope": "pending array tasks 1-5 only",
+        "memory_request_before": "128G",
+        "memory_request_after": "task 1: 108G; pending tasks 2-5: 112G",
+        "basis": "exact-protocol smoke MaxRSS 84406800 KiB, live task-0 MaxRSS 83832664 KiB, and task-1 second-row MaxRSS 96121376 KiB",
+        "minimum_headroom_over_observed_max_rss_gib": 16.3,
+        "task1_first_row_max_rss_kib": 84397452,
+        "task1_second_row_max_rss_kib": 96121376,
+        "task1_first_row_exact_protocol_validated": true,
+        "scientific_protocol_change": false,
+        "counted_job_submission_change": 0,
+        "outcome": "task 1 became eligible and started at 108G; a running-task increase to 112G was rejected without changing or interrupting it; pending tasks 2-5 were raised to 112G and remain in the original array"
+      },
+      "scheduler_transition": {
+        "timestamp": "2026-09-01T05:29:39+02:00",
+        "memory_qos_block_cleared": true,
+        "cause": "unrelated R2f HLVid job became user-held and released its 128G reservation",
+        "pending_reason_after": "Resources",
+        "node21_h100_nvl_configured": 6,
+        "node21_h100_nvl_allocated": 6,
+        "autogaze_evaluation_h100_nvl_allocated": 2,
+        "unrelated_job_modified_by_this_task": false
+      },
+      "task1_memory_watch": {
+        "observed_at_row": 6,
+        "max_rss_kib": 98325848,
+        "headroom_under_108g_gib": 14.2,
+        "running_increase_attempts_to_112g_and_128g": "rejected by SLURM without changing or interrupting the task",
+        "recovery_trigger_max_rss_kib": 104857600,
+        "recovery_trigger_gib": 100,
+        "recovery": "requeue-hold the same array task, change its request to 128G, release it, and resume append-only from existing question IDs",
+        "new_counted_submission": false,
+        "required_accounting": "record restart, both allocation segments, terminal state, and final append-only hashes",
+        "post_qos_release_in_place_increase_attempts": "112G and 128G rejected by SLURM without changing or interrupting task 1",
+        "historical_k24_reference_max_rss_kib": 110148072,
+        "historical_k24_reference_job_id": "1676865_0",
+        "later_budget_recovery": "If task 1 or 2 terminates for memory during K24/K36, preserve every completed summary append-only and spend at most its reserved counted slot on a new 128G task-specific resume containing only incomplete budgets via EVAL_BUDGETS."
+      },
+      "task2_launch": {
+        "start_time": "2026-09-01T06:04:53+02:00",
+        "memory_request": "112G",
+        "gpu_uuid": "GPU-f0d9ab69-fc2a-1fba-ca57-aca75f633cd4",
+        "driver_version": "595.71.05",
+        "gpu_memory_total_mib": 95830,
+        "first_row_exact_protocol_validated": true,
+        "first_row_max_rss_kib": 82403432,
+        "five_row_prefix_exact_protocol_validated": true,
+        "five_row_max_rss_kib": 94181772,
+        "counted_job_submission_change": 0,
+        "scientific_protocol_change": false
+      },
+      "task0_live_max_rss_kib": 134182108,
+      "transient_decoder_open_failure": {
+        "observed_at": "2026-09-01T09:47:45+02:00",
+        "video_path": "/storage/slurm/latn/data/AutoGaze/HLVid/videos/clip_av_video_5_002.mp4",
+        "video_size_bytes": 1902193962,
+        "expected_frame_count": 8992,
+        "failed_tasks": [
+          {
+            "array_task": 1,
+            "state": "FAILED",
+            "elapsed": "04:49:59",
+            "exit_code": "1:0",
+            "max_rss_kib": 99069740,
+            "completed_k16_rows": 95,
+            "next_question_id": 95
+          },
+          {
+            "array_task": 2,
+            "state": "FAILED",
+            "elapsed": "03:42:46",
+            "exit_code": "1:0",
+            "max_rss_kib": 94196796,
+            "completed_k16_rows": 96,
+            "next_question_id": 96
+          }
+        ],
+        "diagnosis": "Transient OpenCV/storage open failure, not dataset or protocol drift: task 2 opened the same immutable video for qid 95 before a later open failed; task 0 had passed the video; five immediate sequential exact OpenCV open/frame-count/last-frame checks all passed at 8992 frames.",
+        "frozen_prefixes": [
+          {
+            "run": "fixedk16_seed440827",
+            "rows": 95,
+            "last_question_id": 94,
+            "sha256": "31301dcebc54a7f95e0cdc7f73f74561950e24938200accb37ee8db75ef099d7"
+          },
+          {
+            "run": "fixedk16_seed440828",
+            "rows": 96,
+            "last_question_id": 95,
+            "sha256": "8e84981090167e57d05948e226d375071e53c549a2a2a3cbcadecaa81d9e12f8"
+          }
+        ],
+        "scientific_protocol_change": false,
+        "dataset_mutation": false
+      },
+      "resume_array": {
+        "job_id": 1691118,
+        "tasks": [
+          1,
+          2
+        ],
+        "concurrency_cap": 1,
+        "memory_request": "128G per task",
+        "state": "cancelled_by_authorized_scope_change",
+        "terminal_state": "CANCELLED by user 18939",
+        "cancelled_at": "2026-09-03T23:04:21+02:00",
+        "cancellation_reason": "Mixed repair included K36; useful K16/K24 work is continued by replacement array 1694468 without K36.",
+        "submitted_at": "2026-09-01T09:50:00+02:00",
+        "counted_jobs_added": 2,
+        "counted_jobs_total": 9,
+        "mechanism": "same published launcher/commit/config/checkpoints; --resume appends only missing question IDs, with the two seeds serialized",
+        "scientific_protocol_change": false
+      },
+      "task0_resume": {
+        "job_id": 1693594,
+        "array_task": 0,
+        "base_seed": 440826,
+        "budgets": [
+          36
+        ],
+        "memory_request": "128G",
+        "state_at_submission": "PENDING Priority",
+        "terminal_state": "CANCELLED by user 18939",
+        "cancelled_at": "2026-09-03T23:04:21+02:00",
+        "cancellation_reason": "K36 was abandoned and excluded from primary reporting before this pending repair started.",
+        "submitted_at": "2026-09-02T23:09:01+02:00",
+        "counted_jobs_added": 1,
+        "counted_jobs_total": 10,
+        "trigger": "Original task 0 terminated after a transient OpenCV open failure at K36 qid 260.",
+        "validated_prefix": {
+          "run": "fixedk36_seed440826",
+          "rows": 260,
+          "last_question_id": 259,
+          "sha256": "3d43d89de4b3ed347b530f9ada9c576b434c3247cb54dda0da819f8e31d55fba",
+          "independent_validation": "pass: parquet identity/order, terminal newline, exact 128 frame indices, parser and correctness"
+        },
+        "mechanism": "same published launcher/commit/config/checkpoint; EVAL_BUDGETS=36 and --resume append only missing question IDs",
+        "scientific_protocol_change": false
+      },
+      "task3_launch": {
+        "start_time": "2026-09-01T09:47:59+02:00",
+        "base_seed": 440829,
+        "budget": 16,
+        "memory_request": "112G",
+        "gpu_uuid": "GPU-76617f5b-d408-006d-123e-b15d08e5301d",
+        "driver_version": "595.71.05",
+        "gpu_memory_total_mib": 95830,
+        "launch_cause": "original failed tasks released an array-concurrency slot",
+        "first_row_exact_protocol_validated": true,
+        "first_row_records_128_uniform_indices": true,
+        "first_row_log_records_64_thumbnail_frames_and_mtv48_spatial_tiling": true,
+        "scientific_protocol_change": false,
+        "counted_job_submission_change": 0,
+        "live_max_rss_kib": 98951632
+      },
+      "task4_launch": {
+        "start_time": "2026-09-01T10:31:12+02:00",
+        "base_seed": 440830,
+        "budget": 16,
+        "memory_request": "112G",
+        "gpu_uuid": "GPU-2d1fcdff-934e-20bb-f266-e31373855098",
+        "driver_version": "595.71.05",
+        "gpu_memory_total_mib": 95830,
+        "launch_cause": "an original array concurrency/resource slot became available",
+        "nine_row_prefix_exact_protocol_validated": true,
+        "nine_row_prefix_records_128_uniform_indices": true,
+        "log_records_64_thumbnail_frames_and_mtv48_spatial_tiling": true,
+        "live_max_rss_kib": 116010008,
+        "scientific_protocol_change": false,
+        "counted_job_submission_change": 0
+      },
+      "task0_k24_transition": {
+        "start_time": "2026-09-01T15:10:16+02:00",
+        "base_seed": 440826,
+        "budget": 24,
+        "checkpoint_sha256": "78a8b5386be199d43a4fb9bd7061f6077481d46b231d954bc6901859d697152b",
+        "gpu_uuid": "GPU-e84fa049-3dab-dcaf-44ce-d37c5e5add15",
+        "first_row_exact_protocol_validated": true,
+        "first_row_records_128_uniform_indices": true,
+        "log_records_64_thumbnail_frames_and_mtv48_spatial_tiling": true,
+        "scientific_protocol_change": false,
+        "counted_job_submission_change": 0
+      },
+      "task4_memory_requeue": {
+        "triggered_at": "2026-09-01T17:37:44+02:00",
+        "basis": "MaxRSS 116010008 KiB left approximately 1.36 GiB under the 112 GiB allocation with 84 HLVid questions remaining; append-only requeue avoided a likely OOM while preserving the counted-job slot.",
+        "first_segment_state": "REQUEUED",
+        "first_segment_elapsed": "07:06:38",
+        "first_segment_batch_state": "CANCELLED by requeuehold",
+        "first_segment_exit_code": "0:0 job / 0:15 batch",
+        "first_segment_max_rss_kib": 116010008,
+        "validated_prefix": {
+          "run": "fixedk16_seed440830",
+          "rows": 184,
+          "last_question_id": 183,
+          "sha256": "cda55f53f4c51cdc7fccf9777f9fd871f343327031bae717b068fb80cf572456",
+          "independent_validation": "pass: parquet identity/order, terminal newline, exact 128 frame indices, parser and correctness"
+        },
+        "same_array_task": "1690942_4",
+        "restarts": 1,
+        "memory_request_before": "112G",
+        "memory_request_after": "128G",
+        "time_limit_after": "08:00:00",
+        "remaining_runtime_basis": "84 rows versus 184 rows in 7.1 hours; eight hours exceeds twice the observed remaining-time estimate including reload margin",
+        "current_state": "COMPLETED",
+        "counted_job_submission_change": 0,
+        "scientific_protocol_change": false,
+        "resume_mechanism": "same launcher/commit/config/checkpoint; --resume skips the 184 validated question IDs and appends only qid 184-267"
+      },
+      "terminal_task_states": {
+        "0": "FAILED",
+        "1": "FAILED",
+        "2": "FAILED",
+        "3": "COMPLETED",
+        "4": "COMPLETED",
+        "5": "COMPLETED"
+      }
+    },
+    "resume_policy": {
+      "counted_job_slots_under_revised_plan": 10,
+      "reserved_resume_slots": 0,
+      "maximum_total_counted_jobs": 10,
+      "eligible_tasks": [
+        0,
+        1,
+        2
+      ],
+      "trigger": "Submit a task-specific resume only after a terminal TIMEOUT, memory failure, or independently validated transient decoder-open failure leaves an incomplete matched-seed stream.",
+      "mechanism": "same published commit, same frozen script/config/checkpoint hashes, EVAL --resume appends only missing question IDs",
+      "tracked_mutation_boundary": "do not modify tracked AutoGaze files or advance the checkout until every original task and any required resume is terminal; launchers require exact commit 7835a4bf00c4abbb620d325fdc7c8a9514bd16df and a tracked-clean worktree",
+      "k32_boundary": "The completed fixed-step-20000 K32 handoff was verified and is evaluated only in the one-for-one replacement array; no K36 work remains scheduled.",
+      "triggered_tasks": [
+        0,
+        1,
+        2
+      ],
+      "remaining_counted_job_slots": 0,
+      "superseded_by_replacement_array": 1694468
+    }
+  },
+  "checkpoints": [
+    {
+      "base_seed": 440826,
+      "continuation_seed": 540826,
+      "budget": 16,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440826_seed540826/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "d008a458e62a15c69a236e4585a248b185343e82c2b6ece205d6638d4578b9ff",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440826,
+      "continuation_seed": 540826,
+      "budget": 24,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2c_fixedk24_stage3_base440826_seed540826/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "78a8b5386be199d43a4fb9bd7061f6077481d46b231d954bc6901859d697152b",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440826,
+      "continuation_seed": 540826,
+      "budget": 36,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2c_fixedk36_stage3_base440826_seed540826/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "56d578316bd5d947ae437b3ac57bbf6aa5e5c5d7addc6fa02e2cc7f42f2cfbf2",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440827,
+      "continuation_seed": 540827,
+      "budget": 16,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440827_seed540827/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "669777ee6191c2a01ba1069f3492cb8e75aeaae307bdc5bf895ff13145c4f22a",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440827,
+      "continuation_seed": 540827,
+      "budget": 24,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2c_fixedk24_stage3_base440827_seed540827/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "54412e2ad43e0897790c4d0aecb7c4c12fbdc59f45472674aa9d1c3ed0f810ac",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440827,
+      "continuation_seed": 540827,
+      "budget": 36,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2c_fixedk36_stage3_base440827_seed540827/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "00af9355626bcbd85cf1e8f00567917dcd387f01f6c87e775a8927806552026f",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440828,
+      "continuation_seed": 540828,
+      "budget": 16,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440828_seed540828/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "83cdc62cda40d75d9dedf34134484715f38a984542d1e27e1dd78c9bcfa69596",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440828,
+      "continuation_seed": 540828,
+      "budget": 24,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2c_fixedk24_stage3_base440828_seed540828/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "3112c9c0760195f9c1346a5fd71589cbb6a524bdd01f2c99c201b6e71e6daab5",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440828,
+      "continuation_seed": 540828,
+      "budget": 36,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2c_fixedk36_stage3_base440828_seed540828/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "0b688a66cfbdac40d8292a33bcdfb96a0d8a20c0b282a9d51a471cc6af947f19",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440829,
+      "continuation_seed": 540829,
+      "budget": 16,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440829_seed540829/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "fe287cc2aaaf84153f277da87103b37c3c7949ce3f66c9ebbedfeeeebc37658d",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440830,
+      "continuation_seed": 540830,
+      "budget": 16,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440830_seed540830/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "ec287894d2f77b8fcd6e6fa102460c7b4533a671942dd713506ca8abc6788180",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    },
+    {
+      "base_seed": 440831,
+      "continuation_seed": 540831,
+      "budget": 16,
+      "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440831_seed540831/checkpoint_latest_gaze",
+      "model_safetensors_sha256": "1721a2175adc3fbf95e2ad293736e80345ac4c89f1d2e3c514f4acd5261a7781",
+      "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+      "preprocessor_config_sha256": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3",
+      "tensor_count": 49
+    }
+  ],
+  "k32_status": {
+    "status": "completed_and_validated",
+    "base_seeds": [
+      440826,
+      440827,
+      440828
+    ],
+    "continuation_seeds": [
+      540826,
+      540827,
+      540828
+    ],
+    "fixed_cumulative_optimizer_updates": 20000,
+    "endpoint_selection": "fixed_step_20000_not_best_validation",
+    "source_verification_sha256": "410388e5019e380182b6606077077520a76d12ab1949c871fa85f5322319ebe4",
+    "checkpoint_preflight": "experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/preflight_k16_k24_k32.json",
+    "job_id": 1694468,
+    "protocol_identical_to_k16_k24": true,
+    "human_gaze_protected_test_accessed": false,
+    "completed_job_id": 1694468,
+    "completed_runs": 3
+  },
+  "results": {
+    "status": "complete_and_validated",
+    "primary_budgets": [
+      16,
+      24,
+      32
+    ],
+    "abandoned_budget": {
+      "budget": 36,
+      "partial_rows_preserved": {
+        "base_seed_440826": 260
+      },
+      "included_in_primary_reporting": false
+    },
+    "required_final_validation": [
+      "all 12 primary K16/K24/K32 summaries and JSONL streams exist with exactly 268 unique ordered HLVid question IDs",
+      "every row records exactly round(linspace(0, source_frame_count - 1, 128)) and num_sampled_frames=128",
+      "every row category, video path, and answer matches the checksummed parquet, and prediction_letter/is_correct recompute from raw prediction",
+      "every summary results_jsonl_sha256 matches the final JSONL stream",
+      "all summary dataset, checkpoint, seed, split, protocol, and exact-budget fields match the applicable frozen preflight",
+      "SLURM terminal states, elapsed times, exit codes, GPU identities, and MaxRSS are reconciled before curation"
+    ],
+    "interim_validation": {
+      "validated_at": "2026-09-01T18:35:19+02:00",
+      "completed_rows": 851,
+      "run_prefix_rows": {
+        "fixedk16_seed440826": 268,
+        "fixedk16_seed440827": 95,
+        "fixedk16_seed440828": 96,
+        "fixedk16_seed440829": 126,
+        "fixedk16_seed440830": 184,
+        "fixedk24_seed440826": 82
+      },
+      "jsonl_newline_complete": true,
+      "unique_ordered_prefix": true,
+      "uniform_128_indices_recomputed": true,
+      "protocol_log_tails_verified": true,
+      "note": "Interim only; final validation still requires all 12 complete 268-row streams and summaries.",
+      "benchmark_identity_revalidated_against_parquet": true,
+      "answer_parser_independently_recomputed": true,
+      "correctness_independently_recomputed": true
+    },
+    "completed_run_validation": {
+      "status": "pass",
+      "primary_runs": 12,
+      "question_rows": 3216,
+      "table": "experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/per_seed.csv",
+      "table_sha256": "1804d97507d4f6d7ec405cb7b129c0f3e81906ee4f9a55fb8babbd5dd7beb3c0"
+    },
+    "final_validation": {
+      "status": "pass",
+      "completed_runs": 12,
+      "questions_per_run": 268,
+      "total_question_rows": 3216,
+      "dataset_identity_recomputed_from_parquet": true,
+      "uniform_128_frame_indices_recomputed": true,
+      "answer_parser_and_correctness_recomputed": true,
+      "summary_metrics_and_stream_hashes_recomputed": true,
+      "checkpoint_protocol_seed_and_split_provenance_verified": true,
+      "reproducible_text_tables_and_png": true
+    },
+    "budget_summaries": [
+      {
+        "budget": 16,
+        "num_seeds": 6,
+        "base_seeds": [
+          440826,
+          440827,
+          440828,
+          440829,
+          440830,
+          440831
+        ],
+        "question_micro_accuracy_mean": 0.5031094527363185,
+        "question_micro_accuracy_seed_sd": 0.010921219611201587,
+        "question_micro_accuracy_ci90_low": 0.4941252200513011,
+        "question_micro_accuracy_ci90_high": 0.5120936854213358,
+        "macro_video_accuracy_mean": 0.49986878201163915,
+        "macro_video_accuracy_seed_sd": 0.016501142531193128,
+        "macro_video_accuracy_ci90_low": 0.4862942812373099,
+        "macro_video_accuracy_ci90_high": 0.5134432827859684
+      },
+      {
+        "budget": 24,
+        "num_seeds": 3,
+        "base_seeds": [
+          440826,
+          440827,
+          440828
+        ],
+        "question_micro_accuracy_mean": 0.47885572139303484,
+        "question_micro_accuracy_seed_sd": 0.014126637676120093,
+        "question_micro_accuracy_ci90_low": 0.45504026625286276,
+        "question_micro_accuracy_ci90_high": 0.5026711765332069,
+        "macro_video_accuracy_mean": 0.482800136371565,
+        "macro_video_accuracy_seed_sd": 0.02021384630232484,
+        "macro_video_accuracy_ci90_low": 0.4487225334160422,
+        "macro_video_accuracy_ci90_high": 0.5168777393270878
+      },
+      {
+        "budget": 32,
+        "num_seeds": 3,
+        "base_seeds": [
+          440826,
+          440827,
+          440828
+        ],
+        "question_micro_accuracy_mean": 0.49129353233830847,
+        "question_micro_accuracy_seed_sd": 0.01199459049874746,
+        "question_micro_accuracy_ci90_low": 0.471072398442411,
+        "question_micro_accuracy_ci90_high": 0.5115146662342059,
+        "macro_video_accuracy_mean": 0.5186872651158366,
+        "macro_video_accuracy_seed_sd": 0.015453168973126511,
+        "macro_video_accuracy_ci90_low": 0.492635471271424,
+        "macro_video_accuracy_ci90_high": 0.5447390589602493
+      }
+    ],
+    "matched_budget_summaries": [
+      {
+        "budget": 16,
+        "num_seeds": 3,
+        "base_seeds": [
+          440826,
+          440827,
+          440828
+        ],
+        "question_micro_accuracy_mean": 0.4975124378109453,
+        "question_micro_accuracy_seed_sd": 0.01199459049874744,
+        "question_micro_accuracy_ci90_low": 0.47729130391504787,
+        "question_micro_accuracy_ci90_high": 0.5177335717068428
+      },
+      {
+        "budget": 24,
+        "num_seeds": 3,
+        "base_seeds": [
+          440826,
+          440827,
+          440828
+        ],
+        "question_micro_accuracy_mean": 0.47885572139303484,
+        "question_micro_accuracy_seed_sd": 0.014126637676120093,
+        "question_micro_accuracy_ci90_low": 0.45504026625286276,
+        "question_micro_accuracy_ci90_high": 0.5026711765332069
+      },
+      {
+        "budget": 32,
+        "num_seeds": 3,
+        "base_seeds": [
+          440826,
+          440827,
+          440828
+        ],
+        "question_micro_accuracy_mean": 0.49129353233830847,
+        "question_micro_accuracy_seed_sd": 0.01199459049874746,
+        "question_micro_accuracy_ci90_low": 0.471072398442411,
+        "question_micro_accuracy_ci90_high": 0.5115146662342059
+      }
+    ],
+    "matched_budget_differences": [
+      {
+        "budget_a": 16,
+        "budget_b": 24,
+        "difference": 0.018656716417910446,
+        "ci90_low": -0.019444444444444445,
+        "ci90_high": 0.05368289637952559,
+        "cluster_unit": "video",
+        "num_video_clusters": 77,
+        "iterations": 10000,
+        "bootstrap_seed": 20262525
+      },
+      {
+        "budget_a": 16,
+        "budget_b": 32,
+        "difference": 0.006218905472636816,
+        "ci90_low": -0.05830087394847959,
+        "ci90_high": 0.06723911887298858,
+        "cluster_unit": "video",
+        "num_video_clusters": 77,
+        "iterations": 10000,
+        "bootstrap_seed": 20262533
+      },
+      {
+        "budget_a": 24,
+        "budget_b": 32,
+        "difference": -0.012437810945273632,
+        "ci90_low": -0.06060606060606061,
+        "ci90_high": 0.030012120192427508,
+        "cluster_unit": "video",
+        "num_video_clusters": 77,
+        "iterations": 10000,
+        "bootstrap_seed": 20263333
+      }
+    ],
+    "primary_interpretation": "No matched K16/K24/K32 contrast excludes zero at the frozen 90% video-cluster-bootstrap level; the evidence does not establish a reliable or monotonic fixed-budget ordering."
+  },
+  "authorization": {
+    "evaluation_type": "explicitly_authorized_external_cross_benchmark_test_evaluation",
+    "benchmark_access": "local complete HLVid copy; official Hugging Face test split only",
+    "academic_noncommercial_evaluation": true,
+    "license_audit": {
+      "hlvid": {
+        "dataset_card_license_field": "absent",
+        "note": "The local dataset card states no license; this manifest does not infer one."
+      },
+      "nvila": {
+        "model_card_front_matter": "cc-by-nc-4.0",
+        "model_card_body_governing_terms": "CC-BY-NC-SA-4.0",
+        "use_restriction": "research and development only",
+        "note": "The local model card contains both labels; both are recorded without resolving the inconsistency."
+      },
+      "autogaze_code": {
+        "license": "Apache-2.0",
+        "source": "repository LICENSE"
+      }
+    }
+  },
+  "metric_protocol_audit": {
+    "upstream_evaluator": {
+      "path": "/home/stud/latn/AutoGaze/scripts/runners/evaluate_hlvid_nvila.py",
+      "sha256": "f7281533b556e508b6c82fc419e66a138d93e151be68932a7a632c8585c6de1e"
+    },
+    "upstream_common": {
+      "path": "/home/stud/latn/AutoGaze/scripts/runners/hlvid_common.py",
+      "sha256": "d390fd54b8fca681e2d530c3fb53ee15fdddcb06c379ef86d7720a914949e0b4"
+    },
+    "prompt_template": "<video>\n\nQuestion: {benchmark_question_with_choices_and_answer_instruction}",
+    "answer_parser": "first standalone A/B/C/D letter, case-insensitive",
+    "primary_metric": "sum(prediction_letter == answer) / 268 HLVid question rows",
+    "generation": "greedy (upstream default; current evaluator sets do_sample=false explicitly)"
+  },
+  "acquisition_contract_audit": {
+    "adapter_source": {
+      "path": "autogaze/human_gaze/hlvid.py",
+      "sha256": "1e40d62054eb890db68383310d1077b404c629618425c5213860c7b989794de9"
+    },
+    "decoder_source": {
+      "path": "autogaze/models/autogaze/modeling_autogaze.py",
+      "sha256": "89059eb6daa3e31e93987a9182abe3d569557b59315a6b82fe31e532966a3e87"
+    },
+    "contract": {
+      "allowed_local_action_ids": [
+        69,
+        264
+      ],
+      "fine_action_count": 196,
+      "unique_within_autogaze_frame": true,
+      "allow_eos": false,
+      "resolution_adaptation": "unchanged NVILA processor mapping after decoder selection",
+      "supported_exact_budget_values": [
+        16,
+        24,
+        32,
+        36
+      ],
+      "evaluated_primary_budget_values": [
+        16,
+        24,
+        32
+      ]
+    },
+    "h100_smoke_k16": {
+      "exact_decoder_actions_per_autogaze_frame": 16,
+      "model_calls": 23,
+      "autogaze_frame_observations": 368,
+      "retained_patches_per_frame_mean": 64.0,
+      "retained_patches_per_frame_min": 64,
+      "retained_patches_per_frame_max": 64,
+      "note": "Retained NVILA patches after resolution adaptation are not the decoder action budget K."
+    }
+  },
+  "hardware_reference": {
+    "slurm_node_constraint": "node21",
+    "gpu_class": "NVIDIA H100 NVL",
+    "gpus_per_task": 1,
+    "cpus_per_task": 8,
+    "memory_per_task": {
+      "task_0": "128G",
+      "task_1": "108G after pending-only QOS adjustment",
+      "tasks_2_to_5": "112G after second-row MaxRSS safety adjustment"
+    },
+    "task0_gpu": {
+      "uuid": "GPU-e84fa049-3dab-dcaf-44ce-d37c5e5add15",
+      "driver_version": "595.71.05",
+      "memory_total_mib": 95830
+    },
+    "task1_gpu": {
+      "uuid": "GPU-76617f5b-d408-006d-123e-b15d08e5301d",
+      "driver_version": "595.71.05",
+      "memory_total_mib": 95830
+    },
+    "node_os": "Linux 6.17.0-29-generic, Ubuntu 24.04.1",
+    "slurm_version": "26.05.2",
+    "note": "Each final task log records its allocated GPU UUID and driver independently.",
+    "task2_gpu": {
+      "uuid": "GPU-f0d9ab69-fc2a-1fba-ca57-aca75f633cd4",
+      "driver_version": "595.71.05",
+      "memory_total_mib": 95830
+    },
+    "replacement_array": {
+      "node": "node21",
+      "gpu_class": "NVIDIA H100 NVL",
+      "driver_version": "595.71.05",
+      "gpus_per_task": 1,
+      "cpus_per_task": 8,
+      "memory_per_task": "128G"
+    }
+  },
+  "runtime_observations": {
+    "sequence_length_warning": {
+      "observed_task": 0,
+      "observed_budget": 16,
+      "reported_token_indices": 48478,
+      "configured_model_maximum": 40960,
+      "inference_continued_successfully": true,
+      "protocol_substitution": false,
+      "interpretation": "The fixed policy post-adaptation visual-patch count produced this input length; the evaluator preserved the frozen 128-frame, 64-thumbnail, max_tiles_video=48 setup and did not truncate or change preprocessing."
+    },
+    "historical_checkpoint_notice": {
+      "runtime_only_key": "gazing_model.gaze_decoder.output_token_logit_bias",
+      "verified_initialization": "registered exact-zero buffer",
+      "accepted_by_fail_closed_adapter": true
+    },
+    "historical_k24_resource_reference": {
+      "job_id": "1676865_0",
+      "state": "COMPLETED",
+      "elapsed": "08:46:40",
+      "request": "128G",
+      "max_rss_kib": 110148072,
+      "examples": 268,
+      "budget": 24,
+      "base_seed": 440827,
+      "retained_patches_per_frame": 96.0,
+      "protocol": {
+        "num_video_frames": 128,
+        "num_video_frames_thumbnail": 64,
+        "max_tiles_video": 48,
+        "tile_len": 16,
+        "torch_dtype": "bfloat16"
+      },
+      "interpretation": "Resource and comparability evidence only. This older evaluator lacks the new checksums, ordered-frame audit, macro-video metric, and current all-seed provenance, so its score is not substituted for the current matrix."
+    },
+    "k24_sequence_length_warning": {
+      "observed_task": 0,
+      "observed_budget": 24,
+      "reported_token_indices": 68958,
+      "configured_model_maximum": 40960,
+      "first_generation_completed_successfully": true,
+      "protocol_substitution": false,
+      "interpretation": "The larger exact K24 policy retained more post-adaptation visual patches; the evaluator preserved 128 frames, 64 thumbnails, and max_tiles_video=48 without truncation or preprocessing changes."
+    },
+    "k32_sequence_length_warning": {
+      "maximum_observed_token_indices": 89417,
+      "configured_model_maximum": 40960,
+      "all_generations_completed": true,
+      "protocol_substitution": false,
+      "interpretation": "Recorded limitation of the established protocol; no frames, thumbnails, tiles, or generation settings were changed."
+    }
+  },
+  "preflight_extension": {
+    "path": "experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/preflight_k16_k24_k32.json",
+    "sha256": "e68b8d93cae8a8419326a6df900d098dcbbd9376c3f8dd3f168e8298948be082",
+    "status": "pass",
+    "purpose": "verified K32 handoff plus K16/K24-only repair plan; K36 excluded"
+  }
+}

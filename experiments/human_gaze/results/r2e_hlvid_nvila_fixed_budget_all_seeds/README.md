@@ -1,6 +1,6 @@
 # R2e HLVid NVILA fixed-budget all-seed evaluation
 
-Status: preregistered and preflighted; evidential inference pending.
+Status: complete and independently validated.
 
 This bundle supersedes the unexecuted two-random-seed utility probe for the
 purpose of the September cross-benchmark evaluation. It evaluates every
@@ -8,8 +8,9 @@ available fixed-budget human-gaze checkpoint, without checkpoint selection:
 
 - K16: six base seeds 440826--440831;
 - K24: three base seeds 440826--440828;
-- K36: three base seeds 440826--440828;
-- K32: not scheduled until the separate three-seed training handoff exists.
+- K32: three fixed-20k replications for base seeds 440826--440828;
+- K36: abandoned by user direction; one 260/268 prefix is preserved outside
+  primary reporting.
 
 ## Frozen protocol
 
@@ -33,20 +34,41 @@ AutoGaze reference is descriptive, not budget- or seed-matched.
 
 ## Files
 
-- `preflight.json`: dataset, reference artifact, environment, protocol, and all
-  12 available checkpoint fingerprints.
-- `config.yaml`: resolved frozen configuration (added after completion).
-- `metrics.json`: aggregate results and uncertainty (added after completion).
-- `manifest.json`: code/job/artifact provenance (added after completion).
+- `preflight.json` and `preflight_k16_k24_k32.json`: original and K32-extension
+  protocol, dataset, environment, and checkpoint fingerprints.
+- `config.yaml`: resolved execution configuration.
+- `metrics.json`: aggregate results, validation record, and uncertainty.
+- `manifest.json`: code, job, checkpoint, and heavy-artifact provenance.
 - `per_seed.csv`, `per_category.csv`, and
-  `matched_budget_differences.csv`: reviewable tables (added after completion).
-- `hlvid_fixed_budget_all_seeds.{png,pdf}`: final figure (added after completion).
+  `matched_budget_differences.csv`: reviewable tables.
+- `hlvid_fixed_budget_all_seeds.{png,pdf}`: final figure.
 
-## K32 integration point
+## Results
 
-After all three K32 endpoint checkpoints are handed off, set
-`k32_integration.status` to `handed_off`, add budget key `32` to the first
-three rows of the frozen seed matrix, rerun the same preflight,
-and submit array tasks 0--2 only with `EVAL_BUDGETS=32`. The unchanged
-aggregator will then add K32 to the matched-seed table and figure. No K32 job is
-scheduled before that handoff.
+| Budget | Seeds | Mean question-micro accuracy | 90% t interval |
+|---:|---:|---:|---:|
+| K16 | 6 | 0.5031 | [0.4941, 0.5121] |
+| K24 | 3 | 0.4789 | [0.4550, 0.5027] |
+| K32 | 3 | 0.4913 | [0.4711, 0.5115] |
+
+On matched base seeds 440826--440828, the means are 0.4975, 0.4789, and
+0.4913 for K16, K24, and K32. The video-cluster-bootstrap differences are:
+
+| Contrast | Difference | 90% interval |
+|---|---:|---:|
+| K16 - K24 | +0.0187 | [-0.0194, +0.0537] |
+| K16 - K32 | +0.0062 | [-0.0583, +0.0672] |
+| K32 - K24 | +0.0124 | [-0.0300, +0.0606] |
+
+All three intervals include zero. The evidence therefore does not establish a
+reliable fixed-budget ordering or monotonic benefit from increasing K. K16 has
+the highest point mean, while K32 recovers the K24 drop, but the cross-seed and
+video-cluster uncertainty is too large for a stronger claim. The preserved
+upstream AutoGaze reference is 0.4851 and remains descriptive rather than a
+budget- or seed-matched statistical baseline.
+
+All 12 primary streams contain exactly 268 unique ordered questions and passed
+recomputation against the checksummed parquet, exact 128-frame sampling rule,
+answer parser, correctness, summary hashes, checkpoint identities, and frozen
+protocol. No protected human-gaze test data was accessed. K36 remains excluded
+from all primary summaries, comparisons, and figures.

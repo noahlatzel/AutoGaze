@@ -7,21 +7,25 @@ import argparse
 import csv
 import hashlib
 import json
+import re
 from collections import defaultdict
 from itertools import combinations
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pyarrow.parquet as pq
 import yaml
 
 T90 = {2: 2.919985580, 5: 2.015048373}
+ANSWER_RE = re.compile(r"\b([ABCD])\b", re.IGNORECASE)
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--preflight", type=Path)
     return parser.parse_args()
 
 
@@ -34,11 +38,37 @@ def sha256(path: Path) -> str:
 
 
 def read_jsonl(path: Path) -> list[dict]:
+    if not path.read_bytes().endswith(b"\n"):
+        raise ValueError(f"JSONL is missing its terminal newline: {path}")
     rows = []
     with path.open() as handle:
         for line in handle:
             if line.strip():
                 rows.append(json.loads(line))
+    return rows
+
+
+def extract_letter(text: str) -> str:
+    match = ANSWER_RE.search(text.strip())
+    return match.group(1).upper() if match else ""
+
+
+def checkpoint_rows(preflight: dict, preflight_path: Path) -> list[dict]:
+    """Combine original K16/K24 fingerprints with handed-off K32 rows."""
+    rows = list(preflight.get("checkpoints", []))
+    legacy_ref = preflight.get("existing_k16_k24_preflight")
+    if legacy_ref:
+        legacy_path = Path(legacy_ref["path"])
+        if sha256(legacy_path) != legacy_ref["sha256"]:
+            raise ValueError(f"Legacy preflight fingerprint drift: {legacy_path}")
+        legacy = json.loads(legacy_path.read_text())
+        if legacy.get("status") != "pass":
+            raise ValueError(f"Legacy preflight did not pass: {legacy_path}")
+        rows.extend(row for row in legacy["checkpoints"] if int(row["budget"]) in {16, 24})
+    for row in preflight.get("k32_handoff", {}).get("checkpoints", []):
+        rows.append({"budget": 32, **row})
+    if not rows:
+        raise ValueError(f"No checkpoint fingerprints found in {preflight_path}")
     return rows
 
 
@@ -101,7 +131,7 @@ def cluster_bootstrap_difference(
 
 def write_csv(path: Path, rows: list[dict], fieldnames: list[str]) -> None:
     with path.open("w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -111,14 +141,29 @@ def main() -> None:
     config = yaml.safe_load(args.config.read_text())
     raw_root = Path(config["outputs"]["raw_root"])
     protocol = config["protocol"]
-    preflight_path = args.output_dir / "preflight.json"
+    preflight_path = args.preflight or args.output_dir / "preflight.json"
     preflight = json.loads(preflight_path.read_text())
     if preflight["status"] != "pass":
-        raise ValueError(f"Preflight did not pass: {preflight['failures']}")
+        raise ValueError(f"Preflight did not pass: {preflight.get('failures', [])}")
     expected_checkpoints = {
         (int(row["base_seed"]), int(row["budget"])): row
-        for row in preflight["checkpoints"]
+        for row in checkpoint_rows(preflight, preflight_path)
     }
+    parquet_path = Path(config["dataset"]["root"]) / config["dataset"]["parquet"]
+    if sha256(parquet_path) != config["dataset"]["parquet_sha256"]:
+        raise ValueError(f"HLVid parquet fingerprint drift: {parquet_path}")
+    benchmark_rows = sorted(
+        pq.read_table(parquet_path).to_pylist(), key=lambda row: int(row["question_id"])
+    )
+    if (
+        len(benchmark_rows) != 268
+        or [int(row["question_id"]) for row in benchmark_rows] != list(range(268))
+    ):
+        raise ValueError("HLVid source must contain exactly question IDs 0--267")
+    benchmark_identity = [
+        (int(row["question_id"]), row["video_path"], row["category"], row["answer"])
+        for row in benchmark_rows
+    ]
     expected_protocol = {
         "num_video_frames": 128,
         "num_video_frames_thumbnail": 64,
@@ -135,7 +180,6 @@ def main() -> None:
         "answer_parser": "first standalone A/B/C/D letter",
     }
     runs = {}
-    canonical = None
     per_seed = []
     per_category = []
     for seed_row in config["seed_matrix"]:
@@ -149,17 +193,39 @@ def main() -> None:
                 raise FileNotFoundError(f"Missing completed run: {run_dir}")
             rows = read_jsonl(results_path)
             summary = json.loads(summary_path.read_text())
-            if len(rows) != 268 or len({int(row["question_id"]) for row in rows}) != 268:
-                raise ValueError(f"Incomplete or duplicate HLVid rows: {results_path}")
-            rows.sort(key=lambda row: int(row["question_id"]))
+            if (
+                len(rows) != 268
+                or [int(row["question_id"]) for row in rows] != list(range(268))
+            ):
+                raise ValueError(
+                    f"Incomplete, duplicate, or unordered HLVid rows: {results_path}"
+                )
             identity = [
                 (int(row["question_id"]), row["video_path"], row["category"], row["answer"])
                 for row in rows
             ]
-            if canonical is None:
-                canonical = identity
-            elif identity != canonical:
-                raise ValueError(f"Benchmark identity/order drift: {results_path}")
+            if identity != benchmark_identity:
+                raise ValueError(f"Benchmark source identity/order drift: {results_path}")
+            for row in rows:
+                expected_indices = np.round(
+                    np.linspace(0, int(row["source_frame_count"]) - 1, 128)
+                ).astype(np.int64).tolist()
+                if (
+                    row.get("num_sampled_frames") != 128
+                    or row.get("sampled_source_indices") != expected_indices
+                ):
+                    raise ValueError(
+                        f"Temporal sampling drift in {results_path}, "
+                        f"qid={row['question_id']}"
+                    )
+                parsed = extract_letter(str(row["prediction"]))
+                if row.get("prediction_letter") != parsed or bool(
+                    row.get("is_correct")
+                ) != (parsed == row["answer"]):
+                    raise ValueError(
+                        f"Prediction parsing/correctness drift in {results_path}, "
+                        f"qid={row['question_id']}"
+                    )
             if summary.get("dataset_parquet_sha256") != config["dataset"]["parquet_sha256"]:
                 raise ValueError(f"Dataset drift: {summary_path}")
             if summary.get("benchmark_split") != "official_huggingface_test":
@@ -171,10 +237,18 @@ def main() -> None:
                 raise ValueError(f"Run was not fingerprinted in preflight: seed={seed}, K={budget}")
             if summary.get("autogaze_checkpoint_sha256") != checkpoint["model_safetensors_sha256"]:
                 raise ValueError(f"Checkpoint fingerprint drift: {summary_path}")
-            if Path(summary.get("autogaze_model_id", "")).resolve() != Path(checkpoint["path"]).resolve():
+            if Path(summary.get("autogaze_model_id", "")).resolve() != Path(
+                checkpoint["path"]
+            ).resolve():
                 raise ValueError(f"Checkpoint path drift: {summary_path}")
-            if summary.get("base_seed") != seed or summary.get("continuation_seed") != int(seed_row["continuation_seed"]):
+            if summary.get("base_seed") != seed or summary.get("continuation_seed") != int(
+                seed_row["continuation_seed"]
+            ):
                 raise ValueError(f"Seed identity drift: {summary_path}")
+            if summary.get("code_commit") != preflight["evaluation_commit"]:
+                raise ValueError(f"Evaluation commit drift: {summary_path}")
+            if summary.get("results_jsonl_sha256") != sha256(results_path):
+                raise ValueError(f"Summary stream fingerprint drift: {summary_path}")
             compatibility = summary.get("checkpoint_compatibility", {})
             if compatibility.get("accepted_runtime_only_keys") != [
                 "gazing_model.gaze_decoder.output_token_logit_bias"
@@ -190,11 +264,29 @@ def main() -> None:
             if adapter["allowed_action_ids"] != [69, 264] or adapter["allow_eos"]:
                 raise ValueError(f"Action contract drift: {summary_path}")
             call_stats = adapter["post_resolution_adaptation_current_process"]
-            if call_stats["model_calls"] <= 0 or call_stats["frame_observations"] <= 0:
-                raise ValueError(f"Fixed-budget adapter was not exercised: {summary_path}")
+            model_calls = int(call_stats["model_calls"])
+            frame_observations = int(call_stats["frame_observations"])
+            if (
+                model_calls < 0
+                or frame_observations < 0
+                or (model_calls == 0) != (frame_observations == 0)
+            ):
+                raise ValueError(f"Inconsistent adapter counters: {summary_path}")
+            if model_calls == 0 and any(
+                call_stats[key] is not None
+                for key in (
+                    "retained_patches_per_frame_mean",
+                    "retained_patches_per_frame_min",
+                    "retained_patches_per_frame_max",
+                )
+            ):
+                raise ValueError(f"Invalid no-op resume adapter counters: {summary_path}")
             micro = accuracy(rows)
             macro = macro_video_accuracy(rows)
-            if abs(summary["accuracy"] - micro) > 1e-12 or abs(summary["macro_video_accuracy"] - macro) > 1e-12:
+            if (
+                abs(summary["accuracy"] - micro) > 1e-12
+                or abs(summary["macro_video_accuracy"] - macro) > 1e-12
+            ):
                 raise ValueError(f"Summary metric mismatch: {summary_path}")
             runs[(seed, budget)] = rows
             per_seed.append(
@@ -208,6 +300,7 @@ def main() -> None:
                     "invalid_predictions": int(sum(not row["prediction_letter"] for row in rows)),
                     "checkpoint_sha256": summary["autogaze_checkpoint_sha256"],
                     "results_sha256": sha256(results_path),
+                    "summary_sha256": sha256(summary_path),
                 }
             )
             for category in sorted({row["category"] for row in rows}):
@@ -251,6 +344,27 @@ def main() -> None:
     matched_budgets = [
         budget for budget in budgets if all((seed, budget) in runs for seed in matched_seeds)
     ]
+    matched_budget_summaries = []
+    for budget in matched_budgets:
+        subset = [
+            row
+            for row in per_seed
+            if row["budget"] == budget and row["base_seed"] in matched_seeds
+        ]
+        values = [row["question_micro_accuracy"] for row in subset]
+        interval = seed_interval(values)
+        matched_budget_summaries.append(
+            {
+                "budget": budget,
+                "num_seeds": len(subset),
+                "base_seeds": matched_seeds,
+                "question_micro_accuracy_mean": float(np.mean(values)),
+                "question_micro_accuracy_seed_sd": float(np.std(values, ddof=1)),
+                "question_micro_accuracy_ci90_low": interval[0],
+                "question_micro_accuracy_ci90_high": interval[1],
+            }
+        )
+
     differences = []
     for budget_a, budget_b in combinations(matched_budgets, 2):
         result = cluster_bootstrap_difference(
@@ -288,8 +402,20 @@ def main() -> None:
         "preflight_sha256": sha256(preflight_path),
         "validated_checkpoint_fingerprints": len(runs),
         "human_gaze_protected_test_accessed": False,
+        "validation": {
+            "status": "pass",
+            "completed_runs": len(runs),
+            "questions_per_run": 268,
+            "total_question_rows": sum(len(rows) for rows in runs.values()),
+            "dataset_identity_recomputed_from_parquet": True,
+            "uniform_128_frame_indices_recomputed": True,
+            "answer_parser_and_correctness_recomputed": True,
+            "summary_metrics_and_stream_hashes_recomputed": True,
+            "checkpoint_protocol_seed_and_split_provenance_verified": True,
+        },
         "budget_summaries": budget_summaries,
         "matched_budget_seeds": matched_seeds,
+        "matched_budget_summaries": matched_budget_summaries,
         "matched_budget_differences": differences,
         "upstream_reference": {
             "accuracy": protocol["reference_accuracy"],
@@ -297,12 +423,24 @@ def main() -> None:
             "artifact_sha256": protocol["reference_artifact_sha256"],
             "comparison_boundary": "descriptive; not budget-matched or seed-matched",
         },
-        "k32_status": config["k32_integration"],
+        "k32_status": {**config["k32_integration"], "status": "completed_and_validated"},
+        "abandoned_k36": {
+            **config["abandoned_k36"],
+            "cancellation_date": str(config["abandoned_k36"]["cancellation_date"]),
+        },
     }
     (args.output_dir / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
 
     figure, axis = plt.subplots(figsize=(7.2, 4.6), constrained_layout=True)
     colors = plt.cm.tab10(np.linspace(0, 1, len(matched_seeds)))
+    axis.scatter(
+        [row["budget"] for row in per_seed],
+        [100 * row["question_micro_accuracy"] for row in per_seed],
+        facecolors="none",
+        edgecolors="0.65",
+        s=28,
+        label="all available seed endpoints",
+    )
     for color, seed in zip(colors, matched_seeds, strict=True):
         points = [row for row in per_seed if row["base_seed"] == seed]
         points.sort(key=lambda row: row["budget"])
@@ -315,7 +453,7 @@ def main() -> None:
             color=color,
             label=f"seed {seed}",
         )
-    for summary in budget_summaries:
+    for summary_index, summary in enumerate(budget_summaries):
         x = summary["budget"]
         mean = 100 * summary["question_micro_accuracy_mean"]
         low = 100 * summary["question_micro_accuracy_ci90_low"]
@@ -323,6 +461,7 @@ def main() -> None:
         axis.errorbar(
             [x], [mean], yerr=[[mean - low], [high - mean]], fmt="D", color="black",
             capsize=4, markersize=6, zorder=5,
+            label="all-seed mean ± 90% t CI" if summary_index == 0 else None,
         )
     axis.axhline(100 * protocol["reference_accuracy"], color="0.4", linestyle="--", linewidth=1.2,
                  label="upstream AutoGaze (descriptive)")
