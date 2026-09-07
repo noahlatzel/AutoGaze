@@ -1,0 +1,91 @@
+schema_version: 1
+experiment_id: r2e_hlvid_k24_k32_six_seed_extension
+status: authorized_training
+date: 2026-09-07
+objective: >-
+  Extend the completed K24 and K32 fixed-budget HLVid comparison from three to
+  six matched seeds without selecting checkpoints or changing the established
+  HLVid protocol.
+authorization:
+  user_authorized_on: 2026-09-07
+  human_gaze_protected_test_accessed: false
+  hlvid_evaluation: authorized_after_checkpoint_handoff
+seed_extension:
+  base_seeds: [440829, 440830, 440831]
+  continuation_seeds: [540829, 540830, 540831]
+  mapping:
+    - {base_seed: 440829, continuation_seed: 540829}
+    - {base_seed: 440830, continuation_seed: 540830}
+    - {base_seed: 440831, continuation_seed: 540831}
+  budgets: [24, 32]
+training:
+  initialization: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+  trainable: autoregressive_decoder_only
+  frozen: [vision_encoder, connector, task_model]
+  exact_unique_fine_actions_per_frame: budget
+  allow_eos: false
+  stage1:
+    updates: 2315
+    optimizer: adam
+    learning_rate: 1.0e-5
+    schedule: linear_w_warmup
+    temperature: exponential_1.0_to_0.3
+  stage2:
+    updates: 7685
+    optimizer: adam_reset
+    learning_rate: 3.0e-6
+    schedule: constant
+    temperature: 0.3
+  stage3:
+    new_updates: 10000
+    optimizer: adam_preserved
+    learning_rate: 3.0e-6
+    schedule: constant
+    temperature: 0.3
+  endpoint_selection: fixed_step_20000_not_best_validation
+  validation_only_during_training: true
+  protected_test_opened: false
+  run_templates:
+    24:
+      stage1: r2c_fixedk24_stage1_seed{base_seed}
+      stage2: r2c_fixedk24_stage2_base{base_seed}_seed{continuation_seed}
+      stage3: r2c_fixedk24_stage3_base{base_seed}_seed{continuation_seed}
+    32:
+      stage1: r2c_k32_reproduction_stage1_seed{base_seed}
+      stage2: r2c_k32_reproduction_stage2_base{base_seed}_seed{continuation_seed}
+      stage3: r2c_k32_reproduction_stage3_base{base_seed}_seed{continuation_seed}
+hlvid_protocol:
+  protocol_id: hlvid_nvila_mtv48_uniform128_thumbnail64_v1
+  split: official_huggingface_test
+  examples: 268
+  videos: 77
+  parquet_sha256: ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a
+  model: NVILA-8B-HD-Video
+  frame_source: uniform
+  num_video_frames: 128
+  num_video_frames_thumbnail: 64
+  thumbnails: full
+  max_tiles_video: 48
+  tile_len: 16
+  torch_dtype: bfloat16
+  generation: greedy
+  max_new_tokens: 16
+  primary_metric: exact_match_question_micro_accuracy
+  tile_policy:
+    exact_decoder_actions_per_autogaze_frame: budget
+    allowed_action_ids: [69, 264]
+    unique_actions: true
+    allow_eos: false
+  checkpoint_selection_from_hlvid: false
+slurm:
+  maximum_counted_jobs: 10
+  training_array_tasks: 6
+  later_evaluation_tasks: 3
+  total_planned_counted_tasks: 9
+  training_layout: one budget-seed replication per task, with three stages serially
+  evaluation_layout: one base seed per task, with K24 then K32 serially
+  submit_evaluation_before_checkpoint_handoff: false
+outputs:
+  training_root: outputs/human_gaze/grpo
+  hlvid_raw_root: outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_all_seeds_mtv48
+  result_bundle: experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds
