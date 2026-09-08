@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/noahlatzel/AutoGaze/experiments/hlvid_nvila/schemas/per_example_evidence.schema.json",
+  "title": "HLVid per-example evidence record v1",
+  "type": "object",
+  "required": ["schema_version", "example_key", "video_key", "attempt_id", "compatibility_key", "state"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "example_key": {"type": "string", "minLength": 1},
+    "video_key": {"type": "string", "minLength": 1},
+    "attempt_id": {"type": "string", "minLength": 1},
+    "compatibility_key": {"type": "string", "minLength": 1},
+    "state": {"enum": ["attempt_started", "completed_answer", "failed"]},
+    "question_id": {"type": ["string", "integer"]},
+    "question_index": {"type": "integer", "minimum": 0},
+    "split": {"type": "string"},
+    "recorded_at": {"type": "string"},
+    "measurement_origin": {"enum": ["original_forward", "processor_replay", "unavailable"]},
+    "answer": {"type": "object"},
+    "error": {"type": ["string", "object"]},
+    "decode": {
+      "type": "object",
+      "properties": {
+        "intended_indices": {"type": "array", "items": {"type": "integer", "minimum": 0}},
+        "effective_indices": {"type": "array", "items": {"type": "integer", "minimum": 0}},
+        "metadata_count_corrected": {"type": "boolean"},
+        "sampled_read_failure": {"type": "boolean"},
+        "legacy_output_substituted": {"type": "boolean"},
+        "decode_usable": {"type": "boolean"},
+        "read_results": {"type": "array", "items": {"type": "object"}}
+      }
+    },
+    "counters": {"type": "object", "additionalProperties": {"$ref": "#/$defs/counter"}},
+    "context": {
+      "type": "object",
+      "properties": {
+        "tokenizer_input_length": {"type": ["integer", "null"], "minimum": 0},
+        "expanded_visual_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "expanded_context_length": {"type": ["integer", "null"], "minimum": 0},
+        "generated_tokens": {"type": ["integer", "null"], "minimum": 0},
+        "measurement_source": {"type": "string"}
+      }
+    },
+    "raw_decoder_calls": {"type": "array", "items": {"type": "object"}},
+    "post_adaptation_calls": {"type": "array", "items": {"type": "object"}},
+    "cache_state": {"enum": ["cold", "warm", "mixed", "unknown"]},
+    "timing_boundary": {"type": "string"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"state": {"const": "completed_answer"}}},
+      "then": {"required": ["answer"]}
+    }
+  ],
+  "$defs": {
+    "counter": {
+      "type": "object",
+      "required": ["availability", "observed_count", "expected_observations", "observed_sum", "mean", "min", "max", "unit", "source"],
+      "properties": {
+        "availability": {"enum": ["complete", "partial", "unavailable"]},
+        "observed_count": {"type": "integer", "minimum": 0},
+        "expected_observations": {"type": ["integer", "null"], "minimum": 0},
+        "observed_sum": {"type": ["number", "null"]},
+        "mean": {"type": ["number", "null"]},
+        "min": {"type": ["number", "null"]},
+        "max": {"type": ["number", "null"]},
+        "unit": {"type": "string"},
+        "source": {"type": "string"},
+        "reason": {"type": "string"},
+        "unavailable_parts": {"type": "integer", "minimum": 0}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"availability": {"const": "unavailable"}}},
+          "then": {"required": ["reason"], "properties": {"observed_sum": {"type": "null"}}}
+        }
+      ]
+    }
+  }
+}
