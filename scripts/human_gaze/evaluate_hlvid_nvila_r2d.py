@@ -215,6 +215,9 @@ def main() -> None:
 
     runner.AutoProcessor = R2DAutoProcessor
     runner.parse_args = lambda: runner_args
+    resume_prefix_examples = (
+        len(runner.existing_question_ids(Path(runner_args.output))) if runner_args.resume else 0
+    )
     runner.main()
 
     if len(installed_stats) != 1:
@@ -265,6 +268,13 @@ def main() -> None:
             "preflight": wrapper_args.preflight,
         },
         "allocation_statistics": installed_stats[0].as_dict(),
+        "allocation_raw": installed_stats[0].as_raw_dict(),
+        "observation_coverage": {
+            "qa_examples_in_summary": expected_examples,
+            "qa_examples_observed_by_process_counters": expected_examples - resume_prefix_examples,
+            "resume_prefix_examples": resume_prefix_examples,
+            "complete": resume_prefix_examples == 0,
+        },
     }
     summary_path.write_text(json.dumps(summary, indent=2) + "\n")
     print(json.dumps(summary["r2d_hlvid_adapter"], indent=2))

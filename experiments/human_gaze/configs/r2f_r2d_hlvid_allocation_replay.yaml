@@ -1,0 +1,66 @@
+experiment: r2f_r2d_hlvid_allocation_replay
+status: prepared_pending_shared_slurm_admission
+date: 2026-09-09
+purpose: >-
+  Recover resume-safe variable-EOS allocation, recovered-patch, visual-token,
+  and expanded-context evidence without repeating any NVILA answer generation.
+scope:
+  modes: [variable]
+  base_seeds: [440826, 440827, 440828]
+  training_seeds: [740826, 740827, 740828]
+  unique_videos: 77
+  question_keys: 268
+  processor_calls_per_seed: 77
+  nvila_generation_calls: 0
+  weighting: question_count_per_unique_video
+protocol:
+  dataset_split: test
+  dataset_parquet_sha256: ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a
+  frame_source: uniform
+  num_video_frames: 128
+  num_video_frames_thumbnail: 64
+  thumbnail_sampling: full
+  max_tiles_video: 48
+  tile_len: 16
+  delta_gap: 0
+  legacy_runner_sha256: f7281533b556e508b6c82fc419e66a138d93e151be68932a7a632c8585c6de1e
+  legacy_common_sha256: d390fd54b8fca681e2d530c3fb53ee15fdddcb06c379ef86d7720a914949e0b4
+  nvila_processor_sha256: 2b9dbf36a9c69954af7e7cc8478a980e406e91c2ba27b7f2f164167da70dbc9a
+validation:
+  requirement: exact_uninterrupted_variable_processor_observation
+  reference_seed: 440826
+  reference_question_id: 0
+  reference_video: clip_av_video_3_000.mp4
+  reference_summary: /storage/user/latn/artifacts/autogaze-r2f/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535/preflight/seed440826_variable/summary.json
+  reference_summary_sha256: 80079a78c783654801038a22e93ad17b4ae93a37e7d87f3e0fbc1a290b829ec3
+  reference_results_sha256: 123d834ac786fbeee7bd58403a81bac83b04e138aae08f707e1d4dc3a6e656d6
+resume_contract:
+  unit: unique_video
+  stable_keys: [identity_sha256, replay_key, video_path, question_ids]
+  attempt_states: [started, completed_processor_observation]
+  completed_records: append_only_jsonl
+  compatibility: exact_identity_sha256
+  process_exit_aggregates: never_accepted_without_explicit_question_coverage
+resources_requested:
+  scheduler_owner: fixed_k_task_01a05a0a_3c7e_7053_aa24_5069bff7fa96
+  partition: NORMAL
+  node: node17
+  gpu: a40_48GB
+  gpu_count: 1
+  cpus: 5
+  host_memory: 128G
+  walltime: "24:00:00"
+  concurrency: 1
+  jobs: 1
+  admission: forbidden_until_exact_permit
+runtime_basis:
+  uninterrupted_one_question_preflight_elapsed: 00:04:07
+  uninterrupted_one_question_preflight_max_rss_kib: 66390084
+  conservative_upper_bound: >-
+    231 unique-video processor observations at four minutes each are 15.4 hours,
+    leaving loading, hashing, validation, and resume margin within 24 hours.
+interpretation_boundary: >-
+  This replay recovers deterministic processor/allocation evidence only. It is
+  not an NVILA rollout, does not change any QA answer, and cannot isolate the
+  EOS allocation effect from changed later spatial ordering in the actual
+  variable-versus-forced deployment comparison.

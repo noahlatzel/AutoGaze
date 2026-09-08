@@ -5,12 +5,146 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass, field
 from types import MethodType
-from typing import Any, Literal
+from typing import Any, Iterable, Literal
 
 import torch
 
 
 Mode = Literal["variable", "forced_k16"]
+
+
+def summarize_raw_allocation(raw: dict[str, Any]) -> dict[str, Any]:
+    """Convert additive allocation counters into the historical summary shape."""
+
+    decoder = raw["decoder"]
+    post = raw["post_resolution_adaptation"]
+    decoder_observations = int(decoder["frame_observations"])
+    post_observations = int(post["frame_observations"])
+    histogram = {str(key): int(value) for key, value in decoder["spatial_action_histogram"].items()}
+    if sum(histogram.values()) != decoder_observations:
+        raise ValueError("Decoder histogram does not cover every frame observation")
+    if sum(int(key) * value for key, value in histogram.items()) != int(decoder["spatial_actions_sum"]):
+        raise ValueError("Decoder histogram does not match the spatial-action sum")
+    valid_action_tokens = int(decoder["valid_action_tokens"])
+    if valid_action_tokens != int(decoder["spatial_actions_sum"]) + int(decoder["eos_actions"]):
+        raise ValueError("Decoder valid-token count does not match spatial plus EOS actions")
+    return {
+        "model_calls": int(raw["model_calls"]),
+        "decoder": {
+            "calls": int(decoder["calls"]),
+            "frame_observations": decoder_observations,
+            "padded_position_slots": int(decoder["padded_position_slots"]),
+            "valid_action_tokens": valid_action_tokens,
+            "spatial_actions_per_frame_mean": (
+                int(decoder["spatial_actions_sum"]) / decoder_observations
+                if decoder_observations
+                else None
+            ),
+            "padded_position_slots_per_frame_mean": (
+                int(decoder["padded_position_slots"]) / decoder_observations
+                if decoder_observations
+                else None
+            ),
+            "valid_action_tokens_per_frame_mean": (
+                int(decoder["valid_action_tokens"]) / decoder_observations
+                if decoder_observations
+                else None
+            ),
+            "spatial_actions_per_frame_min": decoder["spatial_actions_min"],
+            "spatial_actions_per_frame_max": decoder["spatial_actions_max"],
+            "eos_action_rate": (
+                int(decoder["eos_actions"]) / decoder_observations
+                if decoder_observations
+                else None
+            ),
+            "spatial_action_histogram": histogram,
+        },
+        "post_resolution_adaptation": {
+            "frame_observations": post_observations,
+            "padded_position_slots": int(post["padded_position_slots"]),
+            "valid_retained_patches": int(post["retained_patches_sum"]),
+            "retained_patches_per_frame_mean": (
+                int(post["retained_patches_sum"]) / post_observations
+                if post_observations
+                else None
+            ),
+            "padded_position_slots_per_frame_mean": (
+                int(post["padded_position_slots"]) / post_observations
+                if post_observations
+                else None
+            ),
+            "retained_patches_per_frame_min": post["retained_patches_min"],
+            "retained_patches_per_frame_max": post["retained_patches_max"],
+        },
+    }
+
+
+def merge_raw_allocations(weighted_records: Iterable[tuple[dict[str, Any], int]]) -> dict[str, Any]:
+    """Merge per-scope raw counters, optionally weighting repeated identical scopes."""
+
+    merged = {
+        "schema_version": 1,
+        "model_calls": 0,
+        "decoder": {
+            "calls": 0,
+            "frame_observations": 0,
+            "spatial_actions_sum": 0,
+            "padded_position_slots": 0,
+            "valid_action_tokens": 0,
+            "spatial_actions_min": None,
+            "spatial_actions_max": None,
+            "eos_actions": 0,
+            "spatial_action_histogram": {},
+        },
+        "post_resolution_adaptation": {
+            "frame_observations": 0,
+            "retained_patches_sum": 0,
+            "padded_position_slots": 0,
+            "retained_patches_min": None,
+            "retained_patches_max": None,
+        },
+    }
+    for raw, weight in weighted_records:
+        if int(weight) != weight or weight <= 0:
+            raise ValueError("Allocation replay weights must be positive integers")
+        if int(raw.get("schema_version", -1)) != 1:
+            raise ValueError("Unsupported raw allocation schema")
+        weight = int(weight)
+        decoder = raw["decoder"]
+        post = raw["post_resolution_adaptation"]
+        merged["model_calls"] += int(raw["model_calls"]) * weight
+        for key in (
+            "calls",
+            "frame_observations",
+            "spatial_actions_sum",
+            "padded_position_slots",
+            "valid_action_tokens",
+            "eos_actions",
+        ):
+            merged["decoder"][key] += int(decoder[key]) * weight
+        for key in ("frame_observations", "retained_patches_sum", "padded_position_slots"):
+            merged["post_resolution_adaptation"][key] += int(post[key]) * weight
+        for value, count in decoder["spatial_action_histogram"].items():
+            histogram = merged["decoder"]["spatial_action_histogram"]
+            histogram[str(value)] = histogram.get(str(value), 0) + int(count) * weight
+        for destination, source in (
+            ("spatial_actions_min", decoder.get("spatial_actions_min")),
+            ("retained_patches_min", post.get("retained_patches_min")),
+        ):
+            if source is not None:
+                section = "decoder" if destination.startswith("spatial") else "post_resolution_adaptation"
+                current = merged[section][destination]
+                merged[section][destination] = int(source) if current is None else min(current, int(source))
+        for destination, source in (
+            ("spatial_actions_max", decoder.get("spatial_actions_max")),
+            ("retained_patches_max", post.get("retained_patches_max")),
+        ):
+            if source is not None:
+                section = "decoder" if destination.startswith("spatial") else "post_resolution_adaptation"
+                current = merged[section][destination]
+                merged[section][destination] = int(source) if current is None else max(current, int(source))
+    summarize_raw_allocation(merged)
+    return merged
 
 
 @dataclass
@@ -21,14 +155,36 @@ class R2DHLVidCallStats:
     decoder_calls: int = 0
     decoder_frame_observations: int = 0
     decoder_spatial_sum: int = 0
+    decoder_position_slots: int = 0
+    decoder_valid_action_tokens: int = 0
     decoder_spatial_min: int | None = None
     decoder_spatial_max: int | None = None
     decoder_eos_actions: int = 0
     decoder_spatial_histogram: Counter[int] = field(default_factory=Counter)
     post_frame_observations: int = 0
     post_retained_sum: int = 0
+    post_position_slots: int = 0
     post_retained_min: int | None = None
     post_retained_max: int | None = None
+
+    def reset(self) -> None:
+        """Reset counters after a durable per-example/per-video snapshot."""
+
+        self.model_calls = 0
+        self.decoder_calls = 0
+        self.decoder_frame_observations = 0
+        self.decoder_spatial_sum = 0
+        self.decoder_position_slots = 0
+        self.decoder_valid_action_tokens = 0
+        self.decoder_spatial_min = None
+        self.decoder_spatial_max = None
+        self.decoder_eos_actions = 0
+        self.decoder_spatial_histogram.clear()
+        self.post_frame_observations = 0
+        self.post_retained_sum = 0
+        self.post_position_slots = 0
+        self.post_retained_min = None
+        self.post_retained_max = None
 
     @staticmethod
     def _update_range(current_min, current_max, values):
@@ -74,6 +230,8 @@ class R2DHLVidCallStats:
         if counts:
             self.decoder_frame_observations += len(counts)
             self.decoder_spatial_sum += sum(counts)
+            self.decoder_position_slots += positions.numel()
+            self.decoder_valid_action_tokens += int((~padded).sum())
             self.decoder_eos_actions += eos_count
             self.decoder_spatial_histogram.update(counts)
             self.decoder_spatial_min, self.decoder_spatial_max = self._update_range(
@@ -91,10 +249,12 @@ class R2DHLVidCallStats:
         padded_value = output.get("if_padded_gazing")
         if padded_value is None:
             counts = [int(value) for value in widths.tolist()]
+            self.post_position_slots += sum(counts)
         else:
             padded = torch.as_tensor(padded_value).detach().to(device="cpu", dtype=torch.bool)
             if padded.ndim != 2 or int(widths.sum()) != padded.shape[1]:
                 raise ValueError("Post-resolution frame widths do not match the padding mask")
+            self.post_position_slots += padded.numel()
             counts = []
             for frame_padded in padded.split(widths.tolist(), dim=1):
                 counts.extend(int(value) for value in (~frame_padded).sum(dim=1).tolist())
@@ -104,41 +264,43 @@ class R2DHLVidCallStats:
             self.post_retained_min, self.post_retained_max, counts
         )
 
-    def as_dict(self) -> dict[str, Any]:
-        decoder_mean = (
-            self.decoder_spatial_sum / self.decoder_frame_observations
-            if self.decoder_frame_observations
-            else None
-        )
-        post_mean = (
-            self.post_retained_sum / self.post_frame_observations
-            if self.post_frame_observations
-            else None
-        )
+    def as_raw_dict(self) -> dict[str, Any]:
+        """Return additive integer counters suitable for resume-safe merging."""
+
         return {
+            "schema_version": 1,
             "model_calls": self.model_calls,
             "decoder": {
                 "calls": self.decoder_calls,
                 "frame_observations": self.decoder_frame_observations,
-                "spatial_actions_per_frame_mean": decoder_mean,
-                "spatial_actions_per_frame_min": self.decoder_spatial_min,
-                "spatial_actions_per_frame_max": self.decoder_spatial_max,
-                "eos_action_rate": (
-                    self.decoder_eos_actions / self.decoder_frame_observations
-                    if self.decoder_frame_observations
-                    else None
-                ),
+                "spatial_actions_sum": self.decoder_spatial_sum,
+                "padded_position_slots": self.decoder_position_slots,
+                "valid_action_tokens": self.decoder_valid_action_tokens,
+                "spatial_actions_min": self.decoder_spatial_min,
+                "spatial_actions_max": self.decoder_spatial_max,
+                "eos_actions": self.decoder_eos_actions,
                 "spatial_action_histogram": {
                     str(key): value for key, value in sorted(self.decoder_spatial_histogram.items())
                 },
             },
             "post_resolution_adaptation": {
                 "frame_observations": self.post_frame_observations,
-                "retained_patches_per_frame_mean": post_mean,
-                "retained_patches_per_frame_min": self.post_retained_min,
-                "retained_patches_per_frame_max": self.post_retained_max,
+                "retained_patches_sum": self.post_retained_sum,
+                "padded_position_slots": self.post_position_slots,
+                "retained_patches_min": self.post_retained_min,
+                "retained_patches_max": self.post_retained_max,
             },
         }
+
+    def pop_raw_dict(self) -> dict[str, Any]:
+        """Return the current additive counters and start a fresh scope."""
+
+        raw = self.as_raw_dict()
+        self.reset()
+        return raw
+
+    def as_dict(self) -> dict[str, Any]:
+        return summarize_raw_allocation(self.as_raw_dict())
 
 
 def install_r2d_hlvid_forward(
