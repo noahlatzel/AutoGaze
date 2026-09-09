@@ -1,0 +1,126 @@
+schema_version: 1
+experiment_id: r2e_hlvid_k16_causal_controls
+status: prepared_pending_decode_audit_and_resource_admission
+date: 2026-09-09
+question: >-
+  Does the six-seed trained exact-K16 spatial policy differ descriptively from
+  the original pretrained exact-K16 policy and a deterministic STAViS Center16
+  policy under the established HLVid/NVILA protocol?
+authorization:
+  evaluation_type: external_cross_benchmark_causal_control
+  benchmark_split: HLVid official Hugging Face test
+  human_gaze_protected_test_accessed: false
+  full_control_evaluations: 2
+  questions_per_control: 268
+  total_new_qa: 536
+dataset:
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+  parquet: data/test-00000-of-00001.parquet
+  parquet_sha256: ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a
+  split: official_huggingface_test
+  questions: 268
+  videos: 77
+models:
+  nvila:
+    path: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video
+    huggingface_revision: 7a5670e20da435d98b0efdc49f9a536f73985152
+    config_sha256: c1651402332c65b764a820b97cc5a8d284245fca38603444c7b174318a38f657
+    modeling_sha256: 4ad40894a1c03ada5ce5c7b92c7ffaf658584fe572e1bb54924633d365a6f36a
+    processing_sha256: 2b9dbf36a9c69954af7e7cc8478a980e406e91c2ba27b7f2f164167da70dbc9a
+    terms: CC-BY-NC-SA-4.0; research and development only
+  pretrained_autogaze:
+    path: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+    model_safetensors_sha256: a48e6a83a198368e3798420ff5d5df42af7c0003c9230f85581c39a2ea64e9eb
+    config_sha256: 2bfa48a1f8ac23e67e3477edfd5c439305bdf5fb22dd0130965863bc3e29236b
+    preprocessor_config_sha256: a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3
+    mode: eval
+protocol:
+  protocol_id: hlvid_nvila_mtv48_uniform128_thumbnail64_v1
+  source_index_rule: round(linspace(0, decodable_frame_count - 1, 128))
+  num_video_frames: 128
+  num_video_frames_thumbnail: 64
+  thumbnails: full
+  max_tiles_video: 48
+  tile_len: 16
+  max_new_tokens: 16
+  image_processor: saved slow processor (use_fast=false)
+  torch_dtype: bfloat16
+  generation: greedy; do_sample=false
+  prompt: "<video>\n\nQuestion: {benchmark_question_with_choices_and_answer_instruction}"
+  answer_parser: first standalone A/B/C/D letter
+  context_policy: upstream long-context recipe; no evaluator truncation
+  tokenizer_nominal_model_max_length: 40960
+  nvila_nominal_max_position_embeddings: 32768
+  tile_policy:
+    exact_decoder_actions_per_autogaze_frame: 16
+    allowed_action_ids: [69, 264]
+    unique_actions: true
+    allow_eos: false
+controls:
+  - id: pretrained_exact_k16
+    policy_kind: pretrained
+    stochastic_training_seed: null
+    checkpoint: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+    acquisition: pretrained greedy generator forced to the exact fine-only K16/no-EOS contract
+  - id: stavis_center16
+    policy_kind: center16
+    stochastic_training_seed: null
+    checkpoint_used_for_selection: false
+    fine_grid: 14
+    fine_cells_ordered: [90, 91, 104, 105, 76, 77, 89, 92, 103, 106, 118, 119, 75, 78, 117, 120]
+    action_ids_ordered: [159, 160, 173, 174, 145, 146, 158, 161, 172, 175, 187, 188, 144, 147, 186, 189]
+    injection_boundary: tile-local generation before resolution recovery
+    expected_28x28_fine_patches_after_2x2_tile_recovery: 64
+    learned_generation_or_probability_rescoring: false
+trained_reference:
+  budget: 16
+  valid_seeds: [440826, 440827, 440828, 440829, 440830, 440831]
+  result_bundle: experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds
+  raw_root: outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_all_seeds_mtv48
+  mean_question_micro_accuracy: 0.5031094527363185
+  mean_macro_video_accuracy: 0.49986878201163915
+  reuse_boundary: >-
+    Existing answers are reused. Missing retrospective decode/counter telemetry is
+    reported as unavailable and does not justify rerunning six endpoints.
+analysis:
+  primary_metric: exact_match_question_micro_accuracy
+  sensitivity_metric: macro_video_accuracy
+  confidence_level: 0.90
+  training_seed_uncertainty: two-sided Student t interval across all six trained endpoints
+  paired_video_uncertainty: video-cluster bootstrap for each trained-minus-control contrast
+  bootstrap_iterations: 10000
+  bootstrap_seed: 20260909
+  deterministic_control_seed_uncertainty: not applicable
+  claim_boundary: descriptive and setting-specific; no causal superiority from incomplete or unmatched arms
+recording:
+  decode_audit_gate:
+    shared_audit_only: true
+    required_live_runtime_supplement: live_runtime_supplement.json
+    required_versions: [opencv, pillow, numpy, pyarrow]
+    immutable_output_hashes:
+      - protocol_runtime_manifest_sha256
+      - summary_sha256
+      - decode_audit_jsonl_sha256
+  fail_closed_decode_for_new_controls: true
+  per_example_actions: true
+  per_example_valid_and_padded_patch_counts: true
+  per_example_projected_visual_and_total_context_tokens: true
+  timing_boundaries:
+    - frame_decode
+    - preprocessing_and_acquisition
+    - AutoGaze_selector
+    - NVILA_vision_encoder_and_projector
+    - language_prefill_and_decode
+  resume: append-only attempt/completed-answer event stream with immutable run identity
+slurm:
+  script: experiments/human_gaze/slurm/run_hlvid_nvila_k16_causal_controls.sbatch
+  array_tasks: 2
+  concurrency: 1
+  gpu_per_task: nvidia_h100_nvl:1
+  cpu_per_task: 8
+  memory_per_task: 128G
+  walltime_per_task: 1-00:00:00
+  admission: pending shared ledger
+outputs:
+  raw_root: outputs/human_gaze/hlvid_nvila/r2e_k16_causal_controls_mtv48
+  result_bundle: experiments/human_gaze/results/r2e_hlvid_k16_causal_controls

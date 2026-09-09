@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
@@ -83,3 +84,79 @@ def test_checkpoint_compatibility_accepts_only_known_zero_buffer(tmp_path):
     assert result["max_absolute_value"] == 0.0
     with pytest.raises(ValueError, match="compatibility buffer is not zero"):
         MODULE.verify_loaded_checkpoint(FakeModel(torch.ones(3)), checkpoint)
+
+
+def test_attempt_record_resume_recovers_only_completed_answers(tmp_path):
+    records = tmp_path / "records"
+    compatibility_key = "abc123"
+
+    def evidence_record(question_id, state, attempt_id, **extra):
+        return {
+            "schema_version": 1,
+            "example_key": MODULE.stable_example_key(question_id, "test"),
+            "video_key": MODULE.stable_video_key("video.mp4", "test"),
+            "attempt_id": attempt_id,
+            "compatibility_key": compatibility_key,
+            "state": state,
+            "protocol_id": MODULE.PROTOCOL_ID,
+            "question_id": question_id,
+            **extra,
+        }
+
+    MODULE.write_evidence_record(
+        records, evidence_record(1, "attempt_started", "attempt-1")
+    )
+    MODULE.write_evidence_record(
+        records,
+        evidence_record(
+            1,
+            "completed_answer",
+            "attempt-1",
+            answer={"question_id": 1, "prediction_letter": "A"},
+            context={"expanded_context_length": 101},
+        ),
+    )
+    MODULE.write_evidence_record(
+        records, evidence_record(2, "attempt_started", "attempt-2")
+    )
+
+    answers, telemetry = MODULE.load_completed_evidence(
+        records, compatibility_key=compatibility_key
+    )
+    assert answers == {1: {"question_id": 1, "prediction_letter": "A"}}
+    assert telemetry[1]["context"]["expanded_context_length"] == 101
+
+
+def test_stale_compact_results_are_recoverable_from_durable_evidence():
+    completed = {
+        1: {"question_id": 1, "prediction_letter": "A"},
+        2: {"question_id": 2, "prediction_letter": "B"},
+    }
+    MODULE.validate_compact_results({1: completed[1]}, completed)
+
+
+def test_compact_results_cannot_outrun_or_disagree_with_durable_evidence():
+    completed = {1: {"question_id": 1, "prediction_letter": "A"}}
+    with pytest.raises(ValueError, match="without durable evidence"):
+        MODULE.validate_compact_results(
+            {2: {"question_id": 2, "prediction_letter": "B"}}, completed
+        )
+    with pytest.raises(ValueError, match="differs from durable evidence"):
+        MODULE.validate_compact_results(
+            {1: {"question_id": 1, "prediction_letter": "D"}}, completed
+        )
+
+
+def test_resume_manifest_rejects_protocol_or_checkpoint_drift(tmp_path):
+    path = tmp_path / "run_manifest.json"
+    identity = {"protocol_id": "v1", "checkpoint": "sha-a"}
+    first_hash = MODULE.ensure_manifest(path, identity, resume=True)
+    assert json.loads(path.read_text())["compatibility_key"] == first_hash
+    assert MODULE.ensure_manifest(path, identity, resume=True) == first_hash
+
+    with pytest.raises(ValueError, match="Resume-incompatible"):
+        MODULE.ensure_manifest(
+            path,
+            {"protocol_id": "v1", "checkpoint": "sha-b"},
+            resume=True,
+        )

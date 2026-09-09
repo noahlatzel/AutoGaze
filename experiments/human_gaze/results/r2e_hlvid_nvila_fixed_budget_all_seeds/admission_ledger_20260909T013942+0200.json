@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-09-09T02:03:08+02:00",
+  "scope": "all jobs for Slurm user latn plus the separate local VM GPU",
+  "association": {
+    "user": "latn",
+    "account": "stud",
+    "cluster": "inf9",
+    "qos": "stud",
+    "default_qos": "stud",
+    "association_specific_limits_reported": null
+  },
+  "qos_limits": {
+    "priority": 5,
+    "max_running_jobs_per_user": 15,
+    "max_submitted_jobs_per_user": 20,
+    "group_tres": {
+      "cpu": 100,
+      "gpu": 9,
+      "memory": "512G"
+    },
+    "max_wall": null
+  },
+  "partition": {
+    "name": "NORMAL",
+    "state": "UP",
+    "max_time": "14-00:00:00",
+    "configured_nodes": 21,
+    "configured_cpus": 1060,
+    "configured_gpus": 135,
+    "configured_h100_nvl": 6,
+    "configured_a40": 40
+  },
+  "active_user_jobs": [
+    {
+      "job_id": "1690935_5",
+      "name": "gaze-r2f-hlvid",
+      "state": "RUNNING",
+      "node": "node17",
+      "gpu": "a40:1",
+      "cpus": 5,
+      "memory": "128G",
+      "squeue_min_memory_display": "16000M",
+      "time_limit": "1-00:00:00"
+    },
+    {
+      "array_job_id": "1690935",
+      "task_ids": [0, 1, 2, 4],
+      "name": "gaze-r2f-hlvid",
+      "state": "PENDING",
+      "pending_reason": "ReqNodeNotAvail; some nodes may be reserved",
+      "possible_array_concurrency": 2,
+      "gpu_per_task": "a40:1",
+      "cpus_per_task": 5,
+      "memory_per_task": "128G",
+      "squeue_min_memory_display": "16000M",
+      "time_limit": "1-00:00:00"
+    }
+  ],
+  "current_possible_r2f_demand": {
+    "concurrent_allocations": 2,
+    "gpus": 2,
+    "cpus": 10,
+    "memory": "256G"
+  },
+  "provisional_orchestration_ceiling": {
+    "concurrent_slurm_gpu_allocations": 2,
+    "aggregate_requested_memory": "256G",
+    "status": "superseded at parent approval after raw memory reconciliation"
+  },
+  "approved_adjusted_ceiling": {
+    "concurrent_slurm_gpu_allocations": 3,
+    "aggregate_requested_memory": "384G",
+    "exact_envelope": "up to two R2f A40/128G tasks plus one fixed-control H100/128G task",
+    "aggregate_if_full": {
+      "gpus": 3,
+      "cpus": 18,
+      "memory": "384G"
+    },
+    "status": "approved by parent orchestration; subject to lower actual constraints and all-user demand"
+  },
+  "memory_field_reconciliation": {
+    "observed_at": "2026-09-09T01:50:33+02:00",
+    "raw_pending_req_tres": "cpu=5,mem=128G,node=1,billing=5,gres/gpu=1,gres/gpu:a40=1",
+    "raw_running_req_tres": "cpu=5,mem=128G,node=1,billing=5,gres/gpu=1,gres/gpu:a40=1",
+    "raw_running_alloc_tres": "cpu=5,mem=128G,node=1,billing=5,gres/gpu=1,gres/gpu:a40=1",
+    "raw_req_mem": "128G",
+    "num_tasks": 1,
+    "cpus_per_task": 5,
+    "mem_per_tres": "gpu:16000",
+    "min_memory_tres": "16000M",
+    "explanation": "squeue MIN_MEMORY exposed the per-GPU minimum TRES field, while ReqTRES/ReqMem and AllocTRES reserve 128G total per task",
+    "completed_sibling_job": "1694765",
+    "completed_sibling_max_rss_kib": 131296872
+  },
+  "local_vm": {
+    "hostname": "atcremers63",
+    "gpu": "NVIDIA RTX A2000 12GB",
+    "gpu_memory_total_mib": 12282,
+    "gpu_memory_used_mib": 1,
+    "gpu_utilization_percent": 0,
+    "host_memory_total": "15Gi",
+    "host_memory_available": "13Gi",
+    "separate_from_slurm_ceiling": true,
+    "admitted_work": "one sequential DINO export/profile worker; <=2 CPU threads, <=10 GiB VRAM, target <=8 GiB RSS; no HLVid NVILA",
+    "fixed_control_processor_smoke": {
+      "status": "pass",
+      "finished_at": "2026-09-09T02:00:43+02:00",
+      "fixture": "16 frames, 8 thumbnails, 224x224, one spatial tile",
+      "comparison": "literal frozen R2e trained adapter versus instrumented trained adapter",
+      "processor_output_sha256": "95caf726a6d7653d869a108a09811790bc5a266a5247065658e69150fcb665f8",
+      "total_context_tokens": 1105,
+      "max_rss_kib": 2092236,
+      "artifact": "/tmp/hlvid_k16_processor_smoke_224.json",
+      "scope": "small real-processor compatibility only; full 128-frame/64-thumbnail plumbing remains an H100 preflight"
+    }
+  }
+}
