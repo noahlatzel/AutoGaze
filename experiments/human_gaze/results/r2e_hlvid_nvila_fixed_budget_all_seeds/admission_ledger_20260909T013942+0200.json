@@ -139,6 +139,31 @@
     "pending_reason": "ReqNodeNotAvail; node may be reserved",
     "orchestration_envelope_if_r2f_uses_two_lanes": "3 GPUs and 384G requested host memory"
   },
+  "processor_replay_submission": {
+    "admitted_at": "2026-09-09T03:04:00+02:00",
+    "submitted_at": "2026-09-09T03:07:06+02:00",
+    "job_id": "1700681",
+    "state_after_submission": "PENDING",
+    "pending_reason": "Dependency",
+    "dependency": "afterok:1690935_*(unfulfilled)",
+    "purpose": "processor-only replay of deterministic allocation evidence; zero NVILA QA generation",
+    "execution_commit": "ecd72f151e4ca5066ce48b9ecb0032af1cb06645",
+    "execution_worktree": "/home/stud/latn/.codex/worktrees/r2f-replay-ecd72f1-20260909-0304",
+    "run_id": "20260909-0304_r2f-r2d-hlvid-allocation-replay_ecd72f1",
+    "launcher": "experiments/human_gaze/slurm/run_r2d_hlvid_allocation_replay.sbatch",
+    "launcher_sha256": "3b68577423a894eecc0cb5f98a003fef69875b38febe1f581fccf1709200df37",
+    "request": "cpu=5,mem=128G,gres/gpu:a40=1,node17,24h",
+    "shared_decode_audit_path": "/home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d",
+    "live_admission_snapshot": {
+      "r2f_running_tasks": [0, 5],
+      "r2f_running_demand": "2 A40 GPUs and 256G requested host memory",
+      "fixed_control_state": "PENDING; array concurrency 1",
+      "other_user_jobs": [],
+      "maximum_after_dependency_release": "one A40 replay plus one serialized H100 control = 2 GPUs and 256G requested host memory"
+    },
+    "submission_executor": "variable-budget owner task 01a05a0a-3c9c-7292-af02-9bef0c909d04",
+    "scheduler_confirmation": "dependency, ReqTRES, SubmitLine, command path, and stored batch-script SHA256 matched the exact permit"
+  },
   "local_vm": {
     "hostname": "atcremers63",
     "gpu": "NVIDIA RTX A2000 12GB",
