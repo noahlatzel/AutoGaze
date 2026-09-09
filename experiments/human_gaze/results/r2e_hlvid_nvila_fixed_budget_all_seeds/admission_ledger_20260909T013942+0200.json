@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "observed_at": "2026-09-09T02:03:08+02:00",
+  "observed_at": "2026-09-09T02:56:17+02:00",
   "scope": "all jobs for Slurm user latn plus the separate local VM GPU",
   "association": {
     "user": "latn",
@@ -55,6 +55,18 @@
       "memory_per_task": "128G",
       "squeue_min_memory_display": "16000M",
       "time_limit": "1-00:00:00"
+    },
+    {
+      "array_job_id": "1700678",
+      "task_ids": [0, 1],
+      "name": "gaze-hlvid-k16-ctrl",
+      "state": "PENDING",
+      "pending_reason": "ReqNodeNotAvail; node may be reserved",
+      "possible_array_concurrency": 1,
+      "gpu_per_task": "nvidia_h100_nvl:1",
+      "cpus_per_task": 8,
+      "memory_per_task": "128G",
+      "time_limit": "1-00:00:00"
     }
   ],
   "current_possible_r2f_demand": {
@@ -93,6 +105,40 @@
     "completed_sibling_job": "1694765",
     "completed_sibling_max_rss_kib": 131296872
   },
+  "shared_decode_audit": {
+    "status": "pass",
+    "path": "/home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d",
+    "video_count": 77,
+    "question_count": 268,
+    "unusable_videos": 0,
+    "requested_read_failures": 0,
+    "metadata_count_corrections": 0,
+    "substitutions": 0,
+    "affected_question_rows": [],
+    "reuse_qualification": "no_current_requested_decode_failures",
+    "historical_certification": false,
+    "protocol_runtime_manifest_sha256": "ca584503958f6be661bc1e9dc79a2fd5f89bbccbab01e348431f8773908ecb60",
+    "summary_sha256": "36b3e76dd1d3b64cfb8a0d37782746b8ab64fd38630fe4c6b0c25d8bf648fbf5",
+    "decode_audit_jsonl_sha256": "563e6c8f29b70f7c70b93668aee53624d68a9148521847998ab326ecc07f26b9",
+    "live_runtime_supplement_sha256": "f2679ed4c90c6884e15243c78d38d78c4613861109098cb4521fcb3b1a4e1bf7",
+    "consumer_validation": "passed by frozen fixed-control evaluator"
+  },
+  "control_submission": {
+    "submitted_at": "2026-09-09T02:56:17+02:00",
+    "array_job_id": "1700678",
+    "tasks": {
+      "0": "pretrained_exact_k16",
+      "1": "stavis_center16"
+    },
+    "concurrency": 1,
+    "execution_commit": "b795de084001c3a8ef1c147bc850d7764c867cb3",
+    "execution_worktree": "/storage/user/latn/worktrees/autogaze-r2e-k16-controls-b795de0",
+    "launcher": "experiments/human_gaze/slurm/run_hlvid_nvila_k16_causal_controls.sbatch",
+    "request_per_active_task": "cpu=8,mem=128G,gres/gpu:nvidia_h100_nvl=1",
+    "state_after_submission": "PENDING",
+    "pending_reason": "ReqNodeNotAvail; node may be reserved",
+    "orchestration_envelope_if_r2f_uses_two_lanes": "3 GPUs and 384G requested host memory"
+  },
   "local_vm": {
     "hostname": "atcremers63",
     "gpu": "NVIDIA RTX A2000 12GB",
@@ -111,7 +157,9 @@
       "processor_output_sha256": "95caf726a6d7653d869a108a09811790bc5a266a5247065658e69150fcb665f8",
       "total_context_tokens": 1105,
       "max_rss_kib": 2092236,
-      "artifact": "/tmp/hlvid_k16_processor_smoke_224.json",
+      "artifact": "experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/preflight/processor_smoke_224.json",
+      "artifact_sha256": "255fa5e4824e45dceebf1954584aae1e1e3c0a048e3cb86be97750e199429397",
+      "admission_identity_precheck_sha256": "f7cf6fcd5c3e017ef89b5c89cfc031488f15d2a656d7559f8d227956258276de",
       "scope": "small real-processor compatibility only; full 128-frame/64-thumbnail plumbing remains an H100 preflight"
     }
   }
