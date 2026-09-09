@@ -3,3 +3,6 @@ scripts/render_hlvid_fixed.py text eol=lf
 figures/hlvid_fixed/*.json text eol=lf
 figures/hlvid_fixed/*.svg text eol=lf
 figures/hlvid_fixed/*.md text eol=lf
+
+# Immutable compact temporal source copies retain exact upstream bytes.
+addenda/temporal/source_bundle/* -text

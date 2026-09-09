@@ -11,3 +11,17 @@ must be distinguished from the training RNG seed; preserve their mapping in
 provenance. Deterministic controls have inapplicable, empty `n_seeds`, not one
 training seed. State whether a mean action budget averages sources equally or
 pools frames before interpreting it as a resource measure.
+
+The normalized metric table additionally supports `metric_unit`,
+`aggregation_unit`, `n_questions`, `n_videos`, `bootstrap_seed`, `source_field`,
+`metric_role`, and `protocol_validity`. Blank primary designation means the
+historical source did not declare a primary metric; a figure's chosen reporting
+axis must not be relabeled as preregistration. Bootstrap RNG identities belong
+in `bootstrap_seed`, with training-seed counts left unavailable. Accuracy
+fractions and fraction differences become percent or percentage points only
+when a figure explicitly applies a factor of 100.
+
+Pinned external figure links are permitted. Their regeneration command is run
+in the linked source repository at the recorded commit, into a new output
+directory. Addendum manifests retain exact source hashes and name superseded
+bundles without altering completed source artifacts.

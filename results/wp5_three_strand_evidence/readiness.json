@@ -1,16 +1,20 @@
 {
-  "schema_version": 1,
-  "status": "implementation_readiness_only",
-  "scientific_claims_added": false,
+  "schema_version": 2,
+  "status": "partial_evidence_and_execution_readiness",
+  "scientific_claims_added": true,
   "items": [
     {
       "id": "hlvid_runtime_decode_audit",
       "repository": "noahlatzel/AutoGaze",
-      "commit": "38fffdac34cee682f87a75f12af05dc6e118ac17",
-      "commit_verified_via_github": true,
-      "reported_cpu_tests_passed": 23,
-      "actual_linux_decode_audit": "pending",
-      "eligible_for_empirical_claims": false
+      "commit": "ecd72f151e4ca5066ce48b9ecb0032af1cb06645",
+      "actual_linux_decode_audit": "complete: 77 videos and 268 questions; no current requested-decode failures",
+      "eligible_for_empirical_claims": true,
+      "claim_scope": "present-day requested-decode reuse qualification only",
+      "historical_certification": false,
+      "source_bundle": "results/hlvid_nvila/20260909-0211_wp0-hlvid-protocol-audit_b98970d",
+      "source_manifest": "addenda/wp0_decode/manifest.json",
+      "source_verification": "Committed source files and exact Git-blob SHA256 hashes verified at integration d649ad05c15b8f58edd0990140e05c23a4b9c183",
+      "reported_prior_audit_cpu_tests_passed": 23
     },
     {
       "id": "dino_benchmark_supplement",
@@ -18,8 +22,8 @@
       "repository_resolution": "Published identity and local review reported by parent",
       "commit": "796ee4f074cf38f2259ead32bf9deb0566331a6e",
       "commit_reported_by_parent": true,
-      "panel_export": "GPU inference pending",
-      "gpu_results": "pending",
+      "panel_export": "complete as reported by owner",
+      "gpu_results": "execution complete; curation pending",
       "eligible_for_empirical_claims": false,
       "panel_contract": {
         "split": "validation",
@@ -51,10 +55,9 @@
     {
       "id": "dinov3_gaze_panel_exporter",
       "repository": "noahlatzel/AutoGaze",
-      "commit": "8dbaa3f5dcf60fa7ea58d1a394f4a14f328be7e3",
+      "commit": "a8239fce8528335ca147adfd23e246ca06bdc7dc",
       "commit_reported_by_parent": true,
-      "reported_cpu_tests_passed": 36,
-      "implementation_status": "published CPU-tested exporter",
+      "implementation_status": "published exporter plus exact-zero historical-buffer compatibility",
       "panel_contract": {
         "split": "validation",
         "distinct_videos": 12,
@@ -62,18 +65,20 @@
         "frames_per_clip": 16,
         "selection_uses_outcomes": false
       },
-      "actual_checkpoint_inference": "pending",
-      "gpu_results": "pending",
-      "eligible_for_empirical_claims": false
+      "actual_checkpoint_inference": "complete as reported by owner",
+      "gpu_results": "execution complete; curation pending",
+      "eligible_for_empirical_claims": false,
+      "reported_core_cpu_tests_passed": 36,
+      "reported_focused_compatibility_tests_passed": 12
     },
     {
       "id": "temporal_evidence_closure",
       "owner_thread": "01a0691b-8544-7be0-ba5c-3344adf04982",
-      "source_table": null,
-      "status": "reviewed curation and renderer code; raw-artifact reaggregation and new immutable bundle pending",
-      "eligible_for_empirical_claims": false,
+      "source_table": "addenda/temporal/source_bundle/conditions.csv",
+      "status": "complete historical reaggregation; independently audited published source bundle",
+      "eligible_for_empirical_claims": true,
       "repository": "noahlatzel/video-frame-selection",
-      "commit": "50c1949819efbaf25338c0f3d62c5180ff581847",
+      "commit": "9b26feb3f53c9c2bce131f02c8bdf363b00bf315",
       "commit_reported_by_parent": true,
       "original_results_status": "historical",
       "protocol_corrections": [
@@ -82,8 +87,15 @@
       ],
       "reported_focused_tests_passed": 8,
       "test_scope": "Eight focused tests, including four-figure rendering coverage; no new scientific result implied",
-      "actual_raw_artifact_reaggregation": "pending",
-      "new_immutable_result_bundle": "pending"
+      "actual_raw_artifact_reaggregation": "complete",
+      "new_immutable_result_bundle": "results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949",
+      "curator_commit": "50c1949819efbaf25338c0f3d62c5180ff581847",
+      "claim_scope": "bounded historical descriptive/exploratory observations",
+      "source_manifest": "addenda/temporal/manifest.json",
+      "historical_primary_metric_declared": false,
+      "reported_verified_output_hashes": 29,
+      "total_bundle_files": 30,
+      "new_inference_calls": 0
     },
     {
       "id": "conceptual_intervention_figure",
@@ -96,6 +108,35 @@
         "is_final_k16": false
       },
       "status": "available_parent_local_exact_output_paths_pending",
+      "eligible_for_empirical_claims": false
+    },
+    {
+      "id": "fixed_k_controls",
+      "commit": "b795de084001c3a8ef1c147bc850d7764c867cb3",
+      "slurm_job": "1700678",
+      "status": "pending",
+      "eligible_for_empirical_claims": false
+    },
+    {
+      "id": "refreshed_variable_budget",
+      "source_commit": "ecd72f151e4ca5066ce48b9ecb0032af1cb06645",
+      "variable_slurm_job": "1690935",
+      "variable_status": "partial; no final aggregate",
+      "replay_slurm_job": "1700681",
+      "replay_status": "waiting dependency",
+      "eligible_for_empirical_claims": false
+    },
+    {
+      "id": "combined_autogaze_cpu_validation",
+      "integration_commit": "d649ad05c15b8f58edd0990140e05c23a4b9c183",
+      "native_windows_passed": 109,
+      "native_windows_platform_failure_count": 1,
+      "platform_limitation": "Directory os.open/fsync in test_preflight_selects_question_zero_from_a_larger_resumed_run; Linux-targeted runner unchanged",
+      "linux_receipt_commit": "f3487e112f36699407587d9b9d5eb4e8f990016b",
+      "linux_validation_reported_by_parent": true,
+      "linux_suite_passed": 12,
+      "linux_suite_elapsed_seconds": 18.37,
+      "test_scope": "Linux receipt includes exact named resume test before b795de0; not 110 native Windows passes",
       "eligible_for_empirical_claims": false
     }
   ]

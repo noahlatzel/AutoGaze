@@ -1,0 +1,427 @@
+{
+  "bootstrap": {
+    "ci_level": 0.9,
+    "replicates": 10000,
+    "seed": 20260813
+  },
+  "claims": {
+    "forbidden": [
+      "best exposed threshold is confirmed",
+      "candidate-grid frames equal raw decoded source frames",
+      "historical mixed-hardware timing is a controlled speedup",
+      "independent token-merging, temporal-selection and spatial-gazing savings multiply into end-to-end acceleration"
+    ],
+    "negative": "The deployed learned-delta policy collapsed to one realized schedule and did not establish adaptive equal-budget QA gains.",
+    "positive": "Some historical proxy settings retained similar observed HLVid QA while keeping fewer candidate-grid frames."
+  },
+  "comparisons": [
+    {
+      "candidate": "fixed_delta1",
+      "id": "fixed_delta1_vs_fixed_uniform128",
+      "reference": "fixed_uniform128",
+      "validity": "descriptive paired historical comparison"
+    },
+    {
+      "candidate": "fixed_delta2",
+      "id": "fixed_delta2_vs_fixed_uniform128",
+      "reference": "fixed_uniform128",
+      "validity": "descriptive paired historical comparison"
+    },
+    {
+      "candidate": "fixed_delta4",
+      "id": "fixed_delta4_vs_fixed_uniform128",
+      "reference": "fixed_uniform128",
+      "validity": "descriptive paired historical comparison"
+    },
+    {
+      "candidate": "fixed_delta8",
+      "id": "fixed_delta8_vs_fixed_uniform128",
+      "reference": "fixed_uniform128",
+      "validity": "descriptive paired historical comparison"
+    },
+    {
+      "candidate": "fixed_delta16",
+      "id": "fixed_delta16_vs_fixed_uniform128",
+      "reference": "fixed_uniform128",
+      "validity": "descriptive paired historical comparison"
+    },
+    {
+      "candidate": "fixed_delta32",
+      "id": "fixed_delta32_vs_fixed_uniform128",
+      "reference": "fixed_uniform128",
+      "validity": "descriptive paired historical comparison"
+    },
+    {
+      "candidate": "videomae128_t25",
+      "id": "videomae128_vs_uniform128",
+      "reference": "uniform128",
+      "validity": "same candidate grid; test-exposed setting"
+    },
+    {
+      "candidate": "dino_novelty128",
+      "id": "dino_novelty128_vs_uniform128",
+      "reference": "uniform128",
+      "validity": "same candidate grid; test-exposed setting"
+    },
+    {
+      "candidate": "dino_diversity128",
+      "id": "dino_diversity128_vs_uniform128",
+      "reference": "uniform128",
+      "validity": "same candidate grid; different GPU makes timing incomparable"
+    },
+    {
+      "candidate": "question_relevance128",
+      "id": "question_relevance128_vs_uniform128",
+      "reference": "uniform128",
+      "validity": "same grid but query-aware information class"
+    },
+    {
+      "candidate": "pixel256_t002",
+      "id": "pixel002_vs_uniform256",
+      "reference": "uniform256",
+      "validity": "same candidate grid; exposed threshold sweep"
+    },
+    {
+      "candidate": "pixel256_t003",
+      "id": "pixel003_vs_uniform256",
+      "reference": "uniform256",
+      "validity": "same candidate grid; exposed threshold sweep"
+    },
+    {
+      "candidate": "pixel256_t004",
+      "id": "pixel004_vs_uniform256",
+      "reference": "uniform256",
+      "validity": "same candidate grid; best observed exposed threshold is not confirmation"
+    },
+    {
+      "candidate": "pixel256_t005",
+      "id": "pixel005_vs_uniform256",
+      "reference": "uniform256",
+      "validity": "same candidate grid; exposed threshold sweep"
+    },
+    {
+      "candidate": "pixel256_t006",
+      "id": "pixel006_vs_uniform256",
+      "reference": "uniform256",
+      "validity": "same candidate grid; exposed threshold sweep"
+    },
+    {
+      "candidate": "siglip256_t00125",
+      "id": "siglip256_vs_uniform256",
+      "reference": "uniform256",
+      "validity": "same candidate grid; test-exposed setting"
+    },
+    {
+      "candidate": "learned_dino_delta",
+      "id": "learned_vs_uniform128",
+      "reference": "uniform128",
+      "validity": "different frame budget and resolution: learned max_tiles_video=1 versus reference max_tiles_video=48; QA difference cannot isolate temporal policy"
+    },
+    {
+      "candidate": "learned_dino_delta",
+      "id": "learned_vs_fixed_delta32",
+      "reference": "fixed_delta32",
+      "validity": "schedule diagnostic only: identical realized frame schedule but learned max_tiles_video=1 versus reference max_tiles_video=48; QA difference is resolution-confounded"
+    }
+  ],
+  "conditions": [
+    {
+      "candidate_grid_frames": 128,
+      "default_kept_frames": 128,
+      "exposure_status": "historical repeatedly exposed HLVid test",
+      "family": "fixed_delta",
+      "hardware": null,
+      "id": "fixed_uniform128",
+      "information_inputs": "none; uniform 128-point grid",
+      "label": "Uniform 128 (legacy)",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_default_autogaze/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 128,
+      "exposure_status": "historical repeatedly exposed HLVid test",
+      "family": "fixed_delta",
+      "hardware": null,
+      "id": "fixed_delta1",
+      "information_inputs": "none; add gap 1 after each 16-frame tile",
+      "label": "Fixed gap 1",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_1/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 128,
+      "exposure_status": "historical repeatedly exposed HLVid test",
+      "family": "fixed_delta",
+      "hardware": null,
+      "id": "fixed_delta2",
+      "information_inputs": "none; add gap 2 after each 16-frame tile",
+      "label": "Fixed gap 2",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_2/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 128,
+      "exposure_status": "historical repeatedly exposed HLVid test",
+      "family": "fixed_delta",
+      "hardware": null,
+      "id": "fixed_delta4",
+      "information_inputs": "none; add gap 4 after each 16-frame tile",
+      "label": "Fixed gap 4",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_4/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 128,
+      "exposure_status": "historical repeatedly exposed HLVid test",
+      "family": "fixed_delta",
+      "hardware": null,
+      "id": "fixed_delta8",
+      "information_inputs": "none; add gap 8 after each 16-frame tile",
+      "label": "Fixed gap 8",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_8/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 128,
+      "exposure_status": "historical repeatedly exposed HLVid test",
+      "family": "fixed_delta",
+      "hardware": null,
+      "id": "fixed_delta16",
+      "information_inputs": "none; add gap 16 after each 16-frame tile",
+      "label": "Fixed gap 16",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_16/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 128,
+      "exposure_status": "historical repeatedly exposed HLVid test",
+      "family": "fixed_delta",
+      "hardware": null,
+      "id": "fixed_delta32",
+      "information_inputs": "none; add gap 32 after each 16-frame tile",
+      "label": "Fixed gap 32",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_32/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 128,
+      "exposure_status": "historical repeatedly exposed HLVid test",
+      "family": "uniform",
+      "hardware": "NVIDIA H100 NVL",
+      "id": "uniform128",
+      "information_inputs": "none; uniform 128-point candidate grid",
+      "label": "Uniform 128",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2_highres/s2_highres_uniform_128/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 128,
+      "exposure_status": "test-exposed exploratory threshold",
+      "family": "reconstruction_proxy",
+      "hardware": "NVIDIA H100 NVL",
+      "id": "videomae128_t25",
+      "information_inputs": "future candidate tiles scored by VideoMAE reconstruction error; threshold 2.5",
+      "label": "VideoMAE reconstruction",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2_highres_videomae_128_t25/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 128,
+      "exposure_status": "test-exposed exploratory setting",
+      "family": "semantic_proxy",
+      "hardware": "NVIDIA H100 NVL",
+      "id": "dino_novelty128",
+      "information_inputs": "future candidate DINOv2 embeddings; novelty minus 0.01 log temporal cost",
+      "label": "DINOv2 novelty",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_v5_pareto_mtv48/dinov2_semnovel_128_l001_log_mtv48/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 128,
+      "exposure_status": "test-exposed exploratory setting",
+      "family": "semantic_proxy",
+      "hardware": "NVIDIA RTX PRO 6000 Blackwell",
+      "id": "dino_diversity128",
+      "information_inputs": "future candidate DINOv2 embeddings; diversity minus 0.01 log temporal cost",
+      "label": "DINOv2 diversity",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_v5_pareto_mtv48/dinov2_semdiv_128_l001_log_mtv48/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 128,
+      "exposure_status": "test-exposed exploratory setting",
+      "family": "query_aware_semantic_proxy",
+      "hardware": "NVIDIA H100 NVL",
+      "id": "question_relevance128",
+      "information_inputs": "question and choices plus future candidate semantic embeddings",
+      "label": "Question relevance",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_v5_pareto_mtv48/question_relevance_128_l001_log_mtv48/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 256,
+      "exposure_status": "historical repeatedly exposed HLVid test",
+      "family": "uniform",
+      "hardware": "NVIDIA H100 NVL",
+      "id": "uniform256",
+      "information_inputs": "none; uniform 256-point candidate grid",
+      "label": "Uniform 256",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2_highres/s2_highres_uniform_256/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 256,
+      "exposure_status": "test-exposed threshold sweep",
+      "family": "pixel_proxy",
+      "hardware": "NVIDIA H100 NVL",
+      "id": "pixel256_t002",
+      "information_inputs": "future candidate RGB tiles; largest gap below Pixel MSE threshold .02",
+      "label": "Pixel MSE t=.02",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2b_highres_pixel_mse_256_t002/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 256,
+      "exposure_status": "test-exposed threshold sweep",
+      "family": "pixel_proxy",
+      "hardware": "NVIDIA H100 NVL",
+      "id": "pixel256_t003",
+      "information_inputs": "future candidate RGB tiles; largest gap below Pixel MSE threshold .03",
+      "label": "Pixel MSE t=.03",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2b_highres_pixel_mse_256_t003/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 256,
+      "exposure_status": "best observed test-exposed threshold; exploratory only",
+      "family": "pixel_proxy",
+      "hardware": "NVIDIA H100 NVL",
+      "id": "pixel256_t004",
+      "information_inputs": "future candidate RGB tiles; largest gap below Pixel MSE threshold .04",
+      "label": "Pixel MSE t=.04",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2_highres_pixel_mse_256_t004/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 256,
+      "exposure_status": "test-exposed threshold sweep",
+      "family": "pixel_proxy",
+      "hardware": "NVIDIA H100 NVL",
+      "id": "pixel256_t005",
+      "information_inputs": "future candidate RGB tiles; largest gap below Pixel MSE threshold .05",
+      "label": "Pixel MSE t=.05",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2b_highres_pixel_mse_256_t005/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 256,
+      "exposure_status": "test-exposed threshold sweep",
+      "family": "pixel_proxy",
+      "hardware": "NVIDIA H100 NVL",
+      "id": "pixel256_t006",
+      "information_inputs": "future candidate RGB tiles; largest gap below Pixel MSE threshold .06",
+      "label": "Pixel MSE t=.06",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2b_highres_pixel_mse_256_t006/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 256,
+      "exposure_status": "test-exposed exploratory setting",
+      "family": "perceptual_proxy",
+      "hardware": "NVIDIA H100 NVL",
+      "id": "siglip256_t00125",
+      "information_inputs": "future candidate SigLIP embeddings; threshold .00125",
+      "label": "SigLIP perceptual",
+      "max_tiles_video": 48,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2_highres_siglip_256_t00125/results.jsonl",
+      "run_code_commit": null
+    },
+    {
+      "candidate_grid_frames": 128,
+      "exposure_status": "historical repeatedly exposed HLVid test",
+      "family": "learned_delta",
+      "hardware": null,
+      "id": "learned_dino_delta",
+      "information_inputs": "current 16-frame AutoGaze mean-vision state plus effective_fps, frame_count and start",
+      "label": "Learned DINO-delta policy",
+      "max_tiles_video": 1,
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/learned_delta_dino_semnovel_l001_mtv1/results.jsonl",
+      "run_code_commit": null
+    }
+  ],
+  "dataset": {
+    "answer_decoding": "First standalone A-D letter, case-insensitive, from at most 16 generated tokens. Missing letters are incorrect.",
+    "autogaze_model": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze",
+    "autogaze_revision": null,
+    "category_counts": {
+      "av": 146,
+      "household": 122
+    },
+    "expected_questions": 268,
+    "expected_videos": 77,
+    "historical_exposure": "The full HLVid test was repeatedly inspected while developing thresholds and policies; all threshold sweeps are exploratory.",
+    "model": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video",
+    "model_revision": null,
+    "name": "HLVid",
+    "population": "full historical test population",
+    "prompt": "<video>\\n\\nQuestion: {question}"
+  },
+  "default_max_tiles_video": 48,
+  "gate": "t0_historical_temporal_evidence_closure",
+  "learned_policy": {
+    "condition_id": "learned_dino_delta",
+    "deployment": "Greedy causal classification on a 128-point uniform HLVid candidate grid; action is a gap after the current 16-frame tile.",
+    "dino_probe_checkpoint": "/home/stud/latn/AutoGaze/outputs/delta_policy/dino_semnovel_l001_fusion_probe/checkpoints/mean_vision_linear.pt",
+    "dino_probe_metrics": "/home/stud/latn/AutoGaze/outputs/delta_policy/dino_semnovel_l001_fusion_probe/metrics/mean_vision_linear.json",
+    "dino_train_labels": "/home/stud/latn/AutoGaze/outputs/delta_labels/dino_semnovel_l001_train.json",
+    "dino_val_labels": "/home/stud/latn/AutoGaze/outputs/delta_labels/dino_semnovel_l001_val.json",
+    "mismatch": "Training examples are consecutive short prepared clips, while deployment treats the sparse full-duration 128-point grid as frame_count=128 and effective_fps=128/duration.",
+    "pixel_probe_metrics": "/home/stud/latn/AutoGaze/outputs/delta_probe_supervised_t004_balanced25k/pixel_mse_t004_mean_vision_runtime_linear_metrics.json",
+    "pixel_train_labels": "/home/stud/latn/AutoGaze/outputs/delta_labels/exp0b_pixel_mse_t004_balanced25k_train.json",
+    "tile_len": 16,
+    "training_inputs": "Frozen current-tile AutoGaze mean-vision representation concatenated with effective_fps, frame_count and start.",
+    "training_target": "Argmax future DINOv2 mean-novelty utility over gaps {1,2,4,8,16,32}; noncausal future candidate embeddings are labels only."
+  },
+  "schema_version": 1,
+  "supplementary": {
+    "p0": {
+      "config": "/home/stud/latn/.codex/worktrees/5428/master-thesis/code/results/p0_predictive_surprise/20260817-0040_p0-predictive-surprise_a6725c5/config.yaml",
+      "coordination_reported_curation_commit": "fa89cd1",
+      "coordination_reported_wrapper_commit": "cbb5ed1",
+      "manifest": "/home/stud/latn/.codex/worktrees/5428/master-thesis/code/results/p0_predictive_surprise/20260817-0040_p0-predictive-surprise_a6725c5/manifest.json",
+      "metrics": "/home/stud/latn/.codex/worktrees/5428/master-thesis/code/results/p0_predictive_surprise/20260817-0040_p0-predictive-surprise_a6725c5/metrics.json",
+      "per_source": "/home/stud/latn/.codex/worktrees/5428/master-thesis/code/results/p0_predictive_surprise/20260817-0040_p0-predictive-surprise_a6725c5/per_source.csv",
+      "per_video": "/home/stud/latn/.codex/worktrees/5428/master-thesis/code/results/p0_predictive_surprise/20260817-0040_p0-predictive-surprise_a6725c5/per_video.csv",
+      "readme": "/home/stud/latn/.codex/worktrees/5428/master-thesis/code/results/p0_predictive_surprise/20260817-0040_p0-predictive-surprise_a6725c5/README.md",
+      "strand": "within-frame spatial ranking; not temporal acquisition"
+    },
+    "t0d": {
+      "coordination_reported_autogaze_commit": "8e0a176",
+      "coordination_reported_wrapper_commit": "0db19a9",
+      "manifest": "/home/stud/latn/.codex/worktrees/temporal-active-viewing/master-thesis/AutoGaze/experiments/temporal_viewing/results/20260818-1209_t0d-rich-test_a1bfdb5/manifest.json",
+      "metrics": "/home/stud/latn/.codex/worktrees/temporal-active-viewing/master-thesis/AutoGaze/experiments/temporal_viewing/results/20260818-1209_t0d-rich-test_a1bfdb5/metrics.json",
+      "provenance_note": "Role-labeled lineage: execution used AutoGaze a1bfdb5100bd89a5d6f72fccc95627b662548b58 and wrapper cbd30290c952bb436d946262969e223b76a28eeb; immediate curation used child AutoGaze 8e0a176 and wrapper 0db19a9. These roles are compatible, not a provenance discrepancy.",
+      "readme": "/home/stud/latn/.codex/worktrees/temporal-active-viewing/master-thesis/AutoGaze/experiments/temporal_viewing/results/20260818-1209_t0d-rich-test_a1bfdb5/README.md",
+      "resolved_config": "/home/stud/latn/.codex/worktrees/temporal-active-viewing/master-thesis/AutoGaze/experiments/temporal_viewing/results/20260818-1209_t0d-rich-test_a1bfdb5/resolved_config.yaml",
+      "strand": "temporal within-tile promotion; not decode avoidance or HLVid QA"
+    }
+  }
+}

@@ -1,0 +1,229 @@
+{
+  "schema_version": 1,
+  "status": "complete_historical_exploratory",
+  "repository": "noahlatzel/video-frame-selection",
+  "result_commit": "9b26feb3f53c9c2bce131f02c8bdf363b00bf315",
+  "curator_commit": "50c1949819efbaf25338c0f3d62c5180ff581847",
+  "curator_dirty": false,
+  "result_bundle": "results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949",
+  "supersedes_result_bundle": "results/t0/20260909-0207_t0-historical-temporal-evidence_d34d96a",
+  "supersession_note": "Corrected curation replaces the earlier draft for thesis use; original published bundles remain immutable. Wrapper b14792a records this relationship.",
+  "hash_policy": "Exact Git blob bytes; copied source files disable line-ending conversion.",
+  "source_files": {
+    "README.md": {
+      "sha256": "58e2b7710cf03b9d27e4c3720e979410ade684b9260575eb58a6fc5784409fcc",
+      "git_blob": "3f705bfac39abbf9739e6153a605d5148213ff19",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/README.md"
+    },
+    "answer_flips.csv": {
+      "sha256": "45253ba418dee42f6b8f1a53390718b1271caa27457a8b67c9a74d7b8c9776df",
+      "git_blob": "584f1fa50d95e3604289ad3bd7a21397dd83680d",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/answer_flips.csv"
+    },
+    "conditions.csv": {
+      "sha256": "17d99123b252f7a23435be8ebf437c8403cfb0094c8c9bcbcf98ba7fde15f2cb",
+      "git_blob": "97e248c828c668d6b11451f014dd6bd55afdd764",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/conditions.csv"
+    },
+    "config.yaml": {
+      "sha256": "ecf6480d8a61e980f96345db09311d307535a47da67853916c0956430a5daf51",
+      "git_blob": "af5511a5e6bfa2f569ad2f6532d9ee3e0e96c6d7",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/config.yaml"
+    },
+    "figure_captions.md": {
+      "sha256": "c24b0ee6dc660ab39dd6b3bcc2234307995feb97ec4769c699dd5da9b93d00b6",
+      "git_blob": "4f02d388da4b868d8eeabbbd03cf798d8370f3e3",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figure_captions.md"
+    },
+    "figures/data_checks.json": {
+      "sha256": "aa51e538bb711a78725463f29298d6abe505651152eb6174be1c5566201f58c4",
+      "git_blob": "919216c9ef5348fa4d6136803d120442a6cda9e3",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/data_checks.json"
+    },
+    "figures/historical_h100_timing.json": {
+      "sha256": "7eba2a4f2f41c4017018ca0286e6d2ffc24fea086010af5a8d8cd195282dc029",
+      "git_blob": "269e9b17fe051dde1c07cf43f16bc4ab1b835d0b",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/historical_h100_timing.json"
+    },
+    "figures/historical_h100_timing.pdf": {
+      "sha256": "83b09df4a9af796191d3682da6004af2aa190855508f3766cc5b91f767d5b0bf",
+      "git_blob": "7188a11e3f10c144f6a231981cdd774d009cdbb8",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/historical_h100_timing.pdf"
+    },
+    "figures/historical_h100_timing.png": {
+      "sha256": "3f8df9383e9ddfa6fda4af38806a363dddb9eb4e1809a9cb740cb184e4cb1b47",
+      "git_blob": "e104c94fb2a3890470ca22e27d2f3e164266ff84",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/historical_h100_timing.png"
+    },
+    "figures/historical_h100_timing.svg": {
+      "sha256": "2546e8659b86383468ef8f7713e8052ac8c511bac16f9d97e3404303828399c0",
+      "git_blob": "8e2612b920b68bf79b93b423354bb2bf3b9b35ec",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/historical_h100_timing.svg"
+    },
+    "figures/learned_delta_schedule.json": {
+      "sha256": "6f37cac69d7ae4d54bd475f16df3672c99a0f10f3f78a51077e5a58207ba6e9d",
+      "git_blob": "b675c53f33cc54682058f0b2a0193565dee4bf93",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/learned_delta_schedule.json"
+    },
+    "figures/learned_delta_schedule.pdf": {
+      "sha256": "1c8824d64046f7a2ccd76fa97b68918584739127b26fcbaea19768fb77bb50e3",
+      "git_blob": "26f1b1fd823921762f2e4dd6096910d42631d855",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/learned_delta_schedule.pdf"
+    },
+    "figures/learned_delta_schedule.png": {
+      "sha256": "94787925b9effa6bea52e3987c5fed340dcb6628ca5e85b71865ec8b99160bbb",
+      "git_blob": "5a44520a22bbdafbe1082a9dcd195d6d74290859",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/learned_delta_schedule.png"
+    },
+    "figures/learned_delta_schedule.svg": {
+      "sha256": "65e807a4b914e156412a6d8cca8ee2e1c95121e0e28e4444c473a6b9ca27f63c",
+      "git_blob": "d53365ec3cf0776f014c39a718031de3e811f705",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/learned_delta_schedule.svg"
+    },
+    "figures/pixel_threshold_sweep.json": {
+      "sha256": "ff58a26ea400ce361fc952cb30bffac94ea031b979a1f10836524342c0204a6c",
+      "git_blob": "e9b81b6868fa8f87f09ad7386e59dadd841cf535",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/pixel_threshold_sweep.json"
+    },
+    "figures/pixel_threshold_sweep.pdf": {
+      "sha256": "660220aa78c0cbe5bc7f4f6a7ee9043d604ddc81e989b58dd1ec77c2e9413172",
+      "git_blob": "8428b275504de4db1fca4bd449e3d877a3d765bc",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/pixel_threshold_sweep.pdf"
+    },
+    "figures/pixel_threshold_sweep.png": {
+      "sha256": "033d3bfa6148d10769550ac0926969eaccb14415a1747e56522270134c52a02c",
+      "git_blob": "7bed335340b2d9b198bf485149962ee115eccc8a",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/pixel_threshold_sweep.png"
+    },
+    "figures/pixel_threshold_sweep.svg": {
+      "sha256": "6868414d5881b5810446eac88c5533e50b3b332176afbbf97f7d4670ea240e3e",
+      "git_blob": "9f48ad2c39b37b54dde05f0586c63d493b3e0de1",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/pixel_threshold_sweep.svg"
+    },
+    "figures/temporal_accuracy_frames_frontier.json": {
+      "sha256": "03064f823cf49f774f580cab01b4f292ac26b46df4eb3f9caf085610db633cc4",
+      "git_blob": "921634ec5a38d1c2c4ad52734d613bb596ae350e",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/temporal_accuracy_frames_frontier.json"
+    },
+    "figures/temporal_accuracy_frames_frontier.pdf": {
+      "sha256": "2e1344af6534a24e3e9c6033f1e0e51b3f70d37b86e5e191b42dabd728234678",
+      "git_blob": "54dc4b0717af7cea29907ef2fe340062af9cd57b",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/temporal_accuracy_frames_frontier.pdf"
+    },
+    "figures/temporal_accuracy_frames_frontier.png": {
+      "sha256": "f4abd2d5b3b46586a546be5869046b3fb60cc45bfffb821781215f47c675f169",
+      "git_blob": "57cf696f346589666e5d64f85ddba307d0991f02",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/temporal_accuracy_frames_frontier.png"
+    },
+    "figures/temporal_accuracy_frames_frontier.svg": {
+      "sha256": "fa1ee8b95d13becc77cbca1e4a87aa4e77981e2d69fdec88750ef878dd9262dd",
+      "git_blob": "a438e37077508c4833477e78dfb2095bdae936a0",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/figures/temporal_accuracy_frames_frontier.svg"
+    },
+    "learned_trajectories.csv": {
+      "sha256": "e44cdda15a7d91a89e013ca2f0f0b4b8f9abf063e6ecbd170c890b9ec79499b0",
+      "git_blob": "d3efc876ccc35c766c9881dd48caee814e6f374c",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/learned_trajectories.csv"
+    },
+    "learned_trajectory_summary.json": {
+      "sha256": "8a4385a1a8b57280432f1ab2870d9ea0dac860a44ab609715c8012d580f62e74",
+      "git_blob": "32860e1bcdee7d89de77aab9d82c5220b71e046c",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/learned_trajectory_summary.json"
+    },
+    "manifest.json": {
+      "sha256": "005884a37237b1caf923cbe55455f4ee7845da17dd0bd9ecaf9df2fc7fb718d7",
+      "git_blob": "0e800bd07a0eb582db16830714e826c0c8374d44",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/manifest.json"
+    },
+    "method_inventory.csv": {
+      "sha256": "d70dca6ab22b996ab67e588f6ad173f6fb670e408a4a2b77d773a85dcf3ac73b",
+      "git_blob": "b15f00a8d0910f5bb176eda27ac1ba3a121a55ef",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/method_inventory.csv"
+    },
+    "metrics.json": {
+      "sha256": "e866886a0270347d004ad224945b38d8585c12be8b06ca55fbdc9219f678afdc",
+      "git_blob": "7768b1796bc1e751cec1371a68533a2a96df2d6f",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/metrics.json"
+    },
+    "paired_comparisons.csv": {
+      "sha256": "6c3623b1471da819e0d7258217a6950f5179e15610f4ee0709122e16eb19228a",
+      "git_blob": "61e4286f0f6a37942380f51fc2c3594c1618818e",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/paired_comparisons.csv"
+    },
+    "supplemental_inventory.csv": {
+      "sha256": "24249106ab25e441bb8911c265c6ce152729a89c85f7f55ec62c07dd662bf1d1",
+      "git_blob": "c668853ea57fa7d30785913801e288839fc9e999",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/supplemental_inventory.csv"
+    },
+    "timing_cache_strata.csv": {
+      "sha256": "2f3167b6a77fa516942b99c552c844b48985f732fb647fc14a9895bb48b6bc46",
+      "git_blob": "7a510d1ae5b96d81c82b92242fa0455684d25cad",
+      "url": "https://github.com/noahlatzel/video-frame-selection/blob/9b26feb3f53c9c2bce131f02c8bdf363b00bf315/results/t0/20260909-0315_t0-historical-temporal-evidence_50c1949/timing_cache_strata.csv"
+    }
+  },
+  "copied_source_files": {
+    "README.md": "addenda/temporal/source_bundle/README.md",
+    "answer_flips.csv": "addenda/temporal/source_bundle/answer_flips.csv",
+    "conditions.csv": "addenda/temporal/source_bundle/conditions.csv",
+    "config.yaml": "addenda/temporal/source_bundle/config.yaml",
+    "figure_captions.md": "addenda/temporal/source_bundle/figure_captions.md",
+    "learned_trajectories.csv": "addenda/temporal/source_bundle/learned_trajectories.csv",
+    "learned_trajectory_summary.json": "addenda/temporal/source_bundle/learned_trajectory_summary.json",
+    "manifest.json": "addenda/temporal/source_bundle/manifest.json",
+    "method_inventory.csv": "addenda/temporal/source_bundle/method_inventory.csv",
+    "metrics.json": "addenda/temporal/source_bundle/metrics.json",
+    "paired_comparisons.csv": "addenda/temporal/source_bundle/paired_comparisons.csv",
+    "supplemental_inventory.csv": "addenda/temporal/source_bundle/supplemental_inventory.csv",
+    "timing_cache_strata.csv": "addenda/temporal/source_bundle/timing_cache_strata.csv"
+  },
+  "hash_validation": {
+    "manifest_outputs": 29,
+    "bundle_files_including_manifest": 30,
+    "all_output_sha256_verified": true
+  },
+  "primary_metric_declared_in_historical_source": false,
+  "curation_qa_axis": "video_macro_accuracy",
+  "retained_question_metric": "question_micro_accuracy",
+  "cost_aggregation": "question means; retained candidate-grid frames are not raw decoded source frames",
+  "uncertainty": "90% paired video-bootstrap intervals for 18 contrasts; 10000 draws; exact per-contrast RNG seed retained; no training-seed uncertainty",
+  "new_vlm_calls": 0,
+  "new_gpu_runs": 0,
+  "wp5_bootstrap_recomputed": false,
+  "protocol_boundaries": [
+    "Learned deployment max_tiles_video=1; uniform/fixed-gap references max_tiles_video=48.",
+    "Learned QA contrasts cannot isolate temporal selection; schedule collapse is an independent trajectory observation.",
+    "Repeated HLVid test exposure makes threshold sweeps exploratory.",
+    "Timing is historical, question-weighted and cache-stratified; no controlled speedup claim.",
+    "Exact early model/code revisions remain unavailable."
+  ],
+  "provenance_lineage": {
+    "t0d": "Role-labeled lineage: execution used AutoGaze a1bfdb5100bd89a5d6f72fccc95627b662548b58 and wrapper cbd30290c952bb436d946262969e223b76a28eeb; immediate curation used child AutoGaze 8e0a176 and wrapper 0db19a9. These roles are compatible, not a provenance discrepancy."
+  },
+  "provenance_uncertainties": [
+    "Early HLVid bundles omit exact code/model revisions.",
+    "P0 coordination curation/wrapper short commits are not embedded in its manifest."
+  ],
+  "condition_bootstrap_rng_seeds": {
+    "fixed_uniform128": 20260813,
+    "fixed_delta1": 20260814,
+    "fixed_delta2": 20260815,
+    "fixed_delta4": 20260816,
+    "fixed_delta8": 20260817,
+    "fixed_delta16": 20260818,
+    "fixed_delta32": 20260819,
+    "uniform128": 20260820,
+    "videomae128_t25": 20260821,
+    "dino_novelty128": 20260822,
+    "dino_diversity128": 20260823,
+    "question_relevance128": 20260824,
+    "uniform256": 20260825,
+    "pixel256_t002": 20260826,
+    "pixel256_t003": 20260827,
+    "pixel256_t004": 20260828,
+    "pixel256_t005": 20260829,
+    "pixel256_t006": 20260830,
+    "siglip256_t00125": 20260831,
+    "learned_dino_delta": 20260832
+  },
+  "condition_bootstrap_rng_contract": "Resolved config base seed plus condition index; executed curator scripts/curate_temporal_evidence.py:219-222. These are not training seeds."
+}
