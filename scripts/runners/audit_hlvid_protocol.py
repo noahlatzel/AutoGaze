@@ -183,13 +183,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--expected-parquet-sha256", default=EXPECTED_PARQUET_SHA256)
     parser.add_argument("--legacy-loader", type=Path, default=Path("/home/stud/latn/AutoGaze/scripts/runners/evaluate_hlvid_nvila.py"))
     parser.add_argument("--expected-loader-sha256", default=EXPECTED_LOADER_SHA256)
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.num_frames != 128:
+        parser.error("this frozen protocol audit requires --num-frames=128")
+    return args
 
 
 def main() -> int:
     args = parse_args()
-    if args.num_frames < 1:
-        raise ValueError("--num-frames must be positive")
     parquet = args.parquet or args.dataset_root / "data" / f"{args.split}-00000-of-00001.parquet"
     parquet_hash = sha256_file(parquet)
     if args.expected_parquet_sha256 and parquet_hash != args.expected_parquet_sha256:
@@ -218,6 +219,7 @@ def main() -> int:
                      "do_sample": False, "num_beams": 1, "max_new_tokens": 16,
                      "truncation": False},
         "protocol_configuration_source": "frozen_evaluator_contract_not_model_execution",
+        "live_model_files_verified": False,
         "nvila_snapshot_revision": "7a5670e20da435d98b0efdc49f9a536f73985152",
         "python": sys.version, "platform": platform.platform(),
         "interpretation": "Present-day decode audit; does not retrospectively certify historical inputs.",

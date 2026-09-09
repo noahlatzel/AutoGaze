@@ -15,7 +15,7 @@ from scripts.runners.hlvid_evidence import (
     unavailable_counter,
     write_evidence_record,
 )
-from scripts.runners.audit_hlvid_protocol import audit_video, requested_indices, summarize_audit
+from scripts.runners.audit_hlvid_protocol import audit_video, parse_args, requested_indices, summarize_audit
 
 
 def record(state="attempt_started", *, question=3, attempt="attempt-1", compatibility="policy-a"):
@@ -265,3 +265,13 @@ def test_metadata_count_correction_alone_does_not_flag_qa_reuse():
 def test_requested_grid_uses_rounding_and_preserves_short_video_duplicates():
     assert requested_indices(3, 9) == [0, 0, 0, 1, 1, 1, 2, 2, 2]
     assert requested_indices(1, 128) == [0] * 128
+
+
+def test_frozen_audit_cli_rejects_shorter_sampling_before_loading_inputs(monkeypatch, capsys):
+    monkeypatch.setattr("sys.argv", ["audit_hlvid_protocol.py", "--output-dir", "unused", "--num-frames", "16"])
+    with pytest.raises(SystemExit) as error:
+        parse_args()
+    assert error.value.code == 2
+    assert "requires --num-frames=128" in capsys.readouterr().err
+    monkeypatch.setattr("sys.argv", ["audit_hlvid_protocol.py", "--output-dir", "unused"])
+    assert parse_args().num_frames == 128
