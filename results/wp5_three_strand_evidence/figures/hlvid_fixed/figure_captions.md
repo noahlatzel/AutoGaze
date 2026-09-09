@@ -1,0 +1,9 @@
+# Fixed-budget HLVid figure captions
+
+## hlvid_fixed_common_seeds
+
+Fixed spatial-budget HLVid results for the three common base seeds 440826, 440827 and 440828. Panel a connects checkpoints sharing the same base seed across K16, K24 and K32; black diamonds are arithmetic means of these three seeds (49.75%, 47.89% and 49.13%). Accuracy is question-micro exact match over all 268 questions. Panel b reproduces the published paired video-cluster-bootstrap intervals for the mean correctness differences across these same seeds: 90% intervals, 10,000 draws, 77 video clusters. The intervals describe video resampling conditional on the observed three-seed set; they are not intervals from resampling training seeds. All intervals include zero, so no reliable budget ordering or equivalence is established. K is the exact number of unique fine actions per AutoGaze frame, with EOS disabled. The evaluation uses 128 uniformly sampled video frames, 64 full thumbnails and maximum spatial tile budget 48. The additional K16 seeds, unmatched native reference, and pending pretrained/Center16 causal controls are not plotted.
+
+## hlvid_fixed_aggregation_sensitivity
+
+Aggregation sensitivity using exactly the same three common seeds and nine checkpoints as the primary fixed-budget comparison. Panel a repeats question-micro accuracy, the prespecified primary metric. Panel b reports the secondary video-macro accuracy, which averages questions within a video and then weights the 77 videos equally. Colored lines pair base seeds; black diamonds are three-seed arithmetic means. The question-micro means are 49.75%, 47.89% and 49.13% for K16, K24 and K32; the corresponding video-macro means are 48.80%, 48.28% and 51.87%. The highest observed mean therefore changes from K16 to K32 under the secondary aggregation. These are point estimates without uncertainty intervals and do not establish a reliable ordering. The additional K16-only seeds and all causal controls are excluded.

@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "package_id": "wp5_three_strand_evidence",
+  "status": "draft_with_verified_gaze",
+  "published_base": {
+    "repository": "noahlatzel/AutoGaze",
+    "commit": "a0a5bde41909a0fbbafcf18c25a636b5e1a85489",
+    "tree": "ef79ee74d3e2808e038f53066ae0b9c9db8b0bb5"
+  },
+  "integrated": [
+    "r2e_hlvid_nvila_fixed_budget_all_seeds",
+    "r0_r1_direct_coverage_grpo_fold1",
+    "r2d_variable_fine_token_budget"
+  ],
+  "pending": [
+    "dino_cost_fidelity",
+    "temporal_budget_utility",
+    "pretrained_and_center16_k16_controls",
+    "refreshed_variable_budget_paired_tables",
+    "runtime_and_decode_provenance"
+  ],
+  "missing_values_are_zero": false,
+  "joint_system_speedup_supported": false,
+  "publication_figures": {
+    "status": "verified existing R2e evidence rendered into new WP5 assets",
+    "figure_ids": [
+      "gaze_fixed_budget",
+      "gaze_fixed_aggregation_sensitivity"
+    ],
+    "new_inference_calls": 0,
+    "bootstrap_recomputed": false,
+    "metadata_root": "figures/hlvid_fixed"
+  }
+}

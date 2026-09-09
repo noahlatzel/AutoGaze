@@ -1,0 +1,5 @@
+# Keep renderer and its newly generated text/hash assets stable across hosts.
+scripts/render_hlvid_fixed.py text eol=lf
+figures/hlvid_fixed/*.json text eol=lf
+figures/hlvid_fixed/*.svg text eol=lf
+figures/hlvid_fixed/*.md text eol=lf

@@ -1,0 +1,104 @@
+{
+  "figure": "hlvid_fixed_common_seeds",
+  "caption": "Fixed spatial-budget HLVid results for the three common base seeds 440826, 440827 and 440828. Panel a connects checkpoints sharing the same base seed across K16, K24 and K32; black diamonds are arithmetic means of these three seeds (49.75%, 47.89% and 49.13%). Accuracy is question-micro exact match over all 268 questions. Panel b reproduces the published paired video-cluster-bootstrap intervals for the mean correctness differences across these same seeds: 90% intervals, 10,000 draws, 77 video clusters. The intervals describe video resampling conditional on the observed three-seed set; they are not intervals from resampling training seeds. All intervals include zero, so no reliable budget ordering or equivalence is established. K is the exact number of unique fine actions per AutoGaze frame, with EOS disabled. The evaluation uses 128 uniformly sampled video frames, 64 full thumbnails and maximum spatial tile budget 48. The additional K16 seeds, unmatched native reference, and pending pretrained/Center16 causal controls are not plotted.",
+  "source_bundle": "r2e_hlvid_nvila_fixed_budget_all_seeds",
+  "source_files": {
+    "per_seed.csv": "22602408b2b204d839ea4416a981bec8ffa5dda832fb325705c7a39635c73e07",
+    "matched_budget_differences.csv": "fea8b783b9f57e3bf1379ce9c5b7a42b699c99c06fd9e8b2cfc77afaf7477b6d",
+    "metrics.json": "595bdf51381f8b9a27202e65e16d8852f82d0033d85c496518a63f27c32d7bf7",
+    "manifest.json": "65f3653469540612088bf96ddd4f2113cf02dcabfc78d68277c90e52bdd53dbc",
+    "config.yaml": "73b4f52b84209121d1bbd37bae5935ea7a88ff8a84a4c3ef9d68ffe6d5f3dca6",
+    "README.md": "9b92f5a84e4bb1d160b29c46394215c21de6c4a1dea3dd143e7c9117d8decb5b"
+  },
+  "source_text_lf_sha256": {
+    "per_seed.csv": "1804d97507d4f6d7ec405cb7b129c0f3e81906ee4f9a55fb8babbd5dd7beb3c0",
+    "matched_budget_differences.csv": "f7f5c673ba95099bd8812bed9235163ca9385e9cb86007ad59baaaebebc1fef3",
+    "metrics.json": "74df4626f099f6043bb2412c5df2c08b76b3868203964f2d96aeab42f4f2bbc6",
+    "manifest.json": "224a9199bafc6bbf6e9484716a43b91ba6d187348da1b3fdcdda63606b0b4310",
+    "config.yaml": "1e11ec7bf3659a30bcc664ffc0fc2b5d7931c408008f9e2806a5d66c21b96fbd",
+    "README.md": "a670e5f55cae0196e14001761acd760892d3570dda9fbbbc480a2e31aea5e615"
+  },
+  "source_hash_policy": "source_files hashes the actual read bytes; source_text_lf_sha256 normalizes CRLF to LF for cross-platform text-content comparison",
+  "renderer": "render_hlvid_fixed.py",
+  "renderer_sha256": "11775ff2e1cb5de4a1f3b7fca16a2f50ef49d17678190bda87fdd47aedd2feae",
+  "matplotlib_version": "3.11.1",
+  "common_seeds": [
+    440826,
+    440827,
+    440828
+  ],
+  "num_seeds_per_budget": 3,
+  "budgets": [
+    16,
+    24,
+    32
+  ],
+  "protocol_id": "hlvid_nvila_mtv48_uniform128_thumbnail64_v1",
+  "scientific_results_recomputed": false,
+  "means_recomputed_from_published_endpoints": true,
+  "addendum_cross_check": {
+    "per_seed.csv": "1dd25d242d9bdd3b4d1f598d2d6d2781c39ff70bf5600c9a3576da11fec49b04",
+    "matched_budget_differences.csv": "fea8b783b9f57e3bf1379ce9c5b7a42b699c99c06fd9e8b2cfc77afaf7477b6d"
+  },
+  "primary_metric": "question_micro_accuracy",
+  "paired_comparisons": [
+    {
+      "budget_a": "16",
+      "budget_b": "24",
+      "difference": "0.018656716417910446",
+      "ci90_low": "-0.019444444444444445",
+      "ci90_high": "0.05368289637952559",
+      "cluster_unit": "video",
+      "num_video_clusters": "77",
+      "iterations": "10000",
+      "bootstrap_seed": "20262525"
+    },
+    {
+      "budget_a": "16",
+      "budget_b": "32",
+      "difference": "0.006218905472636816",
+      "ci90_low": "-0.05830087394847959",
+      "ci90_high": "0.06723911887298858",
+      "cluster_unit": "video",
+      "num_video_clusters": "77",
+      "iterations": "10000",
+      "bootstrap_seed": "20262533"
+    },
+    {
+      "budget_a": "24",
+      "budget_b": "32",
+      "difference": "-0.012437810945273632",
+      "ci90_low": "-0.06060606060606061",
+      "ci90_high": "0.030012120192427508",
+      "cluster_unit": "video",
+      "num_video_clusters": "77",
+      "iterations": "10000",
+      "bootstrap_seed": "20263333"
+    }
+  ],
+  "mean_percent": {
+    "16": 49.75124378109453,
+    "24": 47.885572139303484,
+    "32": 49.12935323383085
+  },
+  "seed_uncertainty_intervals_plotted": false,
+  "bootstrap_recomputed": false,
+  "control_results_plotted": false,
+  "outputs": [
+    {
+      "file": "hlvid_fixed_common_seeds.pdf",
+      "bytes": 34851,
+      "sha256": "11562d45b22f730dfcc7065082d275af59aa75440b23dd8c58f31457be7ebca3"
+    },
+    {
+      "file": "hlvid_fixed_common_seeds.svg",
+      "bytes": 25275,
+      "sha256": "7e2a761ad3ce150cb878f647b9f938625171ccc319a32854a8e78d4d4b8b51d7"
+    },
+    {
+      "file": "hlvid_fixed_common_seeds.png",
+      "bytes": 330851,
+      "sha256": "79a1f96ef4afc1f20693aea1e0a05dbc70df3723e7e11f9635a6ef7c47fc3197"
+    }
+  ]
+}

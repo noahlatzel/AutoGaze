@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "status": "historical_curated",
+  "source_ref": "a0a5bde41909a0fbbafcf18c25a636b5e1a85489",
+  "r0_r1_metrics_blob": "8272c2364664db9ab2fe2041a49b9cd96bf63ebe",
+  "r0_r1_manifest_blob": "9427a534898100c7f358ae7c7ca668edfbee4d27",
+  "r0_r1_data_sha256": "0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10",
+  "r2d_metrics_blob": "59084ea9ae43cc756d58762789df798e0aae5a77",
+  "r2d_manifest_blob": "541fc3a6784bac0495d17ffb80a25f59b855f81b",
+  "r2d_training_commit": "cdfd67f1adbe18e976199a63da6d55c0cf3b6f7d",
+  "r2d_data_manifest_sha256": "0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10",
+  "r2d_cell_mass_sha256": "fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8",
+  "r2d_verification_source": "experiments/human_gaze/results/r2d_variable_fine_token_budget/verification.json",
+  "r2d_base_seeds": [
+    440826,
+    440827,
+    440828
+  ],
+  "r2d_training_seeds": [
+    740826,
+    740827,
+    740828
+  ],
+  "r2d_seed_mapping": [
+    {
+      "base_seed": 440826,
+      "training_seed": 740826
+    },
+    {
+      "base_seed": 440827,
+      "training_seed": 740827
+    },
+    {
+      "base_seed": 440828,
+      "training_seed": 740828
+    }
+  ],
+  "r2d_metric_source_fields": {
+    "gaze_r2d_mean_k": "three_seed_means.calibrated_validation_mean_k (equal-weight source means within seed, then mean across seeds)",
+    "gaze_r2d_pooled_mean_k": "three_seed_means.pooled_frame_mean_k (pooled validation frames within seed, then mean across seeds)"
+  },
+  "r2d_matched_source_macro_k_band": [
+    15.5,
+    16.5
+  ]
+}
