@@ -87,14 +87,25 @@ def write_protocol_audit(directory, *, qualification="no_current_requested_decod
     paths["protocol_runtime_manifest"].write_text(json.dumps(manifest) + "\n")
     paths["decode_audit"].write_text(json.dumps(record) + "\n")
     supplement = {
-        "artifact_hashes": {
-            name: {"sha256": MODULE.sha256_file(path)} for name, path in paths.items()
+        "audit_output_hashes": {
+            "protocol_runtime_manifest_sha256": MODULE.sha256_file(
+                paths["protocol_runtime_manifest"]
+            ),
+            "summary_sha256": MODULE.sha256_file(paths["summary"]),
+            "decode_audit_jsonl_sha256": MODULE.sha256_file(paths["decode_audit"]),
         },
         "reuse_qualification": qualification,
-        "runtime": {"numpy_version": "tested"},
-        "git": {"commit": "audit", "dirty": False},
+        "hostname": "test-host",
+        "packages": {
+            "opencv": "tested",
+            "pillow": "tested",
+            "numpy": "tested",
+            "pyarrow": "tested",
+        },
+        "git_commit": "audit",
+        "git_dirty": False,
     }
-    (directory / "audit_supplement.json").write_text(json.dumps(supplement) + "\n")
+    (directory / "live_runtime_supplement.json").write_text(json.dumps(supplement) + "\n")
 
 
 def test_protocol_audit_requires_supplement_hashes_and_clean_decode_qualification(tmp_path):
@@ -104,7 +115,7 @@ def test_protocol_audit_requires_supplement_hashes_and_clean_decode_qualificatio
     assert summary["reuse_qualification"] == "no_current_requested_decode_failures"
     assert set(records) == {"a.mp4"}
     assert provenance["supplement_sha256"] == MODULE.sha256_file(
-        accepted / "audit_supplement.json"
+        accepted / "live_runtime_supplement.json"
     )
 
     rejected = tmp_path / "rejected"

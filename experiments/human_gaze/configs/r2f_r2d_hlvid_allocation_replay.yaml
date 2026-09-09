@@ -27,7 +27,8 @@ protocol:
   legacy_common_sha256: d390fd54b8fca681e2d530c3fb53ee15fdddcb06c379ef86d7720a914949e0b4
   nvila_processor_sha256: 2b9dbf36a9c69954af7e7cc8478a980e406e91c2ba27b7f2f164167da70dbc9a
   decode_audit: shared_wp0_bundle_required_before_admission
-  decode_audit_supplement: >-
+  decode_audit_supplement: live_runtime_supplement.json
+  decode_audit_supplement_contract: >-
     required runtime/library/hostname/Git/output-hash provenance with stable
     example keys for every affected parquet row
   decode_audit_historical_certification: false

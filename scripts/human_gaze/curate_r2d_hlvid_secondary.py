@@ -226,7 +226,7 @@ def load_variable_replay(
         (audit_dir / "summary.json", "summary_sha256"),
         (audit_dir / "protocol_runtime_manifest.json", "manifest_sha256"),
         (audit_dir / "decode_audit.jsonl", "decode_audit_sha256"),
-        (audit_dir / "audit_supplement.json", "supplement_sha256"),
+        (audit_dir / "live_runtime_supplement.json", "supplement_sha256"),
     ]
     for path, hash_key in audit_paths:
         if not path.is_file() or sha256_file(path) != audit.get(hash_key):

@@ -351,7 +351,7 @@ def load_protocol_audit(directory: Path) -> tuple[dict[str, Any], dict[str, dict
     summary_path = directory / "summary.json"
     manifest_path = directory / "protocol_runtime_manifest.json"
     records_path = directory / "decode_audit.jsonl"
-    supplement_path = directory / "audit_supplement.json"
+    supplement_path = directory / "live_runtime_supplement.json"
     for path in (summary_path, manifest_path, records_path, supplement_path):
         if not path.is_file():
             raise FileNotFoundError(f"Protocol audit artifact is missing: {path}")
@@ -369,14 +369,18 @@ def load_protocol_audit(directory: Path) -> tuple[dict[str, Any], dict[str, dict
             "Protocol audit requires affected-subset inspection before replay: "
             f"{summary.get('affected_question_rows')}"
         )
-    supplement_hashes = supplement.get("artifact_hashes") or {}
-    for name, path in (
-        ("summary", summary_path),
-        ("protocol_runtime_manifest", manifest_path),
-        ("decode_audit", records_path),
-    ):
-        if supplement_hashes.get(name, {}).get("sha256") != sha256_file(path):
-            raise ValueError(f"Protocol audit supplement hash mismatch: {name}")
+    expected_supplement_hashes = {
+        "protocol_runtime_manifest_sha256": sha256_file(manifest_path),
+        "summary_sha256": sha256_file(summary_path),
+        "decode_audit_jsonl_sha256": sha256_file(records_path),
+    }
+    if supplement.get("audit_output_hashes") != expected_supplement_hashes:
+        raise ValueError("Protocol audit supplement output hashes do not match")
+    packages = supplement.get("packages") or {}
+    if not all(packages.get(name) for name in ("opencv", "pillow", "numpy", "pyarrow")):
+        raise ValueError("Protocol audit supplement lacks required runtime versions")
+    if not supplement.get("hostname") or not isinstance(supplement.get("git_dirty"), bool):
+        raise ValueError("Protocol audit supplement lacks hostname or Git dirty state")
     if supplement.get("reuse_qualification") != summary.get("reuse_qualification"):
         raise ValueError("Protocol audit supplement qualification mismatch")
     records = read_jsonl(records_path)
@@ -392,8 +396,17 @@ def load_protocol_audit(directory: Path) -> tuple[dict[str, Any], dict[str, dict
         "reuse_qualification": summary["reuse_qualification"],
         "historical_certification": bool(summary.get("historical_certification")),
         "live_model_files_verified": bool(manifest.get("live_model_files_verified")),
-        "runtime": supplement.get("runtime"),
-        "audit_git": supplement.get("git"),
+        "runtime": {
+            "hostname": supplement["hostname"],
+            "packages": packages,
+            "python_executable": supplement.get("python_executable"),
+            "python_version": supplement.get("python_version"),
+        },
+        "audit_git": {
+            "commit": supplement.get("git_commit"),
+            "dirty": supplement["git_dirty"],
+            "repository": supplement.get("git_repository"),
+        },
     }
     return summary, by_video, provenance
 

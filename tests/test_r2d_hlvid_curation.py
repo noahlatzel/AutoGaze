@@ -136,7 +136,7 @@ def test_complete_validated_replay_covers_all_qa_keys(tmp_path):
         "summary_sha256": audit_dir / "summary.json",
         "manifest_sha256": audit_dir / "protocol_runtime_manifest.json",
         "decode_audit_sha256": audit_dir / "decode_audit.jsonl",
-        "supplement_sha256": audit_dir / "audit_supplement.json",
+        "supplement_sha256": audit_dir / "live_runtime_supplement.json",
     }
     for path in audit_files.values():
         path.write_text("{}\n")
@@ -210,5 +210,5 @@ def test_complete_validated_replay_covers_all_qa_keys(tmp_path):
         audit_dir / "summary.json",
         audit_dir / "protocol_runtime_manifest.json",
         audit_dir / "decode_audit.jsonl",
-        audit_dir / "audit_supplement.json",
+        audit_dir / "live_runtime_supplement.json",
     ]

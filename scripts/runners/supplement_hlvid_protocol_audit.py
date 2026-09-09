@@ -42,7 +42,7 @@ def main() -> None:
     parser.add_argument("--repo", type=Path, default=Path(__file__).resolve().parents[2])
     args = parser.parse_args()
 
-    output = args.audit_dir / "audit_supplement.json"
+    output = args.audit_dir / "live_runtime_supplement.json"
     if output.exists():
         raise FileExistsError(f"Refusing to replace audit supplement: {output}")
     paths = {
@@ -70,10 +70,28 @@ def main() -> None:
     import pyarrow
     from PIL import __version__ as pillow_version
 
+    current_git = git_state(args.repo)
     supplement = {
         "schema_version": 1,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "run_id": args.audit_dir.name,
+        "hostname": platform.node(),
+        "packages": {
+            "opencv": cv2.__version__,
+            "pillow": pillow_version,
+            "numpy": numpy.__version__,
+            "pyarrow": pyarrow.__version__,
+        },
+        "python_executable": sys.executable,
+        "python_version": sys.version,
+        "git_commit": current_git["commit"],
+        "git_dirty": current_git["dirty"],
+        "git_repository": current_git["repository"],
+        "audit_output_hashes": {
+            "protocol_runtime_manifest_sha256": sha256_file(paths["protocol_runtime_manifest"]),
+            "summary_sha256": sha256_file(paths["summary"]),
+            "decode_audit_jsonl_sha256": sha256_file(paths["decode_audit"]),
+        },
         "runtime": {
             "hostname": platform.node(),
             "python_executable": sys.executable,
@@ -83,7 +101,7 @@ def main() -> None:
             "numpy_version": numpy.__version__,
             "pyarrow_version": pyarrow.__version__,
         },
-        "git": git_state(args.repo),
+        "git": current_git,
         "artifact_hashes": {
             name: {"path": str(path.resolve()), "sha256": sha256_file(path)}
             for name, path in paths.items()
