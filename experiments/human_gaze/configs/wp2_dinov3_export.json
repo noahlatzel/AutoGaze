@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "population_manifest": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl",
+  "population_sha256": "0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10",
+  "dataset_root": "/storage/user/zverev/datasets/av-gaze-stavis",
+  "policies": {
+    "pretrained_k16": {
+      "checkpoint_dir": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze",
+      "files": {
+        "model.safetensors": "a48e6a83a198368e3798420ff5d5df42af7c0003c9230f85581c39a2ea64e9eb",
+        "config.json": "2bfa48a1f8ac23e67e3477edfd5c439305bdf5fb22dd0130965863bc3e29236b",
+        "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+      }
+    },
+    "human_k16_seed440826": {
+      "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440826_seed540826/checkpoint_latest_gaze",
+      "files": {
+        "model.safetensors": "d008a458e62a15c69a236e4585a248b185343e82c2b6ece205d6638d4578b9ff",
+        "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+      }
+    },
+    "human_k16_seed440827": {
+      "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440827_seed540827/checkpoint_latest_gaze",
+      "files": {
+        "model.safetensors": "669777ee6191c2a01ba1069f3492cb8e75aeaae307bdc5bf895ff13145c4f22a",
+        "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+      }
+    },
+    "human_k16_seed440828": {
+      "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440828_seed540828/checkpoint_latest_gaze",
+      "files": {
+        "model.safetensors": "83cdc62cda40d75d9dedf34134484715f38a984542d1e27e1dd78c9bcfa69596",
+        "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+      }
+    },
+    "human_k16_seed440829": {
+      "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440829_seed540829/checkpoint_latest_gaze",
+      "files": {
+        "model.safetensors": "fe287cc2aaaf84153f277da87103b37c3c7949ce3f66c9ebbedfeeeebc37658d",
+        "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+      }
+    },
+    "human_k16_seed440830": {
+      "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440830_seed540830/checkpoint_latest_gaze",
+      "files": {
+        "model.safetensors": "ec287894d2f77b8fcd6e6fa102460c7b4533a671942dd713506ca8abc6788180",
+        "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+      }
+    },
+    "human_k16_seed440831": {
+      "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440831_seed540831/checkpoint_latest_gaze",
+      "files": {
+        "model.safetensors": "1721a2175adc3fbf95e2ad293736e80345ac4c89f1d2e3c514f4acd5261a7781",
+        "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+      }
+    }
+  }
+}
