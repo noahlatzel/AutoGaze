@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
@@ -23,6 +24,9 @@ def fixture(policy_kind="center16"):
         else list(range(69, 85))
     )
     record = {
+        "schema_version": 1,
+        "example_key": "question-zero-key",
+        "question_id": 0,
         "compatibility_key": "identity",
         "measurement_origin": "original_forward",
         "decode": {
@@ -61,9 +65,12 @@ def fixture(policy_kind="center16"):
 
 def test_center16_preflight_accepts_exact_tile_local_actions():
     summary, records = fixture()
-    result = MODULE.validate(summary, records, "center16")
+    result = MODULE.validate(
+        summary, records, "center16", admission_record_sha256="admission"
+    )
     assert result["status"] == "pass"
     assert result["expanded_context_length"] == 48_478
+    assert result["question_id"] == 0
 
 
 def test_center16_preflight_rejects_global_or_reordered_static_selection():
@@ -75,3 +82,22 @@ def test_center16_preflight_rejects_global_or_reordered_static_selection():
         )
     with pytest.raises(ValueError, match="frozen STAViS"):
         MODULE.validate(summary, records, "center16")
+
+
+def test_preflight_selects_question_zero_from_a_larger_resumed_run(tmp_path):
+    summary, records = fixture()
+    records["completed"]["later"] = {
+        **records["completed"]["example"],
+        "example_key": "later-key",
+        "question_id": 7,
+    }
+    summary["num_examples"] = 8
+    result = MODULE.validate(summary, records, "center16")
+    attestation = tmp_path / "preflight_pass.json"
+    MODULE.persist_or_validate_attestation(attestation, result)
+    MODULE.persist_or_validate_attestation(attestation, result)
+    assert json.loads(attestation.read_text()) == result
+
+    changed = {**result, "expanded_context_length": result["expanded_context_length"] + 1}
+    with pytest.raises(ValueError, match="differs"):
+        MODULE.persist_or_validate_attestation(attestation, changed)

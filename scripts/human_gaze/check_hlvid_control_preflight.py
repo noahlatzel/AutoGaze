@@ -4,11 +4,14 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
+import tempfile
 from pathlib import Path
 
 from autogaze.human_gaze.coverage import center_order
-from scripts.runners.hlvid_evidence import load_resume_state
+from scripts.runners.hlvid_evidence import fingerprint, load_resume_state
 
 
 CENTER16_ACTION_IDS = [69 + int(cell) for cell in center_order(14)[:16]]
@@ -19,16 +22,28 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--summary", type=Path, required=True)
     parser.add_argument("--evidence-dir", type=Path, required=True)
     parser.add_argument("--policy-kind", choices=("pretrained", "center16"), required=True)
+    parser.add_argument("--attestation", type=Path, required=True)
+    parser.add_argument("--admission-record", type=Path, required=True)
     return parser.parse_args()
 
 
-def validate(summary: dict, records: dict, policy_kind: str) -> dict:
-    if summary.get("num_examples") != 1:
-        raise ValueError("Preflight must contain exactly one completed answer")
+def validate(
+    summary: dict,
+    records: dict,
+    policy_kind: str,
+    *,
+    admission_record_sha256: str | None = None,
+) -> dict:
     compatibility_key = summary.get("compatibility_key")
-    completed = list(records["completed"].values())
-    if len(completed) != 1 or not compatibility_key:
-        raise ValueError("Preflight evidence must contain exactly one durable completion")
+    if not compatibility_key:
+        raise ValueError("Preflight summary lacks a compatibility key")
+    completed = [
+        record
+        for record in records["completed"].values()
+        if int(record.get("question_id", -1)) == 0
+    ]
+    if len(completed) != 1:
+        raise ValueError("Preflight evidence must contain one durable completion for question 0")
     record = completed[0]
     if record["compatibility_key"] != compatibility_key:
         raise ValueError("Summary and evidence compatibility keys differ")
@@ -80,11 +95,38 @@ def validate(summary: dict, records: dict, policy_kind: str) -> dict:
     return {
         "status": "pass",
         "policy_kind": policy_kind,
+        "compatibility_key": compatibility_key,
+        "example_key": record["example_key"],
+        "question_id": 0,
+        "source_completed_record_sha256": fingerprint(record),
+        "admission_record_sha256": admission_record_sha256,
         "expanded_context_length": expanded_context,
         "expanded_visual_tokens": expanded_visual,
         "raw_action_observations": raw["observed_count"],
         "retained_patch_observations": retained["observed_count"],
     }
+
+
+def persist_or_validate_attestation(path: Path, result: dict) -> None:
+    if path.exists():
+        if json.loads(path.read_text()) != result:
+            raise ValueError("Persisted preflight attestation differs from question-0 evidence")
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=".pending-preflight-", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(json.dumps(result, indent=2, sort_keys=True) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.link(temporary, path)
+        directory_fd = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
 
 
 def main() -> None:
@@ -94,7 +136,18 @@ def main() -> None:
     if not compatibility_key:
         raise ValueError("Summary lacks compatibility_key")
     records = load_resume_state(args.evidence_dir, compatibility_key)
-    print(json.dumps(validate(summary, records, args.policy_kind), indent=2, sort_keys=True))
+    admission_record_sha256 = hashlib.sha256(args.admission_record.read_bytes()).hexdigest()
+    admission = json.loads(args.admission_record.read_text())
+    if admission.get("status") != "pass":
+        raise ValueError("Control admission record did not pass")
+    result = validate(
+        summary,
+        records,
+        args.policy_kind,
+        admission_record_sha256=admission_record_sha256,
+    )
+    persist_or_validate_attestation(args.attestation, result)
+    print(json.dumps(result, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":

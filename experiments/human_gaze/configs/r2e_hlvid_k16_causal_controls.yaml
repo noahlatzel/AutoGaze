@@ -27,12 +27,24 @@ models:
     config_sha256: c1651402332c65b764a820b97cc5a8d284245fca38603444c7b174318a38f657
     modeling_sha256: 4ad40894a1c03ada5ce5c7b92c7ffaf658584fe572e1bb54924633d365a6f36a
     processing_sha256: 2b9dbf36a9c69954af7e7cc8478a980e406e91c2ba27b7f2f164167da70dbc9a
+    artifact_hashes:
+      config.json: c1651402332c65b764a820b97cc5a8d284245fca38603444c7b174318a38f657
+      generation_config.json: 55b2b4462aedccc5858edd8d7aa0fa7aebf8a3bf9245f9a095ddeba8a9a1650a
+      modeling_nvila.py: 4ad40894a1c03ada5ce5c7b92c7ffaf658584fe572e1bb54924633d365a6f36a
+      preprocessor_config.json: 84641b6ff10af9951f96e58c2d77049e8ebd1ee9598dab3d55bd156e7b71863b
+      processing_nvila.py: 2b9dbf36a9c69954af7e7cc8478a980e406e91c2ba27b7f2f164167da70dbc9a
+      processor_config.json: 55e1660d43fd7e7b00d9b3bfd7266fa76f698c27e604d8d1fdcf4247401bf554
+      pytorch_model.bin.index.json: b37a2f427b8aab3e25d7373bdf127765a3375d4d52306ecc315d5eba05039549
+      tokenizer_config.json: a78516f2955346a04b72bb7dfa895cef476d190ed312143e2fbfe5d42ae7f13b
     terms: CC-BY-NC-SA-4.0; research and development only
   pretrained_autogaze:
     path: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
     model_safetensors_sha256: a48e6a83a198368e3798420ff5d5df42af7c0003c9230f85581c39a2ea64e9eb
     config_sha256: 2bfa48a1f8ac23e67e3477edfd5c439305bdf5fb22dd0130965863bc3e29236b
     preprocessor_config_sha256: a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3
+    artifact_hashes:
+      config.json: 2bfa48a1f8ac23e67e3477edfd5c439305bdf5fb22dd0130965863bc3e29236b
+      preprocessor_config.json: a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3
     mode: eval
 protocol:
   protocol_id: hlvid_nvila_mtv48_uniform128_thumbnail64_v1
@@ -93,6 +105,13 @@ analysis:
   deterministic_control_seed_uncertainty: not applicable
   claim_boundary: descriptive and setting-specific; no causal superiority from incomplete or unmatched arms
 recording:
+  processor_smoke:
+    path: experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/preflight/processor_smoke_224.json
+    report_sha256: 255fa5e4824e45dceebf1954584aae1e1e3c0a048e3cb86be97750e199429397
+    fixture: 16 frames, 8 thumbnails, 224x224, one spatial tile
+    code_sha256:
+      scripts/human_gaze/smoke_hlvid_fixed_budget_processor.py: cfeeda6639cd3da819e91192f98183afd3689b809301c9a9904bddf5525ad10e
+      autogaze/human_gaze/hlvid.py: 2f6894ce6f726d1dcabec31f8b7c1acc86104a48460d11eed353c7a6b8ad4555
   decode_audit_gate:
     shared_audit_only: true
     required_live_runtime_supplement: live_runtime_supplement.json
@@ -105,6 +124,8 @@ recording:
   per_example_actions: true
   per_example_valid_and_padded_patch_counts: true
   per_example_projected_visual_and_total_context_tokens: true
+  process_warmup_state: cold for first generation in each process, warm thereafter
+  video_frame_cache_state: not applicable; frames are decoded again for every question
   timing_boundaries:
     - frame_decode
     - preprocessing_and_acquisition

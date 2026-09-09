@@ -95,11 +95,25 @@ run_evaluator() {
     "$@"
 }
 
-# The first invocation is the bounded generation/plumbing smoke. The second
-# resumes the same append-only run, so question 0 is not generated twice.
-run_evaluator --limit 1
+admission_record="$run_dir/admission_record.json"
+python scripts/human_gaze/check_hlvid_control_admission.py \
+  --config experiments/human_gaze/configs/r2e_hlvid_k16_causal_controls.yaml \
+  --smoke-report experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/preflight/processor_smoke_224.json \
+  --expected-code-commit "$AUTOGAZE_COMMIT" \
+  --output "$admission_record"
+
+# The first invocation is the bounded generation/plumbing smoke. A durable
+# attestation binds question 0 to this run identity. Restarts with more than
+# one completed answer revalidate question 0 from the full evidence directory
+# and never re-enter a one-row evaluator subset.
+preflight_attestation="$run_dir/preflight_pass.json"
+if [[ ! -f "$run_dir/summary.json" ]]; then
+  run_evaluator --limit 1
+fi
 python scripts/human_gaze/check_hlvid_control_preflight.py \
   --summary "$run_dir/summary.json" \
   --evidence-dir "$run_dir/evidence_records" \
-  --policy-kind "$policy_kind"
+  --policy-kind "$policy_kind" \
+  --admission-record "$admission_record" \
+  --attestation "$preflight_attestation"
 run_evaluator

@@ -179,6 +179,8 @@ def load_completed_evidence(
             "post_adaptation_calls": event.get("post_adaptation_calls", []),
             "timing": event.get("timing", {}),
             "cache_state": event.get("cache_state", "unknown"),
+            "process_warmup_state": event.get("process_warmup_state", "unknown"),
+            "video_frame_cache_state": event.get("video_frame_cache_state", "unknown"),
         }
     return answers, telemetry
 
@@ -890,7 +892,7 @@ def main() -> None:
                 if torch.cuda.is_available() and torch.device(target_device).type == "cuda"
                 else None,
             }
-            cache_state = "cold" if generated_in_process == 0 else "warm"
+            process_warmup_state = "cold" if generated_in_process == 0 else "warm"
             completed_record = {
                 **common_record,
                 "state": "completed_answer",
@@ -903,7 +905,9 @@ def main() -> None:
                 "raw_decoder_calls": acquisition["raw_decoder_calls"],
                 "post_adaptation_calls": acquisition["post_adaptation_calls"],
                 "timing": timing,
-                "cache_state": cache_state,
+                "cache_state": "unknown",
+                "process_warmup_state": process_warmup_state,
+                "video_frame_cache_state": "not_applicable_frames_redecoded_each_question",
                 "timing_boundary": (
                     "decode, processor/acquisition, NVILA vision encoder/projector, "
                     "and language prefill/decode measured separately"
@@ -923,7 +927,9 @@ def main() -> None:
                 "raw_decoder_calls": acquisition["raw_decoder_calls"],
                 "post_adaptation_calls": acquisition["post_adaptation_calls"],
                 "timing": timing,
-                "cache_state": cache_state,
+                "cache_state": "unknown",
+                "process_warmup_state": process_warmup_state,
+                "video_frame_cache_state": "not_applicable_frames_redecoded_each_question",
             }
         except Exception as error:
             write_evidence_record(
