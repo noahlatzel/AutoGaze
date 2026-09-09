@@ -183,3 +183,60 @@ def test_code_provenance_uses_the_exporter_repository_root(monkeypatch):
     metadata = bridge._code_provenance()
     assert commands[0][2] == str(bridge.Path(bridge.__file__).resolve().parents[2])
     assert metadata["autogaze_commit"] == "abc123"
+
+
+def compatibility_fixture(*, bias=None, persistent=True):
+    model = torch.nn.Module()
+    model.gazing_model = torch.nn.Module()
+    model.gazing_model.gaze_decoder = torch.nn.Module()
+    decoder = model.gazing_model.gaze_decoder
+    decoder.vocab_size = 4
+    decoder.register_buffer("output_token_logit_bias", torch.zeros(4) if bias is None else bias,
+                            persistent=persistent)
+    loading = {"missing_keys": [bridge.HISTORICAL_ZERO_BIAS], "unexpected_keys": [],
+               "mismatched_keys": [], "error_msgs": []}
+    return model, loading
+
+
+def test_historical_loading_allows_only_verified_zero_without_modifying_buffer():
+    model, loading = compatibility_fixture()
+    bias = model.get_buffer(bridge.HISTORICAL_ZERO_BIAS)
+    before, version = bias.clone(), bias._version
+    report = bridge.verify_checkpoint_loading(model, loading)
+    assert report["accepted_runtime_only_keys"] == [bridge.HISTORICAL_ZERO_BIAS]
+    assert report["max_absolute_value"] == 0.0
+    assert bias._version == version and torch.equal(bias, before)
+    # A fully matching checkpoint remains valid, with no runtime-only allowance.
+    loading["missing_keys"] = []
+    assert bridge.verify_checkpoint_loading(model, loading)["accepted_runtime_only_keys"] == []
+
+
+@pytest.mark.parametrize("defect", ["nonzero", "nan", "missing_buffer", "nonpersistent", "wrong_shape",
+                                         "wrong_dtype", "meta", "other_missing", "unexpected", "mismatched", "error"])
+def test_historical_loading_rejects_every_non_neutral_or_unrelated_mismatch(defect):
+    model, loading = compatibility_fixture()
+    decoder = model.gazing_model.gaze_decoder
+    if defect == "nonzero":
+        decoder.output_token_logit_bias[2] = 1e-20
+    elif defect == "nan":
+        decoder.output_token_logit_bias[2] = float("nan")
+    elif defect == "missing_buffer":
+        del decoder.output_token_logit_bias
+    elif defect == "nonpersistent":
+        decoder._non_persistent_buffers_set.add("output_token_logit_bias")
+    elif defect == "wrong_shape":
+        decoder.output_token_logit_bias = torch.zeros(5)
+    elif defect == "wrong_dtype":
+        decoder.output_token_logit_bias = torch.zeros(4, dtype=torch.int64)
+    elif defect == "meta":
+        decoder.output_token_logit_bias = torch.empty(4, device="meta")
+    elif defect == "other_missing":
+        loading["missing_keys"].append("gazing_model.some_weight")
+    elif defect == "unexpected":
+        loading["unexpected_keys"] = ["unknown.weight"]
+    elif defect == "mismatched":
+        loading["mismatched_keys"] = [("weight", (4,), (5,))]
+    elif defect == "error":
+        loading["error_msgs"] = ["load error"]
+    with pytest.raises(ValueError):
+        bridge.verify_checkpoint_loading(model, loading)

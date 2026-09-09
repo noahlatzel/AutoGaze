@@ -13,7 +13,14 @@ paths and full SHA-256 values for the population and each checkpoint's
 policies are the existing 20k K16 endpoints: base seeds 440826 through 440831,
 with continuation seeds 540826 through 540831. The pretrained policy uses the
 verified `nvidia--AutoGaze` directory. Missing hashes, missing files, changed
-bytes, missing seeds and incomplete model loads block inference. If a checkpoint
+bytes, missing seeds and incomplete model loads block inference. The sole
+historical compatibility allowance is a missing persistent
+`gazing_model.gaze_decoder.output_token_logit_bias` buffer: the runtime buffer
+must exist, match the decoder vocabulary shape, be floating point, finite and
+exactly zero. It is verified without mutation and recorded in policy execution
+metadata. Every other missing, unexpected, mismatched or load-error entry is
+rejected. Verified checkpoint files/hashes and generation settings are unchanged.
+If a checkpoint
 contains `generation_config.json`, add its verified hash to that policy's `files`
 map as well. That file can be loaded implicitly by Transformers.
 
@@ -132,6 +139,13 @@ alignment. Synthetic masks and RGB are test fixtures only.
 Local CPU validation: **36 tests passed in 8.43 seconds**. A separate schema
 round trip passed through the actual DINO benchmark loader using twelve
 synthetic RGB clips and all seven policy names; no neural model was loaded.
+
+The historical-buffer compatibility follow-up has a separate focused safety
+suite for exact-zero acceptance and nonzero/nonfinite, absent, nonpersistent,
+wrong-shape/dtype, meta-device and unrelated loading mismatches. These checks
+use tiny synthetic modules, with no checkpoint inference.
+The focused follow-up passed **12 tests in 8.04 seconds**; unrelated tests were
+not rerun.
 
 Real Linux checkpoint loading and all 1,344 selector frame inputs remain to be
 run. DINO's actual-weight dense/all-true/r0 gate and the encoder measurements

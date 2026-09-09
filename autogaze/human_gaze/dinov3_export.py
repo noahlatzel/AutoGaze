@@ -41,6 +41,7 @@ PRETRAINED_FILES = {
 }
 POLICY_NAMES = ("pretrained_k16", *(f"human_k16_seed{seed}" for seed in HUMAN_MODEL_SHA256))
 REQUIRED_FILES = ("model.safetensors", "config.json", "preprocessor_config.json")
+HISTORICAL_ZERO_BIAS = "gazing_model.gaze_decoder.output_token_logit_bias"
 GENERATION_CONTRACT = {
     "max_gaze_tokens_each_frame": 16, "allowed_token_ids": list(range(69, 265)),
     "allow_eos": False, "min_gaze_tokens_each_frame": 16, "gazing_ratio": None,
@@ -74,6 +75,34 @@ def verify_checkpoint_files(directory: Path, expected: Mapping) -> dict:
             raise ValueError(f"Checkpoint SHA-256 mismatch: {directory / name}")
     return {"checkpoint_dir": str(directory), "files": observed,
             "file_set_sha256": canonical_payload_sha256(observed)}
+
+
+def verify_checkpoint_loading(model: torch.nn.Module, loading: Mapping) -> dict:
+    """Allow only the historical absent logit-bias buffer, verified exactly zero.
+
+    The current decoder registers this persistent buffer, while the frozen
+    historical weights predate it. This check never initializes or changes it.
+    """
+    missing = loading.get("missing_keys", [])
+    if (missing not in ([], [HISTORICAL_ZERO_BIAS])
+            or any(loading.get(key) for key in ("unexpected_keys", "mismatched_keys", "error_msgs"))):
+        raise ValueError(f"Checkpoint did not load exactly apart from the known zero buffer: {loading}")
+    try:
+        bias = model.get_buffer(HISTORICAL_ZERO_BIAS)
+        vocabulary_size = model.gazing_model.gaze_decoder.vocab_size
+    except AttributeError as error:
+        raise ValueError("Historical-checkpoint compatibility buffer is missing or invalid.") from error
+    if (not isinstance(bias, torch.Tensor) or bias.device.type == "meta"
+            or not bias.is_floating_point() or type(vocabulary_size) is not int or vocabulary_size < 1
+            or tuple(bias.shape) != (vocabulary_size,)
+            or HISTORICAL_ZERO_BIAS not in model.state_dict()):
+        raise ValueError("Historical-checkpoint compatibility buffer is missing, nonpersistent or invalid.")
+    if not torch.isfinite(bias).all() or torch.count_nonzero(bias).item() != 0:
+        raise ValueError("Historical-checkpoint compatibility buffer must be finite and exactly zero.")
+    return {"accepted_runtime_only_keys": list(missing), "buffer_name": HISTORICAL_ZERO_BIAS,
+            "buffer_shape": list(bias.shape), "buffer_dtype": str(bias.dtype),
+            "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation",
+            "max_absolute_value": 0.0}
 
 
 def validate_run_config(config: Mapping, *, check_files: bool = True) -> dict:
@@ -289,12 +318,11 @@ def export_policies(config: Mapping, panel_dir: Path, *, device: str = "cuda", b
         verify_checkpoint_files(Path(checked[name]["checkpoint_dir"]), checked[name]["files"])
         model, loading = AutoGaze.from_pretrained(checked[name]["checkpoint_dir"], local_files_only=True,
             use_safetensors=True, torch_dtype=torch.float32, output_loading_info=True)
-        if any(loading.get(key) for key in ("missing_keys", "unexpected_keys", "mismatched_keys", "error_msgs")):
-            raise ValueError(f"{name}: checkpoint did not load exactly: {loading}")
+        compatibility = verify_checkpoint_loading(model, loading)
         model = model.to(target).eval()
         execution = {"attn_mode": model.attn_mode,
                      "generation_autocast": "bfloat16" if model.attn_mode == "flash_attention_2" else None,
-                     "loading_info": loading}
+                     "loading_info": loading, "checkpoint_compatibility": compatibility}
         records, batches = [], []
         torch.cuda.reset_peak_memory_stats(target)
         with (panel_dir / "policies" / f"{name}.progress.jsonl").open("x", encoding="utf-8") as progress:
