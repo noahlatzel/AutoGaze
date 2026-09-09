@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "purpose": "Provenance for the explicitly approved H100-to-A40 replacement of the two serialized K16 causal controls",
+  "observed_at": "2026-09-09T19:04:15+02:00",
+  "user_authorization": {
+    "approval_quote": "Approve, cross-hardware QA comparison is generally acceptable!",
+    "hardware_requirement_quote": "Keep in mind that we just need to have enough VRAM for e.g. HLVID at max tiles video =48 etc.",
+    "approved_scope": "Cancel the wholly unstarted H100 array once and replace it with the same two full-protocol evaluations on the nominal 48-GB-class A40 GRES, serialized at one active task.",
+    "interpretation_boundary": "Comparisons against the six H100-evaluated trained K16 endpoints are descriptive cross-hardware QA. Latency remains hardware-specific; no trained reference is rerun for hardware matching."
+  },
+  "immutable_execution": {
+    "commit": "b795de084001c3a8ef1c147bc850d7764c867cb3",
+    "worktree": "/storage/user/latn/worktrees/autogaze-r2e-k16-controls-b795de0",
+    "tracked_worktree_clean_before_submission": true,
+    "launcher": "experiments/human_gaze/slurm/run_hlvid_nvila_k16_causal_controls.sbatch",
+    "launcher_sha256": "484748d8352f9d7ecde2cbe583345b74f8ed32999541574e9a5130cef9e81c4b",
+    "stored_replacement_batch_script_sha256": "484748d8352f9d7ecde2cbe583345b74f8ed32999541574e9a5130cef9e81c4b",
+    "resolved_config_sha256": "4b6808957c890dde765d6043c2f2f1305082be0fccdd4f796b416236abe64e1a",
+    "evaluator_sha256": "ab2e357fa123a9093dbd1278b629b1500de78857240c8fde1efdead8b9ce1bfd",
+    "admission_checker_sha256": "dc96b2299494af5f2d72b362a6b31c4d7da415128e0a2f8ccf07773a162cbcaa",
+    "preflight_checker_sha256": "3135f8a673e816a2ccb9e46a36a14a3a68ad316d332cd972f07be15846ed7838",
+    "decode_audit_dir": "/home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d"
+  },
+  "frozen_scientific_protocol": {
+    "benchmark": "HLVid official test split",
+    "questions": 268,
+    "videos": 77,
+    "dataset_parquet_sha256": "ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a",
+    "model": "NVILA-8B-HD-Video",
+    "model_precision": "bfloat16",
+    "sampled_frames": 128,
+    "thumbnail_frames": 64,
+    "thumbnail_sampling": "full",
+    "max_tiles_video": 48,
+    "tile_len": 16,
+    "exact_budget": 16,
+    "fine_action_ids": "69-264",
+    "eos": "disabled",
+    "generation": "greedy",
+    "max_new_tokens": 16,
+    "prompt_parser_and_scoring": "unchanged frozen standalone A/B/C/D protocol",
+    "array_task_mapping": {
+      "0": "pretrained_exact_k16",
+      "1": "stavis_center16"
+    },
+    "input_reduction_to_fit_hardware": false,
+    "protected_human_gaze_test_access": false,
+    "full_protocol_first_question_gate": "retained in each real allocation with fail-closed admission, expanded-context checks, and actual OOM detection"
+  },
+  "cancelled_h100_submission": {
+    "array_job_id": "1700678",
+    "requested_gpu": "nvidia_h100_nvl:1",
+    "requested_node": "node21",
+    "state_immediately_before_cancellation": "PENDING",
+    "array_tasks_before_cancellation": ["1700678_0", "1700678_1"],
+    "elapsed_before_cancellation": "00:00:00",
+    "allocation_before_cancellation": null,
+    "restarts": 0,
+    "projected_start_before_cancellation": "2026-09-24T15:00:00+02:00",
+    "slurm_logs_present_before_cancellation": false,
+    "generated_control_outputs_present_before_cancellation": false,
+    "preexisting_file": "outputs/human_gaze/hlvid_nvila/r2e_k16_causal_controls_mtv48/admission_precheck.json",
+    "preexisting_file_role": "pre-submission admission check, not a generated QA answer or allocation preflight",
+    "cancellation_command": "scancel 1700678",
+    "cancelled_at": "2026-09-09T18:59:58+02:00",
+    "state_after_cancellation": "CANCELLED by 18939",
+    "elapsed_after_cancellation": "00:00:00",
+    "active_elements_after_cancellation": 0,
+    "duplicate_evaluation_created": false
+  },
+  "replacement_a40_submission": {
+    "array_job_id": "1701485",
+    "submitted_at": "2026-09-09T19:00:24+02:00",
+    "submission_command": "sbatch --nodelist=node15 --gres=gpu:a40:1 --cpus-per-task=8 --mem=128G --time=1-00:00:00 --array=0-1%1 --export=ALL,AUTOGAZE_WORKTREE=/storage/user/latn/worktrees/autogaze-r2e-k16-controls-b795de0,AUTOGAZE_COMMIT=b795de084001c3a8ef1c147bc850d7764c867cb3,DECODE_AUDIT_DIR=/home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d experiments/human_gaze/slurm/run_hlvid_nvila_k16_causal_controls.sbatch",
+    "submission_warning": "Slurm emitted its advisory 8-CPU-per-GPU ratio warning and explicitly stated there is no penalty; the approved 8-CPU request was preserved.",
+    "scheduler_overrides_at_submission": {
+      "ReqNodeList": "node15",
+      "TresPerNode": "gres/gpu:a40:1",
+      "cpus_per_task": 8,
+      "requested_host_memory": "128G",
+      "time_limit": "1-00:00:00",
+      "array": "0-1%1"
+    },
+    "state_after_submission": "PENDING",
+    "pending_reason_after_submission": "Priority",
+    "projected_start_after_submission": null,
+    "array_task_throttle": 1,
+    "maximum_active_control_allocations": 1,
+    "output_template": "/storage/user/latn/slurm/logs/gaze-hlvid-k16-ctrl-1701485_%a.{out,err}"
+  },
+  "same_a40_node_relaxation": {
+    "rationale": "Node15 is not part of a scientific identity. Typed A40 nodes 15-18 advertise the nominal GPU_MEM:48 class and shared paths; clearing the node pin retains the same A40 class while removing an unnecessary node15 bottleneck.",
+    "precondition": "Both replacement elements resolved individually and remained PENDING with zero runtime.",
+    "commands": [
+      "scontrol update JobId=1701485_0 ReqNodeList=",
+      "scontrol update JobId=1701485_1 ReqNodeList="
+    ],
+    "results": {
+      "1701485_0": {
+        "logical_job_id": "1701485_0",
+        "materialized_raw_job_id": "1701486",
+        "ReqNodeList": null,
+        "state": "PENDING",
+        "reason": "Priority"
+      },
+      "1701485_1": {
+        "logical_job_id": "1701485_1",
+        "materialized_raw_job_id": "1701485",
+        "ReqNodeList": null,
+        "state": "PENDING",
+        "reason": "Priority"
+      }
+    },
+    "unchanged_effective_fields": {
+      "ArrayTaskThrottle": 1,
+      "ReqTRES": "cpu=8,mem=128G,node=1,billing=8,gres/gpu=1,gres/gpu:a40=1",
+      "TresPerNode": "gres/gpu:a40:1",
+      "time_limit": "1-00:00:00",
+      "command": "/storage/user/latn/worktrees/autogaze-r2e-k16-controls-b795de0/experiments/human_gaze/slurm/run_hlvid_nvila_k16_causal_controls.sbatch",
+      "work_dir": "/storage/user/latn/worktrees/autogaze-r2e-k16-controls-b795de0",
+      "exports": "AUTOGAZE_WORKTREE, AUTOGAZE_COMMIT, DECODE_AUDIT_DIR unchanged",
+      "source_inputs_generation_scoring": "unchanged"
+    },
+    "actual_allocation_node_recording": "Required from Slurm accounting and the launcher's nvidia-smi line after each task allocates."
+  },
+  "a40_capacity_evidence": {
+    "typed_scheduler_capacity": {
+      "gpu_model": "NVIDIA A40",
+      "capacity_label": "nominal 48-GB GPU class, not a claim of 48 GiB runtime-visible memory",
+      "slurm_feature": "GPU_MEM:48",
+      "slurm_gres": "VRAM:no_consume:48G",
+      "observed_typed_nodes": ["node15", "node16", "node17", "node18"]
+    },
+    "completed_full_protocol_reference": {
+      "source_job": "1694765",
+      "logical_array_element": "1690935_3",
+      "source_log": "/storage/user/latn/slurm/logs/gaze-r2f-hlvid-1690935_3.out",
+      "node": "node17",
+      "gpu_name": "NVIDIA A40",
+      "device_total_memory_bytes": 47699722240,
+      "device_total_memory_mib": 45490,
+      "device_total_memory_gib": 44.423828125,
+      "slurm_peak_gres_gpumem_raw": "36490M",
+      "slurm_peak_gres_gpumem_mib": 36490,
+      "slurm_peak_gres_gpumem_gib": 35.634765625,
+      "observed_headroom_mib": 9000,
+      "observed_headroom_gib": 8.7890625,
+      "host_MaxRSS_raw": "131296872K",
+      "elapsed": "17:41:39",
+      "exit_code": "0:0",
+      "completed_questions": "268/268",
+      "protocol": "forced-K16, 128 frames, 64 thumbnails, max_tiles_video=48, bfloat16 NVILA",
+      "interpretation": "This is concrete A40 capacity evidence for the complete frozen input protocol. The near-128G host RSS supports retaining the full 128G host-memory request."
+    },
+    "new_control_safeguard": "Each new policy still executes its own real-allocation first-question preflight and fails closed on OOM or protocol mismatch."
+  },
+  "global_admission_ledger": {
+    "approved_ceiling": "3 concurrent Slurm GPU allocations and 384G aggregate requested host memory",
+    "possible_r2f_demand": "up to two A40 tasks and 256G requested host memory from array 1690935",
+    "possible_control_demand": "one serialized A40 task and 128G requested host memory from array 1701485",
+    "replay_job": "1700681",
+    "replay_dependency": "afterok:1690935_*",
+    "replay_overlap_with_r2f": false,
+    "maximum_envelope_before_replay": "3 A40 GPUs and 384G requested host memory",
+    "maximum_envelope_after_r2f_completion": "one control plus one replay = 2 A40 GPUs and 256G requested host memory",
+    "other_user_gpu_allocations_at_submission": 0,
+    "r2f_or_replay_mutated_by_this_replacement": false
+  },
+  "final_scheduler_snapshot": {
+    "observed_at": "2026-09-09T19:04:15+02:00",
+    "old_h100_array": "1700678 CANCELLED, zero runtime, no allocation",
+    "replacement_task_0": "1701485_0 PENDING Priority; no projected start",
+    "replacement_task_1": "1701485_1 PENDING Priority; no projected start",
+    "effective_ReqNodeList": null,
+    "active_control_allocation": false,
+    "preflight_started": false,
+    "concrete_error": null
+  }
+}
