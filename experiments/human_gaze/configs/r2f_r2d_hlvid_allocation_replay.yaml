@@ -26,6 +26,11 @@ protocol:
   legacy_runner_sha256: f7281533b556e508b6c82fc419e66a138d93e151be68932a7a632c8585c6de1e
   legacy_common_sha256: d390fd54b8fca681e2d530c3fb53ee15fdddcb06c379ef86d7720a914949e0b4
   nvila_processor_sha256: 2b9dbf36a9c69954af7e7cc8478a980e406e91c2ba27b7f2f164167da70dbc9a
+  decode_audit: shared_wp0_bundle_required_before_admission
+  decode_audit_supplement: >-
+    required runtime/library/hostname/Git/output-hash provenance with stable
+    example keys for every affected parquet row
+  decode_audit_historical_certification: false
 validation:
   requirement: exact_uninterrupted_variable_processor_observation
   reference_seed: 440826
@@ -35,11 +40,16 @@ validation:
   reference_summary_sha256: 80079a78c783654801038a22e93ad17b4ae93a37e7d87f3e0fbc1a290b829ec3
   reference_results_sha256: 123d834ac786fbeee7bd58403a81bac83b04e138aae08f707e1d4dc3a6e656d6
 resume_contract:
-  unit: unique_video
-  stable_keys: [identity_sha256, replay_key, video_path, question_ids]
-  attempt_states: [started, completed_processor_observation]
-  completed_records: append_only_jsonl
-  compatibility: exact_identity_sha256
+  processor_unit: unique_video
+  evidence_unit: typed_question_id_and_split
+  stable_keys: [compatibility_key, replay_key, hashed_video_key, hashed_example_key]
+  attempt_states: [attempt_started, completed_answer, failed]
+  authoritative_records: immutable_per_event_json
+  jsonl_role: derived_export
+  compatibility: >-
+    inspectable embedded identity covering dataset, QA source, model, processor,
+    checkpoint, sampling, recovery, prompt, generation, parser, and scoring;
+    instrumentation-only code revision is recorded separately
   process_exit_aggregates: never_accepted_without_explicit_question_coverage
 resources_requested:
   scheduler_owner: fixed_k_task_01a05a0a_3c7e_7053_aa24_5069bff7fa96

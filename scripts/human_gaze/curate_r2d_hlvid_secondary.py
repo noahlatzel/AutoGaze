@@ -16,6 +16,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from autogaze.human_gaze.r2d_hlvid import merge_raw_allocations, summarize_raw_allocation
+from scripts.runners.hlvid_evidence import (
+    load_resume_state,
+    stable_example_key,
+    stable_video_key,
+)
 
 SEEDS = (440826, 440827, 440828)
 MODES = ("variable", "forced_k16")
@@ -135,10 +140,10 @@ def load_variable_replay(
         raise ValueError(f"Variable replay protocol mismatch for seed {seed}: {protocol_mismatches}")
 
     results_path = Path(summary["results_jsonl"])
-    attempt_path = Path(summary["attempt_log"])
+    evidence_path = Path(summary["evidence_jsonl"])
     for path, hash_key in (
         (results_path, "results_jsonl_sha256"),
-        (attempt_path, "attempt_log_sha256"),
+        (evidence_path, "evidence_jsonl_sha256"),
     ):
         if not path.is_file() or sha256_file(path) != summary[hash_key]:
             raise ValueError(f"Variable replay artifact/hash mismatch for seed {seed}: {path}")
@@ -153,10 +158,15 @@ def load_variable_replay(
         video = row["video_path"]
         if video in replay_by_video:
             raise ValueError(f"Duplicate variable replay video for seed {seed}: {video}")
-        if row.get("attempt_state") != "completed_processor_observation":
+        if row.get("state") != "completed_processor_observation":
             raise ValueError(f"Incomplete variable replay record for seed {seed}: {video}")
-        if row.get("identity_sha256") != summary.get("identity_sha256"):
+        if row.get("compatibility_key") != summary.get("compatibility_key"):
             raise ValueError(f"Variable replay resume identity mismatch for seed {seed}: {video}")
+        if row.get("video_key") != stable_video_key(video, "test"):
+            raise ValueError(f"Variable replay stable video key mismatch for seed {seed}: {video}")
+        expected_question_keys = [stable_example_key(qid, "test") for qid in row["question_ids"]]
+        if row.get("question_keys") != expected_question_keys:
+            raise ValueError(f"Variable replay stable QA keys mismatch for seed {seed}: {video}")
         if sorted(row["question_ids"]) != sorted(qa_by_video[video]):
             raise ValueError(f"Variable replay QA-key mismatch for seed {seed}: {video}")
         if int(row["question_count"]) != len(qa_by_video[video]):
@@ -171,7 +181,57 @@ def load_variable_replay(
         raise ValueError(f"Variable replay aggregate mismatch for seed {seed}")
     if summarize_raw_allocation(recomputed_raw) != summary["weighted_allocation_statistics"]:
         raise ValueError(f"Variable replay summary mismatch for seed {seed}")
-    return summary, [summary_path, results_path, attempt_path]
+    evidence = load_resume_state(evidence_path, summary["compatibility_key"])
+    if len(evidence["completed"]) != EXPECTED_PROTOCOL["num_examples"]:
+        raise ValueError(f"Variable replay durable QA evidence is incomplete for seed {seed}")
+    qa_by_key = {stable_example_key(int(row["question_id"]), "test"): row for row in qa_rows}
+    if set(evidence["completed"]) != set(qa_by_key):
+        raise ValueError(f"Variable replay durable QA key set mismatch for seed {seed}")
+    for example_key, record in evidence["completed"].items():
+        qa_row = qa_by_key[example_key]
+        if record.get("video_key") != stable_video_key(qa_row["video_path"], "test"):
+            raise ValueError(f"Variable replay evidence video key mismatch for seed {seed}")
+        if record.get("measurement_origin") != "processor_replay":
+            raise ValueError(f"Variable replay measurement origin mismatch for seed {seed}")
+        if record.get("answer", {}).get("source_row") != qa_row:
+            raise ValueError(f"Variable replay did not preserve the durable QA row for seed {seed}")
+        for counter_name in (
+            "decoder_spatial_actions",
+            "retained_patches",
+            "expanded_visual_tokens",
+            "expanded_context_tokens",
+        ):
+            counter = record.get("counters", {}).get(counter_name) or {}
+            if counter.get("availability") != "complete" or counter.get("observed_sum") is None:
+                raise ValueError(
+                    f"Variable replay counter {counter_name} is incomplete for seed {seed}"
+                )
+    counters = summary.get("counters") or {}
+    for counter_name in (
+        "decoder_spatial_actions",
+        "retained_patches",
+        "expanded_visual_tokens",
+        "expanded_context_tokens",
+    ):
+        counter = counters.get(counter_name) or {}
+        if (
+            counter.get("availability") != "complete"
+            or int(counter.get("observed_count", -1)) <= 0
+            or counter.get("observed_sum") is None
+        ):
+            raise ValueError(f"Variable replay summary counter {counter_name} is incomplete for seed {seed}")
+    audit = summary.get("protocol_audit") or {}
+    audit_dir = Path(audit.get("directory", ""))
+    audit_paths = [
+        (audit_dir / "summary.json", "summary_sha256"),
+        (audit_dir / "protocol_runtime_manifest.json", "manifest_sha256"),
+        (audit_dir / "decode_audit.jsonl", "decode_audit_sha256"),
+        (audit_dir / "audit_supplement.json", "supplement_sha256"),
+    ]
+    for path, hash_key in audit_paths:
+        if not path.is_file() or sha256_file(path) != audit.get(hash_key):
+            raise ValueError(f"Variable replay protocol-audit artifact mismatch for seed {seed}: {path}")
+    return summary, [summary_path, results_path, evidence_path, *(path for path, _ in audit_paths)]
 
 
 def bootstrap_delta(per_video: dict[tuple[int, str], dict[str, float]], video_ids: list[str]) -> dict:
@@ -279,7 +339,7 @@ def main() -> None:
                     "statistics": replay["weighted_allocation_statistics"],
                     "mean_visual_tokens": replay["visual_tokens"]["mean"],
                     "mean_expanded_context_tokens": replay["expanded_context_tokens"]["mean"],
-                    "replay_identity_sha256": replay["identity_sha256"],
+                    "replay_compatibility_key": replay["compatibility_key"],
                 }
             else:
                 allocation_by_arm[(seed, mode)] = {

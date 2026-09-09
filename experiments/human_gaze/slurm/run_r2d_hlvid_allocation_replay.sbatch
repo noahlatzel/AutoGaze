@@ -15,6 +15,7 @@ set -euo pipefail
 worktree="${R2F_REPLAY_WORKTREE:?Set R2F_REPLAY_WORKTREE to the immutable AutoGaze checkout}"
 code_commit="${R2F_REPLAY_CODE_COMMIT:?Set R2F_REPLAY_CODE_COMMIT to the immutable commit}"
 run_id="${R2F_REPLAY_RUN_ID:?Set R2F_REPLAY_RUN_ID to the allocation-replay run ID}"
+protocol_audit_dir="${R2F_PROTOCOL_AUDIT_DIR:?Set R2F_PROTOCOL_AUDIT_DIR to the accepted shared WP0 audit bundle}"
 output_root="${R2F_REPLAY_OUTPUT_ROOT:-/storage/user/latn/artifacts/autogaze-r2f}"
 heavy_root=/storage/user/latn/worktrees/autogaze-r2d-variable-budget
 reference_summary=/storage/user/latn/artifacts/autogaze-r2f/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535/preflight/seed440826_variable/summary.json
@@ -56,6 +57,7 @@ for base_seed in 440826 440827 440828; do
   checkpoint="$heavy_root/outputs/human_gaze/grpo/r2d_variable_k16_stable_base${base_seed}_seed${training_seed}/checkpoint_latest_gaze"
   calibration="$heavy_root/outputs/human_gaze/diagnostics/r2d_variable_k16_stable_base${base_seed}_seed${training_seed}/variable_budget_val.json"
   output_dir="$output_root/$run_id/replays/seed${base_seed}_variable"
+  qa_results="$output_root/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535/rollouts/seed${base_seed}_variable/results.jsonl"
   mkdir -p "$output_dir"
   python scripts/human_gaze/replay_r2d_hlvid_allocation.py \
     --r2d-mode variable \
@@ -74,10 +76,14 @@ for base_seed in 440826 440827 440828; do
     --num-video-frames-thumbnail 64 \
     --max-tiles-video 48 \
     --max-batch-size-autogaze 16 \
+    --qa-results "$qa_results" \
+    --protocol-audit-dir "$protocol_audit_dir" \
+    --evidence-records-dir "$output_dir/evidence_records" \
+    --evidence-output "$output_dir/evidence.jsonl" \
+    --video-records-dir "$output_dir/video_records" \
     --expected-code-commit "$code_commit" \
     --resume \
     --output "$output_dir/results.jsonl" \
     --summary-output "$output_dir/summary.json" \
-    --attempt-log "$output_dir/attempts.jsonl" \
     "${validation_args[@]}"
 done

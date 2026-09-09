@@ -60,9 +60,11 @@ def test_complete_validated_replay_covers_all_qa_keys(tmp_path):
             {
                 "video_path": video,
                 "question_ids": question_ids,
+                "question_keys": [MODULE.stable_example_key(qid, "test") for qid in question_ids],
                 "question_count": count,
-                "attempt_state": "completed_processor_observation",
-                "identity_sha256": "identity",
+                "state": "completed_processor_observation",
+                "compatibility_key": "identity",
+                "video_key": MODULE.stable_video_key(video, "test"),
                 "allocation_raw": {
                     "schema_version": 1,
                     "model_calls": 1,
@@ -92,8 +94,52 @@ def test_complete_validated_replay_covers_all_qa_keys(tmp_path):
     replay_dir.mkdir()
     results = replay_dir / "results.jsonl"
     results.write_text("".join(json.dumps(row) + "\n" for row in replay_rows))
-    attempts = replay_dir / "attempts.jsonl"
-    attempts.write_text(json.dumps({"attempt_state": "completed_processor_observation"}) + "\n")
+    evidence = replay_dir / "evidence.jsonl"
+    complete_counter = {
+        "availability": "complete",
+        "observed_count": 1,
+        "expected_observations": 1,
+        "observed_sum": 1,
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "unit": "count",
+        "source": "processor_replay",
+    }
+    evidence_rows = []
+    for row in qa_rows:
+        evidence_rows.append(
+            {
+                "schema_version": 1,
+                "example_key": MODULE.stable_example_key(row["question_id"], "test"),
+                "video_key": MODULE.stable_video_key(row["video_path"], "test"),
+                "attempt_id": f"attempt-{row['question_id']}",
+                "compatibility_key": "identity",
+                "state": "completed_answer",
+                "measurement_origin": "processor_replay",
+                "answer": {"source_row": row},
+                "counters": {
+                    name: dict(complete_counter)
+                    for name in (
+                        "decoder_spatial_actions",
+                        "retained_patches",
+                        "expanded_visual_tokens",
+                        "expanded_context_tokens",
+                    )
+                },
+            }
+        )
+    evidence.write_text("".join(json.dumps(row) + "\n" for row in evidence_rows))
+    audit_dir = tmp_path / "protocol_audit"
+    audit_dir.mkdir()
+    audit_files = {
+        "summary_sha256": audit_dir / "summary.json",
+        "manifest_sha256": audit_dir / "protocol_runtime_manifest.json",
+        "decode_audit_sha256": audit_dir / "decode_audit.jsonl",
+        "supplement_sha256": audit_dir / "audit_supplement.json",
+    }
+    for path in audit_files.values():
+        path.write_text("{}\n")
     weighted = MODULE.merge_raw_allocations(
         (row["allocation_raw"], row["question_count"]) for row in replay_rows
     )
@@ -105,7 +151,7 @@ def test_complete_validated_replay_covers_all_qa_keys(tmp_path):
         "record_type": "r2d_hlvid_allocation_replay_summary",
         "status": "complete",
         "nvila_generation_calls": 0,
-        "identity_sha256": "identity",
+        "compatibility_key": "identity",
         "checkpoint": {"model_sha256": "model", "config_sha256": "config"},
         "calibration": {"sha256": "calibration"},
         "protocol": dict(MODULE.EXPECTED_PROTOCOL),
@@ -122,10 +168,23 @@ def test_complete_validated_replay_covers_all_qa_keys(tmp_path):
         },
         "weighted_allocation_raw": weighted,
         "weighted_allocation_statistics": MODULE.summarize_raw_allocation(weighted),
+        "counters": {
+            name: dict(complete_counter)
+            for name in (
+                "decoder_spatial_actions",
+                "retained_patches",
+                "expanded_visual_tokens",
+                "expanded_context_tokens",
+            )
+        },
         "results_jsonl": str(results),
         "results_jsonl_sha256": MODULE.sha256_file(results),
-        "attempt_log": str(attempts),
-        "attempt_log_sha256": MODULE.sha256_file(attempts),
+        "evidence_jsonl": str(evidence),
+        "evidence_jsonl_sha256": MODULE.sha256_file(evidence),
+        "protocol_audit": {
+            "directory": str(audit_dir),
+            **{name: MODULE.sha256_file(path) for name, path in audit_files.items()},
+        },
     }
     (replay_dir / "summary.json").write_text(json.dumps(summary))
     adapter = {
@@ -144,4 +203,12 @@ def test_complete_validated_replay_covers_all_qa_keys(tmp_path):
     assert loaded["weighted_allocation_statistics"]["decoder"][
         "spatial_actions_per_frame_mean"
     ] == 4.0
-    assert paths == [replay_dir / "summary.json", results, attempts]
+    assert paths == [
+        replay_dir / "summary.json",
+        results,
+        evidence,
+        audit_dir / "summary.json",
+        audit_dir / "protocol_runtime_manifest.json",
+        audit_dir / "decode_audit.jsonl",
+        audit_dir / "audit_supplement.json",
+    ]

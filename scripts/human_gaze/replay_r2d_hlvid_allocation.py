@@ -14,10 +14,13 @@ import argparse
 import gc
 import hashlib
 import json
+import os
 import subprocess
 import sys
+import tempfile
 import time
 from collections import OrderedDict
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -40,6 +43,16 @@ from scripts.human_gaze.evaluate_hlvid_nvila_r2d import (
     sha256_file,
     validate_calibration,
     validate_checkpoint,
+)
+from scripts.runners.hlvid_evidence import (
+    canonical_json,
+    export_evidence_jsonl,
+    fingerprint,
+    load_resume_state,
+    resume_compatibility_key,
+    stable_example_key,
+    stable_video_key,
+    write_evidence_record,
 )
 
 
@@ -68,22 +81,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--num-video-frames-thumbnail", type=int, default=64)
     parser.add_argument("--max-tiles-video", type=int, default=48)
     parser.add_argument("--max-batch-size-autogaze", type=int, default=16)
+    parser.add_argument("--qa-results", type=Path, required=True)
+    parser.add_argument("--protocol-audit-dir", type=Path, required=True)
+    parser.add_argument("--evidence-records-dir", type=Path, required=True)
+    parser.add_argument("--evidence-output", type=Path, required=True)
+    parser.add_argument("--video-records-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--summary-output", type=Path, required=True)
-    parser.add_argument("--attempt-log", type=Path, required=True)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--limit-videos", type=int)
     parser.add_argument("--validation-reference-summary", type=Path)
     parser.add_argument("--validated-replay-summary", type=Path)
     parser.add_argument("--expected-code-commit", required=True)
     return parser.parse_args()
-
-
-def append_jsonl(path: Path, record: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a") as handle:
-        handle.write(json.dumps(record, sort_keys=True) + "\n")
-        handle.flush()
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -94,7 +104,7 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def completed_replay_by_video(
-    records: list[dict[str, Any]], expected_identity_sha256: str
+    records: list[dict[str, Any]], expected_compatibility_key: str
 ) -> dict[str, dict[str, Any]]:
     """Validate completed records before resume skipping or aggregation."""
 
@@ -103,12 +113,57 @@ def completed_replay_by_video(
         video = record["video_path"]
         if video in completed:
             raise ValueError(f"Duplicate completed replay video: {video}")
-        if record.get("identity_sha256") != expected_identity_sha256:
+        if record.get("compatibility_key") != expected_compatibility_key:
             raise ValueError(f"Resume identity mismatch for completed video: {video}")
-        if record.get("attempt_state") != "completed_processor_observation":
+        if record.get("state") != "completed_processor_observation":
             raise ValueError(f"Non-complete record found in completed replay output: {video}")
         completed[video] = record
     return completed
+
+
+def write_atomic_json(path: Path, value: dict[str, Any]) -> None:
+    """Publish one immutable replay observation without replacing an event."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        raise FileExistsError(f"Refusing to replace immutable replay record: {path}")
+    fd, temporary = tempfile.mkstemp(prefix=".pending-", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(canonical_json(value) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.link(temporary, path)
+        directory_fd = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
+
+
+def read_video_records(directory: Path) -> list[dict[str, Any]]:
+    if not directory.is_dir():
+        return []
+    return [json.loads(path.read_text()) for path in sorted(directory.glob("*.json"))]
+
+
+def export_video_records(directory: Path, output: Path) -> Path:
+    records = read_video_records(directory)
+    records.sort(key=lambda row: row["video_path"])
+    output.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=".pending-export-", dir=output.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+            for record in records:
+                handle.write(canonical_json(record) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, output)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
+    return output
 
 
 def git_execution(repo_root: Path, expected_commit: str) -> dict[str, Any]:
@@ -199,6 +254,189 @@ def context_records(processor, rows: list[dict], visual_tokens: int) -> list[dic
             }
         )
     return records
+
+
+def raw_counter(
+    *,
+    observed_count: int,
+    observed_sum: int | float,
+    minimum: int | float | None,
+    maximum: int | float | None,
+    unit: str,
+    source: str = "processor_replay",
+) -> dict[str, Any]:
+    """Express additive adapter totals in the shared WP0 counter schema."""
+
+    if observed_count < 0:
+        raise ValueError("Counter observations must be nonnegative")
+    if observed_count == 0 and (minimum is not None or maximum is not None):
+        raise ValueError("Empty counters cannot have extrema")
+    return {
+        "availability": "complete",
+        "observed_count": int(observed_count),
+        "expected_observations": int(observed_count),
+        "observed_sum": observed_sum,
+        "mean": observed_sum / observed_count if observed_count else None,
+        "min": minimum,
+        "max": maximum,
+        "unit": unit,
+        "source": source,
+    }
+
+
+def evidence_counters(raw: dict[str, Any], visual_tokens: int, context_tokens: int) -> dict[str, Any]:
+    decoder = raw["decoder"]
+    post = raw["post_resolution_adaptation"]
+    return {
+        "decoder_spatial_actions": raw_counter(
+            observed_count=int(decoder["frame_observations"]),
+            observed_sum=int(decoder["spatial_actions_sum"]),
+            minimum=decoder["spatial_actions_min"],
+            maximum=decoder["spatial_actions_max"],
+            unit="actions_per_frame_observation",
+        ),
+        "decoder_valid_action_tokens": raw_counter(
+            observed_count=int(decoder["frame_observations"]),
+            observed_sum=int(decoder["valid_action_tokens"]),
+            minimum=None,
+            maximum=None,
+            unit="tokens_per_frame_observation",
+        ),
+        "decoder_padded_slots": raw_counter(
+            observed_count=int(decoder["frame_observations"]),
+            observed_sum=int(decoder["padded_position_slots"]),
+            minimum=None,
+            maximum=None,
+            unit="slots_per_frame_observation",
+        ),
+        "decoder_eos_actions": raw_counter(
+            observed_count=int(decoder["frame_observations"]),
+            observed_sum=int(decoder["eos_actions"]),
+            minimum=None,
+            maximum=None,
+            unit="eos_per_frame_observation",
+        ),
+        "retained_patches": raw_counter(
+            observed_count=int(post["frame_observations"]),
+            observed_sum=int(post["retained_patches_sum"]),
+            minimum=post["retained_patches_min"],
+            maximum=post["retained_patches_max"],
+            unit="patches_per_frame_observation",
+        ),
+        "post_adaptation_padded_slots": raw_counter(
+            observed_count=int(post["frame_observations"]),
+            observed_sum=int(post["padded_position_slots"]),
+            minimum=None,
+            maximum=None,
+            unit="slots_per_frame_observation",
+        ),
+        "expanded_visual_tokens": raw_counter(
+            observed_count=1,
+            observed_sum=int(visual_tokens),
+            minimum=int(visual_tokens),
+            maximum=int(visual_tokens),
+            unit="tokens_per_question",
+        ),
+        "expanded_context_tokens": raw_counter(
+            observed_count=1,
+            observed_sum=int(context_tokens),
+            minimum=int(context_tokens),
+            maximum=int(context_tokens),
+            unit="tokens_per_question",
+        ),
+    }
+
+
+def load_protocol_audit(directory: Path) -> tuple[dict[str, Any], dict[str, dict[str, Any]], dict[str, Any]]:
+    summary_path = directory / "summary.json"
+    manifest_path = directory / "protocol_runtime_manifest.json"
+    records_path = directory / "decode_audit.jsonl"
+    supplement_path = directory / "audit_supplement.json"
+    for path in (summary_path, manifest_path, records_path, supplement_path):
+        if not path.is_file():
+            raise FileNotFoundError(f"Protocol audit artifact is missing: {path}")
+    summary = json.loads(summary_path.read_text())
+    manifest = json.loads(manifest_path.read_text())
+    supplement = json.loads(supplement_path.read_text())
+    if manifest.get("dataset_sha256") != EXPECTED_DATASET_SHA256:
+        raise ValueError("Protocol audit dataset identity mismatch")
+    if manifest.get("legacy_loader_sha256") != EXPECTED_RUNNER_SHA256:
+        raise ValueError("Protocol audit legacy-loader identity mismatch")
+    if manifest.get("protocol", {}).get("num_video_frames") != 128:
+        raise ValueError("Protocol audit did not use the frozen 128-frame grid")
+    if summary.get("reuse_qualification") != "no_current_requested_decode_failures":
+        raise ValueError(
+            "Protocol audit requires affected-subset inspection before replay: "
+            f"{summary.get('affected_question_rows')}"
+        )
+    supplement_hashes = supplement.get("artifact_hashes") or {}
+    for name, path in (
+        ("summary", summary_path),
+        ("protocol_runtime_manifest", manifest_path),
+        ("decode_audit", records_path),
+    ):
+        if supplement_hashes.get(name, {}).get("sha256") != sha256_file(path):
+            raise ValueError(f"Protocol audit supplement hash mismatch: {name}")
+    if supplement.get("reuse_qualification") != summary.get("reuse_qualification"):
+        raise ValueError("Protocol audit supplement qualification mismatch")
+    records = read_jsonl(records_path)
+    by_video = {str(record["manifest_path"]): record for record in records}
+    if len(by_video) != len(records) or len(by_video) != int(summary.get("video_count", -1)):
+        raise ValueError("Protocol audit video coverage is incomplete or duplicated")
+    provenance = {
+        "directory": str(directory.resolve()),
+        "summary_sha256": sha256_file(summary_path),
+        "manifest_sha256": sha256_file(manifest_path),
+        "decode_audit_sha256": sha256_file(records_path),
+        "supplement_sha256": sha256_file(supplement_path),
+        "reuse_qualification": summary["reuse_qualification"],
+        "historical_certification": bool(summary.get("historical_certification")),
+        "live_model_files_verified": bool(manifest.get("live_model_files_verified")),
+        "runtime": supplement.get("runtime"),
+        "audit_git": supplement.get("git"),
+    }
+    return summary, by_video, provenance
+
+
+def load_complete_qa_results(path: Path, expected_rows: list[dict[str, Any]]) -> dict[int, dict[str, Any]]:
+    qa_rows = read_jsonl(path)
+    expected_ids = [int(row["question_id"]) for row in expected_rows]
+    actual_ids = [int(row["question_id"]) for row in qa_rows]
+    if actual_ids != expected_ids:
+        raise ValueError("Allocation replay requires the complete ordered durable 268-row QA stream")
+    by_id = {int(row["question_id"]): row for row in qa_rows}
+    if len(by_id) != len(qa_rows):
+        raise ValueError("QA results contain duplicate question IDs")
+    for source in expected_rows:
+        result = by_id[int(source["question_id"])]
+        if str(result.get("video_path")) != str(source["video_path"]):
+            raise ValueError("QA result video identity differs from the benchmark row")
+    return by_id
+
+
+def small_model_file_manifest(model_path: Path) -> dict[str, str]:
+    """Hash the executable model/processor metadata without rehashing weight shards."""
+
+    names = (
+        "added_tokens.json",
+        "chat_template.jinja",
+        "config.json",
+        "configuration_nvila.py",
+        "generation_config.json",
+        "merges.txt",
+        "modeling_nvila.py",
+        "preprocessor_config.json",
+        "processing_nvila.py",
+        "processor_config.json",
+        "pytorch_model.bin.index.json",
+        "special_tokens_map.json",
+        "tokenizer_config.json",
+        "vocab.json",
+    )
+    missing = [name for name in names if not (model_path / name).is_file()]
+    if missing:
+        raise FileNotFoundError(f"NVILA runtime identity files are missing: {missing}")
+    return {name: sha256_file(model_path / name) for name in names}
 
 
 def legacy_comparable_stats(stats: dict[str, Any]) -> dict[str, Any]:
@@ -340,6 +578,8 @@ def main() -> None:
     rows = runner.load_rows(args.dataset_root)
     if len(rows) != ESTABLISHED_PROTOCOL["num_examples"]:
         raise ValueError("Expected the complete 268-question HLVid benchmark")
+    qa_by_id = load_complete_qa_results(args.qa_results, rows)
+    _, audit_by_video, protocol_audit = load_protocol_audit(args.protocol_audit_dir)
     rows_by_video: OrderedDict[str, list[dict]] = OrderedDict()
     for row in rows:
         rows_by_video.setdefault(str(row["video_path"]), []).append(row)
@@ -356,10 +596,43 @@ def main() -> None:
         "legacy_runner_sha256": EXPECTED_RUNNER_SHA256,
         "legacy_common_sha256": EXPECTED_COMMON_SHA256,
         "processor_source_sha256": sha256_file(args.model_path / "processing_nvila.py"),
+        "nvila_runtime_files": small_model_file_manifest(args.model_path),
+        "protocol_audit_identity": {
+            key: protocol_audit[key]
+            for key in (
+                "summary_sha256",
+                "manifest_sha256",
+                "decode_audit_sha256",
+                "supplement_sha256",
+                "reuse_qualification",
+                "runtime",
+            )
+        },
         "allocation_scope": "one_question_agnostic_processor_call_per_unique_video_weighted_by_question_count",
         "nvila_generation_calls": 0,
+        "processor_arguments": {
+            "gazing_ratio_tile": [0.2] + [0.06] * 15,
+            "gazing_ratio_thumbnail": 1,
+            "task_loss_requirement_tile": 0.6,
+            "task_loss_requirement_thumbnail": None,
+            "max_batch_size_autogaze": args.max_batch_size_autogaze,
+        },
+        "prompt_template": "<video_token>\\n\\nQuestion: {question}",
+        "generation": {"performed": False, "source_qa_runner_sha256": EXPECTED_RUNNER_SHA256},
+        "parser_and_scoring": {
+            "implementation_sha256": EXPECTED_COMMON_SHA256,
+            "metric": ESTABLISHED_PROTOCOL["metric"],
+        },
+        "recovery": {
+            "resolution_adapter": "NVILA processing_nvila.py",
+            "decoder_action_ids": [69, 264],
+            "eos_action_id": 265,
+            "variable_min_spatial_actions": 4,
+            "variable_max_generation_tokens": 36,
+            "forced_spatial_actions": 16,
+        },
     }
-    identity = {
+    compatibility_identity = {
         "schema_version": SCHEMA_VERSION,
         "base_seed": args.base_seed,
         "training_seed": args.training_seed,
@@ -367,16 +640,25 @@ def main() -> None:
         "checkpoint": checkpoint,
         "calibration": calibration,
         "protocol": protocol_identity,
-        "execution": execution,
+        "qa_source": {
+            "run_id": "20260901-0156_r2f-r2d-hlvid-secondary_ecf1535",
+            "results_jsonl_sha256": sha256_file(args.qa_results),
+        },
     }
-    identity_sha256 = hashlib.sha256(
-        json.dumps(identity, sort_keys=True, separators=(",", ":")).encode()
-    ).hexdigest()
+    compatibility_key = resume_compatibility_key(compatibility_identity)
 
-    if args.output.exists() and not args.resume:
-        raise FileExistsError(f"Refusing to overwrite existing replay output: {args.output}")
-    existing = read_jsonl(args.output) if args.resume else []
-    existing_by_video = completed_replay_by_video(existing, identity_sha256)
+    replay_paths = (
+        args.evidence_records_dir,
+        args.evidence_output,
+        args.video_records_dir,
+        args.output,
+        args.summary_output,
+    )
+    if not args.resume and any(path.exists() for path in replay_paths):
+        raise FileExistsError("Refusing to overwrite existing allocation-replay evidence")
+    existing = read_video_records(args.video_records_dir) if args.resume else []
+    existing_by_video = completed_replay_by_video(existing, compatibility_key)
+    resume_state = load_resume_state(args.evidence_records_dir, compatibility_key)
 
     processor = runner.AutoProcessor.from_pretrained(
         args.model_path,
@@ -404,26 +686,36 @@ def main() -> None:
         video_rows = rows_by_video[video]
         video_path = args.dataset_root / "videos" / video
         video_sha256 = sha256_file(video_path)
+        video_key = stable_video_key(video, "test")
+        question_keys = [stable_example_key(int(row["question_id"]), "test") for row in video_rows]
         stable_key_payload = {
-            "identity_sha256": identity_sha256,
+            "compatibility_key": compatibility_key,
             "video_path": video,
             "video_sha256": video_sha256,
         }
-        replay_key = hashlib.sha256(
-            json.dumps(stable_key_payload, sort_keys=True, separators=(",", ":")).encode()
-        ).hexdigest()
-        attempt = {
-            "schema_version": SCHEMA_VERSION,
-            "replay_key": replay_key,
-            "identity_sha256": identity_sha256,
-            "video_path": video,
-            "video_key": f"hlvid:test:video:{Path(video).as_posix()}",
-            "question_ids": [int(row["question_id"]) for row in video_rows],
-            "question_keys": [f"hlvid:test:{str(row['question_id']).strip()}" for row in video_rows],
-            "attempt_state": "started",
-            "started_at_unix": time.time(),
-        }
-        append_jsonl(args.attempt_log, attempt)
+        replay_key = fingerprint(stable_key_payload)
+        attempt_id = fingerprint(
+            {"replay_key": replay_key, "started_time_ns": time.time_ns(), "pid": os.getpid()}
+        )
+        for row, example_key in zip(video_rows, question_keys):
+            if example_key in resume_state["completed"]:
+                continue
+            write_evidence_record(
+                args.evidence_records_dir,
+                {
+                    "schema_version": SCHEMA_VERSION,
+                    "example_key": example_key,
+                    "video_key": video_key,
+                    "attempt_id": attempt_id,
+                    "compatibility_key": compatibility_key,
+                    "state": "attempt_started",
+                    "question_id": int(row["question_id"]),
+                    "question_index": int(row["question_id"]),
+                    "split": "test",
+                    "recorded_at": datetime.now(timezone.utc).isoformat(),
+                    "measurement_origin": "processor_replay",
+                },
+            )
 
         started = time.perf_counter()
         decodable_count, source_indices = decodable_uniform_indices(video_path, args.num_video_frames)
@@ -431,6 +723,15 @@ def main() -> None:
         if len(frames) != args.num_video_frames:
             raise ValueError(f"Legacy loader did not return {args.num_video_frames} frames for {video}")
         frames_sha256 = frame_content_sha256(frames)
+        decode = audit_by_video.get(video)
+        if decode is None:
+            raise ValueError(f"Protocol audit does not cover replay video: {video}")
+        if not decode.get("decode_usable") or decode.get("legacy_output_substituted"):
+            raise ValueError(f"Protocol audit found a material decode mismatch for replay video: {video}")
+        if decode.get("video_key") != video_key:
+            raise ValueError(f"Protocol audit stable video key differs from the replay key: {video}")
+        if [int(index) for index in decode["intended_indices"]] != source_indices:
+            raise ValueError(f"Replay source-index grid differs from the protocol audit: {video}")
         representative_prompt = f"{video_token}\n\nQuestion: {video_rows[0]['question']}"
         inputs = processor(text=representative_prompt, videos=[frames], return_tensors="pt")
         torch.cuda.synchronize()
@@ -447,30 +748,34 @@ def main() -> None:
             raise ValueError("Independent context reconstruction does not match processor output")
         elapsed = time.perf_counter() - started
         record = {
-            **identity,
-            "identity_sha256": identity_sha256,
+            **compatibility_identity,
+            "compatibility_identity": compatibility_identity,
+            "compatibility_key": compatibility_key,
+            "execution": execution,
             "record_type": "r2d_hlvid_allocation_replay_video",
             "replay_key": replay_key,
-            "attempt_state": "completed_processor_observation",
+            "state": "completed_processor_observation",
             "video_index": video_index,
             "video_path": video,
-            "video_key": f"hlvid:test:video:{Path(video).as_posix()}",
+            "video_key": video_key,
             "video_sha256": video_sha256,
             "question_ids": [int(row["question_id"]) for row in video_rows],
-            "question_keys": [f"hlvid:test:{str(row['question_id']).strip()}" for row in video_rows],
+            "question_keys": question_keys,
             "question_count": len(video_rows),
             "source_frames": {
                 "decodable_frame_count": decodable_count,
                 "requested_source_indices": source_indices,
+                "effective_source_indices": decode["effective_indices"],
                 "legacy_loaded_frame_count": len(frames),
                 "legacy_loaded_frames_sha256": frames_sha256,
+                "protocol_audit_video_key": decode["video_key"],
             },
             "processor_tensors": tensor_structure(inputs),
             "expanded_context_by_question": contexts,
             "visual_tokens_per_question": visual_tokens,
             "allocation_raw": allocation_raw,
             "allocation_summary": allocation_summary,
-            "measurement_source": "replay",
+            "measurement_origin": "processor_replay",
             "processor_replay_wall_seconds": elapsed,
             "nvila_generation_calls": 0,
             "qa_reuse": {
@@ -486,23 +791,70 @@ def main() -> None:
                 ],
             },
         }
-        append_jsonl(args.output, record)
-        append_jsonl(
-            args.attempt_log,
-            {
-                **attempt,
-                "attempt_state": "completed_processor_observation",
-                "completed_at_unix": time.time(),
-                "processor_replay_wall_seconds": elapsed,
-            },
-        )
+        contexts_by_id = {int(context["question_id"]): context for context in contexts}
+        for row, example_key in zip(video_rows, question_keys):
+            if example_key in resume_state["completed"]:
+                continue
+            question_id = int(row["question_id"])
+            context = contexts_by_id[question_id]
+            write_evidence_record(
+                args.evidence_records_dir,
+                {
+                    "schema_version": SCHEMA_VERSION,
+                    "example_key": example_key,
+                    "video_key": video_key,
+                    "attempt_id": attempt_id,
+                    "compatibility_key": compatibility_key,
+                    "state": "completed_answer",
+                    "question_id": question_id,
+                    "question_index": question_id,
+                    "split": "test",
+                    "recorded_at": datetime.now(timezone.utc).isoformat(),
+                    "measurement_origin": "processor_replay",
+                    "answer": {
+                        "source": "existing_durable_qa_jsonl",
+                        "source_row": qa_by_id[question_id],
+                    },
+                    "decode": {
+                        "intended_indices": decode["intended_indices"],
+                        "effective_indices": decode["effective_indices"],
+                        "metadata_count_corrected": bool(decode["metadata_count_corrected"]),
+                        "sampled_read_failure": bool(decode["sampled_read_failure"]),
+                        "legacy_output_substituted": bool(decode["legacy_output_substituted"]),
+                        "decode_usable": bool(decode["decode_usable"]),
+                        "loaded_frames_sha256": frames_sha256,
+                    },
+                    "counters": evidence_counters(
+                        allocation_raw,
+                        visual_tokens,
+                        int(context["expanded_input_tokens"]),
+                    ),
+                    "context": {
+                        "tokenizer_input_length": None,
+                        "expanded_visual_tokens": visual_tokens,
+                        "expanded_context_length": int(context["expanded_input_tokens"]),
+                        "generated_tokens": None,
+                        "measurement_source": "processor_replay_model_boundary",
+                    },
+                    "raw_decoder_calls": [allocation_raw["decoder"]],
+                    "post_adaptation_calls": [allocation_raw["post_resolution_adaptation"]],
+                    "cache_state": "mixed",
+                    "timing_boundary": "video_decode_plus_autogaze_processor_without_nvila_generation",
+                    "processor_replay_wall_seconds_for_shared_video": elapsed,
+                    "video_observation_key": replay_key,
+                    "compatibility_identity": compatibility_identity,
+                },
+            )
+        video_record_path = args.video_records_dir / f"{video_key}.json"
+        write_atomic_json(video_record_path, record)
         existing_by_video[video] = record
+        resume_state = load_resume_state(args.evidence_records_dir, compatibility_key)
         del inputs, frames
         gc.collect()
         torch.cuda.empty_cache()
 
-    completed = read_jsonl(args.output)
-    completed_by_video = completed_replay_by_video(completed, identity_sha256)
+    completed = read_video_records(args.video_records_dir)
+    completed_by_video = completed_replay_by_video(completed, compatibility_key)
     expected_selected = set(selected_videos)
     if set(completed_by_video) != expected_selected:
         missing = sorted(expected_selected - set(completed_by_video))
@@ -518,6 +870,12 @@ def main() -> None:
     )
     if covered_question_ids != expected_question_ids:
         raise ValueError("Replay question keys do not exactly cover the selected HLVid rows")
+    completed_evidence = load_resume_state(args.evidence_records_dir, compatibility_key)["completed"]
+    expected_example_keys = {
+        stable_example_key(question_id, "test") for question_id in expected_question_ids
+    }
+    if set(completed_evidence) != expected_example_keys:
+        raise ValueError("Durable replay sidecars do not exactly cover the selected HLVid questions")
     merged_raw = merge_raw_allocations(
         (record["allocation_raw"], int(record["question_count"])) for record in completed
     )
@@ -529,9 +887,29 @@ def main() -> None:
     )
     if full_coverage and args.r2d_mode == "variable" and validation.get("status") != "pass":
         raise ValueError("Full variable-budget evidence requires an exact VARIABLE replay validation")
+    export_video_records(args.video_records_dir, args.output)
+    export_evidence_jsonl(
+        args.evidence_records_dir,
+        args.evidence_output,
+        compatibility_key,
+        completed_only=False,
+    )
+    context_values = [
+        context["expanded_input_tokens"]
+        for record in completed
+        for context in record["expanded_context_by_question"]
+    ]
+    visual_values = [
+        int(record["visual_tokens_per_question"])
+        for record in completed
+        for _ in range(int(record["question_count"]))
+    ]
+    weighted_statistics = summarize_raw_allocation(merged_raw)
     summary = {
-        **identity,
-        "identity_sha256": identity_sha256,
+        **compatibility_identity,
+        "compatibility_identity": compatibility_identity,
+        "compatibility_key": compatibility_key,
+        "execution": execution,
         "record_type": "r2d_hlvid_allocation_replay_summary",
         "status": "complete" if full_coverage else "partial_validation",
         "coverage": {
@@ -543,45 +921,64 @@ def main() -> None:
         },
         "validation": validation,
         "weighted_allocation_raw": merged_raw,
-        "weighted_allocation_statistics": summarize_raw_allocation(merged_raw),
+        "weighted_allocation_statistics": weighted_statistics,
+        "counters": {
+            "decoder_spatial_actions": raw_counter(
+                observed_count=merged_raw["decoder"]["frame_observations"],
+                observed_sum=merged_raw["decoder"]["spatial_actions_sum"],
+                minimum=merged_raw["decoder"]["spatial_actions_min"],
+                maximum=merged_raw["decoder"]["spatial_actions_max"],
+                unit="actions_per_frame_observation",
+            ),
+            "retained_patches": raw_counter(
+                observed_count=merged_raw["post_resolution_adaptation"]["frame_observations"],
+                observed_sum=merged_raw["post_resolution_adaptation"]["retained_patches_sum"],
+                minimum=merged_raw["post_resolution_adaptation"]["retained_patches_min"],
+                maximum=merged_raw["post_resolution_adaptation"]["retained_patches_max"],
+                unit="patches_per_frame_observation",
+            ),
+            "expanded_visual_tokens": raw_counter(
+                observed_count=len(visual_values),
+                observed_sum=sum(visual_values),
+                minimum=min(visual_values) if visual_values else None,
+                maximum=max(visual_values) if visual_values else None,
+                unit="tokens_per_question",
+            ),
+            "expanded_context_tokens": raw_counter(
+                observed_count=len(context_values),
+                observed_sum=sum(context_values),
+                minimum=min(context_values) if context_values else None,
+                maximum=max(context_values) if context_values else None,
+                unit="tokens_per_question",
+            ),
+        },
         "expanded_context_tokens": {
-            "observations": len(covered_question_ids),
-            "mean": float(
-                np.mean(
-                    [
-                        context["expanded_input_tokens"]
-                        for record in completed
-                        for context in record["expanded_context_by_question"]
-                    ]
-                )
-            ),
-            "min": min(
-                context["expanded_input_tokens"]
-                for record in completed
-                for context in record["expanded_context_by_question"]
-            ),
-            "max": max(
-                context["expanded_input_tokens"]
-                for record in completed
-                for context in record["expanded_context_by_question"]
-            ),
+            "observed_count": len(context_values),
+            "observed_sum": sum(context_values),
+            "mean": float(np.mean(context_values)),
+            "min": min(context_values),
+            "max": max(context_values),
         },
         "visual_tokens": {
-            "observations": len(covered_question_ids),
-            "mean": float(
-                np.average(
-                    [record["visual_tokens_per_question"] for record in completed],
-                    weights=[record["question_count"] for record in completed],
-                )
-            ),
-            "min": min(record["visual_tokens_per_question"] for record in completed),
-            "max": max(record["visual_tokens_per_question"] for record in completed),
+            "observed_count": len(visual_values),
+            "observed_sum": sum(visual_values),
+            "mean": float(np.mean(visual_values)),
+            "min": min(visual_values),
+            "max": max(visual_values),
         },
         "nvila_generation_calls": 0,
+        "qa_source_artifact": {
+            "path": str(args.qa_results.resolve()),
+            "sha256": sha256_file(args.qa_results),
+        },
         "results_jsonl": str(args.output.resolve()),
         "results_jsonl_sha256": sha256_file(args.output),
-        "attempt_log": str(args.attempt_log.resolve()),
-        "attempt_log_sha256": sha256_file(args.attempt_log),
+        "video_records_dir": str(args.video_records_dir.resolve()),
+        "evidence_records_dir": str(args.evidence_records_dir.resolve()),
+        "evidence_record_count": len(load_resume_state(args.evidence_records_dir, compatibility_key)["records"]),
+        "evidence_jsonl": str(args.evidence_output.resolve()),
+        "evidence_jsonl_sha256": sha256_file(args.evidence_output),
+        "protocol_audit": protocol_audit,
     }
     args.summary_output.parent.mkdir(parents=True, exist_ok=True)
     args.summary_output.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n")
