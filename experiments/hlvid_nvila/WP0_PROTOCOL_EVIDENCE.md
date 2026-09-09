@@ -183,3 +183,17 @@ Tests cover identity changes, interrupted records and JSONL, duplicate completio
 QA-success state handling, variable valid-versus-padded counts, EOS exclusion,
 weighted counter merges with missing prefixes, rounded short-video sampling,
 last-frame correction, failed duplicate retry, and fatal RGB conversion.
+
+## Executed shared audit
+
+The single admitted present-day audit completed on 2026-09-09 under
+`/home/stud/latn/miniconda3/envs/vila-autogaze-eval/bin/python`. Its compact
+bundle is
+`results/20260909-0211_wp0-hlvid-protocol-audit_b98970d/`.
+
+All 77 videos / 268 question rows were covered. No requested-frame read failure,
+metadata-count correction, legacy output substitution, unusable video, or
+affected row was observed; `loader_source_verified=true` and
+`reuse_qualification=no_current_requested_decode_failures`. This is a
+present-day reuse qualification, not retrospective certification of every
+historical decode.
