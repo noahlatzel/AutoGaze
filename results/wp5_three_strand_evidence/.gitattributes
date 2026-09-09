@@ -6,3 +6,6 @@ figures/hlvid_fixed/*.md text eol=lf
 
 # Immutable compact temporal source copies retain exact upstream bytes.
 addenda/temporal/source_bundle/* -text
+
+# Immutable compact DINO copies retain upstream CRLF bytes and recognize that EOL.
+addenda/dino/source_bundle/* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

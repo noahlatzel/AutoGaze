@@ -1,0 +1,43 @@
+arm,group,protocol,mean_video_median_ms_per_frame,min_video_median_ms_per_frame,max_video_median_ms_per_frame,videos,unit,aggregation
+dense,dense,batch16,3.227340588637162,3.2054005714599043,3.240753954742104,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+central_k16,central_k16,batch16,8.108317138976417,8.020968030905351,8.261963579570875,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090900,random,batch16,8.112164548947476,8.044721296755597,8.263492549303919,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090901,random,batch16,8.109730062036155,8.050992706557736,8.187526458641514,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090902,random,batch16,8.124968873744365,8.049439697060734,8.212236978579313,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090903,random,batch16,8.177748376814028,8.063472661888227,8.647664391901344,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090904,random,batch16,8.218474412084712,8.059820713242516,8.667306567076594,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090905,random,batch16,8.14227751349487,8.072308788541704,8.24371026828885,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090906,random,batch16,8.143511423744107,8.064350520726293,8.211325504817069,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090907,random,batch16,8.161376194038894,8.06216144701466,8.62038679770194,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090908,random,batch16,8.15458919047766,8.02920587011613,8.278577239252627,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090909,random,batch16,8.193159766960889,8.036471670493484,8.644420886412263,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090910,random,batch16,8.13161015685182,8.040835673455149,8.268537203548476,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090911,random,batch16,8.163309590599965,8.032549172639847,8.476887713186443,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090912,random,batch16,8.127805514959618,8.053114463109523,8.250357408542186,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090913,random,batch16,8.179482853544565,8.025496936170384,8.620943845016882,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090914,random,batch16,8.137379843295397,8.042487577768043,8.468756161164492,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+random_k16_seed2026090915,random,batch16,8.11469076628176,8.045759721426293,8.225784549722448,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+policy:human_k16_seed440826,human,batch16,8.124653708364349,8.03964218357578,8.40004938072525,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+policy:human_k16_seed440827,human,batch16,8.141168851580005,8.036457962589338,8.344135276274756,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+policy:human_k16_seed440828,human,batch16,8.080215831190193,8.051948010688648,8.134443341987208,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+policy:human_k16_seed440829,human,batch16,8.129922006143412,8.031754376133904,8.30641490756534,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+policy:human_k16_seed440830,human,batch16,8.113492748331433,8.040319458814338,8.252685045590624,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+policy:human_k16_seed440831,human,batch16,8.10163447264737,8.051223092479631,8.170787448761985,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+policy:pretrained_k16,pretrained,batch16,8.1001910972797,8.020272885914892,8.202354452805594,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+tome_r5,tome,batch16,2.997790084918961,2.986582083394751,3.012417262652889,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+tome_r10,tome,batch16,2.513863735657651,2.5051810080185533,2.527344971895218,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+tome_r15,tome,batch16,2.0029754596180283,1.9909797993022949,2.0192516676615924,12,amortized ms/frame from one 16-frame call,equal-source macro of video medians
+dense,dense,batch1,11.022444756235927,10.977406520396471,11.067482992075384,2,ms/frame from sum of 16 independent batch-one calls,mean of the two predeclared video medians; no population interval
+central_k16,central_k16,batch1,8.62960318045225,8.607433584984392,8.651772775920108,2,ms/frame from sum of 16 independent batch-one calls,mean of the two predeclared video medians; no population interval
+random_k16_seed2026090900,random,batch1,8.652773423818871,8.621804823633283,8.68374202400446,2,ms/frame from sum of 16 independent batch-one calls,mean of the two predeclared video medians; no population interval
+policy:human_k16_seed440826,human,batch1,8.470191634842195,8.458442491246387,8.481940778438002,2,ms/frame from sum of 16 independent batch-one calls,mean of the two predeclared video medians; no population interval
+policy:human_k16_seed440827,human,batch1,8.485871730954386,8.484778372803703,8.48696508910507,2,ms/frame from sum of 16 independent batch-one calls,mean of the two predeclared video medians; no population interval
+policy:human_k16_seed440828,human,batch1,8.510281972121447,8.504082128638402,8.516481815604493,2,ms/frame from sum of 16 independent batch-one calls,mean of the two predeclared video medians; no population interval
+policy:human_k16_seed440829,human,batch1,8.520618270267732,8.494513836922124,8.54672270361334,2,ms/frame from sum of 16 independent batch-one calls,mean of the two predeclared video medians; no population interval
+policy:human_k16_seed440830,human,batch1,8.634907033410855,8.501788601279259,8.76802546554245,2,ms/frame from sum of 16 independent batch-one calls,mean of the two predeclared video medians; no population interval
+policy:human_k16_seed440831,human,batch1,8.73129280807916,8.558690606150776,8.903895010007545,2,ms/frame from sum of 16 independent batch-one calls,mean of the two predeclared video medians; no population interval
+policy:pretrained_k16,pretrained,batch1,8.554464773624204,8.539571485016495,8.569358062231913,2,ms/frame from sum of 16 independent batch-one calls,mean of the two predeclared video medians; no population interval
+tome_r5,tome,batch1,22.071840619901195,22.002445708494633,22.141235531307757,2,ms/frame from sum of 16 independent batch-one calls,mean of the two predeclared video medians; no population interval
+tome_r10,tome,batch1,21.94801514269784,21.919262857409194,21.976767427986488,2,ms/frame from sum of 16 independent batch-one calls,mean of the two predeclared video medians; no population interval
+tome_r15,tome,batch1,21.88044622016605,21.81748562725261,21.94340681307949,2,ms/frame from sum of 16 independent batch-one calls,mean of the two predeclared video medians; no population interval
+spatial_block_r15,spatial_block_r15,batch1,33.15347578609362,32.996495719999075,33.31045585218817,2,ms/frame from sum of 16 independent batch-one calls,mean of the two predeclared video medians; no population interval

@@ -25,3 +25,12 @@ Pinned external figure links are permitted. Their regeneration command is run
 in the linked source repository at the recorded commit, into a new output
 directory. Addendum manifests retain exact source hashes and name superseded
 bundles without altering completed source artifacts.
+
+DINO rows add `n_sources`, `n_frames_per_video`, `replicate_kind`,
+`replicate_count`, and `timing_protocol`. Human endpoint counts may populate
+`n_seeds`; random-mask replication belongs in the distinct replicate fields and
+has empty training-seed count. Preserve base-ID to continuation-training-seed
+mapping separately. Frame counts and bootstrap draws are not additional training
+replicates. Deterministic analytical FLOP counts have no uncertainty interval.
+Batch-16 amortized milliseconds/frame and the separate two-video batch-one
+milliseconds/frame share a physical unit but differ in execution and sampling.

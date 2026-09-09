@@ -1,0 +1,168 @@
+{
+  "aggregation": "Recorded per-video means; equal video weights within each source, then equal source weights.",
+  "created_utc": "2026-09-09T02:00:30.547792+00:00",
+  "executed_benchmark_commit": "796ee4f074cf38f2259ead32bf9deb0566331a6e",
+  "input_directory": "C:\\Users\\noahj\\Documents\\Codex\\2026-09-07\\astra-thesis-narrative-audit\\work\\dinov3-final-curation\\results\\wp2_dinov3_bridge\\20260909-0335_wp2-dinov3-bridge_796ee4f",
+  "input_hashes": {
+    "README.md": "a4df670757938570e36d9b8c77a4d2c9c16ce065cc124e76664a5a1de1ab35da",
+    "config.yaml": "3511d3ae395d06061872be8567b0513a397453ae7a7a5884f5b0a28e4bbc4f3d",
+    "inputs/autogaze_export_complete.json": "be0ab28d4870e577f043fe59abefcf932ae0abddaf2980366e66ddde58e3021c",
+    "inputs/autogaze_export_manifest.json": "e0a9c7600e2625b1b5aa5e13c48eae523674519a2e9c5beaf0f8719c5b5dbe39",
+    "inputs/autogaze_export_panel.json": "6234d71fe37ee78c8d772531fc3c6645487bd834fd6c1886e0b32611993e7979",
+    "inputs/autogaze_export_run.json": "401e5802c7569970a264278e33e04944502dc48ebf4bbb25e10fc27b2fea36a7",
+    "inputs/autogaze_rgb_manifest.json": "0de4c10327428ce4a7d86dee328a1d7ba35bea4113fa9f2b56bbdd83a5f2725d",
+    "inputs/timing_panel_selection.json": "c978a3d1117b394ae82ff651e12f5d1c0ef123dd0201c5cf90468293c4be5871",
+    "manifest.json": "963f8ab36c9e8b1776722f0bb119523de35437e31f30c20a6f790755a5a1eed8",
+    "metrics.json": "1bd259fc15f381583731169961a271cb4c0a87c4e26589bbdd9bb27e9270cbc4",
+    "raw/batch1_timing.jsonl": "d967975bbd83c5b81a1dad4e0834afd78335525eb4bcb47d29bba0acf3bde5cb",
+    "raw/clips.csv": "dbfbfc5b2594e53f8fdbc2f006f8d14a887493265121cd6eab8506e5961cfa90",
+    "raw/frames.csv": "98e9cac8700875416de1447512e6363a8e67ed9bcbc56665a113952b45c7a4dd",
+    "raw/measurements.jsonl": "199643a14200d453d8a22c5e986746eb8ad4a512cfcf6748dc65c9722cef0a8c",
+    "raw/run.json": "43de9f45ca9ce554f8a8fca1919e939411a8fec56efe060529e8241f236176b3",
+    "resource_samples.json": "51ae3adfaa60c261b58c68be32310bf12c9f9e7e173050354d0b221c858abe67"
+  },
+  "interval": "Post-hoc descriptive 90% paired source-stratified video bootstrap interval; 10,000 draws, seed 20260909; conditional on the six fixed sources, six observed training endpoints and 16 observed random-mask replicates. Frames, seeds and timing repeats are not resampled.",
+  "outputs": {
+    "README.md": {
+      "bytes": 3695,
+      "sha256": "0954fcc1c672c53ec60999191ea3be75b67bdc06edcf4543f91004ec630e6af4"
+    },
+    "allocator_memory_repeats.csv": {
+      "bytes": 712927,
+      "sha256": "f6d99729b6736a9867ecf02064bc668468edb642f2170f4b295c1ac834125a0c"
+    },
+    "arm_summary.csv": {
+      "bytes": 5087,
+      "sha256": "9d35f1f7f9678cabba313339a06a0161ad59718c53a6d4f8b16be720f68f12d3"
+    },
+    "endpoints.csv": {
+      "bytes": 1328,
+      "sha256": "4d388f5a4b43820b12f6fb6afd7a77693cc6261be32968abcbeda6e50c46a705"
+    },
+    "exporter_observation_summary.csv": {
+      "bytes": 1301,
+      "sha256": "e46741f31890dbcf489fbb86490ed0757e3247e1511fe09316b5c35485f00e39"
+    },
+    "exporter_observations.csv": {
+      "bytes": 30225,
+      "sha256": "85642ffd5010076040e229657dbbfbd4006c42df114ed94114f2a3a6673f3cd3"
+    },
+    "exporter_observations.json": {
+      "bytes": 17351,
+      "sha256": "0651a175a7cd5a5f153444307bdca6a7eec40b6b360ec92733b40d77219ab8cb"
+    },
+    "family_summary.csv": {
+      "bytes": 683,
+      "sha256": "a3a1f1137741e1bbecba55db6ca6f103d23d3524667871fc4c212196c6c52b3f"
+    },
+    "figure_captions.md": {
+      "bytes": 3147,
+      "sha256": "634121e76ddcfac255a472da28ed54fae44bbb76438815246ad7d33b9790a336"
+    },
+    "figures/compute_fidelity.json": {
+      "bytes": 25514,
+      "sha256": "eb9a51b3b9fc70eca72fb2c34808c9fdf2825d669a0135930649454617db0020"
+    },
+    "figures/compute_fidelity.pdf": {
+      "bytes": 36279,
+      "sha256": "e9a21f73a6a23fc93a1ad6c509e597a00aff4d7325de981129bad363a5f19eac"
+    },
+    "figures/compute_fidelity.png": {
+      "bytes": 181803,
+      "sha256": "f9123d61851326734bf51094dd5176a150c47844b1321d3c2fe583a4cc98441f"
+    },
+    "figures/compute_fidelity.svg": {
+      "bytes": 39147,
+      "sha256": "0bf3254e2595e014cbcd36fe67a6100df53e077e58d5bd4ad1091c5321f8a10e"
+    },
+    "figures/k16_paired_differences.json": {
+      "bytes": 3586,
+      "sha256": "c65bc1da5a971a4214d0a1cd7b430d72f0f2deee6ec8f7b5d5361be291f52055"
+    },
+    "figures/k16_paired_differences.pdf": {
+      "bytes": 29592,
+      "sha256": "8d2e98e0cd38a7b8d3f75d8ed9ed2a21961b0b888ee70e16f0afbf8fbf63fc33"
+    },
+    "figures/k16_paired_differences.png": {
+      "bytes": 87455,
+      "sha256": "8e4925cd51984eb7a01c4db1234da5fce1edbc0aeb4946a82cebfe210c6e61de"
+    },
+    "figures/k16_paired_differences.svg": {
+      "bytes": 13482,
+      "sha256": "dd2522339b61da5ce317c1965fff05314dfdcac1d6466a24827a61a090260290"
+    },
+    "figures/latency_protocols.json": {
+      "bytes": 48323,
+      "sha256": "df89ef22d633e8217449327606db6db68bcdd1c07c09c847556b3d9eae4803ad"
+    },
+    "figures/latency_protocols.pdf": {
+      "bytes": 33569,
+      "sha256": "78d938d7bae2b568cca7655551805a90bad3ec5e1f933272b2cfd7f0e6fdae18"
+    },
+    "figures/latency_protocols.png": {
+      "bytes": 198044,
+      "sha256": "fb13b0f36e1d0c31f98dbc1d3a4d8151ad0f9f2c7dcd8be8d0d14dee687f36ce"
+    },
+    "figures/latency_protocols.svg": {
+      "bytes": 45385,
+      "sha256": "3fb2b52720e9c081a4f704804be2a889067523488e0528e084ddf0eacebd6c98"
+    },
+    "paired_differences.csv": {
+      "bytes": 1266,
+      "sha256": "f0f8e7a4a21abf775df43012547ac2d77fbbdc3763e8f85d7dbee0ee4be5144a"
+    },
+    "paired_video_differences.csv": {
+      "bytes": 3737,
+      "sha256": "f5865960d9777a84339f0dbf9cfaa8b4d2d6f1a8ba0f6b0679908f9bdb531467"
+    },
+    "timing_grouped_videos.csv": {
+      "bytes": 7881,
+      "sha256": "3e95c22bb155f3648c7909c88334cf03a3178dc5c041c17cc62d886a2eb5f4c2"
+    },
+    "timing_summary.csv": {
+      "bytes": 7934,
+      "sha256": "7c1dd47d372f0c889626279048ce16923586f06967a3d1a3a19070f60f0f56f5"
+    },
+    "timing_video_repeats_summary.csv": {
+      "bytes": 61755,
+      "sha256": "0d64f9e7619dfd5ed2f847cf8d4cda5b76dcaee5f799018c814861531e7fa829"
+    },
+    "token_contracts.csv": {
+      "bytes": 12868,
+      "sha256": "52f22aa01c2d60fab270e4bdf0bc9d54483c4f4a3efb3c28cc5ae50c2b940713"
+    },
+    "validation.json": {
+      "bytes": 397,
+      "sha256": "4b6f9226457dbc9bcecbf2dded57e457c4e79e182b957d4343a49e5dd7833e5f"
+    },
+    "video_observations.csv": {
+      "bytes": 48347,
+      "sha256": "d8d38cf971e9276d93f0266a06047db65fd37eeb0a7d57e0b16f93fd1fab7d1f"
+    }
+  },
+  "raw_publication_commit": "af16dfe712f9efdeca280169ccc815c5da516a4e",
+  "runtime": {
+    "matplotlib": "3.11.1",
+    "numpy": "2.5.2",
+    "python": "3.12.14"
+  },
+  "schema_version": 1,
+  "scope": {
+    "fidelity_is_downstream_accuracy": false,
+    "local_heavy_data_hash_verification": false,
+    "memory": "PyTorch allocator baseline/peak/increment only; not process-wide GPU memory.",
+    "new_inference": false,
+    "new_measurements": false,
+    "selector_in_latency": false,
+    "single_pass_selector_observations_preserved_separately": true
+  },
+  "source": {
+    "commit": "1b1c8f7a0c692fcbbdbda0e4c440d1f8d159fe98",
+    "status_porcelain": ""
+  },
+  "source_files": {
+    "scripts/curate_gaze_dinov3.py": "3ce8e987cbe2a604ec8addc65e219f8a79472391e4c8162128e1bc8b71e2c3a4",
+    "src/utils/dinov3_evidence.py": "0398796e0e6073e97ef40564fd23877c3e1bd34d687ad2f946b0b08e6498e669"
+  },
+  "status": "complete"
+}

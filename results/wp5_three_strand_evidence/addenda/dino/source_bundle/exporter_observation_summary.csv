@@ -1,0 +1,8 @@
+policy,cold_first_clip_seconds,remaining_clip_count,remaining_11_clips_mean_seconds,policy_run_peak_cuda_allocated_bytes,policy_run_peak_cuda_reserved_bytes,uncertainty
+human_k16_seed440826,0.37872112914919853,11,0.3829855698753487,114165760,155189248,"not estimated; single-pass operational observations, not a latency benchmark"
+human_k16_seed440827,0.3804777190089226,11,0.38557508985765954,114165760,155189248,"not estimated; single-pass operational observations, not a latency benchmark"
+human_k16_seed440828,0.3787017883732915,11,0.3805440389974551,114165760,155189248,"not estimated; single-pass operational observations, not a latency benchmark"
+human_k16_seed440829,0.38958616741001606,11,0.384731041606177,114165760,155189248,"not estimated; single-pass operational observations, not a latency benchmark"
+human_k16_seed440830,0.4082184983417392,11,0.38013050036335533,114165760,155189248,"not estimated; single-pass operational observations, not a latency benchmark"
+human_k16_seed440831,0.3782503940165043,11,0.3830509488894181,114165760,155189248,"not estimated; single-pass operational observations, not a latency benchmark"
+pretrained_k16,3.9296217216178775,11,0.3935247532684695,113036800,155189248,"not estimated; single-pass operational observations, not a latency benchmark"

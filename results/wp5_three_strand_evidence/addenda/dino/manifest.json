@@ -1,0 +1,435 @@
+{
+  "schema_version": 1,
+  "status": "complete_bounded_descriptive_empirical",
+  "repository": "noahlatzel/video-tokenization",
+  "result_commit": "1accff45ea28f1694b090e3d46c64af2d42a8512",
+  "curator_commit": "1b1c8f7a0c692fcbbdbda0e4c440d1f8d159fe98",
+  "curator_dirty": false,
+  "raw_publication_commit": "af16dfe712f9efdeca280169ccc815c5da516a4e",
+  "executed_benchmark_commit": "796ee4f074cf38f2259ead32bf9deb0566331a6e",
+  "exporter_commit": "a8239fce8528335ca147adfd23e246ca06bdc7dc",
+  "result_bundle": "results/wp2_dinov3_curation/20260909_dinov3_curated_v2",
+  "raw_bundle": "results/wp2_dinov3_bridge/20260909-0335_wp2-dinov3-bridge_796ee4f",
+  "result_manifest_sha256": "6dc89c6932288f18a4de473a1503986a1a7a9fa327717ea28484f36dc3803eae",
+  "source_files": {
+    "README.md": {
+      "sha256": "0954fcc1c672c53ec60999191ea3be75b67bdc06edcf4543f91004ec630e6af4",
+      "bytes": 3695,
+      "git_blob": "e32f9cefd4ff5d1c48e4496155e596be9694e1c0",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/README.md"
+    },
+    "allocator_memory_repeats.csv": {
+      "sha256": "f6d99729b6736a9867ecf02064bc668468edb642f2170f4b295c1ac834125a0c",
+      "bytes": 712927,
+      "git_blob": "6737269700e1d71aa423818ec5f0c6adb1e2e00c",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/allocator_memory_repeats.csv"
+    },
+    "arm_summary.csv": {
+      "sha256": "9d35f1f7f9678cabba313339a06a0161ad59718c53a6d4f8b16be720f68f12d3",
+      "bytes": 5087,
+      "git_blob": "87630914a979325ea5f44f209009870ab9295ece",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/arm_summary.csv"
+    },
+    "endpoints.csv": {
+      "sha256": "4d388f5a4b43820b12f6fb6afd7a77693cc6261be32968abcbeda6e50c46a705",
+      "bytes": 1328,
+      "git_blob": "b4e8514c551d168fbe88f320422de0c0958d916a",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/endpoints.csv"
+    },
+    "exporter_observation_summary.csv": {
+      "sha256": "e46741f31890dbcf489fbb86490ed0757e3247e1511fe09316b5c35485f00e39",
+      "bytes": 1301,
+      "git_blob": "974359c5b9c7ab6c4a349a05edcf9bc9446ab4f6",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/exporter_observation_summary.csv"
+    },
+    "exporter_observations.csv": {
+      "sha256": "85642ffd5010076040e229657dbbfbd4006c42df114ed94114f2a3a6673f3cd3",
+      "bytes": 30225,
+      "git_blob": "8d172dfc0b0294fcd9debb76b91f5442700e499b",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/exporter_observations.csv"
+    },
+    "exporter_observations.json": {
+      "sha256": "0651a175a7cd5a5f153444307bdca6a7eec40b6b360ec92733b40d77219ab8cb",
+      "bytes": 17351,
+      "git_blob": "cadb2f8efd584b92a6c09b4c1a27f39ec3b2245e",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/exporter_observations.json"
+    },
+    "family_summary.csv": {
+      "sha256": "a3a1f1137741e1bbecba55db6ca6f103d23d3524667871fc4c212196c6c52b3f",
+      "bytes": 683,
+      "git_blob": "4c5d62e0003eabbd765d9320fcafcf5df456efd0",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/family_summary.csv"
+    },
+    "figure_captions.md": {
+      "sha256": "634121e76ddcfac255a472da28ed54fae44bbb76438815246ad7d33b9790a336",
+      "bytes": 3147,
+      "git_blob": "bd96bf7697fb972e4a48462b270613a5386ed25e",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/figure_captions.md"
+    },
+    "figures/compute_fidelity.json": {
+      "sha256": "eb9a51b3b9fc70eca72fb2c34808c9fdf2825d669a0135930649454617db0020",
+      "bytes": 25514,
+      "git_blob": "ecaca9541c3e63bb031b2cda4ddfa8211c2170f5",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/figures/compute_fidelity.json"
+    },
+    "figures/compute_fidelity.pdf": {
+      "sha256": "e9a21f73a6a23fc93a1ad6c509e597a00aff4d7325de981129bad363a5f19eac",
+      "bytes": 36279,
+      "git_blob": "931e58fcb151ea081f5f5bdb219a78183e99f72b",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/figures/compute_fidelity.pdf"
+    },
+    "figures/compute_fidelity.png": {
+      "sha256": "f9123d61851326734bf51094dd5176a150c47844b1321d3c2fe583a4cc98441f",
+      "bytes": 181803,
+      "git_blob": "7bac9c9ba436debcb9ccf172818610b7f464f059",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/figures/compute_fidelity.png"
+    },
+    "figures/compute_fidelity.svg": {
+      "sha256": "0bf3254e2595e014cbcd36fe67a6100df53e077e58d5bd4ad1091c5321f8a10e",
+      "bytes": 39147,
+      "git_blob": "ece8f3da9c4ac9ed7d1b7392696ac634f33384c5",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/figures/compute_fidelity.svg"
+    },
+    "figures/k16_paired_differences.json": {
+      "sha256": "c65bc1da5a971a4214d0a1cd7b430d72f0f2deee6ec8f7b5d5361be291f52055",
+      "bytes": 3586,
+      "git_blob": "30c8b2f3e6c00249168731345fdac0b587da4e05",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/figures/k16_paired_differences.json"
+    },
+    "figures/k16_paired_differences.pdf": {
+      "sha256": "8d2e98e0cd38a7b8d3f75d8ed9ed2a21961b0b888ee70e16f0afbf8fbf63fc33",
+      "bytes": 29592,
+      "git_blob": "e486c2b7240da19031dd74ca45cb25dc4cff371f",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/figures/k16_paired_differences.pdf"
+    },
+    "figures/k16_paired_differences.png": {
+      "sha256": "8e4925cd51984eb7a01c4db1234da5fce1edbc0aeb4946a82cebfe210c6e61de",
+      "bytes": 87455,
+      "git_blob": "19f4b864f09570e3249d55481c52c7d9a73d488f",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/figures/k16_paired_differences.png"
+    },
+    "figures/k16_paired_differences.svg": {
+      "sha256": "dd2522339b61da5ce317c1965fff05314dfdcac1d6466a24827a61a090260290",
+      "bytes": 13482,
+      "git_blob": "c9807fb318ac267a7ffc2c0436bbcc24948df00d",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/figures/k16_paired_differences.svg"
+    },
+    "figures/latency_protocols.json": {
+      "sha256": "df89ef22d633e8217449327606db6db68bcdd1c07c09c847556b3d9eae4803ad",
+      "bytes": 48323,
+      "git_blob": "870ff53d62b571a1c31800248bd81984bdfb9145",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/figures/latency_protocols.json"
+    },
+    "figures/latency_protocols.pdf": {
+      "sha256": "78d938d7bae2b568cca7655551805a90bad3ec5e1f933272b2cfd7f0e6fdae18",
+      "bytes": 33569,
+      "git_blob": "ba5248d11c6251af0a12441fcec838bb64a6c7ef",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/figures/latency_protocols.pdf"
+    },
+    "figures/latency_protocols.png": {
+      "sha256": "fb13b0f36e1d0c31f98dbc1d3a4d8151ad0f9f2c7dcd8be8d0d14dee687f36ce",
+      "bytes": 198044,
+      "git_blob": "de2e1f67402a8b89590a55fb00e17e4424ac4749",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/figures/latency_protocols.png"
+    },
+    "figures/latency_protocols.svg": {
+      "sha256": "3fb2b52720e9c081a4f704804be2a889067523488e0528e084ddf0eacebd6c98",
+      "bytes": 45385,
+      "git_blob": "cfc2356b09b6ef9a1515a6a254e23ffb74df0371",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/figures/latency_protocols.svg"
+    },
+    "manifest.json": {
+      "sha256": "6dc89c6932288f18a4de473a1503986a1a7a9fa327717ea28484f36dc3803eae",
+      "bytes": 7683,
+      "git_blob": "a05e60eb79566a42abd8a4f260f127b56db9414a",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/manifest.json"
+    },
+    "paired_differences.csv": {
+      "sha256": "f0f8e7a4a21abf775df43012547ac2d77fbbdc3763e8f85d7dbee0ee4be5144a",
+      "bytes": 1266,
+      "git_blob": "ffce42e45fcbfce2f3e1253642070b9cdbede6d5",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/paired_differences.csv"
+    },
+    "paired_video_differences.csv": {
+      "sha256": "f5865960d9777a84339f0dbf9cfaa8b4d2d6f1a8ba0f6b0679908f9bdb531467",
+      "bytes": 3737,
+      "git_blob": "46a5a05ddb6e26fc8740e231980401ff7c351dc3",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/paired_video_differences.csv"
+    },
+    "timing_grouped_videos.csv": {
+      "sha256": "3e95c22bb155f3648c7909c88334cf03a3178dc5c041c17cc62d886a2eb5f4c2",
+      "bytes": 7881,
+      "git_blob": "9f0e10083f8f4d1e07e46aec4e0e331451c2e995",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/timing_grouped_videos.csv"
+    },
+    "timing_summary.csv": {
+      "sha256": "7c1dd47d372f0c889626279048ce16923586f06967a3d1a3a19070f60f0f56f5",
+      "bytes": 7934,
+      "git_blob": "d115ceefe7fdef16d089e9e8e261d9b1a58e38a8",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/timing_summary.csv"
+    },
+    "timing_video_repeats_summary.csv": {
+      "sha256": "0d64f9e7619dfd5ed2f847cf8d4cda5b76dcaee5f799018c814861531e7fa829",
+      "bytes": 61755,
+      "git_blob": "52781e1b8911f1ceee208269626129f22af85026",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/timing_video_repeats_summary.csv"
+    },
+    "token_contracts.csv": {
+      "sha256": "52f22aa01c2d60fab270e4bdf0bc9d54483c4f4a3efb3c28cc5ae50c2b940713",
+      "bytes": 12868,
+      "git_blob": "4c628465fc13a697401e53adda31e0631e03f269",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/token_contracts.csv"
+    },
+    "validation.json": {
+      "sha256": "4b6f9226457dbc9bcecbf2dded57e457c4e79e182b957d4343a49e5dd7833e5f",
+      "bytes": 397,
+      "git_blob": "fe69804772ffbc301098255cb9c2a6d08be726bd",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/validation.json"
+    },
+    "video_observations.csv": {
+      "sha256": "d8d38cf971e9276d93f0266a06047db65fd37eeb0a7d57e0b16f93fd1fab7d1f",
+      "bytes": 48347,
+      "git_blob": "24f68fb12be84fdc827594d9171230efafff3357",
+      "url": "https://github.com/noahlatzel/video-tokenization/blob/1accff45ea28f1694b090e3d46c64af2d42a8512/results/wp2_dinov3_curation/20260909_dinov3_curated_v2/video_observations.csv"
+    }
+  },
+  "copied_source_files": {
+    "README.md": "addenda/dino/source_bundle/README.md",
+    "allocator_memory_repeats.csv": "addenda/dino/source_bundle/allocator_memory_repeats.csv",
+    "arm_summary.csv": "addenda/dino/source_bundle/arm_summary.csv",
+    "endpoints.csv": "addenda/dino/source_bundle/endpoints.csv",
+    "exporter_observation_summary.csv": "addenda/dino/source_bundle/exporter_observation_summary.csv",
+    "exporter_observations.csv": "addenda/dino/source_bundle/exporter_observations.csv",
+    "exporter_observations.json": "addenda/dino/source_bundle/exporter_observations.json",
+    "family_summary.csv": "addenda/dino/source_bundle/family_summary.csv",
+    "figure_captions.md": "addenda/dino/source_bundle/figure_captions.md",
+    "manifest.json": "addenda/dino/source_bundle/manifest.json",
+    "paired_differences.csv": "addenda/dino/source_bundle/paired_differences.csv",
+    "paired_video_differences.csv": "addenda/dino/source_bundle/paired_video_differences.csv",
+    "timing_grouped_videos.csv": "addenda/dino/source_bundle/timing_grouped_videos.csv",
+    "timing_summary.csv": "addenda/dino/source_bundle/timing_summary.csv",
+    "timing_video_repeats_summary.csv": "addenda/dino/source_bundle/timing_video_repeats_summary.csv",
+    "token_contracts.csv": "addenda/dino/source_bundle/token_contracts.csv",
+    "validation.json": "addenda/dino/source_bundle/validation.json",
+    "video_observations.csv": "addenda/dino/source_bundle/video_observations.csv"
+  },
+  "hash_policy": "Exact pinned Git blob bytes; compact source copies disable line-ending conversion.",
+  "raw_input_hashes": {
+    "README.md": "a4df670757938570e36d9b8c77a4d2c9c16ce065cc124e76664a5a1de1ab35da",
+    "config.yaml": "3511d3ae395d06061872be8567b0513a397453ae7a7a5884f5b0a28e4bbc4f3d",
+    "inputs/autogaze_export_complete.json": "be0ab28d4870e577f043fe59abefcf932ae0abddaf2980366e66ddde58e3021c",
+    "inputs/autogaze_export_manifest.json": "e0a9c7600e2625b1b5aa5e13c48eae523674519a2e9c5beaf0f8719c5b5dbe39",
+    "inputs/autogaze_export_panel.json": "6234d71fe37ee78c8d772531fc3c6645487bd834fd6c1886e0b32611993e7979",
+    "inputs/autogaze_export_run.json": "401e5802c7569970a264278e33e04944502dc48ebf4bbb25e10fc27b2fea36a7",
+    "inputs/autogaze_rgb_manifest.json": "0de4c10327428ce4a7d86dee328a1d7ba35bea4113fa9f2b56bbdd83a5f2725d",
+    "inputs/timing_panel_selection.json": "c978a3d1117b394ae82ff651e12f5d1c0ef123dd0201c5cf90468293c4be5871",
+    "manifest.json": "963f8ab36c9e8b1776722f0bb119523de35437e31f30c20a6f790755a5a1eed8",
+    "metrics.json": "1bd259fc15f381583731169961a271cb4c0a87c4e26589bbdd9bb27e9270cbc4",
+    "raw/batch1_timing.jsonl": "d967975bbd83c5b81a1dad4e0834afd78335525eb4bcb47d29bba0acf3bde5cb",
+    "raw/clips.csv": "dbfbfc5b2594e53f8fdbc2f006f8d14a887493265121cd6eab8506e5961cfa90",
+    "raw/frames.csv": "98e9cac8700875416de1447512e6363a8e67ed9bcbc56665a113952b45c7a4dd",
+    "raw/measurements.jsonl": "199643a14200d453d8a22c5e986746eb8ad4a512cfcf6748dc65c9722cef0a8c",
+    "raw/run.json": "43de9f45ca9ce554f8a8fca1919e939411a8fec56efe060529e8241f236176b3",
+    "resource_samples.json": "51ae3adfaa60c261b58c68be32310bf12c9f9e7e173050354d0b221c858abe67"
+  },
+  "executed_repositories": {
+    "video_tokenization": {
+      "commit": "796ee4f074cf38f2259ead32bf9deb0566331a6e",
+      "status_porcelain": ""
+    },
+    "dinov3": {
+      "commit": "f6da84974a483c33391e7c43da71fe94fbe6835d",
+      "status_porcelain": ""
+    },
+    "tome": {
+      "commit": "69ab3fd045b6a3bce9d721009c7cfa56bda34cc7",
+      "status_porcelain": ""
+    }
+  },
+  "panel": {
+    "split": "val",
+    "population_manifest_sha256": "0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10",
+    "videos": 12,
+    "sources": 6,
+    "videos_per_source": 2,
+    "frames_per_video": 16,
+    "selection_salt": "wp2-dinov3-bridge-v1",
+    "uses_outcomes": false
+  },
+  "primary_metric": "dense-reference final normalized CLS cosine distance",
+  "sensitivity_metric": "relative CLS L2 distance",
+  "aggregation": "Recorded means over 16 frames within video; mean of two videos within source; six sources equally. Observed endpoints/mask replicates averaged within video for family comparisons.",
+  "interval": "Post-hoc descriptive 90% paired source-stratified video bootstrap interval; 10,000 draws, seed 20260909; conditional on the six fixed sources, six observed training endpoints and 16 observed random-mask replicates. Frames, seeds and timing repeats are not resampled.",
+  "comparison_count": 3,
+  "comparisons_adjusted_for_multiplicity": false,
+  "posthoc_descriptive": true,
+  "policy_seed_mapping": [
+    {
+      "policy": "human_k16_seed440826",
+      "base_seed": 440826,
+      "continuation_training_seed": 540826,
+      "checkpoint": {
+        "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440826_seed540826/checkpoint_latest_gaze",
+        "file_set_sha256": "12df1759c2d9954e0e6811faa36fbc6446ac5689ea5880a146d156a97190d71b",
+        "files": {
+          "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+          "model.safetensors": "d008a458e62a15c69a236e4585a248b185343e82c2b6ece205d6638d4578b9ff",
+          "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+        }
+      }
+    },
+    {
+      "policy": "human_k16_seed440827",
+      "base_seed": 440827,
+      "continuation_training_seed": 540827,
+      "checkpoint": {
+        "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440827_seed540827/checkpoint_latest_gaze",
+        "file_set_sha256": "4773a72ae5d5ceb8a23f95dbfa6f5c9f0ec1a84ee16ac1a51c7c777aecefd732",
+        "files": {
+          "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+          "model.safetensors": "669777ee6191c2a01ba1069f3492cb8e75aeaae307bdc5bf895ff13145c4f22a",
+          "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+        }
+      }
+    },
+    {
+      "policy": "human_k16_seed440828",
+      "base_seed": 440828,
+      "continuation_training_seed": 540828,
+      "checkpoint": {
+        "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440828_seed540828/checkpoint_latest_gaze",
+        "file_set_sha256": "d80e30081c3403f70c28ee1cc7e1125c6b6c9ffd64156cfe25aa497761d6a53a",
+        "files": {
+          "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+          "model.safetensors": "83cdc62cda40d75d9dedf34134484715f38a984542d1e27e1dd78c9bcfa69596",
+          "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+        }
+      }
+    },
+    {
+      "policy": "human_k16_seed440829",
+      "base_seed": 440829,
+      "continuation_training_seed": 540829,
+      "checkpoint": {
+        "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440829_seed540829/checkpoint_latest_gaze",
+        "file_set_sha256": "22d5f744d813b10efb0b7cf3a76c1b49243709c7b4dec036fd7279aa43ade6cc",
+        "files": {
+          "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+          "model.safetensors": "fe287cc2aaaf84153f277da87103b37c3c7949ce3f66c9ebbedfeeeebc37658d",
+          "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+        }
+      }
+    },
+    {
+      "policy": "human_k16_seed440830",
+      "base_seed": 440830,
+      "continuation_training_seed": 540830,
+      "checkpoint": {
+        "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440830_seed540830/checkpoint_latest_gaze",
+        "file_set_sha256": "d9a90b6195769a74827b082c0152373b4602e5de20d68ceffdad0d5fe190aada",
+        "files": {
+          "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+          "model.safetensors": "ec287894d2f77b8fcd6e6fa102460c7b4533a671942dd713506ca8abc6788180",
+          "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+        }
+      }
+    },
+    {
+      "policy": "human_k16_seed440831",
+      "base_seed": 440831,
+      "continuation_training_seed": 540831,
+      "checkpoint": {
+        "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440831_seed540831/checkpoint_latest_gaze",
+        "file_set_sha256": "cd195d1213dd96f4c69bfce8dd88224baaf05b69acbff2995e3df5374d5cebef",
+        "files": {
+          "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+          "model.safetensors": "1721a2175adc3fbf95e2ad293736e80345ac4c89f1d2e3c514f4acd5261a7781",
+          "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+        }
+      }
+    },
+    {
+      "policy": "pretrained_k16",
+      "base_seed": null,
+      "continuation_training_seed": null,
+      "checkpoint": {
+        "checkpoint_dir": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze",
+        "file_set_sha256": "a976a914c8fb29a8ccd2ffc974cf0192897765b2d8e73ca404c35371f9b39c65",
+        "files": {
+          "config.json": "2bfa48a1f8ac23e67e3477edfd5c439305bdf5fb22dd0130965863bc3e29236b",
+          "model.safetensors": "a48e6a83a198368e3798420ff5d5df42af7c0003c9230f85581c39a2ea64e9eb",
+          "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+        }
+      }
+    }
+  ],
+  "human_base_seed_ids": [
+    440826,
+    440827,
+    440828,
+    440829,
+    440830,
+    440831
+  ],
+  "human_continuation_training_seeds": [
+    540826,
+    540827,
+    540828,
+    540829,
+    540830,
+    540831
+  ],
+  "random_mask_rng_seeds": [
+    2026090900,
+    2026090901,
+    2026090902,
+    2026090903,
+    2026090904,
+    2026090905,
+    2026090906,
+    2026090907,
+    2026090908,
+    2026090909,
+    2026090910,
+    2026090911,
+    2026090912,
+    2026090913,
+    2026090914,
+    2026090915
+  ],
+  "training_endpoints_resampled": false,
+  "mask_seeds_resampled": false,
+  "timing": {
+    "batch16": "Video median of ten 16-frame input calls, divided by 16; equal-source aggregation over 12 videos. K16 uses per-image ragged sequences internally.",
+    "batch1": "For each repeat sum 16 individually synchronized frame forwards, divide by 16; median within video, then mean of two predeclared videos. No population interval.",
+    "batch1_video_ids": [
+      "AVAD/V39_Guitar4",
+      "SumMe/Kids_playing_in_leaves"
+    ],
+    "batch1_random_mask_rng_seed": 2026090900,
+    "warmup": 3,
+    "repeats": 10,
+    "selection_included": false,
+    "small_policy_timing_rankings_supported": false
+  },
+  "analytical_cost": "Encoder and matching dot-product FLOPs remain separate, FMA=2; dense patch embedding paid in every arm; not a complete operator profiler.",
+  "selector_export_observations": {
+    "count": 84,
+    "protocol": "single pass over 12 clips for7 policies; no warmup/repeats; first batch cold",
+    "latency_benchmark": false,
+    "added_to_encoder_latency": false,
+    "timing_scope": "Single execution wall time per batch: normalized RGB already on device, model.generate plus mask construction, CUDA synchronized. No warmup/repetition; first batch is cold. Excludes load/normalization/copy. Not a latency benchmark."
+  },
+  "scope": {
+    "fidelity_is_downstream_accuracy": false,
+    "local_heavy_data_hash_verification": false,
+    "memory": "PyTorch allocator baseline/peak/increment only; not process-wide GPU memory.",
+    "new_inference": false,
+    "new_measurements": false,
+    "selector_in_latency": false,
+    "single_pass_selector_observations_preserved_separately": true
+  },
+  "new_wp5_inference": false,
+  "new_wp5_bootstrap": false,
+  "new_wp5_render": false
+}

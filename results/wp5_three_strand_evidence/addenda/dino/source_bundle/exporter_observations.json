@@ -1,0 +1,593 @@
+{
+  "policies": {
+    "human_k16_seed440826": {
+      "checkpoint": {
+        "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440826_seed540826/checkpoint_latest_gaze",
+        "file_set_sha256": "12df1759c2d9954e0e6811faa36fbc6446ac5689ea5880a146d156a97190d71b",
+        "files": {
+          "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+          "model.safetensors": "d008a458e62a15c69a236e4585a248b185343e82c2b6ece205d6638d4578b9ff",
+          "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+        }
+      },
+      "execution": {
+        "attn_mode": "sdpa",
+        "checkpoint_compatibility": {
+          "accepted_runtime_only_keys": [
+            "gazing_model.gaze_decoder.output_token_logit_bias"
+          ],
+          "buffer_dtype": "torch.float32",
+          "buffer_name": "gazing_model.gaze_decoder.output_token_logit_bias",
+          "buffer_shape": [
+            266
+          ],
+          "max_absolute_value": 0.0,
+          "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation"
+        },
+        "generation_autocast": null,
+        "loading_info": {
+          "error_msgs": [],
+          "mismatched_keys": [],
+          "missing_keys": [
+            "gazing_model.gaze_decoder.output_token_logit_bias"
+          ],
+          "unexpected_keys": []
+        }
+      }
+    },
+    "human_k16_seed440827": {
+      "checkpoint": {
+        "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440827_seed540827/checkpoint_latest_gaze",
+        "file_set_sha256": "4773a72ae5d5ceb8a23f95dbfa6f5c9f0ec1a84ee16ac1a51c7c777aecefd732",
+        "files": {
+          "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+          "model.safetensors": "669777ee6191c2a01ba1069f3492cb8e75aeaae307bdc5bf895ff13145c4f22a",
+          "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+        }
+      },
+      "execution": {
+        "attn_mode": "sdpa",
+        "checkpoint_compatibility": {
+          "accepted_runtime_only_keys": [
+            "gazing_model.gaze_decoder.output_token_logit_bias"
+          ],
+          "buffer_dtype": "torch.float32",
+          "buffer_name": "gazing_model.gaze_decoder.output_token_logit_bias",
+          "buffer_shape": [
+            266
+          ],
+          "max_absolute_value": 0.0,
+          "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation"
+        },
+        "generation_autocast": null,
+        "loading_info": {
+          "error_msgs": [],
+          "mismatched_keys": [],
+          "missing_keys": [
+            "gazing_model.gaze_decoder.output_token_logit_bias"
+          ],
+          "unexpected_keys": []
+        }
+      }
+    },
+    "human_k16_seed440828": {
+      "checkpoint": {
+        "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440828_seed540828/checkpoint_latest_gaze",
+        "file_set_sha256": "d80e30081c3403f70c28ee1cc7e1125c6b6c9ffd64156cfe25aa497761d6a53a",
+        "files": {
+          "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+          "model.safetensors": "83cdc62cda40d75d9dedf34134484715f38a984542d1e27e1dd78c9bcfa69596",
+          "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+        }
+      },
+      "execution": {
+        "attn_mode": "sdpa",
+        "checkpoint_compatibility": {
+          "accepted_runtime_only_keys": [
+            "gazing_model.gaze_decoder.output_token_logit_bias"
+          ],
+          "buffer_dtype": "torch.float32",
+          "buffer_name": "gazing_model.gaze_decoder.output_token_logit_bias",
+          "buffer_shape": [
+            266
+          ],
+          "max_absolute_value": 0.0,
+          "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation"
+        },
+        "generation_autocast": null,
+        "loading_info": {
+          "error_msgs": [],
+          "mismatched_keys": [],
+          "missing_keys": [
+            "gazing_model.gaze_decoder.output_token_logit_bias"
+          ],
+          "unexpected_keys": []
+        }
+      }
+    },
+    "human_k16_seed440829": {
+      "checkpoint": {
+        "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440829_seed540829/checkpoint_latest_gaze",
+        "file_set_sha256": "22d5f744d813b10efb0b7cf3a76c1b49243709c7b4dec036fd7279aa43ade6cc",
+        "files": {
+          "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+          "model.safetensors": "fe287cc2aaaf84153f277da87103b37c3c7949ce3f66c9ebbedfeeeebc37658d",
+          "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+        }
+      },
+      "execution": {
+        "attn_mode": "sdpa",
+        "checkpoint_compatibility": {
+          "accepted_runtime_only_keys": [
+            "gazing_model.gaze_decoder.output_token_logit_bias"
+          ],
+          "buffer_dtype": "torch.float32",
+          "buffer_name": "gazing_model.gaze_decoder.output_token_logit_bias",
+          "buffer_shape": [
+            266
+          ],
+          "max_absolute_value": 0.0,
+          "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation"
+        },
+        "generation_autocast": null,
+        "loading_info": {
+          "error_msgs": [],
+          "mismatched_keys": [],
+          "missing_keys": [
+            "gazing_model.gaze_decoder.output_token_logit_bias"
+          ],
+          "unexpected_keys": []
+        }
+      }
+    },
+    "human_k16_seed440830": {
+      "checkpoint": {
+        "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440830_seed540830/checkpoint_latest_gaze",
+        "file_set_sha256": "d9a90b6195769a74827b082c0152373b4602e5de20d68ceffdad0d5fe190aada",
+        "files": {
+          "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+          "model.safetensors": "ec287894d2f77b8fcd6e6fa102460c7b4533a671942dd713506ca8abc6788180",
+          "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+        }
+      },
+      "execution": {
+        "attn_mode": "sdpa",
+        "checkpoint_compatibility": {
+          "accepted_runtime_only_keys": [
+            "gazing_model.gaze_decoder.output_token_logit_bias"
+          ],
+          "buffer_dtype": "torch.float32",
+          "buffer_name": "gazing_model.gaze_decoder.output_token_logit_bias",
+          "buffer_shape": [
+            266
+          ],
+          "max_absolute_value": 0.0,
+          "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation"
+        },
+        "generation_autocast": null,
+        "loading_info": {
+          "error_msgs": [],
+          "mismatched_keys": [],
+          "missing_keys": [
+            "gazing_model.gaze_decoder.output_token_logit_bias"
+          ],
+          "unexpected_keys": []
+        }
+      }
+    },
+    "human_k16_seed440831": {
+      "checkpoint": {
+        "checkpoint_dir": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440831_seed540831/checkpoint_latest_gaze",
+        "file_set_sha256": "cd195d1213dd96f4c69bfce8dd88224baaf05b69acbff2995e3df5374d5cebef",
+        "files": {
+          "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+          "model.safetensors": "1721a2175adc3fbf95e2ad293736e80345ac4c89f1d2e3c514f4acd5261a7781",
+          "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+        }
+      },
+      "execution": {
+        "attn_mode": "sdpa",
+        "checkpoint_compatibility": {
+          "accepted_runtime_only_keys": [
+            "gazing_model.gaze_decoder.output_token_logit_bias"
+          ],
+          "buffer_dtype": "torch.float32",
+          "buffer_name": "gazing_model.gaze_decoder.output_token_logit_bias",
+          "buffer_shape": [
+            266
+          ],
+          "max_absolute_value": 0.0,
+          "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation"
+        },
+        "generation_autocast": null,
+        "loading_info": {
+          "error_msgs": [],
+          "mismatched_keys": [],
+          "missing_keys": [
+            "gazing_model.gaze_decoder.output_token_logit_bias"
+          ],
+          "unexpected_keys": []
+        }
+      }
+    },
+    "pretrained_k16": {
+      "checkpoint": {
+        "checkpoint_dir": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze",
+        "file_set_sha256": "a976a914c8fb29a8ccd2ffc974cf0192897765b2d8e73ca404c35371f9b39c65",
+        "files": {
+          "config.json": "2bfa48a1f8ac23e67e3477edfd5c439305bdf5fb22dd0130965863bc3e29236b",
+          "model.safetensors": "a48e6a83a198368e3798420ff5d5df42af7c0003c9230f85581c39a2ea64e9eb",
+          "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+        }
+      },
+      "execution": {
+        "attn_mode": "sdpa",
+        "checkpoint_compatibility": {
+          "accepted_runtime_only_keys": [
+            "gazing_model.gaze_decoder.output_token_logit_bias"
+          ],
+          "buffer_dtype": "torch.float32",
+          "buffer_name": "gazing_model.gaze_decoder.output_token_logit_bias",
+          "buffer_shape": [
+            266
+          ],
+          "max_absolute_value": 0.0,
+          "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation"
+        },
+        "generation_autocast": null,
+        "loading_info": {
+          "error_msgs": [],
+          "mismatched_keys": [],
+          "missing_keys": [
+            "gazing_model.gaze_decoder.output_token_logit_bias"
+          ],
+          "unexpected_keys": []
+        }
+      }
+    }
+  },
+  "scope": "Existing single-pass exporter observations only; no timing interval, encoder-time sum or end-to-end claim.",
+  "settings": {
+    "batch_size": 1,
+    "cpu_threads": 2,
+    "cuda_allocator_cap_bytes": 9663676416,
+    "cuda_version": "13.0",
+    "device": "cuda:0",
+    "eval_mode": true,
+    "generation": {
+      "allow_eos": false,
+      "allowed_token_ids": [
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264
+      ],
+      "gazing_ratio": null,
+      "generate_only": true,
+      "max_gaze_tokens_each_frame": 16,
+      "min_gaze_tokens_each_frame": 16,
+      "task_loss_requirement": null,
+      "use_cache": false
+    },
+    "gpu_name": "NVIDIA RTX A2000 12GB",
+    "gpu_total_memory_bytes": 12482117632,
+    "inference_mode": true,
+    "input_dtype": "float32",
+    "normalization": {
+      "human_k16_seed440826": {
+        "do_normalize": true,
+        "do_rescale": true,
+        "geometry": "cached_full_FOV_224x224; processor resize/crop explicitly disabled",
+        "image_mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "image_std": [
+          0.229,
+          0.224,
+          0.225
+        ],
+        "offset": true,
+        "rescale_factor": 0.00784313725490196
+      },
+      "human_k16_seed440827": {
+        "do_normalize": true,
+        "do_rescale": true,
+        "geometry": "cached_full_FOV_224x224; processor resize/crop explicitly disabled",
+        "image_mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "image_std": [
+          0.229,
+          0.224,
+          0.225
+        ],
+        "offset": true,
+        "rescale_factor": 0.00784313725490196
+      },
+      "human_k16_seed440828": {
+        "do_normalize": true,
+        "do_rescale": true,
+        "geometry": "cached_full_FOV_224x224; processor resize/crop explicitly disabled",
+        "image_mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "image_std": [
+          0.229,
+          0.224,
+          0.225
+        ],
+        "offset": true,
+        "rescale_factor": 0.00784313725490196
+      },
+      "human_k16_seed440829": {
+        "do_normalize": true,
+        "do_rescale": true,
+        "geometry": "cached_full_FOV_224x224; processor resize/crop explicitly disabled",
+        "image_mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "image_std": [
+          0.229,
+          0.224,
+          0.225
+        ],
+        "offset": true,
+        "rescale_factor": 0.00784313725490196
+      },
+      "human_k16_seed440830": {
+        "do_normalize": true,
+        "do_rescale": true,
+        "geometry": "cached_full_FOV_224x224; processor resize/crop explicitly disabled",
+        "image_mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "image_std": [
+          0.229,
+          0.224,
+          0.225
+        ],
+        "offset": true,
+        "rescale_factor": 0.00784313725490196
+      },
+      "human_k16_seed440831": {
+        "do_normalize": true,
+        "do_rescale": true,
+        "geometry": "cached_full_FOV_224x224; processor resize/crop explicitly disabled",
+        "image_mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "image_std": [
+          0.229,
+          0.224,
+          0.225
+        ],
+        "offset": true,
+        "rescale_factor": 0.00784313725490196
+      },
+      "pretrained_k16": {
+        "do_normalize": true,
+        "do_rescale": true,
+        "geometry": "cached_full_FOV_224x224; processor resize/crop explicitly disabled",
+        "image_mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "image_std": [
+          0.229,
+          0.224,
+          0.225
+        ],
+        "offset": true,
+        "rescale_factor": 0.00784313725490196
+      }
+    },
+    "num_workers": 0,
+    "parameter_dtype": "float32",
+    "timing_scope": "Single execution wall time per batch: normalized RGB already on device, model.generate plus mask construction, CUDA synchronized. No warmup/repetition; first batch is cold. Excludes load/normalization/copy. Not a latency benchmark."
+  }
+}

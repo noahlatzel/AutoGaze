@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "status": "partial_evidence_and_execution_readiness",
+  "status": "partial_pending_controls_variable_and_replay",
   "scientific_claims_added": true,
   "items": [
     {
@@ -20,11 +20,11 @@
       "id": "dino_benchmark_supplement",
       "repository": "noahlatzel/video-tokenization",
       "repository_resolution": "Published identity and local review reported by parent",
-      "commit": "796ee4f074cf38f2259ead32bf9deb0566331a6e",
+      "commit": "1accff45ea28f1694b090e3d46c64af2d42a8512",
       "commit_reported_by_parent": true,
       "panel_export": "complete as reported by owner",
-      "gpu_results": "execution complete; curation pending",
-      "eligible_for_empirical_claims": false,
+      "gpu_results": "complete; curated published evidence independently verified",
+      "eligible_for_empirical_claims": true,
       "panel_contract": {
         "split": "validation",
         "distinct_videos": 12,
@@ -50,7 +50,15 @@
           7,
           8
         ]
-      }
+      },
+      "executed_benchmark_commit": "796ee4f074cf38f2259ead32bf9deb0566331a6e",
+      "curator_commit": "1b1c8f7a0c692fcbbdbda0e4c440d1f8d159fe98",
+      "raw_publication_commit": "af16dfe712f9efdeca280169ccc815c5da516a4e",
+      "claim_scope": "bounded encoder-fidelity/cost/implementation-timing observations; conditional descriptive intervals",
+      "source_manifest": "addenda/dino/manifest.json",
+      "source_bundle": "results/wp2_dinov3_curation/20260909_dinov3_curated_v2",
+      "verified_curated_output_hashes": 29,
+      "reported_curation_focused_tests_passed": 6
     },
     {
       "id": "dinov3_gaze_panel_exporter",
@@ -66,10 +74,13 @@
         "selection_uses_outcomes": false
       },
       "actual_checkpoint_inference": "complete as reported by owner",
-      "gpu_results": "execution complete; curation pending",
+      "gpu_results": "complete; curated exporter observations preserved separately",
       "eligible_for_empirical_claims": false,
       "reported_core_cpu_tests_passed": 36,
-      "reported_focused_compatibility_tests_passed": 12
+      "reported_focused_compatibility_tests_passed": 12,
+      "claim_scope": "input provenance and single-pass operational observations; not a controlled selector-latency benchmark",
+      "source_manifest": "addenda/dino/manifest.json",
+      "preserved_single_pass_observations": 84
     },
     {
       "id": "temporal_evidence_closure",
@@ -100,15 +111,19 @@
     {
       "id": "conceptual_intervention_figure",
       "owner_thread": "01a07ddb-a693-79f0-a33b-03901d2518c1",
-      "script": "work/figures/make_interventions.py",
+      "script": "https://github.com/noahlatzel/master-thesis/blob/b14792a8c50e614770ad4921d7a9d978571ce075/wiki/project/assets/three-strand-overview/make_interventions.py",
       "main_token_merging_mechanism": "cumulative_tome",
       "supplemental_mechanism": {
         "name": "spatial_block",
         "operation": "merge before attention and restore the grid after each block",
         "is_final_k16": false
       },
-      "status": "available_parent_local_exact_output_paths_pending",
-      "eligible_for_empirical_claims": false
+      "status": "published_source_and_assets_verified",
+      "eligible_for_empirical_claims": false,
+      "repository": "noahlatzel/master-thesis",
+      "commit": "b14792a8c50e614770ad4921d7a9d978571ce075",
+      "source_manifest": "addenda/conceptual/manifest.json",
+      "source_files_verified": 6
     },
     {
       "id": "fixed_k_controls",
