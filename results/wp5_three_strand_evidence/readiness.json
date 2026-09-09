@@ -14,12 +14,11 @@
     },
     {
       "id": "dino_benchmark_supplement",
-      "repository": null,
-      "repository_resolution": "not present in the available AutoGaze GitHub connection",
-      "commit": "9b5ac79cf6f49fb90905602f3b9bbd2cded011e1",
+      "repository": "noahlatzel/video-tokenization",
+      "repository_resolution": "Published identity and local review reported by parent",
+      "commit": "796ee4f074cf38f2259ead32bf9deb0566331a6e",
       "commit_reported_by_parent": true,
-      "reported_cpu_tests_passed": 57,
-      "panel_export": "pending",
+      "panel_export": "GPU inference pending",
       "gpu_results": "pending",
       "eligible_for_empirical_claims": false,
       "panel_contract": {
@@ -29,15 +28,58 @@
         "frames_per_clip": 16,
         "selection_uses_outcomes": false,
         "constraint": "Two sources contain only two validation videos."
+      },
+      "reported_prior_cpu_tests_passed": 57,
+      "reported_focused_central_control_tests_passed": 3,
+      "test_scope": "57 prior core/supplement tests plus 3 focused central-control tests; not a fresh combined 60-test run",
+      "central_k16": {
+        "enabled": true,
+        "rows": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "columns": [
+          5,
+          6,
+          7,
+          8
+        ]
       }
+    },
+    {
+      "id": "dinov3_gaze_panel_exporter",
+      "repository": "noahlatzel/AutoGaze",
+      "commit": "8dbaa3f5dcf60fa7ea58d1a394f4a14f328be7e3",
+      "commit_reported_by_parent": true,
+      "reported_cpu_tests_passed": 36,
+      "implementation_status": "published CPU-tested exporter",
+      "panel_contract": {
+        "split": "validation",
+        "distinct_videos": 12,
+        "videos_per_source": 2,
+        "frames_per_clip": 16,
+        "selection_uses_outcomes": false
+      },
+      "actual_checkpoint_inference": "pending",
+      "gpu_results": "pending",
+      "eligible_for_empirical_claims": false
     },
     {
       "id": "temporal_evidence_closure",
       "owner_thread": "01a0691b-8544-7be0-ba5c-3344adf04982",
-      "source_patch": "/tmp/t0-temporal-evidence-closure.patch",
       "source_table": null,
-      "status": "assigned_pending_verified_handoff",
-      "eligible_for_empirical_claims": false
+      "status": "reviewed_curation_code; compact table and renderer integration pending",
+      "eligible_for_empirical_claims": false,
+      "repository": "noahlatzel/video-frame-selection",
+      "commit": "8c48a81eef2ad0af1db85260fddbddd040629f1f",
+      "commit_reported_by_parent": true,
+      "original_results_status": "historical",
+      "protocol_corrections": [
+        "MTV1 and MTV48 QA resolution contracts remain separate; no equal-frame selection-effect inference across them",
+        "Historical cached frame-feature counts are distinguished from videos and actual encoder executions"
+      ]
     },
     {
       "id": "conceptual_intervention_figure",

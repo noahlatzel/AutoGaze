@@ -17,3 +17,21 @@ Verified inputs currently comprise the complete R2e HLVid fixed-budget gaze eval
 - `addenda/`: preserved study-specific source tables and identities.
 
 Missing values are empty, never zero. Provisional, partial, snapshot, unsupported, missing, and historical-exploratory evidence cannot silently support a final empirical claim.
+
+`seed_id_role` distinguishes base-seed identifiers from continuation training
+seeds. R2d retains its original base IDs in the CSVs; the in-domain addendum
+manifest maps them to the actual training seeds 740826--740828. Deterministic
+Center16 and Prior16 evaluations have no training-seed count, so their
+`n_seeds` fields are empty and explicitly marked inapplicable.
+
+Variable-budget resource rows distinguish the source-balanced mean number of
+fine actions from the mean over pooled validation frames. Neither number is
+measured encoder cost or latency. The source-balanced calibration band is
+`[15.5,16.5]`; R2d's source-balanced mean K is 15.155946 and its pooled frame
+mean K is 14.571282. Both are preserved as historical source observations.
+The dataset hash and seed mapping are attributed to the original R2d
+`verification.json`, linked in the in-domain addendum manifest.
+
+The fixed-budget figure entry awaits integration of a renderer that reads
+compact tables and writes new publication assets. It deliberately provides no
+executable placeholder or command that overwrites a completed experiment bundle.
