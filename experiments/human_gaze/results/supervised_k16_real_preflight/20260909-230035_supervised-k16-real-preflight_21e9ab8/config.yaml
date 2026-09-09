@@ -1,0 +1,54 @@
+schema_version: 1
+kind: non_scientific_real_model_supervised_k16_preflight
+run_id: 20260909-230035_supervised-k16-real-preflight_21e9ab8
+implementation_base_commit: d85c6558bf9e8f02ece1f3516b4709a715ebec63
+execution_commit: 21e9ab8415be7f3515b6ed75539cf12060d42ecc
+comparison_config: experiments/human_gaze/configs/supervised_k16_comparison.yaml
+split: train
+clip_selection: lexicographically_smallest_clip_id_video_id_dataset_index_per_canonical_source
+sources: [AVAD, Coutrot_db1, Coutrot_db2, DIEM, ETMD_av, SumMe]
+model:
+  path: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+  model_safetensors_sha256: a48e6a83a198368e3798420ff5d5df42af7c0003c9230f85581c39a2ea64e9eb
+data:
+  root: /storage/user/zverev/datasets/av-gaze-stavis
+  manifest: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+  manifest_sha256: 0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10
+  cell_mass: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+  cell_mass_sha256: fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8
+input_contract:
+  frames: 16
+  image_size: 224
+  fine_cells: 196
+  exact_k: 16
+  teacher_histories: annotation_mass_sampled_without_replacement
+  trainable: autoregressive_decoder_only
+execution:
+  device: cuda:0
+  microbatch_size: 1
+  data_loader_workers: 0
+  cpu_threads: 2
+  single_rank_ddp: true
+  ddp_backend: nccl
+  find_unused_parameters: false
+  forward_backward_iterations: 6
+  optimizer_updates: 0
+  greedy_validation_input_keys: [video]
+limits:
+  wall_seconds: 1800
+  gpu_allocation_gib: 10
+  process_rss_gib: 8
+command: >-
+  timeout 30m env PYTHONNOUSERSITE=1 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2
+  MKL_NUM_THREADS=2 CUDA_VISIBLE_DEVICES=0
+  /home/stud/latn/miniconda3/envs/vila-autogaze-eval/bin/python
+  scripts/human_gaze/preflight_supervised_k16.py
+  --config experiments/human_gaze/configs/supervised_k16_comparison.yaml
+  --pretrained /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+  --dataset-root /storage/user/zverev/datasets/av-gaze-stavis
+  --manifest /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+  --cell-mass /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+  --output outputs/human_gaze/20260909-230035_supervised-k16-real-preflight_21e9ab8
+  --device cuda:0 --max-clips 6 --cpu-threads 2 --max-gpu-alloc-gib 10
+  --max-rss-gib 8 --deadline-seconds 1800
+

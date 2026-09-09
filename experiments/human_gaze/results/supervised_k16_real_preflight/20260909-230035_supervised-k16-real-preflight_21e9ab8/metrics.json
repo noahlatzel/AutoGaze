@@ -1,0 +1,66 @@
+{
+  "acceptance": {
+    "all_losses_finite": true,
+    "all_six_sources": true,
+    "decoder_only_gradients": true,
+    "fine_only_exact_k16_teacher_and_greedy": true,
+    "label_free_greedy_input_keys": [
+      "video"
+    ],
+    "resource_ceilings_respected": true,
+    "scientific_result": false,
+    "two_or_more_consecutive_single_rank_ddp_backward_iterations": true
+  },
+  "elapsed_seconds": 17.67180633917451,
+  "loss": {
+    "maximum": 5.263539791107178,
+    "mean": 5.060168186823527,
+    "minimum": 4.94895076751709,
+    "per_source": {
+      "AVAD": 4.992274761199951,
+      "Coutrot_db1": 5.058605194091797,
+      "Coutrot_db2": 4.999866962432861,
+      "DIEM": 5.263539791107178,
+      "ETMD_av": 5.097771644592285,
+      "SumMe": 4.94895076751709
+    }
+  },
+  "gradient_l2": {
+    "maximum": 2.284119994294795,
+    "minimum": 1.3798183170757345,
+    "nonfinite_parameter_tensors": 0,
+    "trainable_parameter_tensors_without_gradient": 0,
+    "frozen_parameter_tensors_with_gradient": 0,
+    "zero_gradient_parameter_names": [
+      "gazing_model.gaze_decoder.task_loss_prediction_head.weight"
+    ]
+  },
+  "parameters": {
+    "frozen_numel": 1218240,
+    "frozen_tensors": 9,
+    "trainable_numel": 2040000,
+    "trainable_tensors": 40
+  },
+  "resources": {
+    "gpu_name": "NVIDIA RTX A2000 12GB",
+    "gpu_total_memory_bytes": 12482117632,
+    "peak_gpu_allocated_bytes": 407873536,
+    "peak_gpu_reserved_bytes": 450887680,
+    "peak_process_rss_bytes": 2149191680
+  },
+  "supervised_distribution": {
+    "exhausted_target_rows": 0,
+    "maximum_absolute_row_sum_error": 4.86894066509258e-7,
+    "shape_per_clip": [
+      1,
+      256,
+      196
+    ],
+    "valid_target_rows": 1536
+  },
+  "supervised_iteration_seconds": {
+    "mean": 1.8924547446270783,
+    "total": 11.35472846776247
+  }
+}
+
