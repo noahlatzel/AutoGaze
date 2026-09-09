@@ -1,25 +1,66 @@
 # Implementation and evidence readiness
 
-These records describe implementation and test readiness only. They are not scientific findings and add no empirical metric rows.
+The overall WP5 package is partial. Completed curated evidence and implementation
+readiness have distinct claim scopes; execution completion alone adds no pending
+numerical result to metrics.csv.
 
-## HLVid runtime and decode audit
+## Completed protocol audit (WP0)
 
-AutoGaze commit `38fffdac34cee682f87a75f12af05dc6e118ac17` is published and was verified through the GitHub commit API. The parent reports 23 CPU tests passing. Actual Linux decode-audit outputs remain pending, so the implementation cannot yet certify fresh runtime behavior or historical reads.
+The present-day requested-decode audit covered all 77 videos and 268 questions.
+No requested-read failures, unusable videos, metadata-count corrections, output
+substitutions or affected question rows were observed. All five compact source
+files are hash-verified through addenda/wp0_decode/manifest.json. Historical
+certification remains false. Protocol settings are not live model-execution evidence.
 
-## DINO benchmark supplement
+## Completed historical temporal curation (WP1)
 
-Published `noahlatzel/video-tokenization` commit `796ee4f074cf38f2259ead32bf9deb0566331a6e` includes the fixed central K16 control in the main panel and separate batch-one timing panel. Validation comprises 57 prior core/supplement CPU tests plus three focused central-control tests; this is not a fresh combined 60-test run. Actual panel export, checkpoint equivalence checks and GPU results remain pending.
+Published noahlatzel/video-frame-selection commit
+`9b26feb3f53c9c2bce131f02c8bdf363b00bf315` contains the corrected bundle executed
+by curator `50c1949819efbaf25338c0f3d62c5180ff581847`. The independent audit verified
+29 output hashes (30 files including the manifest), all 18 paired contrasts and
+all four figure triplets. No new inference was run. WP5 preserves compact source
+bytes and links published figures; it does not rerun bootstrap or rendering.
+The superseded bundle is identified in the addendum and wrapper `b14792a`.
 
-The outcome-independent DINO panel is corrected to 12 distinct validation videos, exactly two per source. Two sources have only two validation videos, so a larger distinct-video quota would be impossible without changing the population. The panel contains all 16 frames per selected clip.
+The source declares no primary metric. Video-macro QA is the curated comparison
+axis; question-micro QA is retained separately. Costs are question means, and
+bootstrap RNG seeds are not training seeds. Learned MTV1 QA contrasts against
+MTV48 references are confounded; fixed-schedule collapse is supported directly
+by the trajectories. Exposed thresholds remain exploratory and historical
+mixed/cache-stratified timing cannot establish controlled speedup. T0d execution
+and curation lineage is preserved without relabeling distortion as QA.
 
-Published AutoGaze exporter commit `8dbaa3f5dcf60fa7ea58d1a394f4a14f328be7e3` passed 36 focused CPU tests. It freezes panel identities and RGB hashes before selector inference, validates all seven checkpoint identities and exports fine cells against those cached RGB bytes. These checks establish implementation readiness; actual checkpoint inference and the completed RGB/mask export remain pending.
+## DINO execution complete, curation pending (WP2)
 
-## Temporal evidence
+The owner reports completion of the real-weight experiment at video-tokenization
+`796ee4f074cf38f2259ead32bf9deb0566331a6e`, including cumulative ToMe, temporary
+spatial_block and central K16. Its outcome-independent validation panel contains
+12 distinct videos, two per source, with 16 frames per clip. Final numerical
+curation, claim review and the DINO addendum remain pending.
 
-Temporal curation is assigned to task `01a0691b-8544-7be0-ba5c-3344adf04982`. Reviewed `noahlatzel/video-frame-selection` commit `50c1949819efbaf25338c0f3d62c5180ff581847` keeps MTV1 and MTV48 QA resolution contracts separate and corrects cached frame-feature count interpretation. The parent reports eight focused tests passing, including four-figure rendering coverage. The original temporal results remain historical. Raw-artifact reaggregation and a new immutable result bundle remain pending; no new temporal metric or figure is promoted by this implementation-readiness update.
+Export used AutoGaze `a8239fce8528335ca147adfd23e246ca06bdc7dc`, with exact-zero-only
+historical-buffer compatibility. Prior validation was 36 core exporter tests
+plus 12 focused compatibility tests; benchmark validation was 57 prior tests
+plus three focused central-control tests. These describe separate test scopes,
+not fresh combined totals.
+
+## Controls and refreshed variable budget remain incomplete
+
+K16 controls run from frozen AutoGaze
+`b795de084001c3a8ef1c147bc850d7764c867cb3` under Slurm 1700678; results are pending.
+Variable-budget job 1690935 is partial, without a final aggregate. Allocation
+replay job 1700681 depends on completion. No partial-run numerical aggregate is
+promoted. Existing R2d in-domain evidence remains historical.
+
+Integration `d649ad05c15b8f58edd0990140e05c23a4b9c183` had 109 native Windows CPU
+passes and one Linux-directory-fsync limitation. Production code and tests were
+preserved. The parent reports a durable Linux receipt at
+`f3487e112f36699407587d9b9d5eb4e8f990016b`: 12 tests passed in 18.37 seconds,
+including the exact resume/attestation test before the frozen control commit.
+This is not 110 native Windows passes and does not imply experimental completion.
 
 ## Conceptual intervention figure
 
-The main token-merging illustration is cumulative ToMe. Temporary `spatial_block` merging is a distinct supplemental mechanism that merges before attention and restores the grid after each block; it is not a final-K16 mechanism.
-
-These readiness statements must remain separate from final claims in `claims.csv`.
+The main token-merging illustration is cumulative ToMe. Temporary spatial_block
+merges before attention and restores the grid after each block; it is not a
+final-K16 mechanism. The illustration adds no empirical claim.

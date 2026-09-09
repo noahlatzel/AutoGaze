@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "package_id": "wp5_three_strand_evidence",
-  "status": "draft_with_verified_gaze",
+  "status": "partial_with_verified_gaze_temporal_and_decode",
   "published_base": {
     "repository": "noahlatzel/AutoGaze",
     "commit": "a0a5bde41909a0fbbafcf18c25a636b5e1a85489",
@@ -10,14 +10,15 @@
   "integrated": [
     "r2e_hlvid_nvila_fixed_budget_all_seeds",
     "r0_r1_direct_coverage_grpo_fold1",
-    "r2d_variable_fine_token_budget"
+    "r2d_variable_fine_token_budget",
+    "wp0_present_day_decode_audit",
+    "t0_historical_temporal_evidence_50c1949"
   ],
   "pending": [
-    "dino_cost_fidelity",
-    "temporal_budget_utility",
+    "dino_cost_fidelity_curation",
     "pretrained_and_center16_k16_controls",
     "refreshed_variable_budget_paired_tables",
-    "runtime_and_decode_provenance"
+    "r2d_allocation_replay_after_variable_completion"
   ],
   "missing_values_are_zero": false,
   "joint_system_speedup_supported": false,
@@ -29,6 +30,33 @@
     ],
     "new_inference_calls": 0,
     "bootstrap_recomputed": false,
-    "metadata_root": "figures/hlvid_fixed"
+    "metadata_root": "figures/hlvid_fixed",
+    "linked_temporal_source": {
+      "repository": "noahlatzel/video-frame-selection",
+      "commit": "9b26feb3f53c9c2bce131f02c8bdf363b00bf315",
+      "figure_ids": [
+        "temporal_temporal_accuracy_frames_frontier",
+        "temporal_pixel_threshold_sweep",
+        "temporal_historical_h100_timing",
+        "temporal_learned_delta_schedule"
+      ],
+      "local_assets_duplicated": false,
+      "source_output_hashes_verified": 29
+    }
+  },
+  "integration_base": {
+    "repository": "noahlatzel/AutoGaze",
+    "commit": "d649ad05c15b8f58edd0990140e05c23a4b9c183"
+  },
+  "evidence_addenda": {
+    "wp0_decode": "addenda/wp0_decode/manifest.json",
+    "temporal": "addenda/temporal/manifest.json"
+  },
+  "temporal_metric_contract": {
+    "historical_source_declares_primary_metric": false,
+    "curation_qa_axis": "video_macro_accuracy",
+    "question_micro_preserved": true,
+    "cost_aggregation": "question mean",
+    "training_seed_counts_available": false
   }
 }

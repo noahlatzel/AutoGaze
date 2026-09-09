@@ -1,0 +1,500 @@
+{
+  "code": {
+    "commit": "50c1949819efbaf25338c0f3d62c5180ff581847",
+    "dirty": false
+  },
+  "created_utc": "2026-09-09T01:15:56.942871+00:00",
+  "gate": "t0_historical_temporal_evidence_closure",
+  "new_gpu_runs": 0,
+  "new_vlm_calls": 0,
+  "outputs": {
+    "README.md": "58e2b7710cf03b9d27e4c3720e979410ade684b9260575eb58a6fc5784409fcc",
+    "answer_flips.csv": "45253ba418dee42f6b8f1a53390718b1271caa27457a8b67c9a74d7b8c9776df",
+    "conditions.csv": "17d99123b252f7a23435be8ebf437c8403cfb0094c8c9bcbcf98ba7fde15f2cb",
+    "config.yaml": "ecf6480d8a61e980f96345db09311d307535a47da67853916c0956430a5daf51",
+    "figure_captions.md": "c24b0ee6dc660ab39dd6b3bcc2234307995feb97ec4769c699dd5da9b93d00b6",
+    "figures/data_checks.json": "aa51e538bb711a78725463f29298d6abe505651152eb6174be1c5566201f58c4",
+    "figures/historical_h100_timing.json": "7eba2a4f2f41c4017018ca0286e6d2ffc24fea086010af5a8d8cd195282dc029",
+    "figures/historical_h100_timing.pdf": "83b09df4a9af796191d3682da6004af2aa190855508f3766cc5b91f767d5b0bf",
+    "figures/historical_h100_timing.png": "3f8df9383e9ddfa6fda4af38806a363dddb9eb4e1809a9cb740cb184e4cb1b47",
+    "figures/historical_h100_timing.svg": "2546e8659b86383468ef8f7713e8052ac8c511bac16f9d97e3404303828399c0",
+    "figures/learned_delta_schedule.json": "6f37cac69d7ae4d54bd475f16df3672c99a0f10f3f78a51077e5a58207ba6e9d",
+    "figures/learned_delta_schedule.pdf": "1c8824d64046f7a2ccd76fa97b68918584739127b26fcbaea19768fb77bb50e3",
+    "figures/learned_delta_schedule.png": "94787925b9effa6bea52e3987c5fed340dcb6628ca5e85b71865ec8b99160bbb",
+    "figures/learned_delta_schedule.svg": "65e807a4b914e156412a6d8cca8ee2e1c95121e0e28e4444c473a6b9ca27f63c",
+    "figures/pixel_threshold_sweep.json": "ff58a26ea400ce361fc952cb30bffac94ea031b979a1f10836524342c0204a6c",
+    "figures/pixel_threshold_sweep.pdf": "660220aa78c0cbe5bc7f4f6a7ee9043d604ddc81e989b58dd1ec77c2e9413172",
+    "figures/pixel_threshold_sweep.png": "033d3bfa6148d10769550ac0926969eaccb14415a1747e56522270134c52a02c",
+    "figures/pixel_threshold_sweep.svg": "6868414d5881b5810446eac88c5533e50b3b332176afbbf97f7d4670ea240e3e",
+    "figures/temporal_accuracy_frames_frontier.json": "03064f823cf49f774f580cab01b4f292ac26b46df4eb3f9caf085610db633cc4",
+    "figures/temporal_accuracy_frames_frontier.pdf": "2e1344af6534a24e3e9c6033f1e0e51b3f70d37b86e5e191b42dabd728234678",
+    "figures/temporal_accuracy_frames_frontier.png": "f4abd2d5b3b46586a546be5869046b3fb60cc45bfffb821781215f47c675f169",
+    "figures/temporal_accuracy_frames_frontier.svg": "fa1ee8b95d13becc77cbca1e4a87aa4e77981e2d69fdec88750ef878dd9262dd",
+    "learned_trajectories.csv": "e44cdda15a7d91a89e013ca2f0f0b4b8f9abf063e6ecbd170c890b9ec79499b0",
+    "learned_trajectory_summary.json": "8a4385a1a8b57280432f1ab2870d9ea0dac860a44ab609715c8012d580f62e74",
+    "method_inventory.csv": "d70dca6ab22b996ab67e588f6ad173f6fb670e408a4a2b77d773a85dcf3ac73b",
+    "metrics.json": "e866886a0270347d004ad224945b38d8585c12be8b06ca55fbdc9219f678afdc",
+    "paired_comparisons.csv": "6c3623b1471da819e0d7258217a6950f5179e15610f4ee0709122e16eb19228a",
+    "supplemental_inventory.csv": "24249106ab25e441bb8911c265c6ce152729a89c85f7f55ec62c07dd662bf1d1",
+    "timing_cache_strata.csv": "2f3167b6a77fa516942b99c552c844b48985f732fb647fc14a9895bb48b6bc46"
+  },
+  "provenance_lineage": {
+    "t0d": "Role-labeled lineage: execution used AutoGaze a1bfdb5100bd89a5d6f72fccc95627b662548b58 and wrapper cbd30290c952bb436d946262969e223b76a28eeb; immediate curation used child AutoGaze 8e0a176 and wrapper 0db19a9. These roles are compatible, not a provenance discrepancy."
+  },
+  "provenance_uncertainties": [
+    "Early HLVid bundles omit exact code/model revisions.",
+    "P0 coordination curation/wrapper short commits are not embedded in its manifest."
+  ],
+  "run_id": "20260909-0315_t0-historical-temporal-evidence_50c1949",
+  "schema_version": 1,
+  "source_records": [
+    {
+      "mtime_unix_seconds": 1786920552.777663,
+      "mtime_utc": "2026-08-16T22:49:12.777663+00:00",
+      "path": "/home/stud/latn/.codex/worktrees/5428/master-thesis/code/results/p0_predictive_surprise/20260817-0040_p0-predictive-surprise_a6725c5/README.md",
+      "sha256": "88a4b63fb1540a3f0e88a965335ed91e0a9f4f6259ce55cf1ee993edae049b8c",
+      "size_bytes": 1313
+    },
+    {
+      "mtime_unix_seconds": 1786920067.9254653,
+      "mtime_utc": "2026-08-16T22:41:07.925465+00:00",
+      "path": "/home/stud/latn/.codex/worktrees/5428/master-thesis/code/results/p0_predictive_surprise/20260817-0040_p0-predictive-surprise_a6725c5/config.yaml",
+      "sha256": "f7e08cc7db35163c1cff802358a0c71dd767b12db6554aa86846bc964a1becf3",
+      "size_bytes": 2425
+    },
+    {
+      "mtime_unix_seconds": 1786920552.807858,
+      "mtime_utc": "2026-08-16T22:49:12.807858+00:00",
+      "path": "/home/stud/latn/.codex/worktrees/5428/master-thesis/code/results/p0_predictive_surprise/20260817-0040_p0-predictive-surprise_a6725c5/manifest.json",
+      "sha256": "a22015fa982c5ad6277901e36f7eb3dfa009f7aa808d2f088fef55e442ebbc92",
+      "size_bytes": 3754
+    },
+    {
+      "mtime_unix_seconds": 1786920550.419797,
+      "mtime_utc": "2026-08-16T22:49:10.419797+00:00",
+      "path": "/home/stud/latn/.codex/worktrees/5428/master-thesis/code/results/p0_predictive_surprise/20260817-0040_p0-predictive-surprise_a6725c5/metrics.json",
+      "sha256": "975bed16451c7c9bce4c89ee638a4ceb37a3c88a2f646118b6b3a9ce138dac16",
+      "size_bytes": 15192
+    },
+    {
+      "mtime_unix_seconds": 1786920550.4247823,
+      "mtime_utc": "2026-08-16T22:49:10.424782+00:00",
+      "path": "/home/stud/latn/.codex/worktrees/5428/master-thesis/code/results/p0_predictive_surprise/20260817-0040_p0-predictive-surprise_a6725c5/per_source.csv",
+      "sha256": "e80950d4417b13264f9b6fa64fc848325ace1c81af7c706a5b3121f2c7880de0",
+      "size_bytes": 740
+    },
+    {
+      "mtime_unix_seconds": 1786920550.4227972,
+      "mtime_utc": "2026-08-16T22:49:10.422797+00:00",
+      "path": "/home/stud/latn/.codex/worktrees/5428/master-thesis/code/results/p0_predictive_surprise/20260817-0040_p0-predictive-surprise_a6725c5/per_video.csv",
+      "sha256": "979508055a6b92323518b919552c12f5ac02dd164ef4fd20d9577e02492e05f9",
+      "size_bytes": 29822
+    },
+    {
+      "mtime_unix_seconds": 1787048538.1603844,
+      "mtime_utc": "2026-08-18T10:22:18.160384+00:00",
+      "path": "/home/stud/latn/.codex/worktrees/temporal-active-viewing/master-thesis/AutoGaze/experiments/temporal_viewing/results/20260818-1209_t0d-rich-test_a1bfdb5/README.md",
+      "sha256": "e3ec674cdb8aa6516f2f2f0659266f4bba420c0abf1ddae419d398aac2a24dfd",
+      "size_bytes": 3670
+    },
+    {
+      "mtime_unix_seconds": 1787048679.871034,
+      "mtime_utc": "2026-08-18T10:24:39.871034+00:00",
+      "path": "/home/stud/latn/.codex/worktrees/temporal-active-viewing/master-thesis/AutoGaze/experiments/temporal_viewing/results/20260818-1209_t0d-rich-test_a1bfdb5/manifest.json",
+      "sha256": "fb6db2b25de5611222f37359941c8c700dfb7fa36d075c56058d03bd9a1fb6c7",
+      "size_bytes": 1983
+    },
+    {
+      "mtime_unix_seconds": 1787048678.630002,
+      "mtime_utc": "2026-08-18T10:24:38.630002+00:00",
+      "path": "/home/stud/latn/.codex/worktrees/temporal-active-viewing/master-thesis/AutoGaze/experiments/temporal_viewing/results/20260818-1209_t0d-rich-test_a1bfdb5/metrics.json",
+      "sha256": "5b074d24cdda3022a06e95543508d8b80c355eec961ec240d5e40756cc3e8946",
+      "size_bytes": 45143
+    },
+    {
+      "mtime_unix_seconds": 1787048678.634596,
+      "mtime_utc": "2026-08-18T10:24:38.634596+00:00",
+      "path": "/home/stud/latn/.codex/worktrees/temporal-active-viewing/master-thesis/AutoGaze/experiments/temporal_viewing/results/20260818-1209_t0d-rich-test_a1bfdb5/resolved_config.yaml",
+      "sha256": "768e9ed0600d7d9bb529fd45a836fa2ee5ec4be5ab8094364987ec1a6550e33d",
+      "size_bytes": 6049
+    },
+    {
+      "mtime_unix_seconds": 1782142163.125594,
+      "mtime_utc": "2026-06-22T15:29:23.125594+00:00",
+      "path": "/home/stud/latn/AutoGaze/autogaze/temporal_sampling/semantic_metrics.py",
+      "sha256": "c9235139809ee3fe49d961be108bee78a9eebb8c1805da5ca977c8575f2b6021",
+      "size_bytes": 6630
+    },
+    {
+      "mtime_unix_seconds": 1782140105.2720876,
+      "mtime_utc": "2026-06-22T14:55:05.272088+00:00",
+      "path": "/home/stud/latn/AutoGaze/autogaze/temporal_sampling/thumbnail_metrics.py",
+      "sha256": "7671e8b5ea94c769fd47e8b69a072e471fb842a6b46ab940c6547a68e55be4f4",
+      "size_bytes": 6923
+    },
+    {
+      "mtime_unix_seconds": 1782462167.1379468,
+      "mtime_utc": "2026-06-26T08:22:47.137947+00:00",
+      "path": "/home/stud/latn/AutoGaze/experiments/delta_policy/configs/dino_semnovel_l001_fusion_probe.yaml",
+      "sha256": "a9bd8821d41210eeccc58fb46a2a69c6f7213849f91cc664f73cf5999068ce1a",
+      "size_bytes": 3936
+    },
+    {
+      "mtime_unix_seconds": 1782414550.4189456,
+      "mtime_utc": "2026-06-25T19:09:10.418946+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/delta_labels/dino_semnovel_l001_train.json",
+      "sha256": "12e795e087cb6601f2f150bd41584cbffc8d3f18f62f005a11facfcf8ba0357c",
+      "size_bytes": 57673688
+    },
+    {
+      "mtime_unix_seconds": 1782422643.301284,
+      "mtime_utc": "2026-06-25T21:24:03.301284+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/delta_labels/dino_semnovel_l001_val.json",
+      "sha256": "49cb25d3567c60781d5e68462d7e1bd9a9a80496319ec447bb96af8b0eba719c",
+      "size_bytes": 11417358
+    },
+    {
+      "mtime_unix_seconds": 1781868556.7364209,
+      "mtime_utc": "2026-06-19T11:29:16.736421+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/delta_labels/exp0b_pixel_mse_t004_balanced25k_train.json",
+      "sha256": "a6387edf35a7c3d49b7ca14b1e2c7f4d71b1955b7877f06660078e1357db88fe",
+      "size_bytes": 45426886
+    },
+    {
+      "mtime_unix_seconds": 1782462856.2728865,
+      "mtime_utc": "2026-06-26T08:34:16.272887+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/delta_policy/dino_semnovel_l001_fusion_probe/checkpoints/mean_vision_linear.pt",
+      "sha256": "ed1c5e2542bbf18d0db143dc47e41949a5b24bc02da4b1bec850137c50084850",
+      "size_bytes": 26329
+    },
+    {
+      "mtime_unix_seconds": 1782461641.6596303,
+      "mtime_utc": "2026-06-26T08:14:01.659630+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/delta_policy/dino_semnovel_l001_fusion_probe/metrics/mean_vision_linear.json",
+      "sha256": "357cf7b155eea01ef9129e73a22998fa8e280eee2ced4b39fa3c249c1ba90c5f",
+      "size_bytes": 68725
+    },
+    {
+      "mtime_unix_seconds": 1781983920.290679,
+      "mtime_utc": "2026-06-20T19:32:00.290679+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/delta_probe_supervised_t004_balanced25k/pixel_mse_t004_mean_vision_runtime_linear_metrics.json",
+      "sha256": "e2df9d2cf555b7a17d7d3ca27bc4d84fb545f3bec52ade0c9cc55c634681a56a",
+      "size_bytes": 65898
+    },
+    {
+      "mtime_unix_seconds": 1782475986.9920962,
+      "mtime_utc": "2026-06-26T12:13:06.992096+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/learned_delta_dino_semnovel_l001_mtv1/results.jsonl",
+      "sha256": "d1b7732c48deb2c86e7befc9fd80fa16eb122534e7f36629195d6b08edcad57b",
+      "size_bytes": 311816
+    },
+    {
+      "mtime_unix_seconds": 1782475987.0268166,
+      "mtime_utc": "2026-06-26T12:13:07.026817+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/learned_delta_dino_semnovel_l001_mtv1/summary.json",
+      "sha256": "a9367eaf460f34093db39a8443cfd44bb840484147645fd69dba98cfd65e7497",
+      "size_bytes": 1269
+    },
+    {
+      "mtime_unix_seconds": 1778890285.7217023,
+      "mtime_utc": "2026-05-16T00:11:25.721702+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_default_autogaze/results.jsonl",
+      "sha256": "a8d905c749c8958c69e06004b255cb69adb517d5eefb0bfa9235ac965fe3c715",
+      "size_bytes": 45073
+    },
+    {
+      "mtime_unix_seconds": 1778890285.7257023,
+      "mtime_utc": "2026-05-16T00:11:25.725702+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_default_autogaze/summary.json",
+      "sha256": "d08fc9b0fa8d89cf584d2fad56549c19d3a79788f065662304dc3a5e0a6e132e",
+      "size_bytes": 812
+    },
+    {
+      "mtime_unix_seconds": 1778887306.1217196,
+      "mtime_utc": "2026-05-15T23:21:46.121720+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_1/results.jsonl",
+      "sha256": "3e30876f421d087c669ed9f4b82d530a494f6ca06009d0a7ec61104255d69d5b",
+      "size_bytes": 94654
+    },
+    {
+      "mtime_unix_seconds": 1778887306.1257195,
+      "mtime_utc": "2026-05-15T23:21:46.125720+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_1/summary.json",
+      "sha256": "6b8f997f9696c1da80449a077225d57c5b26242b4045a5f95be73a034a7d0e79",
+      "size_bytes": 863
+    },
+    {
+      "mtime_unix_seconds": 1778932962.3799198,
+      "mtime_utc": "2026-05-16T12:02:42.379920+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_16/results.jsonl",
+      "sha256": "f524ff0299a2479266e89b9940a3f7c7ab7ebf03f4e35781cb599fe973146647",
+      "size_bytes": 90642
+    },
+    {
+      "mtime_unix_seconds": 1778932962.38392,
+      "mtime_utc": "2026-05-16T12:02:42.383920+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_16/summary.json",
+      "sha256": "23a41f9d57e89ebde65c642bdd1508c2ef39214d2b151dde58dd17d082f1260a",
+      "size_bytes": 863
+    },
+    {
+      "mtime_unix_seconds": 1778915529.6309588,
+      "mtime_utc": "2026-05-16T07:12:09.630959+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_2/results.jsonl",
+      "sha256": "9e60625329bf51a033ad5060f41c92b5e32563ab9b5288042f8313be4a0fd814",
+      "size_bytes": 94655
+    },
+    {
+      "mtime_unix_seconds": 1778915529.6425025,
+      "mtime_utc": "2026-05-16T07:12:09.642503+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_2/summary.json",
+      "sha256": "808187e8984f179609c067a4eb107827cf877b90dc0f31e8f030a12d2c5cfe8e",
+      "size_bytes": 863
+    },
+    {
+      "mtime_unix_seconds": 1778946058.4967165,
+      "mtime_utc": "2026-05-16T15:40:58.496716+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_32/results.jsonl",
+      "sha256": "51b8cc09e4b4cb69624cb4dd1ee541c10248497078498192c0b430627b2b01cf",
+      "size_bytes": 90121
+    },
+    {
+      "mtime_unix_seconds": 1780647097.1399176,
+      "mtime_utc": "2026-06-05T08:11:37.139918+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_32/summary.json",
+      "sha256": "f2a3b3de5ed9b2e7ef4134fc7b781a4ceaa52ff572569df839f58287dfb65f10",
+      "size_bytes": 864
+    },
+    {
+      "mtime_unix_seconds": 1778915484.7988513,
+      "mtime_utc": "2026-05-16T07:11:24.798851+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_4/results.jsonl",
+      "sha256": "bb7c333c4aa154e9f4e4202867553c28bdf6405991c5986495c7adcb1cf717e1",
+      "size_bytes": 93044
+    },
+    {
+      "mtime_unix_seconds": 1778915484.8126874,
+      "mtime_utc": "2026-05-16T07:11:24.812687+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_4/summary.json",
+      "sha256": "452f0d50d34c453249ae29ed0a36abaa954f1ef12d143f6e4194717876b35fb5",
+      "size_bytes": 863
+    },
+    {
+      "mtime_unix_seconds": 1778936918.7520072,
+      "mtime_utc": "2026-05-16T13:08:38.752007+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_8/results.jsonl",
+      "sha256": "2f105e139e6462fda34b1883e051d5f269136ee196e1d285b3c573b928d13f98",
+      "size_bytes": 91976
+    },
+    {
+      "mtime_unix_seconds": 1778936918.7570076,
+      "mtime_utc": "2026-05-16T13:08:38.757008+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_fixed_delta/delta_8/summary.json",
+      "sha256": "d868c7bbc74e2b5c12f3a3f293cfde605d2eba579a9b56fc57713c83be01eaf5",
+      "size_bytes": 863
+    },
+    {
+      "mtime_unix_seconds": 1780894097.408067,
+      "mtime_utc": "2026-06-08T04:48:17.408067+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2_highres/s2_highres_uniform_128/results.jsonl",
+      "sha256": "c4856fc604807da4f33dd0aaa8a89bc8c9d026a65c5b35d06e7f8ddbfaa64f45",
+      "size_bytes": 510388
+    },
+    {
+      "mtime_unix_seconds": 1780894097.4285235,
+      "mtime_utc": "2026-06-08T04:48:17.428524+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2_highres/s2_highres_uniform_128/summary.json",
+      "sha256": "037f652f07da8ce39339b2cdafd5b6b32dbcd3549418fc80f2ff4cae402cc75c",
+      "size_bytes": 4431
+    },
+    {
+      "mtime_unix_seconds": 1781006449.4798489,
+      "mtime_utc": "2026-06-09T12:00:49.479849+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2_highres/s2_highres_uniform_256/results.jsonl",
+      "sha256": "cdb2f8b5acaa3ac98a9d6bcdbdd5487b486a732fa25ec8fa9b5b4062989a920f",
+      "size_bytes": 521885
+    },
+    {
+      "mtime_unix_seconds": 1781006449.5348504,
+      "mtime_utc": "2026-06-09T12:00:49.534850+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2_highres/s2_highres_uniform_256/summary.json",
+      "sha256": "52b5cb870ccafb291a37c4e4c8ec1d3cfb4fc3de486a1806820f115ed58e8591",
+      "size_bytes": 4437
+    },
+    {
+      "mtime_unix_seconds": 1780964492.5099878,
+      "mtime_utc": "2026-06-09T00:21:32.509988+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2_highres_pixel_mse_256_t004/results.jsonl",
+      "sha256": "e4de19e067d6e4e31284d9f0cc6e879f3a1d99ab799fbbf9ecd3672894793160",
+      "size_bytes": 1462015
+    },
+    {
+      "mtime_unix_seconds": 1780964492.5759895,
+      "mtime_utc": "2026-06-09T00:21:32.575989+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2_highres_pixel_mse_256_t004/summary.json",
+      "sha256": "3eeba74f31785fa6bea15aa03ecae64a8ebcd0504a348fece9ead47a5aa21ac4",
+      "size_bytes": 4732
+    },
+    {
+      "mtime_unix_seconds": 1780966617.9677258,
+      "mtime_utc": "2026-06-09T00:56:57.967726+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2_highres_siglip_256_t00125/results.jsonl",
+      "sha256": "85f2aa92b9ca2252ea8c4d5e29b7a438b222e61153884ce5aa23a87b509b0f7c",
+      "size_bytes": 1602855
+    },
+    {
+      "mtime_unix_seconds": 1780966618.0317273,
+      "mtime_utc": "2026-06-09T00:56:58.031727+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2_highres_siglip_256_t00125/summary.json",
+      "sha256": "9ab3f3b67d24ceeb3191f1fb87becd57dbc9706d9ed25fd97a2f0b9d8f6f36fe",
+      "size_bytes": 4700
+    },
+    {
+      "mtime_unix_seconds": 1780885913.6488101,
+      "mtime_utc": "2026-06-08T02:31:53.648810+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2_highres_videomae_128_t25/results.jsonl",
+      "sha256": "7cd8543bd147e9c800f1ece32da7a34c34ce5fb2c446ddc00e01c416756f8478",
+      "size_bytes": 700461
+    },
+    {
+      "mtime_unix_seconds": 1780885913.6928113,
+      "mtime_utc": "2026-06-08T02:31:53.692811+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2_highres_videomae_128_t25/summary.json",
+      "sha256": "967258cddc151fcac1fcc613041899c2efb62220665c7388b401becb8df03eaf",
+      "size_bytes": 4753
+    },
+    {
+      "mtime_unix_seconds": 1782038144.770318,
+      "mtime_utc": "2026-06-21T10:35:44.770318+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2b_highres_pixel_mse_256_t002/results.jsonl",
+      "sha256": "834501db3663bb3c245c29a0ab5f9b423604ad545decdaedfd17c5d0f2ecf0da",
+      "size_bytes": 1600315
+    },
+    {
+      "mtime_unix_seconds": 1782038144.8563201,
+      "mtime_utc": "2026-06-21T10:35:44.856320+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2b_highres_pixel_mse_256_t002/summary.json",
+      "sha256": "a0ea7667e64169e74262853c22dbbc7e75a49e3cd7a868fd446bf720bb058235",
+      "size_bytes": 4681
+    },
+    {
+      "mtime_unix_seconds": 1782065456.0299098,
+      "mtime_utc": "2026-06-21T18:10:56.029910+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2b_highres_pixel_mse_256_t003/results.jsonl",
+      "sha256": "c0dc69742e04e85575b9c01ed489f201ce25c0d9cd120d91d70e52ee7ce2d877",
+      "size_bytes": 1550991
+    },
+    {
+      "mtime_unix_seconds": 1782065456.0639107,
+      "mtime_utc": "2026-06-21T18:10:56.063911+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2b_highres_pixel_mse_256_t003/summary.json",
+      "sha256": "135c671a85579015f63ba0bec87b2a3e426b72163b0c66384b984466ed086fc5",
+      "size_bytes": 4723
+    },
+    {
+      "mtime_unix_seconds": 1781938202.6502466,
+      "mtime_utc": "2026-06-20T06:50:02.650247+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2b_highres_pixel_mse_256_t005/results.jsonl",
+      "sha256": "664610f5e0e69b61e2f52e45cf5c6eec8a1c41a89e649886c33f2ae12690cd80",
+      "size_bytes": 1404710
+    },
+    {
+      "mtime_unix_seconds": 1781938202.7132483,
+      "mtime_utc": "2026-06-20T06:50:02.713248+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2b_highres_pixel_mse_256_t005/summary.json",
+      "sha256": "4294848eec277ab24b1ff43db60b95520730a6d50c139bbae3c5909d7bc7402b",
+      "size_bytes": 4735
+    },
+    {
+      "mtime_unix_seconds": 1781933924.4220948,
+      "mtime_utc": "2026-06-20T05:38:44.422095+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2b_highres_pixel_mse_256_t006/results.jsonl",
+      "sha256": "fa88b6fbab8cb265079e8c593a47c11d3b7278326c0ee04221cc4f1316001ce8",
+      "size_bytes": 1349400
+    },
+    {
+      "mtime_unix_seconds": 1781933924.480096,
+      "mtime_utc": "2026-06-20T05:38:44.480096+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_s2b_highres/s2b_highres_pixel_mse_256_t006/summary.json",
+      "sha256": "0ea013760f9f905e29fadb25a513c22c855e903145ca04901d512fb5e61d2bbe",
+      "size_bytes": 4718
+    },
+    {
+      "mtime_unix_seconds": 1782402793.5567331,
+      "mtime_utc": "2026-06-25T15:53:13.556733+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_v5_pareto_mtv48/dinov2_semdiv_128_l001_log_mtv48/results.jsonl",
+      "sha256": "3ff6321d74833a9c859b92cd7ee5bfd4d788d9db704a705a89a2bb65885975e9",
+      "size_bytes": 904732
+    },
+    {
+      "mtime_unix_seconds": 1782402793.5926256,
+      "mtime_utc": "2026-06-25T15:53:13.592626+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_v5_pareto_mtv48/dinov2_semdiv_128_l001_log_mtv48/summary.json",
+      "sha256": "81e5ed56933a1a353a64a2b3165d44cafa6e7d6bf4fb956d03cf2fd4033addb5",
+      "size_bytes": 5371
+    },
+    {
+      "mtime_unix_seconds": 1782393816.4403067,
+      "mtime_utc": "2026-06-25T13:23:36.440307+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_v5_pareto_mtv48/dinov2_semnovel_128_l001_log_mtv48/results.jsonl",
+      "sha256": "be59999e9cbbefde3b9dbc6d40c296c4ce3e73151cb2a166c0856415b54e625c",
+      "size_bytes": 847268
+    },
+    {
+      "mtime_unix_seconds": 1782393816.5183086,
+      "mtime_utc": "2026-06-25T13:23:36.518309+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_v5_pareto_mtv48/dinov2_semnovel_128_l001_log_mtv48/summary.json",
+      "sha256": "e068c748389e4bb987e81a9e067e695befbd0e0185c8d48997eea8785cb604c3",
+      "size_bytes": 5380
+    },
+    {
+      "mtime_unix_seconds": 1782427047.1549356,
+      "mtime_utc": "2026-06-25T22:37:27.154936+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_v5_pareto_mtv48/question_relevance_128_l001_log_mtv48/results.jsonl",
+      "sha256": "0777a7be8412e0ea8abfc595a3a9c2904c547391cd5ef5f8f8b4beda0a1bf56c",
+      "size_bytes": 1208576
+    },
+    {
+      "mtime_unix_seconds": 1782427047.2949393,
+      "mtime_utc": "2026-06-25T22:37:27.294939+00:00",
+      "path": "/home/stud/latn/AutoGaze/outputs/hlvid/proxy_sampling_v5_pareto_mtv48/question_relevance_128_l001_log_mtv48/summary.json",
+      "sha256": "2760f6e26240678bd128942cf882c6a1bff9085de3a44050e192b4ee140999ce",
+      "size_bytes": 5374
+    },
+    {
+      "mtime_unix_seconds": 1782462253.8610103,
+      "mtime_utc": "2026-06-26T08:24:13.861010+00:00",
+      "path": "/home/stud/latn/AutoGaze/research/dino_semnovel_delta_probe_architectures.md",
+      "sha256": "b02f3301d088fc07be395859f596a3d04a31aab41f328f66b1de36705c796687",
+      "size_bytes": 3085
+    },
+    {
+      "mtime_unix_seconds": 1782301869.2106476,
+      "mtime_utc": "2026-06-24T11:51:09.210648+00:00",
+      "path": "/home/stud/latn/AutoGaze/research/supervised_pixel_mse_skip_policy.md",
+      "sha256": "30e86c7aac7b5759817b74fe87004dd811016f714ad348f1cf3f0f3037cd0596",
+      "size_bytes": 4964
+    },
+    {
+      "mtime_unix_seconds": 1783365705.5714185,
+      "mtime_utc": "2026-07-06T19:21:45.571419+00:00",
+      "path": "/home/stud/latn/AutoGaze/scripts/runners/evaluate_hlvid_nvila.py",
+      "sha256": "f7281533b556e508b6c82fc419e66a138d93e151be68932a7a632c8585c6de1e",
+      "size_bytes": 33350
+    },
+    {
+      "mtime_unix_seconds": 1782375002.6166468,
+      "mtime_utc": "2026-06-25T08:10:02.616647+00:00",
+      "path": "/home/stud/latn/AutoGaze/scripts/runners/evaluate_hlvid_proxy_sampling.py",
+      "sha256": "3020da62752b7288bad3df8ec7537518a44c30afb2604fae1d3cd4c6e575d7d0",
+      "size_bytes": 35759
+    },
+    {
+      "mtime_unix_seconds": 1782302005.8073585,
+      "mtime_utc": "2026-06-24T11:53:25.807359+00:00",
+      "path": "/home/stud/latn/AutoGaze/scripts/runners/hlvid_common.py",
+      "sha256": "d390fd54b8fca681e2d530c3fb53ee15fdddcb06c379ef86d7720a914949e0b4",
+      "size_bytes": 4394
+    }
+  ]
+}

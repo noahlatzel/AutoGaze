@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "status": "complete_present_day_decode_audit",
+  "repository": "noahlatzel/AutoGaze",
+  "integration_commit": "d649ad05c15b8f58edd0990140e05c23a4b9c183",
+  "result_source_commit": "ecd72f151e4ca5066ce48b9ecb0032af1cb06645",
+  "audit_code_revision": "b98970da97b884b8805acd1c25bed094225d7808",
+  "result_bundle": "results/hlvid_nvila/20260909-0211_wp0-hlvid-protocol-audit_b98970d",
+  "source_files": {
+    "README.md": {
+      "sha256": "7cb53b3705b7e499feee55e57fd394f0d0e728c0871c51f168bb3609f342e42c",
+      "source_path": "results/hlvid_nvila/20260909-0211_wp0-hlvid-protocol-audit_b98970d/README.md"
+    },
+    "decode_audit.jsonl": {
+      "sha256": "563e6c8f29b70f7c70b93668aee53624d68a9148521847998ab326ecc07f26b9",
+      "source_path": "results/hlvid_nvila/20260909-0211_wp0-hlvid-protocol-audit_b98970d/decode_audit.jsonl"
+    },
+    "live_runtime_supplement.json": {
+      "sha256": "f2679ed4c90c6884e15243c78d38d78c4613861109098cb4521fcb3b1a4e1bf7",
+      "source_path": "results/hlvid_nvila/20260909-0211_wp0-hlvid-protocol-audit_b98970d/live_runtime_supplement.json"
+    },
+    "protocol_runtime_manifest.json": {
+      "sha256": "ca584503958f6be661bc1e9dc79a2fd5f89bbccbab01e348431f8773908ecb60",
+      "source_path": "results/hlvid_nvila/20260909-0211_wp0-hlvid-protocol-audit_b98970d/protocol_runtime_manifest.json"
+    },
+    "summary.json": {
+      "sha256": "36b3e76dd1d3b64cfb8a0d37782746b8ab64fd38630fe4c6b0c25d8bf648fbf5",
+      "source_path": "results/hlvid_nvila/20260909-0211_wp0-hlvid-protocol-audit_b98970d/summary.json"
+    }
+  },
+  "dataset_sha256": "ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a",
+  "summary": {
+    "video_count": 77,
+    "question_count": 268,
+    "unusable_videos": 0,
+    "videos_with_requested_read_failures": 0,
+    "videos_with_metadata_count_correction": 0,
+    "videos_with_substituted_output": 0,
+    "affected_question_rows": [],
+    "loader_source_verified": true,
+    "reuse_qualification": "no_current_requested_decode_failures",
+    "historical_certification": false,
+    "audit_elapsed_seconds": 2416.030326980166
+  },
+  "historical_certification": false,
+  "interpretation": "Present-day requested-decode reuse qualification only; no retrospective certification of historical QA inputs and no live model execution claim."
+}

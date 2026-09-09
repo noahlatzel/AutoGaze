@@ -1,0 +1,19 @@
+comparison_id,reference,candidate,reference_correct_candidate_wrong,reference_wrong_candidate_correct,net_question_correct,changed_prediction_count,question_count,validity
+fixed_delta1_vs_fixed_uniform128,fixed_uniform128,fixed_delta1,24,23,-1,66,268,descriptive paired historical comparison
+fixed_delta2_vs_fixed_uniform128,fixed_uniform128,fixed_delta2,23,21,-2,64,268,descriptive paired historical comparison
+fixed_delta4_vs_fixed_uniform128,fixed_uniform128,fixed_delta4,22,23,1,67,268,descriptive paired historical comparison
+fixed_delta8_vs_fixed_uniform128,fixed_uniform128,fixed_delta8,26,22,-4,71,268,descriptive paired historical comparison
+fixed_delta16_vs_fixed_uniform128,fixed_uniform128,fixed_delta16,23,18,-5,59,268,descriptive paired historical comparison
+fixed_delta32_vs_fixed_uniform128,fixed_uniform128,fixed_delta32,28,18,-10,67,268,descriptive paired historical comparison
+videomae128_vs_uniform128,uniform128,videomae128_t25,20,13,-7,54,268,same candidate grid; test-exposed setting
+dino_novelty128_vs_uniform128,uniform128,dino_novelty128,21,21,0,62,268,same candidate grid; test-exposed setting
+dino_diversity128_vs_uniform128,uniform128,dino_diversity128,19,21,2,64,268,same candidate grid; different GPU makes timing incomparable
+question_relevance128_vs_uniform128,uniform128,question_relevance128,20,22,2,61,268,same grid but query-aware information class
+pixel002_vs_uniform256,uniform256,pixel256_t002,6,1,-5,19,268,same candidate grid; exposed threshold sweep
+pixel003_vs_uniform256,uniform256,pixel256_t003,3,5,2,17,268,same candidate grid; exposed threshold sweep
+pixel004_vs_uniform256,uniform256,pixel256_t004,6,14,8,36,268,same candidate grid; best observed exposed threshold is not confirmation
+pixel005_vs_uniform256,uniform256,pixel256_t005,12,10,-2,44,268,same candidate grid; exposed threshold sweep
+pixel006_vs_uniform256,uniform256,pixel256_t006,15,9,-6,47,268,same candidate grid; exposed threshold sweep
+siglip256_vs_uniform256,uniform256,siglip256_t00125,10,9,-1,31,268,same candidate grid; test-exposed setting
+learned_vs_uniform128,uniform128,learned_dino_delta,32,20,-12,78,268,different frame budget and resolution: learned max_tiles_video=1 versus reference max_tiles_video=48; QA difference cannot isolate temporal policy
+learned_vs_fixed_delta32,fixed_delta32,learned_dino_delta,10,8,-2,35,268,schedule diagnostic only: identical realized frame schedule but learned max_tiles_video=1 versus reference max_tiles_video=48; QA difference is resolution-confounded
