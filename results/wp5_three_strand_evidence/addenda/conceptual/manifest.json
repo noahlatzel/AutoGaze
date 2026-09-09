@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "status": "published_conceptual",
+  "repository": "noahlatzel/master-thesis",
+  "commit": "b14792a8c50e614770ad4921d7a9d978571ce075",
+  "source_directory": "wiki/project/assets/three-strand-overview",
+  "source_files": {
+    "README.md": {
+      "sha256": "5cd215a0739765eddb6d4f71cc810ec5c008de6f45147ed29303a1c5d4d78de2",
+      "git_blob": "960cc01576548a7a9e92cbad00f8706fca9f87f3",
+      "url": "https://github.com/noahlatzel/master-thesis/blob/b14792a8c50e614770ad4921d7a9d978571ce075/wiki/project/assets/three-strand-overview/README.md"
+    },
+    "make_interventions.py": {
+      "sha256": "6e534d6ca2b3f209e4ba22ad1a5ffd2e87e95fcca9ecd8e135b59cdb24dbfd60",
+      "git_blob": "70bbefbdca6a41e7ac04ae52deb2ff32a554be11",
+      "url": "https://github.com/noahlatzel/master-thesis/blob/b14792a8c50e614770ad4921d7a9d978571ce075/wiki/project/assets/three-strand-overview/make_interventions.py"
+    },
+    "three_visual_compute_interventions.json": {
+      "sha256": "3cea0d239657f98241714f18c25441bcd6629084ed2fc91f1d6a52b33a9df61b",
+      "git_blob": "ecf33b810feb80d2f131dd439f05f2c5c34166b3",
+      "url": "https://github.com/noahlatzel/master-thesis/blob/b14792a8c50e614770ad4921d7a9d978571ce075/wiki/project/assets/three-strand-overview/three_visual_compute_interventions.json"
+    },
+    "three_visual_compute_interventions.pdf": {
+      "sha256": "556e85cd2ced3baedcdfd14c84db8ff77688bb334f750daa00423f21e2cae13a",
+      "git_blob": "201f639a576ac234b9305047c88124e095987ecc",
+      "url": "https://github.com/noahlatzel/master-thesis/blob/b14792a8c50e614770ad4921d7a9d978571ce075/wiki/project/assets/three-strand-overview/three_visual_compute_interventions.pdf"
+    },
+    "three_visual_compute_interventions.png": {
+      "sha256": "1b93b259646b3550103706fe5764d79c298b7047732233af34fe629e3060c95f",
+      "git_blob": "f6e3b8df6741c968db511bb5993a86257f89dfd5",
+      "url": "https://github.com/noahlatzel/master-thesis/blob/b14792a8c50e614770ad4921d7a9d978571ce075/wiki/project/assets/three-strand-overview/three_visual_compute_interventions.png"
+    },
+    "three_visual_compute_interventions.svg": {
+      "sha256": "644e425b59ad4fdb01ae3941d9049827a6b9e7a1a78ddb4d074ce59b4985237e",
+      "git_blob": "0d717349fed2c3c6de013b48dfa4cb426c9b8a53",
+      "url": "https://github.com/noahlatzel/master-thesis/blob/b14792a8c50e614770ad4921d7a9d978571ce075/wiki/project/assets/three-strand-overview/three_visual_compute_interventions.svg"
+    }
+  },
+  "metadata": {
+    "kind": "conceptual_schematic",
+    "measured_results": false,
+    "integrated_pipeline_evaluated": false,
+    "caption": "Three complementary interventions for reducing visual computation. The illustrated cumulative ToMe path combines patch representations between attention and the MLP inside encoder blocks. Temporary spatial variants instead reduce tokens before attention and restore the grid after each block. Temporal selection reduces the retained frame sequence. Spatial gazing selects patches within retained frames or adapted tiles. The studies are evaluated independently using the resource and utility measures shown; the diagram does not claim measured acceleration from combining them. Frame numbers and spatial masks are illustrative.",
+    "source": "Authored from the approved thesis completion scope and verified implementation boundaries.",
+    "formats": [
+      "pdf",
+      "svg",
+      "png"
+    ],
+    "regeneration": "python wiki/project/assets/three-strand-overview/make_interventions.py --output wiki/project/assets/three-strand-overview"
+  },
+  "empirical_claim_eligible": false
+}

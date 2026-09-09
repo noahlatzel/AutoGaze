@@ -2,7 +2,7 @@
 
 This package integrates three complementary component studies: within-encoder token merging, temporal frame selection, and within-frame gaze selection. Each study preserves its source metric and uncertainty definitions, including any missing primary-metric declaration. Unrelated metrics are not forced onto one axis. Independent resource savings are not multiplied, and this package does not claim an integrated end-to-end system.
 
-Verified inputs comprise the complete R2e HLVid fixed-budget gaze evaluation, curated existing in-domain gaze evidence, the completed present-day HLVid decode audit (WP0), and the corrected historical temporal-selection bundle (WP1). The overall package remains partial: DINO execution is complete but final curation is pending; K16 causal controls and refreshed variable-budget/replay results remain pending or partial.
+Verified inputs comprise the complete R2e HLVid fixed-budget gaze evaluation, curated existing in-domain gaze evidence, the present-day HLVid decode audit (WP0), corrected historical temporal evidence (WP1), and the completed DINO encoder comparison (WP2). The overall package remains partial only because K16 causal controls and refreshed variable-budget/replay results remain pending or partial.
 
 ## Files
 
@@ -49,6 +49,46 @@ correction or output substitution across 77 videos and 268 question rows.
 `addenda/wp0_decode/manifest.json` retains all five source-file hashes. This
 qualifies present-day requested decoding for reuse; it does not retrospectively
 certify historical inputs or establish live model-execution behavior.
+
+The DINO addendum preserves 18 compact source files byte for byte and the hashes
+of all 30 published bundle files (29 outputs plus the manifest). Result commit
+`1accff45ea28f1694b090e3d46c64af2d42a8512`, curator
+`1b1c8f7a0c692fcbbdbda0e4c440d1f8d159fe98`, raw publication
+`af16dfe712f9efdeca280169ccc815c5da516a4e` and executed benchmark
+`796ee4f074cf38f2259ead32bf9deb0566331a6e` retain distinct provenance roles.
+The three published figure triplets are linked without regenerating assets.
+
+DINO fidelity averages 16 frames within each video, two videos within each
+source, then six sources equally. The six human training endpoints use base
+IDs 440826--440831, mapped to continuation training seeds 540826--540831 in
+`addenda/dino/manifest.json`. The 16 random-mask RNG seeds are
+2026090900--2026090915. Bootstrap RNG 20260909 identifies a third, separate
+randomization: whole-video draws within fixed sources, shared across arms.
+The post-hoc 90% intervals condition on all observed training endpoints and
+mask seeds; the three contrasts are unadjusted. Human mean differences against
+pretrained and random controls have intervals spanning zero; the center
+contrast is below zero under this conditional descriptive analysis. Lower CLS
+distance means closer encoder representation, not higher downstream QA.
+
+Analytical encoder and matching FLOPs stay separate, with FMA=2 and full dense
+patch embedding paid by every arm. Final patch count does not determine compute:
+cumulative ToMe changes the layer schedule, whereas temporary spatial merging
+restores the full grid after every block. Batch-16 timing is amortized over
+16-frame input calls across all 12 videos. The separate batch-one panel uses
+two predeclared videos and only random-mask seed 2026090900, with no population
+interval. ToMe is faster than dense under the measured batch-16 protocol and
+slower under batch one. K16 uses per-image ragged sequences internally. These
+are observations about the executed implementations, not a general method-speed
+ranking. Selector inference, preparation, transfers and downstream heads are
+excluded from encoder timing.
+
+The 84 existing selector-export observations are retained separately. Their
+single-pass, no-warmup protocol and own environment do not constitute a
+controlled latency benchmark, and their times are not added to encoder timings.
+The conceptual intervention figure now links verified wrapper assets at
+`b14792a8c50e614770ad4921d7a9d978571ce075`; its six source/asset hashes are recorded
+in `addenda/conceptual/manifest.json`. It contains no empirical finding or
+evaluated combined pipeline.
 
 `seed_id_role` distinguishes base-seed identifiers from continuation training
 seeds. R2d retains its original base IDs in the CSVs; the in-domain addendum

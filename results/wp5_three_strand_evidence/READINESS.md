@@ -30,13 +30,28 @@ by the trajectories. Exposed thresholds remain exploratory and historical
 mixed/cache-stratified timing cannot establish controlled speedup. T0d execution
 and curation lineage is preserved without relabeling distortion as QA.
 
-## DINO execution complete, curation pending (WP2)
+## Completed DINO evidence (WP2)
 
-The owner reports completion of the real-weight experiment at video-tokenization
-`796ee4f074cf38f2259ead32bf9deb0566331a6e`, including cumulative ToMe, temporary
-spatial_block and central K16. Its outcome-independent validation panel contains
-12 distinct videos, two per source, with 16 frames per clip. Final numerical
-curation, claim review and the DINO addendum remain pending.
+Published result commit `1accff45ea28f1694b090e3d46c64af2d42a8512` contains the
+completed curation from `1b1c8f7a0c692fcbbdbda0e4c440d1f8d159fe98`, based on raw
+publication `af16dfe712f9efdeca280169ccc815c5da516a4e` and executed benchmark
+`796ee4f074cf38f2259ead32bf9deb0566331a6e`. All 29 output hashes, the 30-file
+bundle inventory and three figure triplets were verified. The curator passed
+six focused CPU tests and reproduced 14 packaged metric arms. No WP5 bootstrap,
+inference or figure generation was performed.
+
+The outcome-independent panel has 12 validation videos, two per source, with
+16 frames each. Six human training endpoints and 16 random-mask seeds stay fixed
+under the conditional paired video bootstrap. The three post-hoc contrasts are
+unadjusted. Human versus pretrained/random intervals span zero; the center
+contrast is below zero in this descriptive analysis. Claims remain about
+representation fidelity, not downstream accuracy.
+
+Analytical encoder and matching FLOPs remain separate. Batch-16 timing covers
+all 12 videos; batch-one timing covers two predeclared videos and one random-mask
+seed. The batching reversal is retained, and no end-to-end claim is supported.
+The 84 single-pass exporter observations are preserved separately as operational
+evidence, not a controlled selector-latency benchmark.
 
 Export used AutoGaze `a8239fce8528335ca147adfd23e246ca06bdc7dc`, with exact-zero-only
 historical-buffer compatibility. Prior validation was 36 core exporter tests
@@ -61,6 +76,9 @@ This is not 110 native Windows passes and does not imply experimental completion
 
 ## Conceptual intervention figure
 
-The main token-merging illustration is cumulative ToMe. Temporary spatial_block
-merges before attention and restores the grid after each block; it is not a
-final-K16 mechanism. The illustration adds no empirical claim.
+The published wrapper figure at `b14792a8c50e614770ad4921d7a9d978571ce075` includes
+PDF, SVG, PNG, JSON, source and README. All six pinned Git blob hashes were
+verified and linked through `addenda/conceptual/manifest.json`. The main
+token-merging illustration is cumulative ToMe; temporary spatial_block restores
+the grid after each block and is not final-K16. The illustration adds no empirical
+claim or evaluated combined pipeline.

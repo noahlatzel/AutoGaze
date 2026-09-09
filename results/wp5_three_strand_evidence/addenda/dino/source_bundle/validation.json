@@ -1,0 +1,11 @@
+{
+  "all_observed_token_schedules_verified": true,
+  "batch1_records": 28,
+  "checkpoint_preflights_passed": true,
+  "heavy_rgb_and_weight_bytes_available_locally": false,
+  "packaged_metric_arms_reproduced": 14,
+  "paired_frame_records": 5568,
+  "paired_video_records": 348,
+  "published_manifest_and_all_15_artifact_hashes_verified": true,
+  "raw_source_summaries_reproduced": true
+}
