@@ -6,6 +6,17 @@ Repeated frames or deterministic encoder calls are not training seeds. Paired vi
 
 Token-merging fidelity is encoder-level only. Temporal selection does not establish spatial efficiency. K16 gaze causal comparisons use all six valid endpoints; K16/K24/K32 budget comparisons use the three shared seeds.
 
+HLVid control and reference QA may use different GPU classes under the approved
+hardware policy, preserving the frozen model, input, precision, generation and
+scoring protocol. Keep `max_tiles_video=48`, 128 video frames, 64 full thumbnails,
+exact K16 controls and all declared budgets; sufficient VRAM must accommodate
+these settings. Record the actual GPU model and VRAM, source scheduler directives,
+effective scheduler overrides, and the full-protocol allocation preflight.
+Existing reference answers remain reusable without additional reference runs.
+QA comparisons remain descriptive with hardware provenance; latency comparisons
+retain explicit hardware scopes. This policy establishes neither measured
+numerical equivalence across GPU classes nor completion of pending controls.
+
 CSV seed identifiers carry a `seed_id_role`. Base IDs used to match experiments
 must be distinguished from the training RNG seed; preserve their mapping in
 provenance. Deterministic controls have inapplicable, empty `n_seeds`, not one
