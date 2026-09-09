@@ -53,6 +53,20 @@ Outputs are `decode_audit.jsonl`, `summary.json` and
 `protocol_runtime_manifest.json`. Existing output directories are refused.
 Default parquet and legacy source hashes are checked before decoding. Alternate
 manifests may pass explicit expected hashes; their identity remains visible.
+The frozen audit CLI rejects sample counts other than 128. Its lower-level
+sampling and decoder helpers remain general for focused tests.
+
+Exit status 0 means the audit completed, not that control admission passed.
+The control owner must inspect `summary.json`, especially `reuse_qualification`
+and `affected_question_rows`, before admitting expensive QA runs. Recovered
+retries require interpretation and do not automatically require rerunning QA.
+
+The runtime manifest records the known frozen model/configuration contract;
+it does not freshly read or verify model weights, processor files or live model
+settings. `live_model_files_verified=false` makes that boundary explicit. The
+fixed/runtime owners must supplement it with their live model, configuration
+and execution-runtime manifest. The dataset and legacy-loader hashes are checked
+by this audit itself.
 
 Keep these findings separate:
 
