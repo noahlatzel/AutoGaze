@@ -196,6 +196,21 @@
     "submission_executor": "variable-budget owner task 01a05a0a-3c9c-7292-af02-9bef0c909d04",
     "scheduler_confirmation": "dependency, ReqTRES, SubmitLine, command path, and stored batch-script SHA256 matched the exact permit"
   },
+  "same_a40_node_relaxation": {
+    "status": "completed_after_batch_syntax_rejection",
+    "applied_at": "2026-09-09T12:50:38+02:00",
+    "receipt": "experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/scheduler_node_relaxation_receipt_20260909T124648+0200.json",
+    "receipt_sha256": "f91399df92f8513e6cf3170460b0aabc8fead83c3259d7229df7a48e20d03a54",
+    "array_elements": ["1690935_0", "1690935_1", "1690935_2", "1690935_4", "1690935_5"],
+    "replay_job": "1700681",
+    "change": "cleared only ReqNodeList=node17 from each still-pending live job record",
+    "unchanged": "job IDs, A40 GRES, 5 CPUs, 128G host memory, 24h time limit, array throttle 2, source/run/output paths, immutable launchers, and replay afterok:1690935_* dependency",
+    "completed_array_element_3": "untouched",
+    "control_job_1700678": "untouched; remains H100 NVL on node21",
+    "batch_attempt": "comma-separated logical array IDs were rejected without effect; each exact target was then updated and verified individually under explicit follow-up authorization",
+    "effective_required_node_list": null,
+    "actual_segment_node_recording": "required later from Slurm accounting"
+  },
   "local_vm": {
     "hostname": "atcremers63",
     "gpu": "NVIDIA RTX A2000 12GB",
