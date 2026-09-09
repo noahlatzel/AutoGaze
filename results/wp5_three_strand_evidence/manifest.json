@@ -20,5 +20,15 @@
     "runtime_and_decode_provenance"
   ],
   "missing_values_are_zero": false,
-  "joint_system_speedup_supported": false
+  "joint_system_speedup_supported": false,
+  "publication_figures": {
+    "status": "verified existing R2e evidence rendered into new WP5 assets",
+    "figure_ids": [
+      "gaze_fixed_budget",
+      "gaze_fixed_aggregation_sensitivity"
+    ],
+    "new_inference_calls": 0,
+    "bootstrap_recomputed": false,
+    "metadata_root": "figures/hlvid_fixed"
+  }
 }

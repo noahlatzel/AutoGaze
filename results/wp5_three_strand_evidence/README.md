@@ -32,6 +32,11 @@ mean K is 14.571282. Both are preserved as historical source observations.
 The dataset hash and seed mapping are attributed to the original R2d
 `verification.json`, linked in the in-domain addendum manifest.
 
-The fixed-budget figure entry awaits integration of a renderer that reads
-compact tables and writes new publication assets. It deliberately provides no
-executable placeholder or command that overwrites a completed experiment bundle.
+The fixed-budget publication figures are available in `figures/hlvid_fixed/`.
+They use exactly the three common seeds at K16, K24, and K32, retaining primary
+question-micro QA and a separate secondary aggregation sensitivity. The renderer
+reads preserved compact tables and writes new WP5 assets; it never invokes the
+heavy aggregator or writes into the completed experimental bundle.
+`figures.csv` records exact repository-root regeneration commands, source tables,
+formats, captions, and validation metadata. See `FIGURE_REGENERATION.md` for the
+optional plotting environment and reproduction notes.

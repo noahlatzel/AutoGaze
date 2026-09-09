@@ -1,0 +1,4 @@
+# Optional standalone figure environment, tested with Python 3.12.14.
+# These are plotting dependencies, not additions to the model evaluation runtime.
+matplotlib==3.11.1
+numpy==2.5.2

@@ -1,0 +1,75 @@
+{
+  "figure": "hlvid_fixed_aggregation_sensitivity",
+  "caption": "Aggregation sensitivity using exactly the same three common seeds and nine checkpoints as the primary fixed-budget comparison. Panel a repeats question-micro accuracy, the prespecified primary metric. Panel b reports the secondary video-macro accuracy, which averages questions within a video and then weights the 77 videos equally. Colored lines pair base seeds; black diamonds are three-seed arithmetic means. The question-micro means are 49.75%, 47.89% and 49.13% for K16, K24 and K32; the corresponding video-macro means are 48.80%, 48.28% and 51.87%. The highest observed mean therefore changes from K16 to K32 under the secondary aggregation. These are point estimates without uncertainty intervals and do not establish a reliable ordering. The additional K16-only seeds and all causal controls are excluded.",
+  "source_bundle": "r2e_hlvid_nvila_fixed_budget_all_seeds",
+  "source_files": {
+    "per_seed.csv": "22602408b2b204d839ea4416a981bec8ffa5dda832fb325705c7a39635c73e07",
+    "matched_budget_differences.csv": "fea8b783b9f57e3bf1379ce9c5b7a42b699c99c06fd9e8b2cfc77afaf7477b6d",
+    "metrics.json": "595bdf51381f8b9a27202e65e16d8852f82d0033d85c496518a63f27c32d7bf7",
+    "manifest.json": "65f3653469540612088bf96ddd4f2113cf02dcabfc78d68277c90e52bdd53dbc",
+    "config.yaml": "73b4f52b84209121d1bbd37bae5935ea7a88ff8a84a4c3ef9d68ffe6d5f3dca6",
+    "README.md": "9b92f5a84e4bb1d160b29c46394215c21de6c4a1dea3dd143e7c9117d8decb5b"
+  },
+  "source_text_lf_sha256": {
+    "per_seed.csv": "1804d97507d4f6d7ec405cb7b129c0f3e81906ee4f9a55fb8babbd5dd7beb3c0",
+    "matched_budget_differences.csv": "f7f5c673ba95099bd8812bed9235163ca9385e9cb86007ad59baaaebebc1fef3",
+    "metrics.json": "74df4626f099f6043bb2412c5df2c08b76b3868203964f2d96aeab42f4f2bbc6",
+    "manifest.json": "224a9199bafc6bbf6e9484716a43b91ba6d187348da1b3fdcdda63606b0b4310",
+    "config.yaml": "1e11ec7bf3659a30bcc664ffc0fc2b5d7931c408008f9e2806a5d66c21b96fbd",
+    "README.md": "a670e5f55cae0196e14001761acd760892d3570dda9fbbbc480a2e31aea5e615"
+  },
+  "source_hash_policy": "source_files hashes the actual read bytes; source_text_lf_sha256 normalizes CRLF to LF for cross-platform text-content comparison",
+  "renderer": "render_hlvid_fixed.py",
+  "renderer_sha256": "11775ff2e1cb5de4a1f3b7fca16a2f50ef49d17678190bda87fdd47aedd2feae",
+  "matplotlib_version": "3.11.1",
+  "common_seeds": [
+    440826,
+    440827,
+    440828
+  ],
+  "num_seeds_per_budget": 3,
+  "budgets": [
+    16,
+    24,
+    32
+  ],
+  "protocol_id": "hlvid_nvila_mtv48_uniform128_thumbnail64_v1",
+  "scientific_results_recomputed": false,
+  "means_recomputed_from_published_endpoints": true,
+  "addendum_cross_check": {
+    "per_seed.csv": "1dd25d242d9bdd3b4d1f598d2d6d2781c39ff70bf5600c9a3576da11fec49b04",
+    "matched_budget_differences.csv": "fea8b783b9f57e3bf1379ce9c5b7a42b699c99c06fd9e8b2cfc77afaf7477b6d"
+  },
+  "role": "secondary sensitivity",
+  "means_percent": {
+    "question_micro": [
+      49.75124378109453,
+      47.885572139303484,
+      49.12935323383085
+    ],
+    "video_macro": [
+      48.796402010687714,
+      48.2800136371565,
+      51.86872651158366
+    ]
+  },
+  "uncertainty_intervals_plotted": false,
+  "control_results_plotted": false,
+  "outputs": [
+    {
+      "file": "hlvid_fixed_aggregation_sensitivity.pdf",
+      "bytes": 30771,
+      "sha256": "51907107d0b804ef24dc2ec4ba4bd89e0a970fb1043e9182be8b2b38882c19b3"
+    },
+    {
+      "file": "hlvid_fixed_aggregation_sensitivity.svg",
+      "bytes": 23387,
+      "sha256": "f165e86e7d8db2932795d3752dc02ce518abcd428b2f951196be1c60f31ed19f"
+    },
+    {
+      "file": "hlvid_fixed_aggregation_sensitivity.png",
+      "bytes": 309485,
+      "sha256": "6d4a864aa6e6c5be9b1ec0c9904c20010f234c35a6c01b089026eb3ddcdc1ebb"
+    }
+  ]
+}

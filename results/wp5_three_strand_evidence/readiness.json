@@ -70,16 +70,20 @@
       "id": "temporal_evidence_closure",
       "owner_thread": "01a0691b-8544-7be0-ba5c-3344adf04982",
       "source_table": null,
-      "status": "reviewed_curation_code; compact table and renderer integration pending",
+      "status": "reviewed curation and renderer code; raw-artifact reaggregation and new immutable bundle pending",
       "eligible_for_empirical_claims": false,
       "repository": "noahlatzel/video-frame-selection",
-      "commit": "8c48a81eef2ad0af1db85260fddbddd040629f1f",
+      "commit": "50c1949819efbaf25338c0f3d62c5180ff581847",
       "commit_reported_by_parent": true,
       "original_results_status": "historical",
       "protocol_corrections": [
         "MTV1 and MTV48 QA resolution contracts remain separate; no equal-frame selection-effect inference across them",
         "Historical cached frame-feature counts are distinguished from videos and actual encoder executions"
-      ]
+      ],
+      "reported_focused_tests_passed": 8,
+      "test_scope": "Eight focused tests, including four-figure rendering coverage; no new scientific result implied",
+      "actual_raw_artifact_reaggregation": "pending",
+      "new_immutable_result_bundle": "pending"
     },
     {
       "id": "conceptual_intervention_figure",

@@ -16,7 +16,7 @@ Published AutoGaze exporter commit `8dbaa3f5dcf60fa7ea58d1a394f4a14f328be7e3` pa
 
 ## Temporal evidence
 
-Temporal curation is assigned to task `01a0691b-8544-7be0-ba5c-3344adf04982`. Reviewed `noahlatzel/video-frame-selection` commit `8c48a81eef2ad0af1db85260fddbddd040629f1f` keeps MTV1 and MTV48 QA resolution contracts separate and corrects cached frame-feature count interpretation. The original temporal results remain historical. Compact source-table integration and a renderer follow-up remain pending; no new temporal metric or figure is promoted by this readiness update.
+Temporal curation is assigned to task `01a0691b-8544-7be0-ba5c-3344adf04982`. Reviewed `noahlatzel/video-frame-selection` commit `50c1949819efbaf25338c0f3d62c5180ff581847` keeps MTV1 and MTV48 QA resolution contracts separate and corrects cached frame-feature count interpretation. The parent reports eight focused tests passing, including four-figure rendering coverage. The original temporal results remain historical. Raw-artifact reaggregation and a new immutable result bundle remain pending; no new temporal metric or figure is promoted by this implementation-readiness update.
 
 ## Conceptual intervention figure
 
