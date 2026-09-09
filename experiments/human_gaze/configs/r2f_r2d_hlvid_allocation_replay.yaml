@@ -26,7 +26,25 @@ protocol:
   legacy_runner_sha256: f7281533b556e508b6c82fc419e66a138d93e151be68932a7a632c8585c6de1e
   legacy_common_sha256: d390fd54b8fca681e2d530c3fb53ee15fdddcb06c379ef86d7720a914949e0b4
   nvila_processor_sha256: 2b9dbf36a9c69954af7e7cc8478a980e406e91c2ba27b7f2f164167da70dbc9a
-  decode_audit: shared_wp0_bundle_required_before_admission
+  decode_audit:
+    run_id: 20260909-0211_wp0-hlvid-protocol-audit_b98970d
+    path: /home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d
+    protocol_runtime_manifest_sha256: ca584503958f6be661bc1e9dc79a2fd5f89bbccbab01e348431f8773908ecb60
+    summary_sha256: 36b3e76dd1d3b64cfb8a0d37782746b8ab64fd38630fe4c6b0c25d8bf648fbf5
+    decode_audit_jsonl_sha256: 563e6c8f29b70f7c70b93668aee53624d68a9148521847998ab326ecc07f26b9
+    live_runtime_supplement_sha256: f2679ed4c90c6884e15243c78d38d78c4613861109098cb4521fcb3b1a4e1bf7
+    result: no_current_requested_decode_failures
+    video_count: 77
+    question_count: 268
+    affected_question_rows: []
+    elapsed_seconds: 2416.030326980166
+    environment:
+      hostname: atcremers63
+      python: /home/stud/latn/miniconda3/envs/vila-autogaze-eval/bin/python
+      opencv: 4.8.0
+      pillow: 12.2.0
+      numpy: 1.26.4
+      pyarrow: 24.0.0
   decode_audit_supplement: live_runtime_supplement.json
   decode_audit_supplement_contract: >-
     required runtime/library/hostname/Git/output-hash provenance with stable

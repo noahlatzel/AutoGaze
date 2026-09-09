@@ -1,0 +1,64 @@
+{
+  "affected_examples": [],
+  "artifact_hashes": {
+    "decode_audit": {
+      "path": "/home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d/decode_audit.jsonl",
+      "sha256": "563e6c8f29b70f7c70b93668aee53624d68a9148521847998ab326ecc07f26b9"
+    },
+    "protocol_runtime_manifest": {
+      "path": "/home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d/protocol_runtime_manifest.json",
+      "sha256": "ca584503958f6be661bc1e9dc79a2fd5f89bbccbab01e348431f8773908ecb60"
+    },
+    "summary": {
+      "path": "/home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d/summary.json",
+      "sha256": "36b3e76dd1d3b64cfb8a0d37782746b8ab64fd38630fe4c6b0c25d8bf648fbf5"
+    }
+  },
+  "audit_output_hashes": {
+    "decode_audit_jsonl_sha256": "563e6c8f29b70f7c70b93668aee53624d68a9148521847998ab326ecc07f26b9",
+    "protocol_runtime_manifest_sha256": "ca584503958f6be661bc1e9dc79a2fd5f89bbccbab01e348431f8773908ecb60",
+    "summary_sha256": "36b3e76dd1d3b64cfb8a0d37782746b8ab64fd38630fe4c6b0c25d8bf648fbf5"
+  },
+  "created_at": "2026-09-09T00:52:34.898669+00:00",
+  "dataset": {
+    "exact_hash_makes_row_indices_immutable": true,
+    "parquet_sha256": "ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a",
+    "split": "test"
+  },
+  "git": {
+    "commit": "4a10750e347985ca6f036cc256c55b11764f315c",
+    "dirty": false,
+    "repository": "/home/stud/latn/.codex/worktrees/r2f-hlvid-curation"
+  },
+  "git_commit": "4a10750e347985ca6f036cc256c55b11764f315c",
+  "git_dirty": false,
+  "git_repository": "/home/stud/latn/.codex/worktrees/r2f-hlvid-curation",
+  "historical_certification": false,
+  "hostname": "atcremers63",
+  "identity_link": {
+    "decode_audit_sha256": "563e6c8f29b70f7c70b93668aee53624d68a9148521847998ab326ecc07f26b9",
+    "protocol_runtime_manifest_sha256": "ca584503958f6be661bc1e9dc79a2fd5f89bbccbab01e348431f8773908ecb60",
+    "run_id": "20260909-0211_wp0-hlvid-protocol-audit_b98970d",
+    "summary_sha256": "36b3e76dd1d3b64cfb8a0d37782746b8ab64fd38630fe4c6b0c25d8bf648fbf5"
+  },
+  "packages": {
+    "numpy": "1.26.4",
+    "opencv": "4.8.0",
+    "pillow": "12.2.0",
+    "pyarrow": "24.0.0"
+  },
+  "python_executable": "/home/stud/latn/miniconda3/envs/vila-autogaze-eval/bin/python",
+  "python_version": "3.11.15 (main, Mar 11 2026, 17:20:07) [GCC 14.3.0]",
+  "reuse_qualification": "no_current_requested_decode_failures",
+  "run_id": "20260909-0211_wp0-hlvid-protocol-audit_b98970d",
+  "runtime": {
+    "hostname": "atcremers63",
+    "numpy_version": "1.26.4",
+    "opencv_version": "4.8.0",
+    "pillow_version": "12.2.0",
+    "pyarrow_version": "24.0.0",
+    "python_executable": "/home/stud/latn/miniconda3/envs/vila-autogaze-eval/bin/python",
+    "python_version": "3.11.15 (main, Mar 11 2026, 17:20:07) [GCC 14.3.0]"
+  },
+  "schema_version": 1
+}

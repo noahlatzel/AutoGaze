@@ -1,0 +1,13 @@
+{
+  "video_count": 77,
+  "question_count": 268,
+  "unusable_videos": 0,
+  "videos_with_requested_read_failures": 0,
+  "videos_with_metadata_count_correction": 0,
+  "videos_with_substituted_output": 0,
+  "affected_question_rows": [],
+  "loader_source_verified": true,
+  "reuse_qualification": "no_current_requested_decode_failures",
+  "historical_certification": false,
+  "audit_elapsed_seconds": 2416.030326980166
+}

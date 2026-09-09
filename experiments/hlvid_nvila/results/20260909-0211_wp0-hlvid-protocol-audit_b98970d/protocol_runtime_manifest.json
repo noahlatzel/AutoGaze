@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-09-09T00:12:03.570907+00:00",
+  "audit_code_revision": "b98970da97b884b8805acd1c25bed094225d7808",
+  "audit_script_sha256": "46c53fb8b225abefb9781c1e240ea03df14e14c4aa5413b1353c2193d9122b53",
+  "legacy_loader_path": "/home/stud/latn/AutoGaze/scripts/runners/evaluate_hlvid_nvila.py",
+  "legacy_loader_sha256": "f7281533b556e508b6c82fc419e66a138d93e151be68932a7a632c8585c6de1e",
+  "legacy_revision_reported": "1eb4d9243f3306cd3a759521d11281ac3c5bb190",
+  "loader_source_verified": true,
+  "dataset_parquet": "/storage/slurm/latn/data/AutoGaze/HLVid/data/test-00000-of-00001.parquet",
+  "dataset_sha256": "ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a",
+  "split": "test",
+  "video_column": "video_path",
+  "question_count": 268,
+  "video_count": 77,
+  "protocol": {
+    "num_video_frames": 128,
+    "num_video_frames_thumbnail": 64,
+    "max_tiles_video": 48,
+    "tile_len": 16,
+    "nvila_dtype": "bfloat16",
+    "do_sample": false,
+    "num_beams": 1,
+    "max_new_tokens": 16,
+    "truncation": false
+  },
+  "protocol_configuration_source": "frozen_evaluator_contract_not_model_execution",
+  "live_model_files_verified": false,
+  "nvila_snapshot_revision": "7a5670e20da435d98b0efdc49f9a536f73985152",
+  "python": "3.11.15 (main, Mar 11 2026, 17:20:07) [GCC 14.3.0]",
+  "platform": "Linux-7.0.0-26-generic-x86_64-with-glibc2.39",
+  "interpretation": "Present-day decode audit; does not retrospectively certify historical inputs."
+}
