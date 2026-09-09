@@ -123,6 +123,16 @@
     "live_runtime_supplement_sha256": "f2679ed4c90c6884e15243c78d38d78c4613861109098cb4521fcb3b1a4e1bf7",
     "consumer_validation": "passed by frozen fixed-control evaluator"
   },
+  "linux_validation_receipt": {
+    "status": "pass",
+    "path": "experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/linux_validation_receipt_b795de0.json",
+    "sha256": "2aae1ea0543a9507edc31be34e9f70a9def52d3440bda83a5dae0a33aa3f8eac",
+    "commit": "b795de084001c3a8ef1c147bc850d7764c867cb3",
+    "required_test": "tests/test_hlvid_control_preflight.py::test_preflight_selects_question_zero_from_a_larger_resumed_run",
+    "completed_at": "2026-09-09T00:50:16Z",
+    "result": "12 passed in 18.37s",
+    "rerun_required": false
+  },
   "control_submission": {
     "submitted_at": "2026-09-09T02:56:17+02:00",
     "array_job_id": "1700678",

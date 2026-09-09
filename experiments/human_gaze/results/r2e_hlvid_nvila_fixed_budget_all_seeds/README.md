@@ -39,6 +39,12 @@ AutoGaze reference is descriptive, not budget- or seed-matched.
 - `config.yaml`: resolved execution configuration.
 - `metrics.json`: aggregate results, validation record, and uncertainty.
 - `manifest.json`: code, job, checkpoint, and heavy-artifact provenance.
+- `admission_ledger_20260909T013942+0200.json`: shared Slurm admission and
+  submitted-control/replay receipt.
+- `linux_validation_receipt_b795de0.json`: original Linux pass evidence for
+  the exact restart-safe question-zero preflight test at the immutable control
+  source commit; this closes the later Windows platform-specific failure
+  without rerunning the unchanged test.
 - `per_seed.csv`, `per_category.csv`, and
   `matched_budget_differences.csv`: reviewable tables.
 - `hlvid_fixed_budget_all_seeds.{png,pdf}`: final figure.

@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "purpose": "Linux validation receipt for the restart-safe HLVid control preflight regression",
+  "status": "pass",
+  "platform": "linux",
+  "command": "source /home/stud/latn/miniconda3/etc/profile.d/conda.sh && conda activate autogaze && PYTHONPATH=$PWD python -m pytest -q tests/test_hlvid_control_preflight.py tests/test_hlvid_fixed_budget_evaluator.py",
+  "working_directory": "/home/stud/latn/.codex/worktrees/3f12/master-thesis/AutoGaze",
+  "completed_at": "2026-09-09T00:50:16Z",
+  "committed_source": {
+    "commit": "b795de084001c3a8ef1c147bc850d7764c867cb3",
+    "committed_at": "2026-09-09T02:50:31+02:00",
+    "test_file": "tests/test_hlvid_control_preflight.py",
+    "test_file_sha256": "6e954e14df53c2919dac2f748913eca3c212b7cabf61e8150f36cebaa6e32811",
+    "binding": "The passing suite completed immediately before b795de0 was committed, after the final test-file edit and with no intervening test-file change."
+  },
+  "required_test": "tests/test_hlvid_control_preflight.py::test_preflight_selects_question_zero_from_a_larger_resumed_run",
+  "result": {
+    "collected_tests": 12,
+    "passed_tests": 12,
+    "elapsed_seconds": 18.37,
+    "excerpt": "............ [100%]\\n12 passed in 18.37s"
+  },
+  "original_transcript": {
+    "path": "/home/stud/latn/.codex/sessions/2026/09/01/rollout-2026-09-01T00-56-55-01a05a0a-3c7e-7053-aa24-5069bff7fa96.jsonl",
+    "completion_line": 17559,
+    "completion_call_id": "call_fzQwqD61eQxRWKBi6Mlm3Gu3"
+  },
+  "interpretation": "This closes the Linux platform concern for the exact unchanged restart-attestation test; no rerun is required."
+}
