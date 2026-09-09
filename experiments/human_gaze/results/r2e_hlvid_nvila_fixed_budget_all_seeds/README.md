@@ -45,6 +45,11 @@ AutoGaze reference is descriptive, not budget- or seed-matched.
   the exact restart-safe question-zero preflight test at the immutable control
   source commit; this closes the later Windows platform-specific failure
   without rerunning the unchanged test.
+- `scheduler_node_relaxation_receipt_20260909T124648+0200.json`: before/after
+  provenance for clearing only the live node17 pin on pending same-A40 R2f and
+  replay jobs, including the rejected batched syntax and successful individual
+  commands. Immutable launchers still record the original node17 directive;
+  final curation records every actual allocation segment's node from Slurm.
 - `per_seed.csv`, `per_category.csv`, and
   `matched_budget_differences.csv`: reviewable tables.
 - `hlvid_fixed_budget_all_seeds.{png,pdf}`: final figure.

@@ -149,6 +149,28 @@
     "pending_reason": "ReqNodeNotAvail; node may be reserved",
     "orchestration_envelope_if_r2f_uses_two_lanes": "3 GPUs and 384G requested host memory"
   },
+  "control_scheduler_decision_20260909T043214+0200": {
+    "decided_at": "2026-09-09T04:32:14+02:00",
+    "decision": "retain job 1700678 unchanged for one bounded eight-hour quiet interval",
+    "rationale": [
+      "H100 NVL preserves hardware matching with the completed fixed-budget learned-policy evaluations",
+      "the distant scheduler start estimate is dynamic",
+      "the visible incumbent H100 jobs end on 2026-09-10",
+      "no active Slurm reservation explains the full projected delay"
+    ],
+    "interval_owner": "parent orchestration task; no recurring automation or autonomous extension",
+    "next_checkpoint": "one fresh read-only node21 maintenance/return-horizon and queue review after the parent-managed interval",
+    "prohibited_during_interval": [
+      "cancel",
+      "resubmit",
+      "requeue",
+      "modify job",
+      "duplicate submission"
+    ],
+    "conditional_fallback": "If H100 availability remains indefinite, make an explicit A40 decision under the same global resource cap and limit trained-versus-control interpretation to descriptive cross-hardware QA; keep latency scopes separate.",
+    "bridge_experiment_required": false,
+    "execution_commit_unchanged": "b795de084001c3a8ef1c147bc850d7764c867cb3"
+  },
   "processor_replay_submission": {
     "admitted_at": "2026-09-09T03:04:00+02:00",
     "submitted_at": "2026-09-09T03:07:06+02:00",
@@ -173,6 +195,21 @@
     },
     "submission_executor": "variable-budget owner task 01a05a0a-3c9c-7292-af02-9bef0c909d04",
     "scheduler_confirmation": "dependency, ReqTRES, SubmitLine, command path, and stored batch-script SHA256 matched the exact permit"
+  },
+  "same_a40_node_relaxation": {
+    "status": "completed_after_batch_syntax_rejection",
+    "applied_at": "2026-09-09T12:50:38+02:00",
+    "receipt": "experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/scheduler_node_relaxation_receipt_20260909T124648+0200.json",
+    "receipt_sha256": "f91399df92f8513e6cf3170460b0aabc8fead83c3259d7229df7a48e20d03a54",
+    "array_elements": ["1690935_0", "1690935_1", "1690935_2", "1690935_4", "1690935_5"],
+    "replay_job": "1700681",
+    "change": "cleared only ReqNodeList=node17 from each still-pending live job record",
+    "unchanged": "job IDs, A40 GRES, 5 CPUs, 128G host memory, 24h time limit, array throttle 2, source/run/output paths, immutable launchers, and replay afterok:1690935_* dependency",
+    "completed_array_element_3": "untouched",
+    "control_job_1700678": "untouched; remains H100 NVL on node21",
+    "batch_attempt": "comma-separated logical array IDs were rejected without effect; each exact target was then updated and verified individually under explicit follow-up authorization",
+    "effective_required_node_list": null,
+    "actual_segment_node_recording": "required later from Slurm accounting"
   },
   "local_vm": {
     "hostname": "atcremers63",
