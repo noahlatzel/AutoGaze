@@ -24,9 +24,16 @@ peak CUDA reservation was 450,887,680 bytes, and peak process RSS was
 figures establish that the requested microbatch-one preflight fits the VM; they
 are not a full-training throughput or memory estimate.
 
+Before GPU execution, the requested seven-file CPU group passed all 77 tests in
+27.66 seconds. The GPU runtime environment does not contain `pytest`, so this
+group ran with `/home/stud/latn/miniconda3/envs/autogaze/bin/python`; the real
+model run used the requested isolated
+`/home/stud/latn/miniconda3/envs/vila-autogaze-eval/bin/python`. Three additional
+harness tests passed in 11.24 seconds, and both new Python files passed syntax
+compilation.
+
 The immutable scientific implementation base is
 `d85c6558bf9e8f02ece1f3516b4709a715ebec63`. The receipt-producing harness ran
 at `21e9ab8415be7f3515b6ed75539cf12060d42ecc`. See `config.yaml` for the exact
 invocation, `metrics.json` for compact checks, and `manifest.json` for hashes and
 the ignored full receipt location.
-
