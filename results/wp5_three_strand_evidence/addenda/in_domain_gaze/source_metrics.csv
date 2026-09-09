@@ -1,0 +1,9 @@
+metric_id,bundle,split,method,metric,value,interval_low,interval_high,interval_method,n_seeds,seed_ids,status
+gaze_r1_learned,r0_r1,protected_test,learned_K16,macro_source_k16_coverage,0.3710703592802914,,,population SD 0.0013745 and range 0.0033148,3,"240826;240827;240828",final_descriptive
+gaze_r1_center,r0_r1,protected_test,center16,macro_source_k16_coverage,0.3616306248294483,,,deterministic,1,not_applicable,final_descriptive
+gaze_r1_prior,r0_r1,protected_test,train_only_prior16,macro_source_k16_coverage,0.43204338771085443,,,deterministic,1,not_applicable,final_descriptive
+gaze_r2d_mean_k,r2d,validation,calibrated_variable,mean_fine_actions,15.155946417959834,,,mean across seeds,3,"440826;440827;440828",historical_curated
+gaze_r2d_variable,r2d,validation,calibrated_variable,macro_source_coverage,0.3787515245426074,,,mean across seeds,3,"440826;440827;440828",historical_curated
+gaze_r2d_forced16,r2d,validation,same_endpoints_forced_K16,macro_source_coverage,0.417116669753735,,,mean across seeds,3,"440826;440827;440828",historical_curated
+gaze_r2d_diff,r2d,validation,variable_minus_forced16,macro_source_difference,-0.038365145211127605,-0.04210092140780236,-0.03462936901445285,descriptive t across seeds,3,"440826;440827;440828",historical_curated
+gaze_r2d_allocation,r2d,validation,actual_minus_shuffled,macro_source_difference,0.007764457516113728,0.005114496730131464,0.010414418302095992,descriptive t across seeds,3,"440826;440827;440828",historical_curated

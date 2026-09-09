@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "status": "implementation_readiness_only",
+  "scientific_claims_added": false,
+  "items": [
+    {
+      "id": "hlvid_runtime_decode_audit",
+      "repository": "noahlatzel/AutoGaze",
+      "commit": "38fffdac34cee682f87a75f12af05dc6e118ac17",
+      "commit_verified_via_github": true,
+      "reported_cpu_tests_passed": 23,
+      "actual_linux_decode_audit": "pending",
+      "eligible_for_empirical_claims": false
+    },
+    {
+      "id": "dino_benchmark_supplement",
+      "repository": null,
+      "repository_resolution": "not present in the available AutoGaze GitHub connection",
+      "commit": "9b5ac79cf6f49fb90905602f3b9bbd2cded011e1",
+      "commit_reported_by_parent": true,
+      "reported_cpu_tests_passed": 57,
+      "panel_export": "pending",
+      "gpu_results": "pending",
+      "eligible_for_empirical_claims": false,
+      "panel_contract": {
+        "split": "validation",
+        "distinct_videos": 12,
+        "videos_per_source": 2,
+        "frames_per_clip": 16,
+        "selection_uses_outcomes": false,
+        "constraint": "Two sources contain only two validation videos."
+      }
+    },
+    {
+      "id": "temporal_evidence_closure",
+      "owner_thread": "01a0691b-8544-7be0-ba5c-3344adf04982",
+      "source_patch": "/tmp/t0-temporal-evidence-closure.patch",
+      "source_table": null,
+      "status": "assigned_pending_verified_handoff",
+      "eligible_for_empirical_claims": false
+    },
+    {
+      "id": "conceptual_intervention_figure",
+      "owner_thread": "01a07ddb-a693-79f0-a33b-03901d2518c1",
+      "script": "work/figures/make_interventions.py",
+      "main_token_merging_mechanism": "cumulative_tome",
+      "supplemental_mechanism": {
+        "name": "spatial_block",
+        "operation": "merge before attention and restore the grid after each block",
+        "is_final_k16": false
+      },
+      "status": "available_parent_local_exact_output_paths_pending",
+      "eligible_for_empirical_claims": false
+    }
+  ]
+}
