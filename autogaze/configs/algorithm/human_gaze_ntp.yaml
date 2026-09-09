@@ -1,0 +1,6 @@
+_target_: autogaze.algorithms.HumanGazeNTP
+clip_len: 16
+actions_per_frame: 265
+fine_action_offset: 69
+exact_budget: 16
+teacher_seed: ${trainer.seed}

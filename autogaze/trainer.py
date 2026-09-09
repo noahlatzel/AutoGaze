@@ -25,6 +25,12 @@ from transformers import get_linear_schedule_with_warmup
 
 from autogaze.utils import get_scheduled_temperature, move_inputs_to_cuda, unwrap_model
 from autogaze.train import seed_everything
+from autogaze.supervised_checkpoint import (
+    plain_supervised_checkpoint_config,
+    supervised_resume_contract,
+    verify_supervised_completion,
+    write_supervised_completion,
+)
 
 
 class Trainer:
@@ -44,7 +50,13 @@ class Trainer:
         self.n_epochs = n_epochs
         self.train_gaze = train_gaze
         self.train_task = train_task
-        self.train_w_ntp = 'ntp' in type(self.algorithm).__name__.lower()
+        self.train_w_ntp = (
+            getattr(self.algorithm, "uses_teacher_forcing", False)
+            or 'ntp' in type(self.algorithm).__name__.lower()
+        )
+        self.human_supervision = getattr(self.algorithm, "uses_teacher_forcing", False)
+        if self.human_supervision and torch.distributed.get_world_size() != 1:
+            raise ValueError("The supervised gaze protocol supports one GPU per seed only")
         self.detach_task = detach_task
         self.val_nsteps = val_nsteps
         self.save_nsteps = save_nsteps
@@ -146,6 +158,8 @@ class Trainer:
             handle.write(json.dumps(record, sort_keys=True) + "\n")
 
     def save_checkpoint(self, epoch, iteration):
+        supervised_contract = supervised_resume_contract(self) if self.human_supervision else None
+        saved_config = plain_supervised_checkpoint_config(self.config) if self.human_supervision else self.config
         task_ckpt = self.task.state_dict()
         train_ckpt = {
             'epoch': epoch,
@@ -154,8 +168,10 @@ class Trainer:
             'scheduler_state_dict': self.scheduler.state_dict(),
             'train_step': self.train_step,
             'val_step': self.val_step,
-            'config': self.config
+            'config': saved_config
         }
+        if self.human_supervision:
+            train_ckpt['supervised_algorithm_state'] = self.algorithm.state_dict()
         
         # Save latest checkpoint
         latest_gaze_dir = os.path.join(self.save_dir, 'checkpoint_latest_gaze')
@@ -185,6 +201,13 @@ class Trainer:
                 oldest_folder = checkpoint_folders.pop(0)
                 shutil.rmtree(os.path.join(self.save_dir, oldest_folder))
 
+        if self.human_supervision:
+            write_supervised_completion(
+                self.save_dir,
+                train_step=self.train_step,
+                contract=supervised_contract,
+            )
+
     def load_checkpoint(self, gaze_model_path=None, task_path=None, resume_path=None, resume=False):
         if resume:
             if resume_path is None:
@@ -194,15 +217,37 @@ class Trainer:
             task_ckpt_path = os.path.join(resume_path, 'checkpoint_latest_task.pt')
 
             if not os.path.exists(gaze_ckpt_path) or not os.path.exists(task_ckpt_path) or not os.path.exists(train_ckpt_path):
+                if self.human_supervision:
+                    raise FileNotFoundError("Supervised resume requires all three checkpoint files")
                 logger.warning("Resuming checkpoint not found. Starting fresh.")
                 return
 
             logger.info(f"Resuming from {resume_path}")
+
+            completion = None
+            if self.human_supervision:
+                completion = verify_supervised_completion(
+                    resume_path,
+                    expected_contract=supervised_resume_contract(self),
+                )
             
             task_ckpt = torch.load(task_ckpt_path, map_location='cpu')
             train_ckpt = torch.load(train_ckpt_path, map_location='cpu')
 
-            unwrap_model(self.gaze_model).from_pretrained(gaze_ckpt_path)
+            if self.human_supervision:
+                if train_ckpt.get('train_step') != completion['train_step']:
+                    raise ValueError("Supervised checkpoint training step disagrees with its completion marker")
+                saved_config = train_ckpt.get('config', {})
+                for key in ('seed', 'batch_size', 'per_gpu_max_batch_size', 'optimizer', 'lr', 'lr_schedule'):
+                    if saved_config.get(key) != self.config.get(key):
+                        raise ValueError(f"Supervised checkpoint saved configuration mismatch for {key}")
+                if 'supervised_algorithm_state' not in train_ckpt:
+                    raise ValueError("Supervised resume checkpoint lacks teacher RNG state")
+                restored_model = unwrap_model(self.gaze_model).from_pretrained(gaze_ckpt_path)
+                unwrap_model(self.gaze_model).load_state_dict(restored_model.state_dict(), strict=True)
+                self.algorithm.load_state_dict(train_ckpt['supervised_algorithm_state'])
+            else:
+                unwrap_model(self.gaze_model).from_pretrained(gaze_ckpt_path)
             self.task.load_state_dict(task_ckpt)
             self.optimizer.load_state_dict(train_ckpt['optimizer_state_dict'])
             self.scheduler.load_state_dict(train_ckpt['scheduler_state_dict'])
@@ -261,9 +306,11 @@ class Trainer:
         gt_gazing_info = inputs['gt_gazing_info']
 
         # Get the probability of gazing
+        supervised_kwargs = {"return_supervised_log_probs": True} if self.human_supervision else {}
         gaze_outputs = self.gaze_model(
             inputs,
             gazing_info=gt_gazing_info,
+            **supervised_kwargs,
             **getattr(unwrap_model(self.task), 'gaze_model_kwargs', {}),
         )
 
@@ -320,6 +367,12 @@ class Trainer:
         }
 
     def train_epoch(self, ep, start_iter):
+        if self.human_supervision:
+            if len(self.train_loader) == 0 or len(self.train_loader) % self.grad_acc_steps:
+                raise ValueError("Supervised training requires complete gradient-accumulation groups per epoch")
+            if not 0 <= start_iter < len(self.train_loader) or start_iter % self.grad_acc_steps:
+                raise ValueError("Supervised resume must start at a complete gradient-accumulation boundary")
+            self._supervised_next_input_cursor = (ep, start_iter)
         if hasattr(self.train_loader.sampler, "set_epoch"):
             self.train_loader.sampler.set_epoch(ep)
         pbar = tqdm(total=(len(self.train_loader) // self.grad_acc_steps)) if torch.distributed.get_rank() == 0 else None
@@ -460,6 +513,16 @@ class Trainer:
                         for metric_name in metrics:
                             accum_metrics[metric_name] += metrics[metric_name]
 
+            if self.human_supervision:
+                # This input has actually contributed gradients. Prefetched or
+                # skipped inputs have not consumed the dedicated teacher RNG.
+                next_iteration = i + 1
+                self._supervised_next_input_cursor = (
+                    (ep + 1, 0)
+                    if next_iteration == len(self.train_loader)
+                    else (ep, next_iteration)
+                )
+
         if has_unapplied_grads:
             logger.warning('Batch size did not divide dataset size: applying partial-batch gradients.')
             # Apply the gradients to the model
@@ -575,13 +638,20 @@ class Trainer:
             self.validate()
             return
         
+        if self.human_supervision:
+            self._supervised_next_input_cursor = (self.start_epoch, self.start_iteration)
         for ep in range(self.start_epoch, self.n_epochs):
+            if self.human_supervision and self.max_train_steps is not None and self.train_step >= self.max_train_steps:
+                break
             logger.info(f"Epoch {ep}")
             self.train_epoch(ep, start_iter=self.start_iteration if ep == self.start_epoch else 0)
 
         if self.save_at_end and torch.distributed.get_rank() == 0:
             logger.info("Saving final checkpoint")
-            self.save_checkpoint(self.n_epochs, 0)
+            if self.human_supervision:
+                self.save_checkpoint(*self._supervised_next_input_cursor)
+            else:
+                self.save_checkpoint(self.n_epochs, 0)
         torch.distributed.barrier()
         if not self.skip_final_validation:
             logger.info("Final validation")

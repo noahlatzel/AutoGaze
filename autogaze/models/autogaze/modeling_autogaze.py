@@ -27,6 +27,7 @@ from transformers import LogitsProcessor, LogitsProcessorList
 
 from .configuration_autogaze import GazeModelConfig, VisionModelConfig, ConnectorConfig
 from .modeling_llama_multi_token_pred import LlamaForCausalLM_MultiTokenPred
+from .supervised_distribution import supervised_action_log_probs
 
 
 @dataclass
@@ -34,6 +35,7 @@ class AutoGazeOutput(ModelOutput):
     gaze_logits: Optional[torch.FloatTensor] = None
     gaze_probs: Optional[torch.FloatTensor] = None
     gaze_log_probs_all: Optional[torch.FloatTensor] = None
+    supervised_action_log_probs_all: Optional[torch.FloatTensor] = None
     loss: Optional[torch.FloatTensor] = None
     logits: torch.FloatTensor = None
     past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None
@@ -498,12 +500,15 @@ class AutoGazeModel(nn.Module):
         allowed_token_ids=None,
         allow_eos=False,
         min_gaze_tokens_each_frame=0,
+        return_supervised_log_probs=False,
         **kwargs,
     ):
         # Unpack gazing_info
         gaze_pos_ids = gazing_info["gazing_pos"]
         num_gazing_each_frame = gazing_info["num_gazing_each_frame"]
         if_padded_gazing = gazing_info["if_padded_gazing"]
+        if return_supervised_log_probs and (allow_eos or if_padded_gazing.any()):
+            raise ValueError("Supervised distributions require fixed, unpadded fine actions without EOS")
         
         # Subsample frames and resize
         B, T = video.shape[:2]
@@ -645,10 +650,27 @@ class AutoGazeModel(nn.Module):
                 self.gaze_decoder_config.eos_token_id,
                 min_gaze_tokens_each_frame,
             )
-        gaze_probs_all = mask_previously_selected(
-            gaze_probs_all,
-            gaze_pos_ids_split,
-        )
+        supervised_log_probs = None
+        if return_supervised_log_probs:
+            supervised_log_probs = supervised_action_log_probs(
+                logits_multi_token_pred,
+                gaze_token_mask,
+                gaze_pred_source_relative,
+                gaze_pos_ids_split,
+                effective_allowed_ids,
+            )
+            # The legacy probability-space no-repeat denominator can underflow
+            # when a removed cell dominates. Supplied supervised histories use
+            # the stable distribution for these compatibility fields as well.
+            gaze_probs_all = F.pad(
+                supervised_log_probs.exp(),
+                (69, self.gaze_decoder_config.vocab_size - 265),
+            )
+        else:
+            gaze_probs_all = mask_previously_selected(
+                gaze_probs_all,
+                gaze_pos_ids_split,
+            )
         gaze_log_probs_all = torch.log(
             gaze_probs_all[..., effective_allowed_ids] + 1e-8
         )
@@ -659,6 +681,7 @@ class AutoGazeModel(nn.Module):
         outputs = AutoGazeOutput(
             gaze_probs=gaze_probs,
             gaze_log_probs_all=gaze_log_probs_all,
+            supervised_action_log_probs_all=supervised_log_probs,
             loss=outputs.loss,
             logits=outputs.logits,
             past_key_values=outputs.past_key_values,

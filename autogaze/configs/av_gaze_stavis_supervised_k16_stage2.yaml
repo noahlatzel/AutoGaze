@@ -1,0 +1,26 @@
+defaults:
+  - av_gaze_stavis_supervised_k16
+  - _self_
+
+# Start from THIS seed's supervised stage-one weights with fresh Adam, as at
+# the historical 2315-update RL boundary. Continue Adam without a reset at10k.
+# Supply the verified stage-one checkpoint by CLI override or this environment
+# variable. Without either, config resolution fails before loading a model.
+trainer:
+  seed: 540826
+  gaze_weights: ${oc.env:SUPERVISED_STAGE1_CHECKPOINT}
+  n_epochs: 40
+  max_train_steps: 17685
+  lr: 3e-6
+  lr_schedule: constant
+  exp_name: supervised_k16_stage2_seed${trainer.seed}
+  logdir: outputs/human_gaze/supervised_k16
+  resume: false
+  max_periodic_checkpoints: 5
+  save_nsteps: 1000000
+  save_train_steps: [2685, 7685, 12685]
+  temp_schedule_args:
+    mode: exp
+    exp:
+      temp_start: 0.3
+      temp_end: 0.3
