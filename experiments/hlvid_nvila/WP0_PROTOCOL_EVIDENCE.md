@@ -189,7 +189,7 @@ last-frame correction, failed duplicate retry, and fatal RGB conversion.
 The single admitted present-day audit completed on 2026-09-09 under
 `/home/stud/latn/miniconda3/envs/vila-autogaze-eval/bin/python`. Its compact
 bundle is
-`results/20260909-0211_wp0-hlvid-protocol-audit_b98970d/`.
+`../../results/hlvid_nvila/20260909-0211_wp0-hlvid-protocol-audit_b98970d/`.
 
 All 77 videos / 268 question rows were covered. No requested-frame read failure,
 metadata-count correction, legacy output substitution, unusable video, or
