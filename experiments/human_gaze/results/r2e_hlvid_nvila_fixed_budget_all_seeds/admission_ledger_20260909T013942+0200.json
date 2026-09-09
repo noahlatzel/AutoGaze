@@ -211,6 +211,39 @@
     "effective_required_node_list": null,
     "actual_segment_node_recording": "required later from Slurm accounting"
   },
+  "control_a40_replacement": {
+    "status": "submitted_pending",
+    "authorized_by_user": "Approve, cross-hardware QA comparison is generally acceptable!",
+    "receipt": "experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/control_a40_replacement_receipt_20260909T190415+0200.json",
+    "receipt_sha256": "ec881d839ff9814a963d83b178957019301447970863781d60f53dc95f7d7cad",
+    "superseded_h100_array": {
+      "job_id": "1700678",
+      "cancelled_at": "2026-09-09T18:59:58+02:00",
+      "state": "CANCELLED",
+      "elapsed": "00:00:00",
+      "allocated": false,
+      "generated_qa": false
+    },
+    "replacement_array": {
+      "job_id": "1701485",
+      "submitted_at": "2026-09-09T19:00:24+02:00",
+      "tasks": {
+        "0": "pretrained_exact_k16",
+        "1": "stavis_center16"
+      },
+      "concurrency": 1,
+      "request_per_active_task": "cpu=8,mem=128G,gres/gpu:a40=1,24h",
+      "effective_required_node_list": null,
+      "state_after_node_relaxation": "PENDING Priority",
+      "projected_start": null,
+      "execution_commit": "b795de084001c3a8ef1c147bc850d7764c867cb3",
+      "stored_batch_script_sha256": "484748d8352f9d7ecde2cbe583345b74f8ed32999541574e9a5130cef9e81c4b"
+    },
+    "capacity_evidence": "Completed job 1694765 ran all 268 MTV48/128-frame/64-thumbnail forced-K16 questions on NVIDIA A40: 47699722240 bytes (45490 MiB, 44.423828125 GiB) runtime-visible total, peak gres/gpumem=36490M, host MaxRSS=131296872K, elapsed 17:41:39, exit 0:0.",
+    "scientific_protocol_change": false,
+    "claim_boundary": "trained-versus-control QA is descriptive cross-hardware; latency remains hardware-specific",
+    "global_cap": "up to two R2f A40/128G tasks plus one serialized control A40/128G task = 3 GPUs and 384G; replay 1700681 is afterok:1690935_*"
+  },
   "local_vm": {
     "hostname": "atcremers63",
     "gpu": "NVIDIA RTX A2000 12GB",

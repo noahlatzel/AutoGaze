@@ -50,6 +50,10 @@ AutoGaze reference is descriptive, not budget- or seed-matched.
   replay jobs, including the rejected batched syntax and successful individual
   commands. Immutable launchers still record the original node17 directive;
   final curation records every actual allocation segment's node from Slurm.
+- `control_a40_replacement_receipt_20260909T190415+0200.json`: explicit user
+  approval, zero-work H100 cancellation, immutable A40 replacement submission,
+  per-element same-A40 node-pin relaxation, full-protocol VRAM evidence, and
+  the descriptive cross-hardware QA/latency claim boundary.
 - `per_seed.csv`, `per_category.csv`, and
   `matched_budget_differences.csv`: reviewable tables.
 - `hlvid_fixed_budget_all_seeds.{png,pdf}`: final figure.
