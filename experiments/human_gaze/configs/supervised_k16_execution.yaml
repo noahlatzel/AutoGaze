@@ -1,0 +1,79 @@
+schema_version: 1
+experiment_id: supervised_k16_comparison
+kind: matched_six_seed_supervised_training_execution
+implementation_base_commit: d85c6558bf9e8f02ece1f3516b4709a715ebec63
+comparison_config: experiments/human_gaze/configs/supervised_k16_comparison.yaml
+comparison_config_sha256: 6730eb010584e50e8e11c20ed1c175553cbb14e6ec32e43e9b1ee7f81f301ada
+required_clean_detached_checkout: true
+base_seeds: [440826, 440827, 440828, 440829, 440830, 440831]
+continuation_seeds: [540826, 540827, 540828, 540829, 540830, 540831]
+data:
+  root: /storage/user/zverev/datasets/av-gaze-stavis
+  manifest: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+  manifest_sha256: 0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10
+  cell_mass: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+  cell_mass_sha256: fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8
+initialization:
+  path: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+  model_safetensors_sha256: a48e6a83a198368e3798420ff5d5df42af7c0003c9230f85581c39a2ea64e9eb
+training:
+  exact_k: 16
+  clip_len: 16
+  base_clips_per_update: 4
+  stage1:
+    config: av_gaze_stavis_supervised_k16_stage1
+    updates: 2315
+    n_epochs: 5
+    learning_rate: 0.00001
+    lr_schedule: linear_w_warmup
+    optimizer: adam
+  stage2:
+    config: av_gaze_stavis_supervised_k16_stage2
+    updates: 17685
+    n_epochs: 40
+    learning_rate: 0.000003
+    lr_schedule: constant
+    optimizer: adam
+    initialization: same_seed_verified_supervised_stage1_model_with_fresh_optimizer
+  cumulative_updates: 20000
+  base_clip_presentations_per_seed: 80000
+  nominal_action_rows_per_seed: 20480000
+  fixed_checkpoint_updates: [2315, 5000, 10000, 15000, 20000]
+execution:
+  python: /home/stud/latn/miniconda3/envs/autogaze/bin/python
+  worktree: /storage/user/latn/worktrees/autogaze-supervised-k16-execution
+  artifact_root: /storage/user/latn/artifacts/autogaze-supervised-k16
+  array_indices: [0, 1, 2, 3, 4, 5]
+  one_gpu_per_seed: true
+  phase_chain_within_seed_allocation: [stage1, verify_stage1, stage2, verify_stage2]
+  resume: disabled_for_initial_admission
+resources:
+  gpu_type: a40
+  gpus_per_task: 1
+  cpus_per_task: 5
+  host_memory_gib_per_task: 32
+  wall_hours_per_task: 24
+  initial_array_concurrency: 1
+  basis:
+    real_model_preflight_peak_cuda_bytes: 407873536
+    real_model_preflight_peak_rss_bytes: 2149191680
+    real_model_preflight_microbatch: 1
+    historical_validation_batch16_completed_on_rtx5000_16gib: true
+    optimizer_state_increment_for_2040000_trainable_fp32_parameters_is_small: true
+  require_final_sacct_elapsed_gpu_and_maxrss: true
+  require_in_job_gpu_memory_telemetry: true
+admission:
+  sole_owner_task: 01a05a0a-3c7e-7053-aa24-5069bff7fa96
+  global_max_concurrent_gpu_allocations: 3
+  global_max_host_memory_gib: 384
+  preserve_existing_priorities: [1690935, 1701485, 1700681]
+  no_independent_submit_requeue_or_cancel: true
+  no_hlvid_in_this_admission: true
+outputs:
+  immutable_precheck: admission_precheck.json
+  per_seed_execution_manifest: execution_manifest.json
+  stage1_completion_verification: stage1_completion_verification.json
+  stage2_completion_verification: stage2_completion_verification.json
+  gpu_telemetry: gpu_memory.csv
+  phase_time_records: [stage1_time.txt, stage2_time.txt]
+  compact_results_after_validation: experiments/human_gaze/results/supervised_k16_comparison

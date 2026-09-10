@@ -99,3 +99,26 @@ teacher RNG. A completion marker checks model/optimizer/teacher-state hashes
 and the phase/sampler contract before loading; an interrupted or mixed latest
 bundle is rejected. Periodic snapshots are not automatic recovery targets.
 The immutable execution manifest must additionally bind source and dataset hashes.
+
+## Production execution
+
+The bounded real-model receipt under
+`results/supervised_k16_real_preflight/20260909-230035_supervised-k16-real-preflight_21e9ab8`
+passed six single-rank NCCL forward/backward iterations and six label-free greedy
+K16 generations. It measured 407,873,536 bytes peak CUDA allocation and
+2,149,191,680 bytes process RSS on the RTX A2000 VM. An extra GPU smoke for an
+Adam step or batch-16 validation was not required: Adam state for 2.04M FP32
+trainable parameters is small, checkpoint restoration has CPU invariant tests,
+and the identical validation batch size already completed in the historical
+RTX5000 training runs.
+
+`configs/supervised_k16_execution.yaml` is the production resource and phase
+contract. `slurm/run_supervised_k16_comparison_array.sbatch` runs one paired seed
+per array element, serializes stage one, its completion verification, stage two,
+and its completion verification, and cannot run HLVid. The initial request is a
+conservative `%1` A40 lane with one GPU, five CPUs, 32 GiB host RAM and a 24-hour
+ceiling per element. The launcher requires a clean detached admitted commit,
+verifies all input hashes before training, refuses existing output directories,
+records phase timing and GPU telemetry, and emits an immutable per-seed execution
+manifest. Final Slurm elapsed/GPU/MaxRSS accounting remains mandatory after each
+allocation exits.
