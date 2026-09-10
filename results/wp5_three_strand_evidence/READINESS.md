@@ -62,7 +62,9 @@ not fresh combined totals.
 ## Controls and refreshed variable budget remain incomplete
 
 K16 controls run from frozen AutoGaze
-`b795de084001c3a8ef1c147bc850d7764c867cb3` under Slurm 1700678; results are pending.
+`b795de084001c3a8ef1c147bc850d7764c867cb3` under the active serialized A40
+replacement array 1701485; results are pending. The superseded H100 array
+1700678 was cancelled with zero runtime and must not be treated as active.
 Variable-budget job 1690935 is partial, without a final aggregate. Allocation
 replay job 1700681 depends on completion. No partial-run numerical aggregate is
 promoted. Existing R2d in-domain evidence remains historical.

@@ -80,6 +80,9 @@ def verified_source(expected_commit: str) -> dict[str, Any]:
         "tests/test_supervised_k16_execution.py",
         "experiments/human_gaze/configs/supervised_k16_execution.yaml",
         "experiments/human_gaze/slurm/run_supervised_k16_comparison_array.sbatch",
+        "results/wp5_three_strand_evidence/READINESS.md",
+        "results/wp5_three_strand_evidence/owner_status.csv",
+        "results/wp5_three_strand_evidence/readiness.json",
     }
     permitted_prefix = "experiments/human_gaze/results/supervised_k16_real_preflight/"
     unexpected = [

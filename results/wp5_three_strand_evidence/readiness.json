@@ -128,7 +128,8 @@
     {
       "id": "fixed_k_controls",
       "commit": "b795de084001c3a8ef1c147bc850d7764c867cb3",
-      "slurm_job": "1700678",
+      "slurm_job": "1701485",
+      "superseded_cancelled_slurm_job": "1700678",
       "status": "pending",
       "eligible_for_empirical_claims": false
     },
