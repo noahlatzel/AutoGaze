@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -15,10 +16,13 @@ from typing import Any
 import torch
 from omegaconf import OmegaConf
 
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
+
 from autogaze.supervised_checkpoint import verify_supervised_completion
 
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 IMPLEMENTATION_BASE = "d85c6558bf9e8f02ece1f3516b4709a715ebec63"
 COMPARISON_SHA256 = "6730eb010584e50e8e11c20ed1c175553cbb14e6ec32e43e9b1ee7f81f301ada"
 MANIFEST_SHA256 = "0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10"
