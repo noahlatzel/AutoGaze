@@ -22,11 +22,12 @@ from autogaze.human_gaze.supervised_analysis import (
     within_source_different_video_indices,
 )
 from scripts.human_gaze.curate_supervised_k16_comparison import (
-    resolved_phase_dir,
+    phase_wall_at,
     resource_summary,
     validate_analysis_config,
     validate_resource_receipt,
 )
+from scripts.human_gaze.plot_supervised_k16_comparison import plot_convergence
 
 
 BASE_SEEDS = tuple(range(440826, 440832))
@@ -193,6 +194,12 @@ def test_action_export_loader_checks_alignment_and_checksum(tmp_path: Path) -> N
                 )
                 + "\n"
             )
+    provenance = {
+        "checkpoint": {
+            "tree_sha256": "c" * 64,
+            "files_sha256": {"model.safetensors": "d" * 64},
+        }
+    }
     manifest = {
         "schema_version": 1,
         "status": "complete",
@@ -201,7 +208,13 @@ def test_action_export_loader_checks_alignment_and_checksum(tmp_path: Path) -> N
         "training_seed": 540826,
         "cumulative_update": 20000,
         "split": "val",
-        "inputs": {"manifest_sha256": "a" * 64, "cell_mass_sha256": "b" * 64},
+        "inputs": {
+            "manifest_sha256": "a" * 64,
+            "cell_mass_sha256": "b" * 64,
+            "checkpoint_tree_sha256": "c" * 64,
+            "model_safetensors_sha256": "d" * 64,
+        },
+        "checkpoint_provenance": provenance,
         "actions_sha256": sha256_file(actions_path),
         "clip_len": 16,
         "exact_k": 16,
@@ -223,6 +236,7 @@ def test_action_export_loader_checks_alignment_and_checksum(tmp_path: Path) -> N
         expected_base_seed=440826,
         expected_training_seed=540826,
         expected_cumulative_update=20000,
+        expected_checkpoint_provenance=provenance,
     )
 
     assert loaded_manifest["status"] == "complete"
@@ -234,6 +248,14 @@ def test_action_export_loader_checks_alignment_and_checksum(tmp_path: Path) -> N
             expected_manifest_sha256="a" * 64,
             expected_cell_mass_sha256="b" * 64,
             expected_training_seed=540827,
+        )
+    with pytest.raises(ValueError, match="checkpoint provenance"):
+        load_action_export(
+            directory,
+            records,
+            expected_manifest_sha256="a" * 64,
+            expected_cell_mass_sha256="b" * 64,
+            expected_checkpoint_provenance={"checkpoint": {}},
         )
     with actions_path.open("a", encoding="utf-8") as handle:
         handle.write("{}\n")
@@ -397,15 +419,6 @@ def test_resource_receipt_and_same_seed_recovery_fail_closed(tmp_path: Path) -> 
     (seed_root / "recovery_manifest.json").write_text(
         json.dumps(recovery), encoding="utf-8"
     )
-    assert resolved_phase_dir(
-        seed_root,
-        seed,
-        "stage1",
-        immutable_source_commit="source",
-        manifest_sha256="manifest",
-        cell_mass_sha256="cell_mass",
-    ) == recovery_stage1.resolve()
-
     complete, detail = validate_resource_receipt(seed_root, seed)
     assert complete is False
     assert "recovery_attempt_accounting" in detail["problems"]
@@ -419,6 +432,59 @@ def test_resource_receipt_and_same_seed_recovery_fail_closed(tmp_path: Path) -> 
     complete, detail = validate_resource_receipt(seed_root, seed)
     assert complete is False
     assert "final_sacct_terminal_state" in detail["problems"]
+
+
+def test_phase_wall_time_rejects_duplicate_steps_and_elapsed_resets() -> None:
+    duplicate = [
+        {"train_step": 4999, "elapsed_seconds": 1000},
+        {"train_step": 4999, "elapsed_seconds": 200},
+    ]
+    with pytest.raises(ValueError, match="duplicate"):
+        phase_wall_at(duplicate, 5000)
+    reset = [
+        {"train_step": 0, "elapsed_seconds": 10},
+        {"train_step": 1, "elapsed_seconds": 5},
+    ]
+    with pytest.raises(ValueError, match="resets"):
+        phase_wall_at(reset, 2)
+
+
+def test_timing_figure_handles_withheld_supervised_curve_and_names_hardware(
+    tmp_path: Path,
+) -> None:
+    coverage = {"mean": 0.4, "ci90_low": 0.3, "ci90_high": 0.5}
+    metrics = {
+        "convergence": {
+            "hardware": {"supervised": "NVIDIA A40", "rl": "NVIDIA RTX 5000"},
+            "supervised_fixed_checkpoints": [
+                {
+                    "base_clip_presentations": 80000,
+                    "nominal_training_trajectory_action_rows": 20480000,
+                    "training_wall_seconds": {"status": "withheld"},
+                    "coverage": coverage,
+                }
+            ],
+            "rl_existing_actual_logged_updates": [
+                {
+                    "base_clip_presentations": 80000,
+                    "nominal_training_trajectory_action_rows": 81920000,
+                    "training_wall_seconds": {
+                        "mean": 3600,
+                        "ci90_low": 3500,
+                        "ci90_high": 3700,
+                    },
+                    "coverage": coverage,
+                }
+            ],
+        }
+    }
+    plot_convergence(metrics, tmp_path)
+    assert (tmp_path / "supervised_k16_convergence.png").is_file()
+    assert (tmp_path / "supervised_k16_convergence.pdf").is_file()
+    source = Path("scripts/human_gaze/plot_supervised_k16_comparison.py").read_text(
+        encoding="utf-8"
+    )
+    assert 'legend_label = f"{method} ({method_hardware})"' in source
 
 
 def test_analysis_config_pins_scientific_matrix() -> None:

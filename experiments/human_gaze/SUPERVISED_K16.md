@@ -146,3 +146,20 @@ per model/checkpoint supports coverage, center/static/shuffle controls,
 SL--RL/RL--RL agreement, off-center analysis, and qualitative curation. This
 branch prepares those commands and the fail-closed CPU curator; it does not
 launch extraction, repeat training, or run HLVid.
+
+Action extraction is provenance-bound, not label-bound. The tracked comparison
+inventory freezes all six published RL endpoint paths and model/config/processor
+hashes. Supervised exports must resolve through the canonical admitted seed root,
+execution manifest, validated phase receipts and endpoint completion markers;
+the retained 5k/10k/15k periodic bundles additionally require their actual saved
+trainer/teacher seed, fixed phase step and sampler cursor. The CPU curator repeats
+these checks against live checkpoint files. A recovery receipt is parsed and
+validated against the completion marker and model hashes, so hashing an empty or
+self-labelled receipt is insufficient.
+
+Elapsed histories are accepted for convergence only when update IDs are unique
+and clocks are monotonic. Recovery histories are not assumed to include prior
+failed attempts: their wall-time convergence points are withheld unless an
+attempt-aware reconstruction exists, while nominal exposure curves and final
+all-attempt scheduler/GPU totals remain reported. Timing figures identify the
+supervised A40 and historical RL RTX5000 hardware.

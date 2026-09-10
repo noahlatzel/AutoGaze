@@ -41,24 +41,40 @@ def plot_convergence(metrics: dict, output: Path) -> None:
         ("nominal_training_trajectory_action_rows", "Nominal trajectory action rows"),
         ("training_wall_seconds", "Training-process wall time (hours)"),
     )
+    hardware = convergence["hardware"]
     for axis, (key, label) in zip(axes, panels):
         for rows, method, color in (
             (rl, "RL K16", "#7b3294"),
             (supervised, "Supervised K16", "#1677b8"),
         ):
+            method_hardware = hardware["rl" if method.startswith("RL") else "supervised"]
+            legend_label = f"{method} ({method_hardware})"
             if key == "training_wall_seconds":
-                x = np.asarray([row[key]["mean"] / 3600 for row in rows])
-                mean = np.asarray([row["coverage"]["mean"] for row in rows])
-                low = np.asarray([row["coverage"]["ci90_low"] for row in rows])
-                high = np.asarray([row["coverage"]["ci90_high"] for row in rows])
+                plotted = [row for row in rows if "mean" in row[key]]
+                if not plotted:
+                    continue
+                x = np.asarray([row[key]["mean"] / 3600 for row in plotted])
+                mean = np.asarray([row["coverage"]["mean"] for row in plotted])
+                low = np.asarray([row["coverage"]["ci90_low"] for row in plotted])
+                high = np.asarray([row["coverage"]["ci90_high"] for row in plotted])
             else:
                 x, mean, low, high = interval_arrays(rows, key)
-            axis.plot(x, mean, color=color, linewidth=2, marker="o" if method.startswith("Supervised") else None, label=method)
+            axis.plot(x, mean, color=color, linewidth=2, marker="o" if method.startswith("Supervised") else None, label=legend_label)
             axis.fill_between(x, low, high, color=color, alpha=0.12)
         axis.set_xlabel(label)
         axis.set_ylabel("Validation macro-source K16 coverage")
         style(axis)
     axes[0].legend(frameon=False)
+    axes[2].legend(frameon=False, fontsize=8)
+    if not any("mean" in row["training_wall_seconds"] for row in supervised):
+        axes[2].text(
+            0.02,
+            0.04,
+            "Supervised process-time curve withheld:\nrecovery/attempt timing not reconstructable.\nSee final scheduler totals.",
+            transform=axes[2].transAxes,
+            fontsize=8,
+            va="bottom",
+        )
     figure.suptitle("Held-out validation convergence under matched base-clip exposure")
     for suffix in ("png", "pdf"):
         figure.savefig(output / f"supervised_k16_convergence.{suffix}", dpi=180)

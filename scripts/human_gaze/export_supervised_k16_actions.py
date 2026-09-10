@@ -16,6 +16,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
+from omegaconf import OmegaConf
 from torch.utils.data import DataLoader
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -24,6 +25,10 @@ if str(REPOSITORY_ROOT) not in sys.path:
 
 from autogaze.datasets.av_gaze_stavis import AVGazeStavisDataset
 from autogaze.human_gaze.coverage import global_positions_to_fine_cells
+from autogaze.human_gaze.checkpoint_provenance import (
+    load_checkpoint_inventory,
+    verify_checkpoint_for_method,
+)
 from autogaze.human_gaze.supervised_analysis import (
     sha256_file,
     sha256_tree,
@@ -36,6 +41,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset-root", type=Path, required=True)
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--cell-mass", type=Path, required=True)
+    parser.add_argument(
+        "--analysis-config",
+        type=Path,
+        default=Path("experiments/human_gaze/configs/supervised_k16_analysis.yaml"),
+    )
+    parser.add_argument("--training-root", type=Path)
     checkpoint = parser.add_mutually_exclusive_group(required=True)
     checkpoint.add_argument("--checkpoint", type=Path)
     checkpoint.add_argument("--run-dir", type=Path)
@@ -81,37 +92,6 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def resolve_checkpoint(
-    checkpoint: Path | None,
-    run_dir: Path | None,
-    phase_train_step: int | None,
-) -> tuple[Path, Path | None]:
-    """Resolve a direct model or one unambiguous saved train step."""
-    if checkpoint is not None:
-        if phase_train_step is not None:
-            raise ValueError("--phase-train-step is only valid with --run-dir")
-        return checkpoint.resolve(strict=True), None
-    if run_dir is None or phase_train_step is None or phase_train_step < 0:
-        raise ValueError("--run-dir requires a nonnegative --phase-train-step")
-    root = run_dir.resolve(strict=True)
-    latest_train = root / "checkpoint_latest_train.pt"
-    if latest_train.is_file():
-        latest = torch.load(latest_train, map_location="cpu", weights_only=False)
-        if int(latest.get("train_step", -1)) == phase_train_step:
-            return (root / "checkpoint_latest_gaze").resolve(strict=True), latest_train
-    matches = []
-    for state_path in root.glob("checkpoint_ep*/checkpoint_train.pt"):
-        state = torch.load(state_path, map_location="cpu", weights_only=False)
-        if int(state.get("train_step", -1)) == phase_train_step:
-            matches.append((state_path.parent / "checkpoint_gaze", state_path))
-    if len(matches) != 1:
-        raise ValueError(
-            f"Expected one saved checkpoint at phase train step {phase_train_step}, "
-            f"found {len(matches)} in {root}"
-        )
-    return matches[0][0].resolve(strict=True), matches[0][1].resolve(strict=True)
-
-
 def main() -> None:
     args = parse_args()
     if args.output_dir.exists():
@@ -138,11 +118,60 @@ def main() -> None:
     if device.type == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("CUDA was requested but is unavailable")
     source = source_identity()
+    analysis_config = args.analysis_config.resolve(strict=True)
+    cfg = OmegaConf.to_container(OmegaConf.load(analysis_config), resolve=True)
+    if not isinstance(cfg, dict) or cfg.get("experiment_id") != "supervised_k16_comparison":
+        raise ValueError("Unexpected supervised K16 analysis config")
+    provenance_cfg = cfg.get("checkpoint_provenance", {})
+    inventory_path = Path(provenance_cfg.get("inventory", ""))
+    if not inventory_path.is_absolute():
+        inventory_path = REPOSITORY_ROOT / inventory_path
+    inventory = load_checkpoint_inventory(
+        inventory_path,
+        expected_sha256=provenance_cfg.get("inventory_sha256", ""),
+        repository_root=REPOSITORY_ROOT,
+    )
     manifest_path = args.manifest.resolve(strict=True)
     cell_mass_path = args.cell_mass.resolve(strict=True)
-    checkpoint, checkpoint_train_state = resolve_checkpoint(
-        args.checkpoint, args.run_dir, args.phase_train_step
-    )
+    if sha256_file(manifest_path) != inventory["data_sha256"]["manifest"]:
+        raise ValueError("STAViS manifest differs from the authoritative execution input")
+    if sha256_file(cell_mass_path) != inventory["data_sha256"]["cell_mass"]:
+        raise ValueError("Human cell-mass cache differs from the authoritative execution input")
+    if args.method == "supervised":
+        expected_phase_step = {
+            2315: 2315,
+            5000: 2685,
+            10000: 7685,
+            15000: 12685,
+            20000: 17685,
+        }[args.cumulative_update]
+        if args.phase_train_step != expected_phase_step:
+            raise ValueError("CLI phase step does not match the frozen cumulative checkpoint")
+        canonical_training_root = Path(inventory["supervised_training_root"])
+        if args.training_root is not None and args.training_root.resolve(strict=True) != canonical_training_root.resolve(strict=True):
+            raise ValueError("Supervised training root differs from the canonical admitted execution")
+        checkpoint, checkpoint_provenance = verify_checkpoint_for_method(
+            "supervised",
+            inventory,
+            training_root=canonical_training_root,
+            base_seed=args.base_seed,
+            cumulative_update=args.cumulative_update,
+            supplied_checkpoint=args.checkpoint,
+            supplied_run_dir=args.run_dir,
+        )
+        checkpoint_train_state = Path(checkpoint_provenance["checkpoint_train_state"])
+    else:
+        if args.phase_train_step is not None:
+            raise ValueError("RL export requires its frozen direct checkpoint, not a run directory")
+        checkpoint, checkpoint_provenance = verify_checkpoint_for_method(
+            "rl",
+            inventory,
+            base_seed=args.base_seed,
+            cumulative_update=args.cumulative_update,
+            supplied_checkpoint=args.checkpoint,
+            supplied_run_dir=args.run_dir,
+        )
+        checkpoint_train_state = None
     if not (checkpoint / "model.safetensors").is_file():
         raise FileNotFoundError("Checkpoint lacks model.safetensors")
     dataset_root = args.dataset_root.resolve(strict=True)
@@ -237,7 +266,12 @@ def main() -> None:
         "num_frames": written * 16,
         "num_action_rows": written * 16 * 16,
         "source": source,
+        "checkpoint_provenance": checkpoint_provenance,
         "inputs": {
+            "analysis_config": str(analysis_config),
+            "analysis_config_sha256": sha256_file(analysis_config),
+            "checkpoint_provenance_inventory": str(inventory_path.resolve(strict=True)),
+            "checkpoint_provenance_inventory_sha256": sha256_file(inventory_path),
             "dataset_root": str(dataset_root),
             "manifest": str(manifest_path),
             "manifest_sha256": sha256_file(manifest_path),

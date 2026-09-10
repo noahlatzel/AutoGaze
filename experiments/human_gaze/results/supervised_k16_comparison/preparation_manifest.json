@@ -18,6 +18,7 @@
   },
   "frozen_inputs": {
     "cell_mass_sha256": "fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8",
+    "checkpoint_provenance_inventory_sha256": "9c824436ef21eb0b00a538eb8b9b65ca82ddc1571b28615458c787050ff042a5",
     "fixed_qualitative_manifest_sha256": "d3e3062277c579db5379c37675105537a54668baaeb9ec568e3c72c50533b03b",
     "offcenter_manifest_sha256": "69e6f3ba51c8dd3c4388dc082d4ccc96f44e4941090ace23be9e91c03638c7fb",
     "offcenter_selection_sha256": "6af272437fa4cc06610314e98f7630d9c2527e0d771ea2db1a2c2852c4123e3c",
@@ -33,8 +34,8 @@
   "status": "analysis_pipeline_ready_waiting_for_declared_evidence",
   "verification": {
     "frozen_offcenter_regeneration_file_sha256": "69e6f3ba51c8dd3c4388dc082d4ccc96f44e4941090ace23be9e91c03638c7fb",
-    "full_cpu_tests_passed": 266,
-    "focused_analysis_tests_passed": 12,
+    "full_cpu_tests_passed": 276,
+    "focused_analysis_tests_passed": 22,
     "readiness_expected_action_exports": 36,
     "readiness_present_action_exports": 0,
     "readiness_status": "waiting_for_declared_inputs"

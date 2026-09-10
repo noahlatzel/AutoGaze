@@ -21,6 +21,11 @@ if str(REPOSITORY_ROOT) not in sys.path:
     sys.path.insert(0, str(REPOSITORY_ROOT))
 
 from autogaze.datasets.av_gaze_stavis import read_manifest
+from autogaze.human_gaze.checkpoint_provenance import (
+    load_checkpoint_inventory,
+    verify_rl_checkpoint,
+    verify_supervised_checkpoint,
+)
 from autogaze.human_gaze.supervised_analysis import (
     agreement_report,
     cell_mass_for_records,
@@ -125,6 +130,21 @@ def validate_analysis_config(cfg: dict[str, Any]) -> None:
         )
     ):
         raise ValueError("Analysis config weakens the frozen recovery contract")
+    provenance = cfg.get("checkpoint_provenance", {})
+    if (
+        provenance.get("inventory")
+        != "experiments/human_gaze/results/supervised_k16_comparison/checkpoint_provenance_inventory.json"
+        or provenance.get("inventory_sha256")
+        != "9c824436ef21eb0b00a538eb8b9b65ca82ddc1571b28615458c787050ff042a5"
+        or provenance.get("supervised_authority")
+        != "canonical_execution_manifest_phase_receipt_completion_marker_and_train_state"
+        or provenance.get("rl_authority")
+        != "published_r2e_frozen_checkpoint_hash_inventory"
+        or provenance.get("supervised_endpoint_completion_marker_required") is not True
+        or provenance.get("supervised_intermediate_periodic_state_required") is not True
+        or provenance.get("reject_cli_or_export_metadata_as_authority") is not True
+    ):
+        raise ValueError("Analysis config weakens checkpoint provenance")
 
 
 def format_template(template: str, seed: int, step: int | None = None, phase: str | None = None) -> str:
@@ -263,91 +283,71 @@ def load_histories(run: Path, filename: str) -> list[dict[str, Any]]:
         return [json.loads(line) for line in handle if line.strip()]
 
 
-def resolved_phase_dir(
-    seed_root: Path,
-    seed: int,
-    phase: str,
-    *,
-    immutable_source_commit: str,
-    manifest_sha256: str,
-    cell_mass_sha256: str,
-) -> Path:
-    """Honor an explicit same-seed recovery map without hiding the aborted run."""
-    recovery_path = seed_root / "recovery_manifest.json"
-    if not recovery_path.is_file():
-        return seed_root / phase
-    recovery = load_json(recovery_path)
-    if (
-        recovery.get("schema_version") != 1
-        or recovery.get("status") != "complete_same_seed_recovery"
-        or recovery.get("base_seed") != seed
-        or recovery.get("training_seed") != seed + 100000
-    ):
-        raise ValueError(f"Invalid same-seed recovery manifest: {recovery_path}")
-    if recovery.get("immutable_source_commit") != immutable_source_commit:
-        raise ValueError("Recovery manifest source identity drift")
-    expected_inputs = {"manifest": manifest_sha256, "cell_mass": cell_mass_sha256}
-    if recovery.get("input_sha256") != expected_inputs:
-        raise ValueError("Recovery manifest input identity drift")
-    for key in ("failed_job_ids", "recovery_job_ids"):
-        job_ids = recovery.get(key)
-        if not isinstance(job_ids, list) or not job_ids:
-            raise ValueError(f"Recovery manifest lacks {key}")
-    value = recovery.get("resolved_phase_directories", {}).get(phase)
-    if not isinstance(value, str) or not value:
-        raise ValueError(f"Recovery manifest lacks resolved {phase} directory")
-    directory = Path(value)
-    if not directory.is_absolute():
-        directory = seed_root / directory
-    directory = directory.resolve(strict=True)
-    receipt = recovery.get("checkpoint_verification_receipts", {}).get(phase, {})
-    receipt_path = Path(receipt.get("path", ""))
-    if not receipt_path.is_absolute():
-        receipt_path = seed_root / receipt_path
-    if not receipt_path.is_file() or sha256_file(receipt_path) != receipt.get("sha256"):
-        raise ValueError(f"Recovery manifest lacks a verified {phase} checkpoint receipt")
-    return directory
-
-
 def phase_wall_at(training_history: list[dict[str, Any]], phase_step: int) -> float:
     if phase_step == 0:
         return 0.0
-    candidates = [
-        row for row in training_history if int(row["train_step"]) <= phase_step - 1
-    ]
-    if not candidates:
+    steps = [int(row["train_step"]) for row in training_history]
+    elapsed = [float(row["elapsed_seconds"]) for row in training_history]
+    if len(steps) != len(set(steps)) or steps != sorted(steps):
+        raise ValueError("Training history has duplicate or nonmonotonic steps across attempts")
+    if any(not math.isfinite(value) or value < 0 for value in elapsed):
+        raise ValueError("Training history has an invalid elapsed timestamp")
+    if any(right < left for left, right in zip(elapsed, elapsed[1:])):
+        raise ValueError("Training history elapsed time resets across attempts")
+    target = phase_step - 1
+    matches = [row for row in training_history if int(row["train_step"]) == target]
+    if len(matches) != 1:
         raise ValueError(f"Training history does not reach phase step {phase_step}")
-    chosen = max(candidates, key=lambda row: int(row["train_step"]))
-    if int(chosen["train_step"]) != phase_step - 1:
-        raise ValueError(f"Training history lacks exact update preceding checkpoint {phase_step}")
-    return float(chosen["elapsed_seconds"])
+    return float(matches[0]["elapsed_seconds"])
 
 
-def supervised_training_wall(cfg: dict, training_root: Path, seed: int) -> dict[int, float]:
-    seed_root = training_root / format_template(
-        cfg["paths"]["supervised_seed_root_template"], seed
+def supervised_training_wall(
+    inventory: dict,
+    training_root: Path,
+    seed: int,
+) -> dict[str, Any]:
+    stage1_checkpoint, stage1_provenance = verify_supervised_checkpoint(
+        inventory,
+        training_root=training_root,
+        base_seed=seed,
+        cumulative_update=2315,
     )
-    phase_identity = {
-        "immutable_source_commit": cfg["submitted_execution"]["immutable_source_commit"],
-        "manifest_sha256": cfg["data"]["manifest_sha256"],
-        "cell_mass_sha256": cfg["data"]["cell_mass_sha256"],
-    }
-    stage1 = load_histories(
-        resolved_phase_dir(seed_root, seed, "stage1", **phase_identity),
-        "training_metrics.jsonl",
+    stage2_checkpoint, stage2_provenance = verify_supervised_checkpoint(
+        inventory,
+        training_root=training_root,
+        base_seed=seed,
+        cumulative_update=20000,
     )
-    stage2 = load_histories(
-        resolved_phase_dir(seed_root, seed, "stage2", **phase_identity),
-        "training_metrics.jsonl",
-    )
-    stage1_final = phase_wall_at(stage1, 2315)
-    return {
-        2315: stage1_final,
-        **{
-            step: stage1_final + phase_wall_at(stage2, step - 2315)
-            for step in FIXED_STEPS[1:]
-        },
-    }
+    if (
+        stage1_provenance["recovery_manifest"] is not None
+        or stage2_provenance["recovery_manifest"] is not None
+    ):
+        return {
+            "status": "withheld_recovery_attempt_timing_not_reconstructable",
+            "points": {},
+            "reason": (
+                "Resolved phase histories omit time already spent in failed attempts; "
+                "use final scheduler totals for total cost."
+            ),
+        }
+    stage1 = load_histories(stage1_checkpoint.parent, "training_metrics.jsonl")
+    stage2 = load_histories(stage2_checkpoint.parent, "training_metrics.jsonl")
+    try:
+        stage1_final = phase_wall_at(stage1, 2315)
+        points = {
+            2315: stage1_final,
+            **{
+                step: stage1_final + phase_wall_at(stage2, step - 2315)
+                for step in FIXED_STEPS[1:]
+            },
+        }
+    except ValueError as error:
+        return {
+            "status": "withheld_ambiguous_or_reset_process_elapsed_history",
+            "points": {},
+            "reason": str(error),
+        }
+    return {"status": "complete_uninterrupted_process_elapsed", "points": points}
 
 
 def rl_validation_curve(cfg: dict, seed: int) -> list[dict[str, float]]:
@@ -393,19 +393,25 @@ def rl_validation_curve(cfg: dict, seed: int) -> list[dict[str, float]]:
 
 def summarize_convergence(
     cfg: dict,
+    inventory: dict,
     training_root: Path,
     supervised_reports: dict[int, dict[int, dict]],
 ) -> dict[str, Any]:
     supervised_by_seed = {}
+    supervised_timing_status = {}
     for seed in BASE_SEEDS:
-        wall = supervised_training_wall(cfg, training_root, seed)
+        timing = supervised_training_wall(inventory, training_root, seed)
+        supervised_timing_status[str(seed)] = {
+            key: value for key, value in timing.items() if key != "points"
+        }
         supervised_by_seed[str(seed)] = [
             {
                 "cumulative_update": step,
                 "base_clip_presentations": step * 4,
                 "nominal_training_trajectory_action_rows": step * 4 * 16 * 16,
-                "training_wall_seconds": wall[step],
-                "training_gpu_seconds": wall[step],
+                "training_wall_seconds": timing["points"].get(step),
+                "training_gpu_seconds": timing["points"].get(step),
+                "wall_time_status": timing["status"],
                 "coverage_macro_source": supervised_reports[step][seed]["coverage"]["actual"]["full_validation"]["macro_source_mean"],
             }
             for step in FIXED_STEPS
@@ -417,13 +423,31 @@ def summarize_convergence(
             next(row for row in supervised_by_seed[str(seed)] if row["cumulative_update"] == step)
             for seed in BASE_SEEDS
         ]
+        available_wall = [
+            row["training_wall_seconds"]
+            for row in rows
+            if row["training_wall_seconds"] is not None
+        ]
+        wall_summary = (
+            six_seed_summary(available_wall)
+            if len(available_wall) == 6
+            else {
+                "status": "withheld_without_all_six_reconstructable_process_histories",
+                "available_seeds": len(available_wall),
+                "missing_seeds": [
+                    seed
+                    for seed, row in zip(BASE_SEEDS, rows)
+                    if row["training_wall_seconds"] is None
+                ],
+            }
+        )
         supervised_summary.append(
             {
                 "cumulative_update": step,
                 "base_clip_presentations": step * 4,
                 "nominal_training_trajectory_action_rows": step * 4 * 16 * 16,
                 "coverage": six_seed_summary([row["coverage_macro_source"] for row in rows]),
-                "training_wall_seconds": six_seed_summary([row["training_wall_seconds"] for row in rows]),
+                "training_wall_seconds": wall_summary,
             }
         )
     common_rl_steps = sorted(
@@ -452,11 +476,19 @@ def summarize_convergence(
     return {
         "supervised_fixed_checkpoints": supervised_summary,
         "rl_existing_actual_logged_updates": rl_summary,
-        "per_seed": {"supervised": supervised_by_seed, "rl": rl_by_seed},
+        "per_seed": {
+            "supervised": supervised_by_seed,
+            "supervised_timing_status": supervised_timing_status,
+            "rl": rl_by_seed,
+        },
         "wall_time_scope": "training_process_elapsed_including_periodic_validation",
         "gpu_time_scope": "single_gpu_wall_time_on_method_specific_hardware",
         "hardware": {"supervised": "A40", "rl": cfg["compute_accounting"]["rl_hardware"]},
-        "warning": "Hardware-specific wall/GPU time is descriptive; nominal action rows are not FLOPs.",
+        "warning": (
+            "Hardware-specific wall/GPU time is descriptive; nominal action rows are not FLOPs. "
+            "Recovered process-history timing is withheld unless attempt-aware reconstruction exists; "
+            "final scheduler totals still include all attempts."
+        ),
     }
 
 
@@ -768,6 +800,12 @@ def main() -> None:
     if not isinstance(cfg, dict):
         raise ValueError("Analysis config must resolve to a mapping")
     validate_analysis_config(cfg)
+    inventory_path = resolve_repo_path(cfg["checkpoint_provenance"]["inventory"])
+    inventory = load_checkpoint_inventory(
+        inventory_path,
+        expected_sha256=cfg["checkpoint_provenance"]["inventory_sha256"],
+        repository_root=REPOSITORY_ROOT,
+    )
     action_root = args.action_root or Path(cfg["paths"]["action_export_root"])
     training_root = args.training_root or Path(cfg["paths"]["supervised_training_root"])
     args.output_dir.mkdir(parents=True)
@@ -787,6 +825,9 @@ def main() -> None:
         )
         write_json(args.output_dir / "gate.json", gate)
         raise SystemExit("Required action/resource inputs are incomplete; HLVid remains closed")
+    curation_source = git_identity()
+    if curation_source["dirty"]:
+        raise ValueError("Complete curation requires a clean versioned source checkout")
 
     manifest_path = Path(cfg["data"]["manifest"])
     cell_mass_path = Path(cfg["data"]["cell_mass"])
@@ -816,6 +857,19 @@ def main() -> None:
     action_manifests = []
     compact_rows = []
     for (method, seed, step), directory in sorted(action_paths.items()):
+        if method == "supervised":
+            _checkpoint, authoritative_provenance = verify_supervised_checkpoint(
+                inventory,
+                training_root=training_root,
+                base_seed=seed,
+                cumulative_update=step,
+            )
+        else:
+            _checkpoint, authoritative_provenance = verify_rl_checkpoint(
+                inventory,
+                base_seed=seed,
+                cumulative_update=step,
+            )
         export_manifest, actions = load_action_export(
             directory,
             records,
@@ -825,6 +879,7 @@ def main() -> None:
             expected_base_seed=seed,
             expected_training_seed=seed + 100000,
             expected_cumulative_update=step,
+            expected_checkpoint_provenance=authoritative_provenance,
         )
         report = policy_report(
             records,
@@ -905,7 +960,9 @@ def main() -> None:
         supervised_actions[440826],
         rl_actions[440826],
     )
-    convergence = summarize_convergence(cfg, training_root, supervised_reports)
+    convergence = summarize_convergence(
+        cfg, inventory, training_root, supervised_reports
+    )
     resources = resource_summary(readiness)
     resource_complete = {
         seed: readiness["resource_receipts"][str(seed)]["complete"] for seed in BASE_SEEDS
@@ -954,11 +1011,13 @@ def main() -> None:
         "schema_version": 1,
         "status": "complete",
         "experiment_id": "supervised_k16_comparison",
-        "source": git_identity(),
+        "source": curation_source,
         "config": str(args.config),
         "config_sha256": sha256_file(args.config),
         "resolved_config": str(args.output_dir / "config.yaml"),
         "resolved_config_sha256": sha256_file(args.output_dir / "config.yaml"),
+        "checkpoint_provenance_inventory": str(inventory_path),
+        "checkpoint_provenance_inventory_sha256": sha256_file(inventory_path),
         "data_sha256": {
             "manifest": cfg["data"]["manifest_sha256"],
             "cell_mass": cfg["data"]["cell_mass_sha256"],

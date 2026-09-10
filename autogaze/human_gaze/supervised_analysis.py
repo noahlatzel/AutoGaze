@@ -227,6 +227,7 @@ def load_action_export(
     expected_base_seed: int | None = None,
     expected_training_seed: int | None = None,
     expected_cumulative_update: int | None = None,
+    expected_checkpoint_provenance: Mapping[str, Any] | None = None,
 ) -> tuple[dict[str, Any], np.ndarray]:
     """Load a complete exact-action export and reject drift or partial files."""
     root = Path(directory)
@@ -264,6 +265,15 @@ def load_action_export(
     for key, value in frozen_contract.items():
         if manifest.get(key) != value:
             raise ValueError(f"Action export violates the frozen {key} contract")
+    if expected_checkpoint_provenance is not None:
+        if manifest.get("checkpoint_provenance") != expected_checkpoint_provenance:
+            raise ValueError("Action export checkpoint provenance differs from authoritative files")
+        checkpoint = expected_checkpoint_provenance.get("checkpoint", {})
+        files = checkpoint.get("files_sha256", {})
+        if inputs.get("checkpoint_tree_sha256") != checkpoint.get("tree_sha256"):
+            raise ValueError("Action export checkpoint tree hash is not authoritative")
+        if inputs.get("model_safetensors_sha256") != files.get("model.safetensors"):
+            raise ValueError("Action export model hash is not authoritative")
 
     actions_path = root / "actions.jsonl"
     if sha256_file(actions_path) != manifest.get("actions_sha256"):

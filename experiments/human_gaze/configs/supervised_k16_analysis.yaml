@@ -12,6 +12,14 @@ submitted_execution:
     path: experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/supervised_k16_admission_receipt_20260910T225706+0200.json
     source_commit: 090f474f27dd06d742872cff70cf930d038f062a
     committed_byte_sha256: 28ef1776b71c65f6bd219b78a8bb81f756d72a9b1a203846d04eba6393499044
+checkpoint_provenance:
+  inventory: experiments/human_gaze/results/supervised_k16_comparison/checkpoint_provenance_inventory.json
+  inventory_sha256: 9c824436ef21eb0b00a538eb8b9b65ca82ddc1571b28615458c787050ff042a5
+  supervised_authority: canonical_execution_manifest_phase_receipt_completion_marker_and_train_state
+  supervised_endpoint_completion_marker_required: true
+  supervised_intermediate_periodic_state_required: true
+  rl_authority: published_r2e_frozen_checkpoint_hash_inventory
+  reject_cli_or_export_metadata_as_authority: true
 data:
   root: /storage/user/zverev/datasets/av-gaze-stavis
   manifest: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl

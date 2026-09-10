@@ -42,6 +42,7 @@ for index in "${!steps[@]}"; do
     --manifest "$manifest" \
     --cell-mass "$cell_mass" \
     --run-dir "$phase_dir" \
+    --training-root "$training_root" \
     --phase-train-step "$phase_step" \
     --method supervised \
     --base-seed "$base_seed" \
