@@ -122,3 +122,44 @@ verifies all input hashes before training, refuses existing output directories,
 records phase timing and GPU telemetry, and emits an immutable per-seed execution
 manifest. Final Slurm elapsed/GPU/MaxRSS accounting remains mandatory after each
 allocation exits.
+
+## Admitted execution and frozen analysis
+
+The fixed Slurm admission owner admitted array `1702710` from immutable source
+`5a31685d56ec727b9a46db60598a0693fae7e20e` as `0-5%1`, with one A40, five
+CPUs, 32 GiB host RAM, a 24-hour limit, no requeue, and dependency
+`afterany:1690935` only. The analysis branch does not modify or resubmit that
+execution source.
+
+`configs/supervised_k16_analysis.yaml` freezes the downstream comparison before
+supervised results are available. Its human-only off-center manifest contains
+110 of 427 validation clips across 23 source/video pairs: the top
+`ceil(0.25 * n_source)` clips within each source by mean human mass outside the
+32 fine cells nearest the 14-by-14 grid center, with stable clip-ID tie
+breaking. The manifest
+records the input and selection checksums.
+
+No complete full-validation RL action export was found. The minimal later GPU
+extraction is therefore six RL K16 endpoint exports plus 30 supervised exports
+(six seeds at the five fixed convergence checkpoints). One exact action export
+per model/checkpoint supports coverage, center/static/shuffle controls,
+SL--RL/RL--RL agreement, off-center analysis, and qualitative curation. This
+branch prepares those commands and the fail-closed CPU curator; it does not
+launch extraction, repeat training, or run HLVid.
+
+Action extraction is provenance-bound, not label-bound. The tracked comparison
+inventory freezes all six published RL endpoint paths and model/config/processor
+hashes. Supervised exports must resolve through the canonical admitted seed root,
+execution manifest, validated phase receipts and endpoint completion markers;
+the retained 5k/10k/15k periodic bundles additionally require their actual saved
+trainer/teacher seed, fixed phase step and sampler cursor. The CPU curator repeats
+these checks against live checkpoint files. A recovery receipt is parsed and
+validated against the completion marker and model hashes, so hashing an empty or
+self-labelled receipt is insufficient.
+
+Elapsed histories are accepted for convergence only when update IDs are unique
+and clocks are monotonic. Recovery histories are not assumed to include prior
+failed attempts: their wall-time convergence points are withheld unless an
+attempt-aware reconstruction exists, while nominal exposure curves and final
+all-attempt scheduler/GPU totals remain reported. Timing figures identify the
+supervised A40 and historical RL RTX5000 hardware.

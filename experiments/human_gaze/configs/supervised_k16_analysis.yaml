@@ -1,0 +1,163 @@
+schema_version: 1
+experiment_id: supervised_k16_comparison
+kind: frozen_validation_action_analysis_and_practical_hlvid_gate
+submitted_execution:
+  immutable_source_commit: 5a31685d56ec727b9a46db60598a0693fae7e20e
+  integrated_receipt_commit: bdd5789d4717075d20d317984f4096551bd4cdb7
+  slurm_array_job_id: 1702710
+  dependency: afterany:1690935
+  array: 0-5%1
+  run_id: 20260910-2128_supervised-k16-comparison_5a31685
+  admission_receipt:
+    path: experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/supervised_k16_admission_receipt_20260910T225706+0200.json
+    source_commit: 090f474f27dd06d742872cff70cf930d038f062a
+    committed_byte_sha256: 28ef1776b71c65f6bd219b78a8bb81f756d72a9b1a203846d04eba6393499044
+checkpoint_provenance:
+  inventory: experiments/human_gaze/results/supervised_k16_comparison/checkpoint_provenance_inventory.json
+  inventory_sha256: 9c824436ef21eb0b00a538eb8b9b65ca82ddc1571b28615458c787050ff042a5
+  supervised_authority: canonical_execution_manifest_phase_receipt_completion_marker_and_train_state
+  supervised_endpoint_completion_marker_required: true
+  supervised_intermediate_periodic_state_required: true
+  rl_authority: published_r2e_frozen_checkpoint_hash_inventory
+  reject_cli_or_export_metadata_as_authority: true
+data:
+  root: /storage/user/zverev/datasets/av-gaze-stavis
+  manifest: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+  manifest_sha256: 0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10
+  cell_mass: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+  cell_mass_sha256: fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8
+  split: val
+  clips: 427
+  clip_len: 16
+  fine_cells: 196
+  exact_k: 16
+  fine_action_offset: 69
+offcenter_subgroup:
+  manifest: experiments/human_gaze/results/supervised_k16_comparison/offcenter_validation_manifest.json
+  manifest_sha256: 69e6f3ba51c8dd3c4388dc082d4ccc96f44e4941090ace23be9e91c03638c7fb
+  selection_sha256: 6af272437fa4cc06610314e98f7630d9c2527e0d771ea2db1a2c2852c4123e3c
+  signal: cached_human_annotation_cell_mass_only
+  ranking: mean_human_mass_outside_center32_descending_within_source
+  fraction_per_source: 0.25
+  count_rule: ceil
+  tie_breaker: clip_id_ascending
+  total_clips: 110
+  total_videos: 23
+  aggregation: eligible_clips_to_video_means_to_equal_source_means
+seeds:
+  base: [440826, 440827, 440828, 440829, 440830, 440831]
+  training: [540826, 540827, 540828, 540829, 540830, 540831]
+checkpoints:
+  supervised_cumulative_updates: [2315, 5000, 10000, 15000, 20000]
+  primary_endpoint_update: 20000
+  supervised_phase_local_updates:
+    2315: {phase: stage1, train_step: 2315}
+    5000: {phase: stage2, train_step: 2685}
+    10000: {phase: stage2, train_step: 7685}
+    15000: {phase: stage2, train_step: 12685}
+    20000: {phase: stage2, train_step: 17685}
+  rl_action_export_updates: [20000]
+  rl_convergence_source: existing_validation_histories_at_actual_logged_updates
+paths:
+  supervised_training_root: /storage/user/latn/artifacts/autogaze-supervised-k16/20260910-2128_supervised-k16-comparison_5a31685
+  supervised_seed_root_template: seed{base_seed}_train{training_seed}
+  supervised_run_dir_template: seed{base_seed}_train{training_seed}/{phase}
+  optional_same_seed_recovery_manifest: seed{base_seed}_train{training_seed}/recovery_manifest.json
+  rl_root: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo
+  rl_stage1_template: r2_fresh10k_stage1_seed{base_seed}
+  rl_stage2_template: r2_fresh10k_stage2_base{base_seed}_seed{training_seed}
+  rl_stage3_template: r2b_fresh20k_stage3_base{base_seed}_seed{training_seed}
+  rl_endpoint_checkpoint_template: r2b_fresh20k_stage3_base{base_seed}_seed{training_seed}/checkpoint_latest_gaze
+  action_export_root: /storage/user/latn/artifacts/autogaze-supervised-k16/20260910-2128_supervised-k16-comparison_5a31685/action_exports
+  supervised_action_export_template: supervised/base{base_seed}_train{training_seed}/step{cumulative_update}
+  rl_action_export_template: rl/base{base_seed}_train{training_seed}/step20000
+recovery:
+  same_seed_only: true
+  require_verified_phase_receipts: true
+  require_immutable_source_and_data_identity: true
+  require_failed_and_recovery_job_ids: true
+  require_all_attempts_in_resource_accounting: true
+action_export:
+  split: val
+  decoding: greedy_self_history
+  exact_k: 16
+  allowed_local_action_ids_inclusive: [69, 264]
+  no_repeat: true
+  batch_size: 16
+  num_workers: 4
+  required_for_supervised: all_six_seeds_at_all_five_fixed_checkpoints
+  required_for_rl: all_six_fixed_20k_endpoints
+  purpose: one_export_supports_coverage_center_shuffle_agreement_and_qualitative_analysis
+metrics:
+  primary: source_macro_video_aggregated_human_coverage_k16
+  secondary: [uniform_selected_density_SIM, uniform_selected_density_CC]
+  secondary_density: probability_one_over_16_on_each_selected_cell
+  controls:
+    - center16
+    - validation_selection_frequency_static_top16
+    - same_source_different_video_deterministic_shuffle
+    - train_source_prior16
+  structure:
+    - center16_intersection_over_k
+    - shuffled_video_intersection_over_k
+    - normalized_selection_entropy
+    - unique_frame_selection_fraction
+agreement:
+  metrics: [intersection_over_k, set_jaccard]
+  aggregation: frames_to_clips_to_videos_to_equal_sources
+  sl_vs_rl: same_base_seed_pairs_all_six_endpoints
+  rl_vs_rl: all_15_unordered_endpoint_seed_pairs_context_only
+uncertainty:
+  seeds: mean_sample_sd_and_descriptive_90_percent_t_interval
+  video_delta: source_stratified_paired_video_cluster_bootstrap
+  bootstrap_iterations: 10000
+  bootstrap_seed: 20260910
+  interpretation: descriptive_unadjusted
+compute_accounting:
+  supervised_base_clip_presentations_per_seed: 80000
+  rl_base_clip_presentations_per_seed: 80000
+  supervised_nominal_training_trajectory_action_rows_per_seed: 20480000
+  rl_nominal_training_trajectory_action_rows_per_seed: 81920000
+  action_rows_are_not_physical_flops_or_runtime: true
+  require_each_supervised_execution_manifest: true
+  require_each_supervised_final_sacct_receipt: true
+  require_each_supervised_phase_time_record: true
+  require_each_supervised_gpu_telemetry: true
+  rl_elapsed_source: complete_existing_phase_validation_histories
+  rl_hardware: NVIDIA RTX 5000
+  rl_requested_host_memory_gib: 48
+  unavailable_historical_rl_peak_memory_must_be_labeled: true
+qualitative:
+  fixed_manifest: experiments/human_gaze/results/r2c_qualitative_offcenter/qualitative_manifest.json
+  fixed_manifest_sha256: d3e3062277c579db5379c37675105537a54668baaeb9ec568e3c72c50533b03b
+  fixed_base_seed: 440826
+  clips: 24
+  comparison: paired_supervised_vs_rl_on_existing_four_frame_windows
+  representative_rule: within_source_clip_closest_to_source_median_supervised_minus_rl_window_coverage_then_clip_id
+  failure_rule: within_source_lowest_supervised_minus_rl_window_coverage_then_clip_id
+  render: full_16_frame_paired_mp4_plus_fixed_window_contact_sheet
+practical_hlvid_gate:
+  rule_type: practical_transfer_gate_not_inferential_claim
+  complete_six_seed_validation_required: true
+  dynamic_coverage_above_static_and_shuffled_required: true
+  dynamic_control_aggregation: equal_seed_mean_of_source_macro_video_coverage
+  route_a:
+    minimum_supervised_minus_rl_coverage: -0.01
+    minimum_reduction_in_nominal_training_trajectory_action_rows: 0.50
+    complete_measured_time_and_resource_accounting_required: true
+  route_b:
+    minimum_overall_coverage_improvement: 0.01
+    or_minimum_offcenter_coverage_improvement: 0.02
+    minimum_overall_supervised_minus_rl_coverage: -0.02
+  if_passed: evaluate_all_six_supervised_fixed_endpoints_only
+  if_incomplete_or_failed: do_not_run_supervised_hlvid
+existing_rl_hlvid_context:
+  metrics: experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/metrics.json
+  metrics_sha256: 74df4626f099f6043bb2412c5df2c08b76b3868203964f2d96aeab42f4f2bbc6
+  per_seed: experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/per_seed.csv
+  per_seed_sha256: 1804d97507d4f6d7ec405cb7b129c0f3e81906ee4f9a55fb8babbd5dd7beb3c0
+  manifest: experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/manifest.json
+  manifest_sha256: 224a9199bafc6bbf6e9484716a43b91ba6d187348da1b3fdcdda63606b0b4310
+  k16_complete_correct_counts: [137, 132, 131, 134, 137, 138]
+  total_questions_per_seed: 268
+  reuse_without_rerunning: true
