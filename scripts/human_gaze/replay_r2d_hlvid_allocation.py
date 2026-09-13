@@ -96,6 +96,23 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def load_replay_processor(auto_processor: Any, args: argparse.Namespace) -> Any:
+    """Keep filesystem Paths internal; the legacy processor serializes its kwargs."""
+    return auto_processor.from_pretrained(
+        str(args.model_path),
+        autogaze_model_id=str(args.autogaze_model_id),
+        num_video_frames=args.num_video_frames,
+        num_video_frames_thumbnail=args.num_video_frames_thumbnail,
+        max_tiles_video=args.max_tiles_video,
+        gazing_ratio_tile=[0.2] + [0.06] * 15,
+        gazing_ratio_thumbnail=1,
+        task_loss_requirement_tile=0.6,
+        task_loss_requirement_thumbnail=None,
+        max_batch_size_autogaze=args.max_batch_size_autogaze,
+        trust_remote_code=True,
+    )
+
+
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
     if not path.is_file():
         return []
@@ -673,19 +690,7 @@ def main() -> None:
     existing_by_video = completed_replay_by_video(existing, compatibility_key)
     resume_state = load_resume_state(args.evidence_records_dir, compatibility_key)
 
-    processor = runner.AutoProcessor.from_pretrained(
-        args.model_path,
-        autogaze_model_id=args.autogaze_model_id,
-        num_video_frames=args.num_video_frames,
-        num_video_frames_thumbnail=args.num_video_frames_thumbnail,
-        max_tiles_video=args.max_tiles_video,
-        gazing_ratio_tile=[0.2] + [0.06] * 15,
-        gazing_ratio_thumbnail=1,
-        task_loss_requirement_tile=0.6,
-        task_loss_requirement_thumbnail=None,
-        max_batch_size_autogaze=args.max_batch_size_autogaze,
-        trust_remote_code=True,
-    )
+    processor = load_replay_processor(runner.AutoProcessor, args)
     stats = install_r2d_hlvid_forward(
         processor._autogaze_model,
         mode=args.r2d_mode,
