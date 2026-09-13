@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "kind": "descriptive_projection_not_measured_full_training_runtime",
+  "source_attempt_array": "1702710",
+  "runtime_basis": "actual_A40_full_input_stage1_updates0_to99_and_update100_validation",
+  "hardware": "NVIDIA A40",
+  "observed_warm_seconds_per_update_by_seed": {
+    "440826": 1.0142352388362692,
+    "440827": 0.6104369958241781,
+    "440828": 0.4943457011020545,
+    "440829": 0.47858364172656126,
+    "440830": 0.4041708792098845,
+    "440831": 0.4236035973134667
+  },
+  "observed_validation_seconds_by_seed": {
+    "440826": 19.922510623931885,
+    "440827": 19.672171115875244,
+    "440828": 19.678817749023438,
+    "440829": 19.49949812889099,
+    "440830": 19.488013744354248,
+    "440831": 19.812466621398926
+  },
+  "planned_updates_per_seed": 20000,
+  "planned_validation_passes_including_phase_initial_and_final": 203,
+  "estimate_hours_per_seed": {
+    "low": 3.354873042773585,
+    "median": 3.812060777242604,
+    "high": 6.744119485142389
+  },
+  "estimate_hours_serial_six_seed_lane": {
+    "low": 20.12923825664151,
+    "median": 22.872364663455624,
+    "high": 40.464716910854335
+  },
+  "assumptions": [
+    "stage2 has same full-input compute as stage1; not yet measured for full production duration",
+    "warm early-update and validation timings extrapolate to later data/cache conditions",
+    "one A40 allocation per seed, six seeds serialized at array concurrency1"
+  ],
+  "excluded_or_not_yet_measured": [
+    "Slurm queue/dependency and maintenance delay",
+    "additional startup/checkpoint/I/O overhead or new failed/recovery attempts",
+    "later separately admitted action extraction/CPU curation/conditional HLVid"
+  ],
+  "interpretation": "planning range only; actual all-attempt scheduler/GPU time must be measured"
+}

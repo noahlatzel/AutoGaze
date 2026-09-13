@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "status": "ready_for_independent_source_review_and_sole_owner_admission_not_submitted",
+  "experiment_id": "supervised_k16_comparison",
+  "scope": "six_same_seed_fresh_versioned_restarts_after_metadata_failure",
+  "source": {
+    "repository": "git@github.com:noahlatzel/AutoGaze.git",
+    "branch": "codex/supervised-k16-checkpoint-recovery",
+    "immutable_execution_commit": "ec320a5435275c6098c6d299b11d98d18d9b1afb",
+    "metadata_repair_commit": "13179be38351df168d702962d81ebdca85691a33",
+    "reviewed_parent_commit": "9c089d183cdfd1e0755287e6fa9db67c73a3bb88",
+    "original_failed_execution_commit": "5a31685d56ec727b9a46db60598a0693fae7e20e"
+  },
+  "run_id": "20260914-0152_supervised-k16-comparison_ec320a5",
+  "artifact_root": "/storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0152_supervised-k16-comparison_ec320a5",
+  "worktree": "/storage/user/latn/worktrees/autogaze-supervised-k16-checkpoint-recovery",
+  "launcher": "experiments/human_gaze/slurm/run_supervised_k16_restart_array.sbatch",
+  "launcher_sha256": "f2f2948c8153bbc12000d87d45d645d84009919cc7387289e04b75077f9f4f82",
+  "execution_config": "experiments/human_gaze/configs/supervised_k16_restart_execution.yaml",
+  "execution_config_sha256": "9334c9660cd2a42ce0e016c1e4d5d062ee3095dac6b6729abdf4dc99a8e85b99",
+  "seeds": {"base": [440826,440827,440828,440829,440830,440831], "continuation": [540826,540827,540828,540829,540830,540831]},
+  "resources_per_task": {"gpu_type": "a40", "gpus": 1, "cpus": 5, "host_memory_gib": 32, "wall_hours": 24, "array": "0-5%1", "requeue": 0, "node_pin": null},
+  "global_admission": {
+    "sole_owner_task": "01a05a0a-3c7e-7053-aa24-5069bff7fa96",
+    "max_concurrent_gpu_allocations": 3,
+    "max_total_host_memory_gib": 384,
+    "count_all_existing_and_pending_user_jobs": true,
+    "preserve_existing_priorities": [1690935,1701485,1700681],
+    "dependency_and_start_time": "sole_owner_selects_from_fresh_global_state_avoid_dependent_replay_deadlock"
+  },
+  "unchanged_recipe": {"exact_k": 16, "frames": 16, "image_px": 224, "base_clips_per_update": 4, "stage1_updates": 2315, "stage2_updates": 17685, "fixed_endpoint_updates": 20000, "base_clip_presentations": 80000, "nominal_action_rows": 20480000, "fresh_adam_at_stage2": true, "new_objective_budget_or_seeds": false},
+  "lineage": {"failed_inventory_sha256": "d19e39245c2fdcaafb713e73747a07dc81708b3dc752006fd4c6b84a21f53f41", "failed_array": "1702710", "failed_updates_per_seed": 100, "failed_base_clip_presentations_per_seed": 400, "failed_nominal_action_rows_per_seed": 102400, "recoverable_checkpoint": false, "preserve_old_paths_and_all_attempt_cost": true},
+  "smoke": {"source": "13179be38351df168d702962d81ebdca85691a33", "status": "pass", "actual_optimizer_update_save_reload_resumed_backward_greedy": true, "full_receipt_sha256": "3c9fbcdd41e8039963e92aa975a80ff37ebfaa09fd03f0ed37767ea9963f08c6", "peak_cuda_allocated_bytes": 441529856, "peak_rss_bytes": 2232098816},
+  "execution_prechecks": {
+    "status": "all_six_pass_clean_detached_exact_execution_source_no_gpu_no_slurm",
+    "heavy_root": "/storage/user/latn/artifacts/autogaze-supervised-k16-restart-precheck/20260914-0152_execution-precheck_ec320a5",
+    "receipt_sha256_by_base_seed": {
+      "440826": "683bf2d3b9abd0741effdd13926bef7cc59a385da7349df5dee2f5731a29e68f",
+      "440827": "94e684d2515797b71476c827f1214c3e3de760306b188306daf6e681c8b911d2",
+      "440828": "b0b1c45407bfef358e980ddb542893aa07358411546b62dd1bf3b8e95bbf6b22",
+      "440829": "d31d53332b034ffc7cfa5ed1575f4634d3827f113c8f90aabddae6d9c2779d84",
+      "440830": "719b303fd55e62e4b4f3e71e7ace24d5ee11a839dce5170fb15afadf231c69d6",
+      "440831": "31c84cb923bcb6d45edb063bb2ceb3f5e1ffa29868d357fde8662a8ec7b484ee"
+    }
+  },
+  "verification": {"full_cpu_tests_passed": 286, "new_real_constructor_regressions": 6, "restart_lineage_regressions": 4, "exports_present": 0, "exports_expected": 36},
+  "analysis_config": "experiments/human_gaze/configs/supervised_k16_restart_analysis.yaml",
+  "analysis_config_sha256": "07988d42ab417d4d26c5a3c9ace9bf20e72fe4b4939348c38edadcddf4cbad24",
+  "checkpoint_inventory_sha256": "cf3cc10f16cd6b136672dbdd98ddbada258d5bfdbec1a452f2bab2ee3e5b9bff",
+  "hlvid": "not_admitted_or_launched_gate_closed_reuse_six_existing_rl_endpoints_if_later_pass",
+  "actions": "later_separate_owner_admission_30_supervised_plus_6_rl_exports",
+  "owner_requested_receipts": "submission_script_hash_job_array_dependency_then_terminal_sacct_per_seed_with_attempts_original_and_restart"
+}

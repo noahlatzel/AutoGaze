@@ -65,6 +65,34 @@ evidence. Completed execution manifests bind both phase receipts and `restart_of
 
 ## Analysis, timing and next evidence
 
+The immutable execution SHA is `ec320a5435275c6098c6d299b11d98d18d9b1afb`; the
+new run is `20260914-0152_supervised-k16-comparison_ec320a5`. All six actual
+prechecks passed from a clean detached copy of that SHA, with live data,
+initialization, smoke and failed-attempt hashes verified. Final CPU suite:286
+passed. `admission_request.json` is the concrete sole-owner handoff; it is not a
+submission receipt. The separately published analysis layer pins this SHA and
+the new root without altering the execution SHA or original inventory.
+
+`runtime_estimate.json` projects the actual A40 warm-update/validation timings:
+about3.4--6.8h per seed (median3.8h), or20--41h for the serialized six-seed lane
+(median23h) after it begins. This assumes later/stage-two throughput is similar
+and excludes queue delay and additional startup/checkpoint/I/O overhead. It is
+a planning range, not a measured full-run runtime or completion guarantee.
+
+After owner-admitted training and separate action-extraction admission, run the
+seed bundle once per base seed from a clean analysis checkout:
+
+```bash
+SUPERVISED_ANALYSIS_CONFIG=experiments/human_gaze/configs/supervised_k16_restart_analysis.yaml \
+bash scripts/human_gaze/export_supervised_k16_seed_bundle.sh 440826 \
+  /storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0152_supervised-k16-comparison_ec320a5 \
+  /storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0152_supervised-k16-comparison_ec320a5/action_exports
+
+python scripts/human_gaze/curate_supervised_k16_comparison.py \
+  --config experiments/human_gaze/configs/supervised_k16_restart_analysis.yaml \
+  --output-dir /storage/user/latn/artifacts/autogaze-supervised-k16/NEW_CURATION_RUN_ID
+```
+
 The updated authoritative restart inventory/config must pin the admitted
 execution SHA and new canonical root. Original inventory/source5a31685 is not
 overwritten. Export and curation independently verify actual source/seed/cursor,

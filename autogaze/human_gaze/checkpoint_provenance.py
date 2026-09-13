@@ -54,12 +54,26 @@ def load_checkpoint_inventory(
     *,
     expected_sha256: str,
     repository_root: Path,
+    verify_live_lineage: bool = True,
 ) -> dict[str, Any]:
     """Load the tracked inventory and validate its published source artifacts."""
     inventory_path = Path(path).resolve(strict=True)
     if sha256_file(inventory_path) != expected_sha256:
         raise ValueError("Checkpoint provenance inventory hash drift")
     inventory = _load_json(inventory_path)
+    if "base_checkpoint_inventory" in inventory:
+        overlay = inventory
+        base_relative = "experiments/human_gaze/results/supervised_k16_comparison/checkpoint_provenance_inventory.json"
+        if (overlay.get("base_checkpoint_inventory") != base_relative
+                or overlay.get("base_checkpoint_inventory_sha256") != "9c824436ef21eb0b00a538eb8b9b65ca82ddc1571b28615458c787050ff042a5"
+                or overlay.get("checkpoint_matrix_and_rl_inventory_inherited_unchanged") is not True
+                or set(overlay.get("authoritative_sources", {})) != {"supervised_execution_kind", "supervised_execution_commit", "supervised_run_id"}):
+            raise ValueError("Restart inventory changes the inherited checkpoint/RL matrix")
+        inventory = load_checkpoint_inventory(repository_root / base_relative,
+            expected_sha256=overlay["base_checkpoint_inventory_sha256"], repository_root=repository_root)
+        inventory["authoritative_sources"].update(overlay["authoritative_sources"])
+        inventory["supervised_training_root"] = overlay["supervised_training_root"]
+        inventory["restart_lineage"] = overlay["restart_lineage"]
     if (
         inventory.get("schema_version") != 1
         or inventory.get("status") != "frozen_authoritative_checkpoint_inventory"
@@ -81,7 +95,7 @@ def load_checkpoint_inventory(
                 or lineage.get("failed_inventory_sha256") != FAILED_INVENTORY_SHA256):
             raise ValueError("Restart checkpoint inventory changes the reviewed source/seed lineage")
         verify_published_restart_source(repository_root, authority.get("supervised_execution_commit", ""))
-        load_failed_attempts(repository_root)
+        load_failed_attempts(repository_root, verify_live=verify_live_lineage)
     if (
         (not is_restart and authority.get("supervised_execution_commit") != EXECUTION_COMMIT)
         or (not is_restart and authority.get("supervised_run_id") != RUN_ID)

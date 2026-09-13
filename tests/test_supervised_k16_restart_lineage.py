@@ -3,13 +3,13 @@ from pathlib import Path
 
 import pytest
 
-from autogaze.human_gaze.checkpoint_provenance import verify_supervised_checkpoint
+from autogaze.human_gaze.checkpoint_provenance import load_checkpoint_inventory, verify_supervised_checkpoint
 from autogaze.human_gaze.supervised_restart import (
     FAILED_INVENTORY_SHA256, REPAIR_COMMIT, load_failed_attempts,
     restart_identity, verify_published_restart_source,
 )
 from autogaze.human_gaze.supervised_analysis import sha256_file
-from scripts.human_gaze.curate_supervised_k16_comparison import supervised_training_wall, validate_resource_receipt
+from scripts.human_gaze.curate_supervised_k16_comparison import load_frozen_analysis_config, resource_summary, supervised_training_wall, validate_analysis_config, validate_resource_receipt
 from scripts.human_gaze.verify_supervised_k16_execution import load_execution_config
 from tests.test_supervised_k16_checkpoint_provenance import make_fixture, write_json, SEED
 
@@ -45,6 +45,19 @@ def test_restart_inherits_exact_original_recipe_and_all_six_seeds():
     assert sum(row["process_elapsed_seconds"] for row in failed["seeds"]) == pytest.approx(770.41)
     assert failed["checkpoint_present"] is False
     assert restart["restart"]["failed_attempt_inventory_sha256"] == FAILED_INVENTORY_SHA256
+
+
+def test_restart_analysis_keeps_frozen_gate_subgroup_and_rl_checkpoint_matrix():
+    cfg = load_frozen_analysis_config(ROOT / "experiments/human_gaze/configs/supervised_k16_restart_analysis.yaml")
+    validate_analysis_config(cfg)
+    original = load_frozen_analysis_config(ROOT / "experiments/human_gaze/configs/supervised_k16_analysis.yaml")
+    for key in ("data", "offcenter_subgroup", "checkpoints", "metrics", "agreement", "practical_hlvid_gate", "qualitative"):
+        assert cfg[key] == original[key]
+    inventory = load_checkpoint_inventory(ROOT / cfg["checkpoint_provenance"]["inventory"],
+        expected_sha256=cfg["checkpoint_provenance"]["inventory_sha256"], repository_root=ROOT, verify_live_lineage=False)
+    assert len(inventory["rl_endpoints"]) == 6
+    assert inventory["authoritative_sources"]["supervised_execution_commit"] == "ec320a5435275c6098c6d299b11d98d18d9b1afb"
+    assert len(inventory["supervised_checkpoints"]) == 5
 
 
 def test_all_five_restart_bundles_bind_source_seed_and_original_failed_attempt(tmp_path, monkeypatch):
@@ -86,5 +99,16 @@ def test_restart_resource_receipt_cannot_omit_failed_allocation(tmp_path):
     assert not complete and "recovery_attempt_job_ids" in detail["problems"]
     sacct["attempts"].append({"job_id": "1702710_0", "elapsed_seconds": 250, "allocated_gpu_count": 1})
     write_json(root / "final_sacct.json", sacct)
-    complete, _detail = validate_resource_receipt(root, SEED)
+    complete, detail = validate_resource_receipt(root, SEED)
     assert complete
+    readiness = {"resource_receipts": {str(seed): {"complete": True, **detail} for seed in range(440826, 440832)}}
+    cost = resource_summary(readiness)
+    assert cost["all_attempt_base_clip_presentations_including_original_failure"]["mean"] == 80400
+    assert cost["all_attempt_nominal_action_rows_including_original_failure"]["mean"] == 20582400
+    assert cost["all_attempt_scheduler_elapsed_seconds"]["mean"] == 350
+    sacct["attempts"].append({"job_id": "extra_failed_attempt", "elapsed_seconds": 25, "allocated_gpu_count": 1})
+    write_json(root / "final_sacct.json", sacct)
+    _complete, extra_detail = validate_resource_receipt(root, SEED)
+    readiness["resource_receipts"][str(SEED)] = {"complete": True, **extra_detail}
+    with pytest.raises(ValueError, match="logical exposure"):
+        resource_summary(readiness)

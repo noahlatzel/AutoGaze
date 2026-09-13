@@ -71,6 +71,22 @@ def resolve_repo_path(path: str | Path) -> Path:
     return value if value.is_absolute() else REPOSITORY_ROOT / value
 
 
+def load_frozen_analysis_config(path: Path) -> dict[str, Any]:
+    cfg = OmegaConf.to_container(OmegaConf.load(path), resolve=True)
+    if isinstance(cfg, dict) and "base_analysis_config" in cfg:
+        base_path = resolve_repo_path(cfg["base_analysis_config"])
+        if (cfg["base_analysis_config"] != "experiments/human_gaze/configs/supervised_k16_analysis.yaml"
+                or cfg.get("base_analysis_config_sha256") != "0a831927a80d15dc9a0db8e8450229375f8b09ca90f4fa5c91eca6fe1e82465e"
+                or sha256_file(base_path) != cfg["base_analysis_config_sha256"]
+                or set(cfg) - {"schema_version", "experiment_id", "base_analysis_config", "base_analysis_config_sha256", "submitted_execution", "checkpoint_provenance", "paths"}):
+            raise ValueError("Restart analysis changes more than frozen source/path provenance")
+        overlay = {key: value for key, value in cfg.items() if key not in ("base_analysis_config", "base_analysis_config_sha256")}
+        cfg = OmegaConf.to_container(OmegaConf.merge(OmegaConf.load(base_path), overlay), resolve=True)
+    if not isinstance(cfg, dict):
+        raise ValueError("Analysis config must resolve to a mapping")
+    return cfg
+
+
 def validate_analysis_config(cfg: dict[str, Any]) -> None:
     """Reject changes to the preregistered comparison and action support."""
     if cfg.get("schema_version") != 1 or cfg.get("experiment_id") != "supervised_k16_comparison":
@@ -131,11 +147,12 @@ def validate_analysis_config(cfg: dict[str, Any]) -> None:
     ):
         raise ValueError("Analysis config weakens the frozen recovery contract")
     provenance = cfg.get("checkpoint_provenance", {})
+    frozen_inventories = {
+        ("experiments/human_gaze/results/supervised_k16_comparison/checkpoint_provenance_inventory.json", "9c824436ef21eb0b00a538eb8b9b65ca82ddc1571b28615458c787050ff042a5"),
+        ("experiments/human_gaze/results/supervised_k16_restart/checkpoint_provenance_inventory.json", "cf3cc10f16cd6b136672dbdd98ddbada258d5bfdbec1a452f2bab2ee3e5b9bff"),
+    }
     if (
-        provenance.get("inventory")
-        != "experiments/human_gaze/results/supervised_k16_comparison/checkpoint_provenance_inventory.json"
-        or provenance.get("inventory_sha256")
-        != "9c824436ef21eb0b00a538eb8b9b65ca82ddc1571b28615458c787050ff042a5"
+        (provenance.get("inventory"), provenance.get("inventory_sha256")) not in frozen_inventories
         or provenance.get("supervised_authority")
         != "canonical_execution_manifest_phase_receipt_completion_marker_and_train_state"
         or provenance.get("rl_authority")
@@ -145,6 +162,15 @@ def validate_analysis_config(cfg: dict[str, Any]) -> None:
         or provenance.get("reject_cli_or_export_metadata_as_authority") is not True
     ):
         raise ValueError("Analysis config weakens checkpoint provenance")
+    if "restart_original_execution_commit" in provenance:
+        expected_source = "ec320a5435275c6098c6d299b11d98d18d9b1afb"
+        expected_run = "20260914-0152_supervised-k16-comparison_ec320a5"
+        if (provenance["restart_original_execution_commit"] != "5a31685d56ec727b9a46db60598a0693fae7e20e"
+                or provenance.get("metadata_repair_commit") != "13179be38351df168d702962d81ebdca85691a33"
+                or cfg["submitted_execution"].get("immutable_source_commit") != expected_source
+                or cfg["submitted_execution"].get("run_id") != expected_run
+                or cfg["paths"].get("supervised_training_root") != f"/storage/user/latn/artifacts/autogaze-supervised-k16/{expected_run}"):
+            raise ValueError("Restart analysis source/seed lineage drift")
 
 
 def format_template(template: str, seed: int, step: int | None = None, phase: str | None = None) -> str:
@@ -227,6 +253,8 @@ def validate_resource_receipt(seed_root: Path, seed: int) -> tuple[bool, dict[st
             problems.append("recovery_attempt_accounting")
         else:
             observed_job_ids = {str(attempt.get("job_id")) for attempt in attempts}
+            if len(observed_job_ids) != len(attempts):
+                problems.append("recovery_attempt_duplicate_job_ids")
             if not expected_job_ids.issubset(observed_job_ids):
                 problems.append("recovery_attempt_job_ids")
             for attempt in attempts:
@@ -254,6 +282,11 @@ def validate_resource_receipt(seed_root: Path, seed: int) -> tuple[bool, dict[st
         "final_sacct": str(sacct_path),
         "final_sacct_sha256": sha256_file(sacct_path),
         "sacct": sacct,
+        "restart_of": execution.get("restart_of"),
+        "current_array_element": (
+            f"{execution.get('slurm', {}).get('SLURM_ARRAY_JOB_ID')}_{execution.get('slurm', {}).get('SLURM_ARRAY_TASK_ID')}"
+            if execution.get("restart_of") is not None else None
+        ),
     }
 
 
@@ -719,12 +752,35 @@ def resource_summary(readiness: dict[str, Any]) -> dict[str, Any]:
     gpu_seconds = []
     max_rss = []
     gpu_peak = []
+    all_attempt_base_clips = []
+    all_attempt_nominal_rows = []
     for seed in BASE_SEEDS:
         receipt = readiness["resource_receipts"][str(seed)]
         if not receipt.get("complete"):
             raise ValueError("Resource summary requires all six complete seed receipts")
         sacct = receipt["sacct"]
+        lineage = receipt.get("restart_of") or {}
         attempts = sacct.get("attempts")
+        if lineage:
+            clips, rows = 0, 0
+            for attempt in attempts:
+                if attempt["job_id"] == lineage["failed_array_element"]:
+                    clips += int(lineage["failed_base_clip_presentations"])
+                    rows += int(lineage["failed_nominal_action_rows"])
+                elif attempt["job_id"] == receipt["current_array_element"]:
+                    clips += 80000
+                    rows += 20480000
+                else:
+                    extra_clips, extra_rows = attempt.get("base_clip_presentations"), attempt.get("nominal_action_rows")
+                    if type(extra_clips) is not int or extra_clips < 0 or type(extra_rows) is not int or extra_rows != extra_clips * 256:
+                        raise ValueError("Additional restart/recovery attempt lacks verified logical exposure; withholding gate")
+                    clips += extra_clips
+                    rows += extra_rows
+            all_attempt_base_clips.append(clips)
+            all_attempt_nominal_rows.append(rows)
+        else:
+            all_attempt_base_clips.append(80000)
+            all_attempt_nominal_rows.append(20480000)
         if isinstance(attempts, list) and attempts:
             elapsed.append(float(sum(row["elapsed_seconds"] for row in attempts)))
             gpu_seconds.append(
@@ -751,6 +807,11 @@ def resource_summary(readiness: dict[str, Any]) -> dict[str, Any]:
         "per_seed_max_rss_bytes": six_seed_summary(max_rss),
         "per_seed_gpu_memory_peak_bytes": six_seed_summary(gpu_peak),
         "recovery_attempts_included_when_present": True,
+        "fixed_endpoint_successful_base_clip_presentations": 80000,
+        "fixed_endpoint_successful_nominal_action_rows": 20480000,
+        "all_attempt_base_clip_presentations_including_original_failure": six_seed_summary(all_attempt_base_clips),
+        "all_attempt_nominal_action_rows_including_original_failure": six_seed_summary(all_attempt_nominal_rows),
+        "exposure_curve_scope": "successful_restart_model_history; original failed exposure is separate overhead counted here",
     }
 
 
@@ -809,7 +870,7 @@ def main() -> None:
     args = parse_args()
     if args.output_dir.exists():
         raise FileExistsError(f"Refusing to replace curation output: {args.output_dir}")
-    cfg = OmegaConf.to_container(OmegaConf.load(args.config), resolve=True)
+    cfg = load_frozen_analysis_config(args.config)
     if not isinstance(cfg, dict):
         raise ValueError("Analysis config must resolve to a mapping")
     validate_analysis_config(cfg)
@@ -985,7 +1046,7 @@ def main() -> None:
         rl_reports=rl_reports,
         supervised_resource_complete=resource_complete,
         supervised_nominal_action_rows=int(
-            cfg["compute_accounting"]["supervised_nominal_training_trajectory_action_rows_per_seed"]
+            resources["all_attempt_nominal_action_rows_including_original_failure"]["mean"]
         ),
         rl_nominal_action_rows=int(
             cfg["compute_accounting"]["rl_nominal_training_trajectory_action_rows_per_seed"]
