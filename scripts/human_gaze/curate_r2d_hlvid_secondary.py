@@ -9,6 +9,7 @@ import json
 import math
 import re
 import platform
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -346,6 +347,8 @@ def main() -> None:
     parser.add_argument("--allocation-replay-root", type=Path)
     parser.add_argument("--accuracy-only", action="store_true", help="Publish complete QA pairs with variable costs explicitly null")
     parser.add_argument("--curation-run-id", help="Distinct immutable curation ID; --run-id still identifies original QA artifacts")
+    parser.add_argument("--scheduler-provenance-dir", type=Path, help="Existing one-time accounting snapshot; does not query Slurm")
+    parser.add_argument("--supporting-processor-smoke", type=Path, help="Existing CPU construction-only smoke, not allocation validation")
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--code-commit", required=True)
@@ -613,7 +616,30 @@ def main() -> None:
         "per_seed": per_seed,
         "aggregate": aggregate,
     }
+    supporting_files = []
+    scheduler = None
+    if args.scheduler_provenance_dir:
+        scheduler_file = args.scheduler_provenance_dir / "scheduler_provenance.json"
+        scheduler = json.loads(scheduler_file.read_text())
+        snapshot_files = [args.scheduler_provenance_dir / filename for filename in ("scheduler_provenance.json", "sacct_segments.psv", "scheduler_node_relaxation_receipt.json")]
+        if sha256_file(snapshot_files[1]) != scheduler["raw_sacct_sha256"] or sha256_file(snapshot_files[2]) != scheduler["node_relaxation_receipt"]["sha256"]:
+            raise ValueError("Scheduler provenance input/hash mismatch")
+        supporting_files.extend(snapshot_files)
+    processor_smoke = None
+    if args.supporting_processor_smoke:
+        processor_smoke = json.loads(args.supporting_processor_smoke.read_text())
+        for key, expected in {"status": "pass", "code_dirty": False, "num_video_frames": 128, "num_video_frames_thumbnail": 64, "max_tiles_video": 48, "nvila_generation_calls": 0, "allocation_semantics_verified": False, "cuda_allocation_performed": False}.items():
+            if processor_smoke.get(key) != expected:
+                raise ValueError(f"Supporting CPU construction smoke mismatch: {key}")
+        supporting_files.append(args.supporting_processor_smoke)
+    artifact_files.extend(supporting_files)
     args.output_dir.mkdir(parents=True, exist_ok=False)
+    if scheduler:
+        (args.output_dir / "scheduler").mkdir()
+        for path in supporting_files[:3]:
+            shutil.copyfile(path, args.output_dir / "scheduler" / path.name)
+    if processor_smoke:
+        shutil.copyfile(args.supporting_processor_smoke, args.output_dir / "processor_initialization_smoke.json")
     (args.output_dir / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
     config["curation"] = {"run_id": curation_id, "source_qa_run_id": args.run_id, "accuracy_only": args.accuracy_only, "code_commit": curation_commit}
     (args.output_dir / "config.yaml").write_text(yaml.safe_dump(config, sort_keys=False))
@@ -711,7 +737,7 @@ def main() -> None:
         axis.set_xticks([])
         axis.set_title(title, fontsize=10)
         axis.grid(axis="y", alpha=0.2)
-    axes[0].set_ylabel("Variable EOS − forced K16 (percentage points)")
+    axes[0].set_ylabel("Variable EOS − forced K16\n(percentage points)")
     axes[1].legend(fontsize=7, loc="best")
     delta_figure.tight_layout()
     delta_figure.savefig(args.output_dir / "paired_accuracy_deltas.png", dpi=300)
@@ -741,8 +767,9 @@ def main() -> None:
             for mode in MODES
         },
         "qa_endpoint_identities": {f"seed{seed}_{mode}": {key: summaries[(seed, mode)]["r2d_hlvid_adapter"][key] for key in ("base_seed", "training_seed", "execution", "checkpoint", "eos_calibration", "action_contract", "benchmark_protocol")} for seed in SEEDS for mode in MODES},
+        "scheduler_provenance": {"local_path": "scheduler/scheduler_provenance.json", "sha256": sha256_file(args.scheduler_provenance_dir / "scheduler_provenance.json"), "historical_node_override_source": scheduler["node_relaxation_receipt"]["source_commit"]} if scheduler else None,
+        "supporting_processor_initialization": {"local_path": "processor_initialization_smoke.json", "sha256": sha256_file(args.supporting_processor_smoke), "source_commit": processor_smoke["code_commit"], "allocation_semantics_verified": False} if processor_smoke else None,
     }
-    (args.output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     readme = f"""# R2f R2d HLVid secondary evaluation
 
 This bundle compares each completed R2d checkpoint under its actual calibrated
@@ -803,6 +830,8 @@ These separate uncertainty views are not combined. Deployment EOS also changes
 later spatial ordering: this is not an allocation-only causal comparison.
 """
     (args.output_dir / "captions.md").write_text(captions)
+    manifest["bundle_file_hashes"] = {str(path.relative_to(args.output_dir)): sha256_file(path) for path in sorted(args.output_dir.rglob("*")) if path.is_file()}
+    (args.output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
 
 if __name__ == "__main__":
