@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "core_manifest_sha256": "c3cd6927fe11b5ec3adffcc63c057cbf872facb47ee89d141cfcf0dea245a7e6",
+  "supplement_file_hashes": {
+    "interpretation.md": "a01d2bd799130010a91c700c8d23ecbe3da285ddd93984dec8262bc576612539",
+    "replay_recovery_handoff.md": "97098c345d3334993f33f2449c53151e3f19c6a4e580b485f6fbbc5b4bb41b1b"
+  },
+  "qa_regenerated": false,
+  "corrected_replay_submitted_by_this_task": false,
+  "corrected_replay_execution_commit": "d3b8d5a4abc448e78021f7085563c0f930113618",
+  "accuracy_curation_execution_commit": "6b4eef79d7105fd40f5932f1fb8fb9d4c6be3377",
+  "validation": "All core bundle and external input hashes verified; three complete pairs, 804 paired QA rows, 231 paired video rows; variable cost fields null. CPU tests: 44 pass."
+}

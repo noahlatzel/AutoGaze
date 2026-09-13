@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "purpose": "Provenance for the same-A40 in-place ReqNodeList relaxation",
+  "status": "completed_after_batch_syntax_rejection",
+  "slurm_version": "26.05.4",
+  "before_observed_at": "2026-09-09T12:46:48+02:00",
+  "after_observed_at": "2026-09-09T12:50:38+02:00",
+  "scientific_change": false,
+  "allocation_change": false,
+  "scheduler_node_constraint_changed": true,
+  "new_job_created": false,
+  "cancelled_or_requeued": false,
+  "target": {
+    "array_job_id": "1690935",
+    "pending_array_elements": [0, 1, 2, 4, 5],
+    "completed_array_element_left_untouched": 3,
+    "dependent_replay_job_id": "1700681"
+  },
+  "before": {
+    "array_elements": {
+      "0": {"state": "PENDING", "restarts": 2, "required_node_list": "node17", "projected_start": "2026-09-22T10:18:00+02:00"},
+      "1": {"state": "PENDING", "restarts": 2, "required_node_list": "node17", "projected_start": "2026-09-23T10:18:00+02:00"},
+      "2": {"state": "PENDING", "restarts": 1, "required_node_list": "node17", "projected_start": "2026-09-19T10:17:04+02:00"},
+      "4": {"state": "PENDING", "restarts": 1, "required_node_list": "node17", "projected_start": "2026-09-20T10:18:00+02:00"},
+      "5": {"state": "PENDING", "restarts": 1, "required_node_list": "node17", "projected_start": "2026-09-21T10:18:00+02:00"}
+    },
+    "array_common": {
+      "array_task_throttle": 2,
+      "request": "cpu=5,mem=128G,node=1,gres/gpu:a40=1",
+      "time_limit": "1-00:00:00",
+      "command": "/home/stud/latn/.codex/worktrees/064d/master-thesis/AutoGaze/experiments/human_gaze/slurm/run_r2d_hlvid_secondary_array.sbatch",
+      "launcher_sha256": "89fc2a55f7dcc4319d97d22d8b5c371cdda59b5754811cce4f8d657a45a938a6",
+      "work_dir": "/home/stud/latn/.codex/worktrees/064d/master-thesis/AutoGaze",
+      "run_id": "20260901-0156_r2f-r2d-hlvid-secondary_ecf1535",
+      "stdout_pattern": "/storage/user/latn/slurm/logs/gaze-r2f-hlvid-1690935_%a.out"
+    },
+    "replay": {
+      "state": "PENDING",
+      "reason": "Dependency",
+      "dependency": "afterok:1690935_*(unfulfilled)",
+      "required_node_list": "node17",
+      "request": "cpu=5,mem=128G,node=1,gres/gpu:a40=1",
+      "time_limit": "1-00:00:00",
+      "command": "/home/stud/latn/.codex/worktrees/r2f-replay-ecd72f1-20260909-0304/experiments/human_gaze/slurm/run_r2d_hlvid_allocation_replay.sbatch",
+      "launcher_sha256": "3b68577423a894eecc0cb5f98a003fef69875b38febe1f581fccf1709200df37",
+      "work_dir": "/home/stud/latn/.codex/worktrees/r2f-replay-ecd72f1-20260909-0304",
+      "run_id": "20260909-0304_r2f-r2d-hlvid-allocation-replay_ecd72f1",
+      "stdout": "/storage/user/latn/slurm/logs/gaze-r2f-replay-1700681.out"
+    }
+  },
+  "updates": {
+    "state_gate": "All five named array elements were rechecked as PENDING immediately before mutation.",
+    "rejected_batch_attempt": {
+      "command": "scontrol update JobId=1690935_0,1690935_1,1690935_2,1690935_4,1690935_5 ReqNodeList=",
+      "result": "rejected",
+      "error": "scontrol: error: Invalid job ID 1690935_0,1690935_1,1690935_2,1690935_4,1690935_5",
+      "effect": "none; set -e stopped before the initially planned replay update"
+    },
+    "authorized_individual_commands": [
+      "scontrol update JobId=1690935_0 ReqNodeList=",
+      "scontrol update JobId=1690935_1 ReqNodeList=",
+      "scontrol update JobId=1690935_2 ReqNodeList=",
+      "scontrol update JobId=1690935_4 ReqNodeList=",
+      "scontrol update JobId=1690935_5 ReqNodeList=",
+      "scontrol update JobId=1700681 ReqNodeList="
+    ],
+    "individual_results": {
+      "1690935_0": "success; immediate invariant check passed",
+      "1690935_1": "success; immediate invariant check passed",
+      "1690935_2": "success; immediate invariant check passed",
+      "1690935_4": "success; immediate invariant check passed",
+      "1690935_5": "success; immediate invariant check passed",
+      "1700681": "success; independent post-read confirmed all invariants after the strict shell stopped before printing its final confirmation"
+    }
+  },
+  "after": {
+    "array_elements_state": "all five remain PENDING with Reason=Priority",
+    "array_elements_required_node_list": null,
+    "array_task_throttle": 2,
+    "array_request": "cpu=5,mem=128G,node=1,gres/gpu:a40=1",
+    "array_time_limit": "1-00:00:00",
+    "array_source_run_and_output_paths": "unchanged",
+    "replay_state": "PENDING",
+    "replay_dependency": "afterok:1690935_*(unfulfilled)",
+    "replay_required_node_list": null,
+    "replay_request_time_source_run_and_output_paths": "unchanged",
+    "control_1700678": "untouched; PENDING on node21 with H100 NVL request"
+  },
+  "feasibility_context": {
+    "same_a40_nodes": ["node15", "node16", "node17", "node18"],
+    "active_same_a40_nodes_at_review": ["node15", "node16", "node17"],
+    "draining_same_a40_nodes_at_review": ["node18"],
+    "test_only_relaxed_request_projected_start": "2026-09-12T00:21:06+02:00",
+    "test_only_projected_node": "node15",
+    "test_only_created_job": false
+  },
+  "launcher_override_explanation": "The immutable launchers retain their original node17 SBATCH directive. The live Slurm job records now override only ReqNodeList, leaving the launchers and execution snapshots unchanged.",
+  "future_execution_provenance": "Final curation must record each actual allocation segment's NodeList from Slurm accounting; no segment location is inferred from the immutable launcher's original node17 directive.",
+  "next_action": "Monitor normal scheduling. Do not submit, cancel, requeue, or increase concurrency."
+}
