@@ -179,7 +179,7 @@ def make_figure(path, per_method, contrasts):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     plt.rcParams.update({"font.size":9, "pdf.fonttype":42, "ps.fonttype":42})
-    fig, axes = plt.subplots(1,3,figsize=(11.2,3.8),layout="constrained")
+    fig, axes = plt.subplots(1,3,figsize=(11.2,4.3),layout="constrained")
     colors = {"trained_k16":"#3476a5", "pretrained_exact_k16":"#d28b2c", "stavis_center16":"#458664"}
     names = {"trained_k16":"Human-gaze K16\n6 H100 seeds", "pretrained_exact_k16":"Pretrained K16\nA40", "stavis_center16":"Center16\nA40"}
     for axis, metric, title in zip(axes[:2],("question_micro_accuracy","macro_video_accuracy"),
@@ -208,7 +208,8 @@ def make_figure(path, per_method, contrasts):
     axis.set_yticks([0,1],["Human-gaze − pretrained","Human-gaze − Center16"])
     axis.set_xlabel("Micro QA difference (percentage points)")
     axis.set_title("Separate uncertainty sources")
-    axis.legend(fontsize=7,loc="lower right")
+    handles, labels = axis.get_legend_handles_labels()
+    fig.legend(handles,labels,fontsize=8,loc="outside lower center",ncols=2)
     fig.savefig(path.with_suffix(".pdf"))
     fig.savefig(path.with_suffix(".png"),dpi=240)
     plt.close(fig)
