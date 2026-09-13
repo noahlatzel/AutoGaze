@@ -264,6 +264,7 @@ def main(cfg: DictConfig):
         train_loader=train_loader,
         val_loader=val_loader,
         optimizer=optimizer,
+        optimizer_name=cfg.trainer.optimizer if getattr(algorithm, 'uses_teacher_forcing', False) else None,
         save_dir=exp_path,
         grad_acc_steps=grad_acc_steps,
         gaze_processor=gaze_transform,

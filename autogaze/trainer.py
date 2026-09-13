@@ -36,7 +36,7 @@ from autogaze.supervised_checkpoint import (
 class Trainer:
     def __init__(self, gaze_model, task, algorithm, train_loader, val_loader, optimizer, n_epochs, temp_schedule_args, 
                  train_gaze=True, train_task=True, detach_task=False, val_nsteps=100, save_nsteps=300, save_dir=None, grad_acc_steps=1, resume=False, gaze_weights=None, task_weights=None, 
-                 val_only=False, gaze_processor=None, reference_gaze_model=None, **config):
+                 val_only=False, gaze_processor=None, reference_gaze_model=None, optimizer_name=None, **config):
 
         # Core modules
         self.gaze_model = gaze_model
@@ -66,6 +66,15 @@ class Trainer:
         self.temp_schedule_args = temp_schedule_args
         self.total_steps = (len(self.train_loader) / grad_acc_steps) * self.n_epochs
         self.config = config
+        if self.human_supervision:
+            # Hydra replaces cfg.trainer.optimizer with the instantiated object
+            # above; the explicit constructor argument is not in **config.
+            # Retain its separately supplied recipe identity for save/resume,
+            # and bind the label to the actual optimizer rather than guessing.
+            optimizer_types = {'adam': torch.optim.Adam, 'sgd': torch.optim.SGD}
+            if not isinstance(optimizer_name, str) or optimizer_name not in optimizer_types or type(optimizer) is not optimizer_types[optimizer_name]:
+                raise ValueError("Supervised Trainer requires the recipe optimizer_name matching its instantiated optimizer")
+            self.config['optimizer'] = optimizer_name
         self.val_only = val_only
 
         # Optimization related
