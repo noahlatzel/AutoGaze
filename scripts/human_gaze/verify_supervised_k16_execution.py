@@ -109,6 +109,30 @@ def load_execution_config(path: Path) -> dict[str, Any]:
     config = OmegaConf.to_container(OmegaConf.load(path), resolve=True)
     if not isinstance(config, dict):
         raise ValueError("Execution config must resolve to a mapping")
+    if config.get("kind") == "matched_six_seed_supervised_training_same_seed_restart":
+        from autogaze.human_gaze.supervised_restart import (
+            FAILED_INVENTORY_PATH, FAILED_INVENTORY_SHA256, REPAIR_COMMIT,
+        )
+        if config.get("schema_version") != 1 or config.get("experiment_id") != "supervised_k16_comparison":
+            raise ValueError("Restart execution identity mismatch")
+        base_path = REPOSITORY_ROOT / config.get("base_execution_config", "")
+        if config.get("base_execution_config") != "experiments/human_gaze/configs/supervised_k16_execution.yaml" or sha256_file(base_path) != "e0ee7948b695a7f43ec40d4209437bdf8bcd138d1776b751195004eadac02050":
+            raise ValueError("Restart changes the original execution recipe")
+        if (config.get("base_execution_config_sha256") != sha256_file(base_path)
+                or config.get("metadata_repair_commit") != REPAIR_COMMIT
+                or config.get("failed_attempt_inventory") != FAILED_INVENTORY_PATH
+                or config.get("failed_attempt_inventory_sha256") != FAILED_INVENTORY_SHA256
+                or any(config.get(key) is not True for key in (
+                    "preserve_failed_attempts", "include_failed_attempts_in_final_scheduler_cost",
+                    "no_extra_objective_budget_or_seed", "no_hlvid_in_this_admission"))):
+            raise ValueError("Restart weakens the frozen same-seed/source/cost contract")
+        base = load_execution_config(base_path)
+        base["kind"] = config["kind"]
+        base["restart"] = config
+        base["execution"]["worktree"] = config["execution_worktree"]
+        base["resources"]["basis"]["actual_optimizer_save_reload_peak_cuda_bytes"] = 441529856
+        base["resources"]["basis"]["actual_optimizer_save_reload_peak_rss_bytes"] = 2232098816
+        return base
     expected = {
         "schema_version": 1,
         "experiment_id": "supervised_k16_comparison",
@@ -161,7 +185,13 @@ def command_precheck(args: argparse.Namespace) -> None:
     for key, expected in expected_hashes.items():
         if hashes[key] != expected:
             raise ValueError(f"Live input hash mismatch for {key}")
-    source = verified_source(args.expected_commit)
+    if "restart" in config:
+        from autogaze.human_gaze.supervised_restart import restart_identity, verify_restart_source
+        source = verify_restart_source(REPOSITORY_ROOT, args.expected_commit)
+        restart_of = restart_identity(REPOSITORY_ROOT, BASE_SEEDS[args.array_index])
+    else:
+        source = verified_source(args.expected_commit)
+        restart_of = None
     index = args.array_index
     record = {
         "schema_version": 1,
@@ -197,6 +227,8 @@ def command_precheck(args: argparse.Namespace) -> None:
             "hlvid": False,
         },
     }
+    if restart_of is not None:
+        record["restart_of"] = restart_of
     write_new_json(args.output, record)
     print(json.dumps({"status": "pass", "output": str(args.output), "base_seed": BASE_SEEDS[index]}))
 
@@ -331,6 +363,13 @@ def command_manifest(args: argparse.Namespace) -> None:
         "scientific_evaluation": "pending_full_validation_all_six_seeds",
         "hlvid_executed": False,
     }
+    if "restart_of" in precheck:
+        from autogaze.human_gaze.supervised_restart import restart_identity
+        expected_restart = restart_identity(REPOSITORY_ROOT, seed_pair[0])
+        if precheck["restart_of"] != expected_restart:
+            raise ValueError("Restart manifest does not bind the preserved same-seed failure")
+        record["restart_of"] = expected_restart
+        record["cost_accounting"] = "final_sacct_attempts_must_include_original_failure_and_restart"
     write_new_json(args.output, record)
     print(json.dumps({"status": record["status"], "output": str(args.output)}))
 

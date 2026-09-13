@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "status": "frozen_failed_attempt_inventory",
+  "experiment_id": "supervised_k16_comparison",
+  "observed_at": "2026-09-14T01:32:15+02:00",
+  "original_source_commit": "5a31685d56ec727b9a46db60598a0693fae7e20e",
+  "original_run_id": "20260910-2128_supervised-k16-comparison_5a31685",
+  "original_training_root": "/storage/user/latn/artifacts/autogaze-supervised-k16/20260910-2128_supervised-k16-comparison_5a31685",
+  "original_array_job_id": "1702710",
+  "failure": "Supervised checkpoint contract requires optimizer and lr_schedule",
+  "completed_updates_per_seed": 100,
+  "base_clip_presentations_per_failed_seed": 400,
+  "nominal_action_rows_per_failed_seed": 102400,
+  "checkpoint_present": false,
+  "scheduler_totals": "pending_exact_terminal_receipts_from_sole_admission_owner",
+  "path_templates": {
+    "precheck": "{seed_root}/admission_precheck.json",
+    "process_time": "{seed_root}/stage1_time.txt",
+    "gpu_telemetry": "{seed_root}/gpu_memory.csv",
+    "slurm_log": "/storage/user/latn/slurm/logs/gaze-supervised-k16-1702710_{array_index}.out"
+  },
+  "seeds": [
+    {"base_seed": 440826, "continuation_seed": 540826, "array_index": 0, "failed_array_element": "1702710_0", "actual_job_id": "1705906", "process_elapsed_seconds": 238.91, "max_rss_kib": 2482600, "gpu_reported_peak_mib": 9599, "files_sha256": {"precheck": "f0532a8ffa2fd9cf508e44c2089ce17ecee526a61fcdd7400ee9b0394702bcd6", "process_time": "9f860335b9303b4a18cf722aeeb1fded2b1c2e181403ed4ea676f2fccaef1eb0", "gpu_telemetry": "d249ee9e43048e4cdc92f8ce871b48d7b899f7b54ede07fec568197e8f7836a8", "slurm_log": "78589528522420a20d6e1840bc2b325766589b7afd4182af45d683422695e85e"}},
+    {"base_seed": 440827, "continuation_seed": 540827, "array_index": 1, "failed_array_element": "1702710_1", "actual_job_id": "1705912", "process_elapsed_seconds": 110.33, "max_rss_kib": 2494284, "gpu_reported_peak_mib": 9599, "files_sha256": {"precheck": "50f7f884e79ccea553b2f82f31a40671dbb2bdd8cb42e9521ee0d68be10d3db0", "process_time": "66350cae2363fa65d54b95553b1be7471a53ba4a4c4b4bb792af433079287c7c", "gpu_telemetry": "e61c19d93be26c50c1c872b0424b5362f5bd6ba07a54dda27b6761ecf62a4e39", "slurm_log": "19ba604a8b9c2c5a0516bb8f50beb7840b79e68042534807a0e6a9347e48b5b8"}},
+    {"base_seed": 440828, "continuation_seed": 540828, "array_index": 2, "failed_array_element": "1702710_2", "actual_job_id": "1705915", "process_elapsed_seconds": 98.79, "max_rss_kib": 2491228, "gpu_reported_peak_mib": 9599, "files_sha256": {"precheck": "5f07cc18b726676e066121ed5ffd8d6b3c8750276b339461a7581d2f82815a94", "process_time": "2db59330845e70a64fcdff631970f2a6961496212cbffba8913739c52bb6d416", "gpu_telemetry": "ab4eaa262462a670a73eb4cc231725fe9fd007ea165e9d1f5275e9350c8f3be9", "slurm_log": "6e717bae1e5a38652d7c04a142f66734c93f5a59e0addf24c41391afd29af3aa"}},
+    {"base_seed": 440829, "continuation_seed": 540829, "array_index": 3, "failed_array_element": "1702710_3", "actual_job_id": "1705918", "process_elapsed_seconds": 97.49, "max_rss_kib": 2491368, "gpu_reported_peak_mib": 9599, "files_sha256": {"precheck": "d2745793db7dd541c49703a6a7e56eebe72ef322dde0f47116e7f3a76ab96b49", "process_time": "a07474203c7119390a51b1cf26904b8b4cebe9ac35ab85a0dd809f05e935c6ea", "gpu_telemetry": "3840fbeca7e69ad9c1bf89de6c6849e2d17f6d70727164f14e644805d3e518fc", "slurm_log": "f3f09c76ed831ec7fd53e637a205bf48f783cd1f1d99008bf9ca1fc97c746d31"}},
+    {"base_seed": 440830, "continuation_seed": 540830, "array_index": 4, "failed_array_element": "1702710_4", "actual_job_id": "1705920", "process_elapsed_seconds": 88.60, "max_rss_kib": 2493684, "gpu_reported_peak_mib": 9599, "files_sha256": {"precheck": "ab6bf1eb0a0f8c9ccfdaafe9231c142bda2c6ee4f7c6c69f6e5013b1167f2d34", "process_time": "360e38f79fb3153461bc666387958b42b8648b98536c122606c5f206e39bbe55", "gpu_telemetry": "c28067ec9bb078f2741450d8c94fe65cdf0bdf1674bfe44402a89aef4d114724", "slurm_log": "cab7289d2eb430b5f3621b5fd3f3ce12136ed4667da284f2dd7d56592c0e2e61"}},
+    {"base_seed": 440831, "continuation_seed": 540831, "array_index": 5, "failed_array_element": "1702710_5", "actual_job_id": "1702710", "process_elapsed_seconds": 136.29, "max_rss_kib": 2486928, "gpu_reported_peak_mib": 9599, "files_sha256": {"precheck": "dbf23af86248cd3e7cc1477d2c86cde3b8f838229e438f58e799c4d1d9fa008c", "process_time": "e546403adb94a30709fcadc8fc01ba3c60045ef59a975d510c99447f110bdd4f", "gpu_telemetry": "c0e745e80e2eb2cc57e9891eb2a9238c881913d5db63ec99cf15b805e4c8c3ae", "slurm_log": "cc0fd82f6971b4a04f85bc395fe4bb351dc16c09031e0e89436870249c1ee4f7"}}
+  ]
+}

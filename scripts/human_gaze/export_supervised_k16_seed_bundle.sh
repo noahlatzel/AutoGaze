@@ -18,6 +18,7 @@ if [[ ! "$base_seed" =~ ^44082[6-9]$|^44083[01]$ ]]; then
 fi
 training_seed="$((base_seed + 100000))"
 python="${AUTOGAZE_PYTHON:-/home/stud/latn/miniconda3/envs/autogaze/bin/python}"
+export_config="${SUPERVISED_ANALYSIS_CONFIG:-experiments/human_gaze/configs/supervised_k16_analysis.yaml}"
 dataset_root=/storage/user/zverev/datasets/av-gaze-stavis
 manifest=/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
 cell_mass=/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
@@ -44,6 +45,7 @@ for index in "${!steps[@]}"; do
     --run-dir "$phase_dir" \
     --training-root "$training_root" \
     --phase-train-step "$phase_step" \
+    --analysis-config "$export_config" \
     --method supervised \
     --base-seed "$base_seed" \
     --training-seed "$training_seed" \
@@ -59,6 +61,7 @@ rl_checkpoint="/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2
   --manifest "$manifest" \
   --cell-mass "$cell_mass" \
   --checkpoint "$rl_checkpoint" \
+  --analysis-config "$export_config" \
   --method rl \
   --base-seed "$base_seed" \
   --training-seed "$training_seed" \

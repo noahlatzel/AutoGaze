@@ -67,9 +67,24 @@ def load_checkpoint_inventory(
     ):
         raise ValueError("Unsupported checkpoint provenance inventory")
     authority = inventory.get("authoritative_sources", {})
+    is_restart = authority.get("supervised_execution_kind") == "same_seed_fresh_restart"
+    if is_restart:
+        from autogaze.human_gaze.supervised_restart import (
+            FAILED_INVENTORY_PATH, FAILED_INVENTORY_SHA256, REPAIR_COMMIT,
+            load_failed_attempts, verify_published_restart_source,
+        )
+        lineage = inventory.get("restart_lineage", {})
+        if (lineage.get("original_execution_commit") != EXECUTION_COMMIT
+                or lineage.get("original_run_id") != RUN_ID
+                or lineage.get("metadata_repair_commit") != REPAIR_COMMIT
+                or lineage.get("failed_inventory") != FAILED_INVENTORY_PATH
+                or lineage.get("failed_inventory_sha256") != FAILED_INVENTORY_SHA256):
+            raise ValueError("Restart checkpoint inventory changes the reviewed source/seed lineage")
+        verify_published_restart_source(repository_root, authority.get("supervised_execution_commit", ""))
+        load_failed_attempts(repository_root)
     if (
-        authority.get("supervised_execution_commit") != EXECUTION_COMMIT
-        or authority.get("supervised_run_id") != RUN_ID
+        (not is_restart and authority.get("supervised_execution_commit") != EXECUTION_COMMIT)
+        or (not is_restart and authority.get("supervised_run_id") != RUN_ID)
         or inventory.get("data_sha256")
         != {"manifest": MANIFEST_SHA256, "cell_mass": CELL_MASS_SHA256}
     ):
@@ -306,18 +321,29 @@ def _canonical_supervised_execution(
     ).resolve(strict=True)
     execution_path = seed_root / "execution_manifest.json"
     execution = _load_json(execution_path)
+    authority = inventory["authoritative_sources"]
+    expected_source = authority.get("supervised_execution_commit", EXECUTION_COMMIT)
+    expected_run = authority.get("supervised_run_id", RUN_ID)
     if (
         execution.get("schema_version") != 1
         or not str(execution.get("status", "")).startswith("training_complete")
         or execution.get("experiment_id") != "supervised_k16_comparison"
-        or execution.get("run_id") != RUN_ID
+        or execution.get("run_id") != expected_run
         or execution.get("base_seed") != base_seed
         or execution.get("continuation_seed") != training_seed
     ):
         raise ValueError("Canonical supervised execution manifest identity mismatch")
     source = execution.get("source", {})
-    if source.get("execution_commit") != EXECUTION_COMMIT or source.get("dirty") is not False:
+    if source.get("execution_commit") != expected_source or source.get("dirty") is not False:
         raise ValueError("Canonical supervised execution source identity mismatch")
+    restart_of = None
+    if authority.get("supervised_execution_kind") == "same_seed_fresh_restart":
+        from autogaze.human_gaze.supervised_restart import restart_identity, verify_published_restart_source
+        repository_root = Path(__file__).resolve().parents[2]
+        expected_chain = verify_published_restart_source(repository_root, expected_source)
+        restart_of = restart_identity(repository_root, base_seed)
+        if source.get("source_chain") != expected_chain or execution.get("restart_of") != restart_of:
+            raise ValueError("Restart execution lacks authoritative same-seed failed-attempt/source binding")
     inputs = execution.get("input_sha256", {})
     if inputs.get("manifest") != MANIFEST_SHA256 or inputs.get("cell_mass") != CELL_MASS_SHA256:
         raise ValueError("Canonical supervised execution data identity mismatch")
@@ -340,7 +366,7 @@ def _canonical_supervised_execution(
             or recovery.get("status") != "complete_same_seed_recovery"
             or recovery.get("base_seed") != base_seed
             or recovery.get("training_seed") != training_seed
-            or recovery.get("immutable_source_commit") != EXECUTION_COMMIT
+            or recovery.get("immutable_source_commit") != expected_source
             or recovery.get("input_sha256")
             != {"manifest": MANIFEST_SHA256, "cell_mass": CELL_MASS_SHA256}
         ):
@@ -394,6 +420,7 @@ def _canonical_supervised_execution(
         "endpoints": endpoints,
         "recovery_manifest_path": recovery_path if recovery is not None else None,
         "recovery_manifest_sha256": sha256_file(recovery_path) if recovery is not None else None,
+        "restart_of": restart_of,
     }
 
 
@@ -467,6 +494,7 @@ def verify_supervised_checkpoint(
             else None
         ),
         "recovery_manifest_sha256": execution["recovery_manifest_sha256"],
+        "restart_of": execution["restart_of"],
     }
     return checkpoint.resolve(strict=True), provenance
 

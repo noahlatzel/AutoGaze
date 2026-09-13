@@ -204,13 +204,24 @@ def validate_resource_receipt(seed_root: Path, seed: int) -> tuple[bool, dict[st
         if isinstance(value, bool) or not isinstance(value, (int, float)) or value <= 0:
             problems.append(f"final_sacct_{key}")
     recovery_path = seed_root / "recovery_manifest.json"
+    expected_job_ids = set()
+    if execution.get("restart_of") is not None:
+        lineage = execution["restart_of"]
+        slurm = execution.get("slurm", {})
+        if (lineage.get("base_seed") != seed or lineage.get("continuation_seed") != seed + 100000
+                or lineage.get("failed_array_element") != f"1702710_{seed - 440826}"
+                or not slurm.get("SLURM_ARRAY_JOB_ID") or slurm.get("SLURM_ARRAY_TASK_ID") != str(seed - 440826)):
+            problems.append("restart_attempt_identity")
+        else:
+            expected_job_ids.update((lineage["failed_array_element"], f"{slurm['SLURM_ARRAY_JOB_ID']}_{slurm['SLURM_ARRAY_TASK_ID']}"))
     if recovery_path.is_file():
         recovery = load_json(recovery_path)
-        expected_job_ids = {
+        expected_job_ids.update({
             str(job_id)
             for key in ("failed_job_ids", "recovery_job_ids")
             for job_id in recovery.get(key, [])
-        }
+        })
+    if expected_job_ids or recovery_path.is_file():
         attempts = sacct.get("attempts")
         if not expected_job_ids or not isinstance(attempts, list) or not attempts:
             problems.append("recovery_attempt_accounting")
@@ -321,12 +332,14 @@ def supervised_training_wall(
     if (
         stage1_provenance["recovery_manifest"] is not None
         or stage2_provenance["recovery_manifest"] is not None
+        or stage1_provenance["restart_of"] is not None
+        or stage2_provenance["restart_of"] is not None
     ):
         return {
             "status": "withheld_recovery_attempt_timing_not_reconstructable",
             "points": {},
             "reason": (
-                "Resolved phase histories omit time already spent in failed attempts; "
+                "Fresh-restart/recovered histories omit time already spent in failed attempts; "
                 "use final scheduler totals for total cost."
             ),
         }

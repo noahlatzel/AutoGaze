@@ -15,7 +15,7 @@ worktree="${AUTOGAZE_WORKTREE:?Set AUTOGAZE_WORKTREE to the detached admitted ch
 execution_commit="${AUTOGAZE_EXECUTION_COMMIT:?Set the exact admitted execution commit}"
 run_id="${SUPERVISED_K16_RUN_ID:?Set the immutable experiment run ID}"
 artifact_root=/storage/user/latn/artifacts/autogaze-supervised-k16
-execution_config=experiments/human_gaze/configs/supervised_k16_execution.yaml
+execution_config="${SUPERVISED_EXECUTION_CONFIG:-experiments/human_gaze/configs/supervised_k16_execution.yaml}"
 python=/home/stud/latn/miniconda3/envs/autogaze/bin/python
 
 if [[ ! "$run_id" =~ ^[0-9]{8}-[0-9]{4}_supervised-k16-comparison_[0-9a-f]{7}$ ]]; then
