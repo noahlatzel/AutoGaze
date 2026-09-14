@@ -149,7 +149,7 @@ def validate_analysis_config(cfg: dict[str, Any]) -> None:
     provenance = cfg.get("checkpoint_provenance", {})
     frozen_inventories = {
         ("experiments/human_gaze/results/supervised_k16_comparison/checkpoint_provenance_inventory.json", "9c824436ef21eb0b00a538eb8b9b65ca82ddc1571b28615458c787050ff042a5"),
-        ("experiments/human_gaze/results/supervised_k16_restart/checkpoint_provenance_inventory.json", "cf3cc10f16cd6b136672dbdd98ddbada258d5bfdbec1a452f2bab2ee3e5b9bff"),
+        ("experiments/human_gaze/results/supervised_k16_restart/checkpoint_provenance_inventory.json", "38bd1f184b9e9612529621f0f790b1cc5a0e396c3c1cc62e9785d958f5139870"),
     }
     if (
         (provenance.get("inventory"), provenance.get("inventory_sha256")) not in frozen_inventories
@@ -164,7 +164,7 @@ def validate_analysis_config(cfg: dict[str, Any]) -> None:
         raise ValueError("Analysis config weakens checkpoint provenance")
     if "restart_original_execution_commit" in provenance:
         expected_source = "ec320a5435275c6098c6d299b11d98d18d9b1afb"
-        expected_run = "20260914-0152_supervised-k16-comparison_ec320a5"
+        expected_run = "20260914-0158_supervised-k16-comparison_ec320a5"
         if (provenance["restart_original_execution_commit"] != "5a31685d56ec727b9a46db60598a0693fae7e20e"
                 or provenance.get("metadata_repair_commit") != "13179be38351df168d702962d81ebdca85691a33"
                 or cfg["submitted_execution"].get("immutable_source_commit") != expected_source

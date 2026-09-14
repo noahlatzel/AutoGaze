@@ -58,6 +58,16 @@ def test_restart_analysis_keeps_frozen_gate_subgroup_and_rl_checkpoint_matrix():
     assert len(inventory["rl_endpoints"]) == 6
     assert inventory["authoritative_sources"]["supervised_execution_commit"] == "ec320a5435275c6098c6d299b11d98d18d9b1afb"
     assert len(inventory["supervised_checkpoints"]) == 5
+    admitted_run = "20260914-0158_supervised-k16-comparison_ec320a5"
+    assert cfg["submitted_execution"]["run_id"] == admitted_run
+    assert cfg["submitted_execution"]["slurm_array_job_id"] == 1705995
+    assert cfg["submitted_execution"]["dependency"] is None
+    assert inventory["authoritative_sources"]["supervised_run_id"] == admitted_run
+    assert inventory["supervised_training_root"] == cfg["paths"]["supervised_training_root"]
+    assert cfg["paths"]["action_export_root"] == f'{inventory["supervised_training_root"]}/action_exports'
+    cfg["submitted_execution"]["run_id"] = "20260914-0152_supervised-k16-comparison_ec320a5"
+    with pytest.raises(ValueError, match="lineage drift"):
+        validate_analysis_config(cfg)
 
 
 def test_all_five_restart_bundles_bind_source_seed_and_original_failed_attempt(tmp_path, monkeypatch):

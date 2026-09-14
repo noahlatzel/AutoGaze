@@ -29,7 +29,7 @@ production checkpoint or validation experiment. `checkpoint_smoke.json` pins its
 full receipt: peak allocated CUDA441529856B, reserved509607936B, RSS2232098816B,
 within10GiB/8GiB/two-CPU-thread/30-minute bounds.
 
-## Six same-seed fresh restarts — sole-owner admission required
+## Six same-seed fresh restarts — admitted array1705995
 
 `../../configs/supervised_k16_restart_execution.yaml` inherits the exact original
 execution recipe by SHA-256. Both original stage configs remain unchanged:
@@ -41,24 +41,29 @@ presentations/102400 nominal action rows per failed attempt are separately
 reported and included in total compute, not silently counted as new seeds or
 omitted. Nominal rows are not physical decoder FLOPs or measured runtime.
 
-Request one array0-5%1, one A40/5CPU/32GiB/24h per seed, Requeue0, no node pin.
-The sole fixed owner01a05a0a-3c7e-7053-aa24-5069bff7fa96 must choose admission
-timing/dependency against all user jobs, preserving existing priorities and the
-3GPU/384GiB global cap. No job is submitted by this source. The inherited
-launcher refuses existing directories; the versioned restart run/root must be
-new. The exact admitted execution SHA and run ID are frozen in the separately
-published admission/analysis manifest, avoiding a self-referential Git SHA.
+The sole fixed owner01a05a0a-3c7e-7053-aa24-5069bff7fa96 submitted array1705995,
+0-5%1, one A40/5CPU/32GiB/24h per seed, Requeue0, no node pin or effective
+dependency. Its published 01:59:05CEST receipt reports PENDING(Priority), zero
+outputs, and a dynamic first-start projection of Sep16 23:40CEST. This is not
+a fresh live scheduler query or a guaranteed start. The owner retains all-user
+resource coordination and the 3GPU/384GiB cap. Do not submit a duplicate or
+modify the clean detached executionec320a5. The admitted run ends0158; the
+previously proposed0152 root was not admitted and must not receive outputs.
+`admission_request.json` now records the actual admission and pins the private
+owner receipt by repository/commit/path/byte hash; it is not a self-issued
+submission receipt. Parent owns independent source review and main/wiki updates.
 
 Inside the owner-admitted allocation, from its clean detached execution SHA:
 
 ```bash
 AUTOGAZE_WORKTREE=/storage/user/latn/worktrees/autogaze-supervised-k16-checkpoint-recovery \
-AUTOGAZE_EXECUTION_COMMIT=ADMITTED_EXECUTION_SHA \
-SUPERVISED_K16_RUN_ID=VERSIONED_RESTART_RUN_ID \
+AUTOGAZE_EXECUTION_COMMIT=ec320a5435275c6098c6d299b11d98d18d9b1afb \
+SUPERVISED_K16_RUN_ID=20260914-0158_supervised-k16-comparison_ec320a5 \
 bash experiments/human_gaze/slurm/run_supervised_k16_restart_array.sbatch
 ```
 
-This is the task payload, not an independent submission command. Precheck
+This documents the already-submitted task payload, not a command to rerun or
+independently submit. Precheck
 validates the tested repair's exact training-code blobs, allowed metadata-only
 source chain, actual successful smoke receipt, and preserved same-seed failed
 evidence. Completed execution manifests bind both phase receipts and `restart_of`.
@@ -66,12 +71,22 @@ evidence. Completed execution manifests bind both phase receipts and `restart_of
 ## Analysis, timing and next evidence
 
 The immutable execution SHA is `ec320a5435275c6098c6d299b11d98d18d9b1afb`; the
-new run is `20260914-0152_supervised-k16-comparison_ec320a5`. All six actual
-prechecks passed from a clean detached copy of that SHA, with live data,
-initialization, smoke and failed-attempt hashes verified. Final CPU suite:286
-passed. `admission_request.json` is the concrete sole-owner handoff; it is not a
-submission receipt. The separately published analysis layer pins this SHA and
-the new root without altering the execution SHA or original inventory.
+actual admitted run is `20260914-0158_supervised-k16-comparison_ec320a5`.
+All six historical proposed0152 prechecks passed from a clean detached copy of
+that SHA, with live data, initialization, smoke and failed-attempt hashes
+verified; their receipt paths are retained, not relabelled as admitted-run QA.
+The owner additionally verified an actual0158-run precheck and9 focused tests,
+recorded in its authoritative receipt. The prior full CPU suite passed286 tests.
+The unexecuted analysis layer pins actual job1705995/sourceec320a5/root0158
+without altering the execution SHA or original inventory. No training output or
+scientific result exists at the admission receipt time.
+
+Admission metadata correction passed26 focused CPU regressions in7.77s,
+including all five SL checkpoint bundles, frozen RL authority and analysis.
+The existing inheritance test now checks actual0158/job1705995/root agreement
+and rejects the obsolete0152 run. Only unexecuted metadata, matching curator
+run/hash constants, documentation and this focused assertion changed; admitted
+executionec320a5 and both launcher/config bytes remain unchanged.
 
 `runtime_estimate.json` projects the actual A40 warm-update/validation timings:
 about3.4--6.8h per seed (median3.8h), or20--41h for the serialized six-seed lane
@@ -85,20 +100,20 @@ seed bundle once per base seed from a clean analysis checkout:
 ```bash
 SUPERVISED_ANALYSIS_CONFIG=experiments/human_gaze/configs/supervised_k16_restart_analysis.yaml \
 bash scripts/human_gaze/export_supervised_k16_seed_bundle.sh 440826 \
-  /storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0152_supervised-k16-comparison_ec320a5 \
-  /storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0152_supervised-k16-comparison_ec320a5/action_exports
+  /storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0158_supervised-k16-comparison_ec320a5 \
+  /storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0158_supervised-k16-comparison_ec320a5/action_exports
 
 python scripts/human_gaze/curate_supervised_k16_comparison.py \
   --config experiments/human_gaze/configs/supervised_k16_restart_analysis.yaml \
   --output-dir /storage/user/latn/artifacts/autogaze-supervised-k16/NEW_CURATION_RUN_ID
 ```
 
-The updated authoritative restart inventory/config must pin the admitted
-execution SHA and new canonical root. Original inventory/source5a31685 is not
+The authoritative restart inventory/config now pin the admitted execution SHA
+and actual0158 canonical root. Original inventory/source5a31685 is not
 overwritten. Export and curation independently verify actual source/seed/cursor,
 completion/model hashes and the failed-attempt lineage. A final `final_sacct.json`
 for each seed must have an `attempts` list covering the original1702710 element
-and the completed restart element, plus any subsequent recovery attempts. The
+and the completed1705995 restart element, plus any subsequent recovery attempts. The
 CPU resource validator fails closed if failed allocation time is omitted.
 
 Fresh-restart process logs do not reconstruct prior failed time; wall-time

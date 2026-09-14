@@ -8,9 +8,9 @@
   "authoritative_sources": {
     "supervised_execution_kind": "same_seed_fresh_restart",
     "supervised_execution_commit": "ec320a5435275c6098c6d299b11d98d18d9b1afb",
-    "supervised_run_id": "20260914-0152_supervised-k16-comparison_ec320a5"
+    "supervised_run_id": "20260914-0158_supervised-k16-comparison_ec320a5"
   },
-  "supervised_training_root": "/storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0152_supervised-k16-comparison_ec320a5",
+  "supervised_training_root": "/storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0158_supervised-k16-comparison_ec320a5",
   "restart_lineage": {
     "original_execution_commit": "5a31685d56ec727b9a46db60598a0693fae7e20e",
     "original_run_id": "20260910-2128_supervised-k16-comparison_5a31685",

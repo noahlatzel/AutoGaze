@@ -4,17 +4,21 @@ base_analysis_config: experiments/human_gaze/configs/supervised_k16_analysis.yam
 base_analysis_config_sha256: 0a831927a80d15dc9a0db8e8450229375f8b09ca90f4fa5c91eca6fe1e82465e
 submitted_execution:
   immutable_source_commit: ec320a5435275c6098c6d299b11d98d18d9b1afb
-  run_id: 20260914-0152_supervised-k16-comparison_ec320a5
-  slurm_array_job_id: null
+  run_id: 20260914-0158_supervised-k16-comparison_ec320a5
+  slurm_array_job_id: 1705995
   dependency: null
   array: 0-5%1
-  admission_receipt: null
+  admission_receipt:
+    repository: git@github.com:noahlatzel/master-thesis.git
+    path: status/2026-09-14-repair-admission.json
+    source_commit: dc137393ee4c51a24ac2c6399d5755804f4d5f27
+    committed_byte_sha256: c7cb220637d09960bc16c31f805a65e55718c3377645d65a9d335225426d8cff
   integrated_receipt_commit: null
 checkpoint_provenance:
   inventory: experiments/human_gaze/results/supervised_k16_restart/checkpoint_provenance_inventory.json
-  inventory_sha256: cf3cc10f16cd6b136672dbdd98ddbada258d5bfdbec1a452f2bab2ee3e5b9bff
+  inventory_sha256: 38bd1f184b9e9612529621f0f790b1cc5a0e396c3c1cc62e9785d958f5139870
   restart_original_execution_commit: 5a31685d56ec727b9a46db60598a0693fae7e20e
   metadata_repair_commit: 13179be38351df168d702962d81ebdca85691a33
 paths:
-  supervised_training_root: /storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0152_supervised-k16-comparison_ec320a5
-  action_export_root: /storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0152_supervised-k16-comparison_ec320a5/action_exports
+  supervised_training_root: /storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0158_supervised-k16-comparison_ec320a5
+  action_export_root: /storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0158_supervised-k16-comparison_ec320a5/action_exports
