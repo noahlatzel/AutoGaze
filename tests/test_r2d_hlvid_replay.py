@@ -1,8 +1,10 @@
 import importlib.util
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
+from transformers import SiglipImageProcessor
 
 
 SCRIPT = Path(__file__).parents[1] / "scripts" / "human_gaze" / "replay_r2d_hlvid_allocation.py"
@@ -10,6 +12,38 @@ SPEC = importlib.util.spec_from_file_location("replay_r2d_hlvid_allocation", SCR
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(MODULE)
+
+
+def test_legacy_image_processor_path_serialization_boundary(tmp_path):
+    """Exercise the real HF image-processor JSON initialization that failed in Slurm."""
+    checkpoint = tmp_path / "checkpoint_latest_gaze"
+    with pytest.raises(TypeError, match=rf"{type(checkpoint).__name__}.*not JSON serializable"):
+        SiglipImageProcessor.from_dict({"autogaze_model_id": "original"}, autogaze_model_id=checkpoint)
+
+    class ImageProcessorBoundary:
+        @staticmethod
+        def from_pretrained(model_path, **kwargs):
+            assert isinstance(model_path, str)
+            return SiglipImageProcessor.from_dict(
+                {key: None for key in kwargs}, **kwargs
+            )
+
+    args = SimpleNamespace(
+        model_path=tmp_path / "nvila",
+        autogaze_model_id=checkpoint,
+        num_video_frames=128,
+        num_video_frames_thumbnail=64,
+        max_tiles_video=48,
+        max_batch_size_autogaze=16,
+    )
+    processor = MODULE.load_replay_processor(ImageProcessorBoundary, args)
+    serialized = json.loads(processor.to_json_string())
+    assert serialized["autogaze_model_id"] == str(checkpoint)
+    assert serialized["num_video_frames"] == 128
+    assert serialized["num_video_frames_thumbnail"] == 64
+    assert serialized["max_tiles_video"] == 48
+    assert serialized["gazing_ratio_tile"] == [0.2] + [0.06] * 15
+    assert serialized["task_loss_requirement_tile"] == 0.6
 
 
 def completed(video, identity="frozen"):

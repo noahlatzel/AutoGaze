@@ -8,12 +8,17 @@ import hashlib
 import json
 import math
 import re
+import platform
 import shutil
+import subprocess
+import sys
+from datetime import datetime, timezone
 from collections import defaultdict
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import yaml
 
 from autogaze.human_gaze.r2d_hlvid import merge_raw_allocations, summarize_raw_allocation
 from scripts.runners.hlvid_evidence import (
@@ -58,6 +63,64 @@ def read_jsonl(path: Path) -> list[dict]:
 def extract_letter(text: str) -> str:
     match = ANSWER_RE.search(text.strip())
     return match.group(1).upper() if match else ""
+
+
+def validate_qa_rows(rows: list[dict]) -> None:
+    """Reject missing, duplicated, coercible or rescoring-incompatible answers."""
+    if len(rows) != 268 or [row.get("question_id") for row in rows] != list(range(268)):
+        raise ValueError("Expected exactly ordered HLVid question IDs 0--267")
+    for row in rows:
+        if type(row["question_id"]) is not int or type(row.get("is_correct")) is not bool:
+            raise ValueError(f"Invalid QA field types at question {row['question_id']}")
+        parsed = extract_letter(str(row["prediction"]))
+        if row.get("prediction_letter") != parsed or row["is_correct"] != (
+            parsed == str(row["answer"]).strip().upper()
+        ):
+            raise ValueError(f"Prediction parser/correctness mismatch at question {row['question_id']}")
+
+
+def complete_mean(values: list[float | None]) -> float | None:
+    """Missing resource evidence must never become zero or a partial-seed mean."""
+    return float(np.mean(values)) if all(value is not None for value in values) else None
+
+
+def unavailable_variable_allocation(process_complete: bool) -> dict:
+    return {
+        "source": "unavailable_pending_validated_variable_processor_replay",
+        "process_summary_counter_scope_complete": process_complete,
+        "statistics": {
+            "decoder": {"spatial_actions_per_frame_mean": None, "eos_action_rate": None},
+            "post_resolution_adaptation": {"retained_patches_per_frame_mean": None},
+        },
+        "mean_visual_tokens": None,
+        "mean_expanded_context_tokens": None,
+        "missing_resource_fields_reason": (
+            "Accuracy-only publication: replay 1700681 failed before observations; legacy "
+            "process counters lack complete observation coverage. Variable costs remain unavailable."
+        ),
+    }
+
+
+def validate_adapter_identity(adapter: dict, summary: dict, config: dict, seed: int) -> None:
+    arm = next(arm for arm in config["arms"] if arm["base_seed"] == seed)
+    expected = {
+        "training_seed": (adapter.get("training_seed"), arm["training_seed"]),
+        "checkpoint_model_sha256": (adapter.get("checkpoint", {}).get("model_sha256"), arm["checkpoint_model_sha256"]),
+        "checkpoint_config_sha256": (adapter.get("checkpoint", {}).get("config_sha256"), arm["checkpoint_config_sha256"]),
+        "calibration_sha256": (adapter.get("eos_calibration", {}).get("sha256"), arm["calibration_sha256"]),
+        "calibration_split": (adapter.get("eos_calibration", {}).get("split"), "train_source_balanced_fixed_subset"),
+        "eos_bias": (adapter.get("action_contract", {}).get("calibrated_eos_logit_bias"), arm["eos_logit_bias"]),
+        "dataset_sha256": (adapter.get("benchmark_protocol", {}).get("dataset_parquet_sha256"), config["dataset"]["parquet_sha256"]),
+        "dataset_split": (adapter.get("benchmark_protocol", {}).get("dataset_split"), config["dataset"]["split"]),
+        "model_path": (summary.get("model_path"), config["models"]["nvila"]),
+    }
+    for key in ("max_batch_size_autogaze", "max_batch_size_siglip", "torch_dtype"):
+        expected[key] = (summary.get(key), config["established_protocol"][key])
+    for key, value in {"fine_action_ids": [69, 264], "eos_action_id": 265, "variable_min_spatial_actions": 4, "variable_max_generation_tokens": 36, "forced_spatial_actions": 16}.items():
+        expected[key] = (adapter.get("action_contract", {}).get(key), value)
+    mismatches = {key: {"actual": pair[0], "expected": pair[1]} for key, pair in expected.items() if pair[0] != pair[1]}
+    if mismatches:
+        raise ValueError(f"Checkpoint/calibration/processor identity mismatch for {seed}: {mismatches}")
 
 
 def macro_video(rows: list[dict]) -> float:
@@ -234,20 +297,24 @@ def load_variable_replay(
     return summary, [summary_path, results_path, evidence_path, *(path for path, _ in audit_paths)]
 
 
-def bootstrap_delta(per_video: dict[tuple[int, str], dict[str, float]], video_ids: list[str]) -> dict:
+def bootstrap_delta(
+    per_video: dict[tuple[int, str], dict[str, float]], video_ids: list[str],
+    question_counts: dict[str, int] | None = None, *, replicates: int = 10000,
+) -> dict:
     rng = np.random.default_rng(20260901)
-    values = np.empty(10000, dtype=np.float64)
+    values = np.empty(replicates, dtype=np.float64)
     for index in range(values.size):
         sampled = rng.choice(video_ids, size=len(video_ids), replace=True)
         seed_deltas = []
         for seed in SEEDS:
             seed_deltas.append(
-                np.mean(
+                np.average(
                     [
                         per_video[(seed, "variable")][video]
                         - per_video[(seed, "forced_k16")][video]
                         for video in sampled
-                    ]
+                    ],
+                    weights=[question_counts[video] for video in sampled] if question_counts else None,
                 )
             )
         values[index] = np.mean(seed_deltas)
@@ -256,6 +323,13 @@ def bootstrap_delta(per_video: dict[tuple[int, str], dict[str, float]], video_id
         "confidence": 0.90,
         "replicates": int(values.size),
         "seed": 20260901,
+        "estimand": "question_micro" if question_counts else "macro_video",
+        "seed_resampling": False,
+        "pairing": "same_video_sample_across_policies_and_all_three_seeds",
+        "point_estimate": float(np.mean([
+            np.average([per_video[(seed, "variable")][video] - per_video[(seed, "forced_k16")][video] for video in video_ids], weights=[question_counts[video] for video in video_ids] if question_counts else None)
+            for seed in SEEDS
+        ])),
         "interval": [float(np.quantile(values, 0.05)), float(np.quantile(values, 0.95))],
     }
 
@@ -270,16 +344,31 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--artifact-root", type=Path, required=True)
-    parser.add_argument("--allocation-replay-root", type=Path, required=True)
+    parser.add_argument("--allocation-replay-root", type=Path)
+    parser.add_argument("--accuracy-only", action="store_true", help="Publish complete QA pairs with variable costs explicitly null")
+    parser.add_argument("--curation-run-id", help="Distinct immutable curation ID; --run-id still identifies original QA artifacts")
+    parser.add_argument("--scheduler-provenance-dir", type=Path, help="Existing one-time accounting snapshot; does not query Slurm")
+    parser.add_argument("--supporting-processor-smoke", type=Path, help="Existing CPU construction-only smoke, not allocation validation")
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--code-commit", required=True)
     args = parser.parse_args()
+    if not args.accuracy_only and args.allocation_replay_root is None:
+        parser.error("--allocation-replay-root is required unless --accuracy-only is explicit")
+    curation_id = args.curation_run_id or args.run_id
+    config = yaml.safe_load(args.config.read_text())
+    repo = Path(__file__).resolve().parents[2]
+    r2d_metrics_path = repo / "experiments/human_gaze/results/r2d_variable_fine_token_budget/metrics.json"
+    r2d_metrics = json.loads(r2d_metrics_path.read_text())
+    curation_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip()
+    curation_dirty = bool(subprocess.check_output(["git", "status", "--porcelain", "--untracked-files=no"], cwd=repo, text=True).strip())
+    if curation_dirty:
+        raise ValueError("Commit curator changes before producing evidential outputs")
 
     summaries = {}
     rows_by_arm = {}
     allocation_by_arm = {}
-    artifact_files = []
+    artifact_files = [args.config, r2d_metrics_path]
     reference = None
     for seed in SEEDS:
         for mode in MODES:
@@ -296,6 +385,7 @@ def main() -> None:
             if execution.get("code_commit") != args.code_commit or execution.get("code_dirty") is not False:
                 raise ValueError(f"Unfrozen execution provenance under {arm_dir}: {execution}")
             protocol = adapter.get("benchmark_protocol") or {}
+            validate_adapter_identity(adapter, summary, config, seed)
             mismatches = {
                 key: {"expected": value, "actual": protocol.get(key)}
                 for key, value in EXPECTED_PROTOCOL.items()
@@ -304,18 +394,9 @@ def main() -> None:
             if mismatches:
                 raise ValueError(f"Protocol mismatch under {arm_dir}: {mismatches}")
             rows = read_jsonl(results_path)
-            if len(rows) != 268 or [int(row["question_id"]) for row in rows] != list(range(268)):
-                raise ValueError(f"Expected ordered HLVid question IDs 0--267 under {arm_dir}")
-            for row in rows:
-                parsed = extract_letter(str(row["prediction"]))
-                answer = str(row["answer"]).strip().upper()
-                if row.get("prediction_letter") != parsed or bool(row.get("is_correct")) != (
-                    parsed == answer
-                ):
-                    raise ValueError(
-                        f"Prediction parser/correctness mismatch under {arm_dir}, "
-                        f"question_id={row['question_id']}"
-                    )
+            validate_qa_rows(rows)
+            if summary.get("num_examples") != 268 or summary.get("accuracy") != float(np.mean([row["is_correct"] for row in rows])):
+                raise ValueError(f"Summary count/accuracy mismatch under {arm_dir}")
             identity = [(row["question_id"], row["video_path"], row["answer"]) for row in rows]
             if reference is None:
                 reference = identity
@@ -325,7 +406,9 @@ def main() -> None:
             rows_by_arm[(seed, mode)] = rows
             artifact_files.extend([summary_path, results_path])
             process_stats_complete = process_counter_scope_complete(adapter)
-            if mode == "variable":
+            if mode == "variable" and args.accuracy_only:
+                allocation_by_arm[(seed, mode)] = unavailable_variable_allocation(process_stats_complete)
+            elif mode == "variable":
                 replay, replay_files = load_variable_replay(
                     args.allocation_replay_root,
                     seed=seed,
@@ -437,6 +520,11 @@ def main() -> None:
     video_ids = sorted(per_video[(SEEDS[0], MODES[0])])
     if any(sorted(per_video[key]) != video_ids for key in per_video):
         raise ValueError("Video clusters differ across arms")
+    if len(video_ids) != EXPECTED_VIDEOS:
+        raise ValueError("Expected exactly 77 HLVid video clusters")
+    question_counts = defaultdict(int)
+    for row in rows_by_arm[(SEEDS[0], "variable")]:
+        question_counts[row["video_path"]] += 1
     aggregate = {}
     for mode in MODES:
         visual_tokens = [row[mode]["mean_visual_tokens"] for row in per_seed]
@@ -454,12 +542,8 @@ def main() -> None:
             ),
             "question_micro_accuracy_seed_sd": float(np.std(micro_values, ddof=1)),
             "question_micro_accuracy_seed_t95_interval": seed_t95(micro_values),
-            "mean_decoder_spatial_actions_over_seeds": float(
-                np.mean([row[mode]["mean_decoder_spatial_actions"] for row in per_seed])
-            ),
-            "mean_retained_patches_over_seeds": float(
-                np.mean([row[mode]["mean_retained_patches"] for row in per_seed])
-            ),
+            "mean_decoder_spatial_actions_over_seeds": complete_mean([row[mode]["mean_decoder_spatial_actions"] for row in per_seed]),
+            "mean_retained_patches_over_seeds": complete_mean([row[mode]["mean_retained_patches"] for row in per_seed]),
             "mean_visual_tokens_over_seeds": (
                 float(np.mean(visual_tokens)) if all(value is not None for value in visual_tokens) else None
             ),
@@ -470,22 +554,29 @@ def main() -> None:
             ),
         }
     deltas = np.array([row["variable_minus_forced_k16_macro_video"] for row in per_seed])
+    micro_deltas = [row["variable_minus_forced_k16_question_micro"] for row in per_seed]
     aggregate["variable_minus_forced_k16"] = {
         "mean_macro_video_accuracy_difference": float(deltas.mean()),
         "paired_video_bootstrap": bootstrap_delta(per_video, video_ids),
         "seed_t95_interval": seed_t95(deltas.tolist()),
+        "question_micro_paired_video_bootstrap": bootstrap_delta(per_video, video_ids, question_counts),
+        "question_micro_seed_t95_interval": seed_t95(micro_deltas),
         "mean_question_micro_accuracy_difference": float(
             np.mean([row["variable_minus_forced_k16_question_micro"] for row in per_seed])
         ),
-        "mean_decoder_spatial_actions_difference": float(
+        "mean_decoder_spatial_actions_difference": (
             aggregate["variable"]["mean_decoder_spatial_actions_over_seeds"] - 16.0
+            if aggregate["variable"]["mean_decoder_spatial_actions_over_seeds"] is not None else None
         ),
     }
 
     metrics = {
         "schema_version": 1,
-        "run_id": args.run_id,
+        "run_id": curation_id,
+        "source_qa_run_id": args.run_id,
         "status": "complete_secondary_descriptive",
+        "accuracy_status": "complete_three_seed_pairs",
+        "allocation_status": "unavailable_pending_validated_replay" if args.accuracy_only else "validated_replay_complete",
         "benchmark": "HLVid official test",
         "human_gaze_protected_test_accessed": False,
         "interpretation_boundary": (
@@ -494,6 +585,14 @@ def main() -> None:
         ),
         "primary_estimand": "equal-seed_mean_macro_video_exact_accuracy",
         "secondary_estimand": "equal-seed_mean_question_micro_exact_accuracy",
+        "r2d_in_domain_context": {
+            "source_metrics_sha256": sha256_file(r2d_metrics_path),
+            "decision": r2d_metrics["decision"],
+            "fixed_endpoint_updates": r2d_metrics["fixed_endpoint_updates"],
+            "matched_compute_band": r2d_metrics["matched_compute_band"],
+            "three_seed_means": {key: r2d_metrics["three_seed_means"][key] for key in ("calibrated_validation_mean_k", "variable_coverage", "forced_k16_coverage", "variable_minus_forced_k16", "allocation_lift")},
+            "allocation_only_control": "actual versus same-source shuffled lengths on common forced-K36 spatial ordering; not EOS versus forced-K16",
+        },
         "eos_calibration_transfer": [
             {
                 "base_seed": seed,
@@ -517,9 +616,42 @@ def main() -> None:
         "per_seed": per_seed,
         "aggregate": aggregate,
     }
+    supporting_files = []
+    scheduler = None
+    if args.scheduler_provenance_dir:
+        scheduler_file = args.scheduler_provenance_dir / "scheduler_provenance.json"
+        scheduler = json.loads(scheduler_file.read_text())
+        snapshot_files = [args.scheduler_provenance_dir / filename for filename in ("scheduler_provenance.json", "sacct_segments.psv", "scheduler_node_relaxation_receipt.json")]
+        if sha256_file(snapshot_files[1]) != scheduler["raw_sacct_sha256"] or sha256_file(snapshot_files[2]) != scheduler["node_relaxation_receipt"]["sha256"]:
+            raise ValueError("Scheduler provenance input/hash mismatch")
+        supporting_files.extend(snapshot_files)
+    processor_smoke = None
+    if args.supporting_processor_smoke:
+        processor_smoke = json.loads(args.supporting_processor_smoke.read_text())
+        for key, expected in {"status": "pass", "code_dirty": False, "num_video_frames": 128, "num_video_frames_thumbnail": 64, "max_tiles_video": 48, "nvila_generation_calls": 0, "allocation_semantics_verified": False, "cuda_allocation_performed": False}.items():
+            if processor_smoke.get(key) != expected:
+                raise ValueError(f"Supporting CPU construction smoke mismatch: {key}")
+        supporting_files.append(args.supporting_processor_smoke)
+    artifact_files.extend(supporting_files)
     args.output_dir.mkdir(parents=True, exist_ok=False)
+    if scheduler:
+        (args.output_dir / "scheduler").mkdir()
+        for path in supporting_files[:3]:
+            shutil.copyfile(path, args.output_dir / "scheduler" / path.name)
+    if processor_smoke:
+        shutil.copyfile(args.supporting_processor_smoke, args.output_dir / "processor_initialization_smoke.json")
     (args.output_dir / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
-    shutil.copyfile(args.config, args.output_dir / "config.yaml")
+    config["curation"] = {"run_id": curation_id, "source_qa_run_id": args.run_id, "accuracy_only": args.accuracy_only, "code_commit": curation_commit}
+    (args.output_dir / "config.yaml").write_text(yaml.safe_dump(config, sort_keys=False))
+    with (args.output_dir / "paired_aggregate.csv").open("w", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=["estimand", "declared_role", "variable_mean", "forced_k16_mean", "paired_delta", "seed_t95_low", "seed_t95_high", "paired_video90_low", "paired_video90_high"])
+        writer.writeheader()
+        contrast = aggregate["variable_minus_forced_k16"]
+        for estimand, role, mean_key, delta_key, seed_key, video_key in (
+            ("macro_video", "primary", "mean_macro_video_accuracy_over_seeds", "mean_macro_video_accuracy_difference", "seed_t95_interval", "paired_video_bootstrap"),
+            ("question_micro", "secondary", "mean_question_micro_accuracy_over_seeds", "mean_question_micro_accuracy_difference", "question_micro_seed_t95_interval", "question_micro_paired_video_bootstrap"),
+        ):
+            writer.writerow({"estimand": estimand, "declared_role": role, "variable_mean": aggregate["variable"][mean_key], "forced_k16_mean": aggregate["forced_k16"][mean_key], "paired_delta": contrast[delta_key], "seed_t95_low": contrast[seed_key][0], "seed_t95_high": contrast[seed_key][1], "paired_video90_low": contrast[video_key]["interval"][0], "paired_video90_high": contrast[video_key]["interval"][1]})
     with (args.output_dir / "per_seed.csv").open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=[
             "base_seed", "mode", "num_correct", "question_micro_accuracy",
@@ -549,6 +681,7 @@ def main() -> None:
                 "variable_macro_accuracy",
                 "forced_k16_macro_accuracy",
                 "accuracy_delta",
+                "question_count",
             ],
         )
         writer.writeheader()
@@ -563,6 +696,7 @@ def main() -> None:
                         "variable_macro_accuracy": variable,
                         "forced_k16_macro_accuracy": forced,
                         "accuracy_delta": variable - forced,
+                        "question_count": question_counts[video],
                     }
                 )
 
@@ -574,22 +708,54 @@ def main() -> None:
     accuracy_axis.set_xlabel("R2d base seed")
     accuracy_axis.set_ylabel("HLVid macro-video exact accuracy")
     accuracy_axis.grid(axis="y", alpha=0.25)
-    allocation_axis = accuracy_axis.twinx()
-    allocation_axis.bar(x, [row["variable"]["mean_decoder_spatial_actions"] for row in per_seed], width=0.18, alpha=0.25, color="tab:green", label="actual mean K")
-    allocation_axis.axhline(16, color="tab:green", linewidth=1, linestyle=":")
-    allocation_axis.set_ylabel("actual decoder spatial actions/frame")
     handles1, labels1 = accuracy_axis.get_legend_handles_labels()
-    handles2, labels2 = allocation_axis.get_legend_handles_labels()
-    accuracy_axis.legend(handles1 + handles2, labels1 + labels2, loc="best", fontsize=8)
+    if not args.accuracy_only:
+        allocation_axis = accuracy_axis.twinx()
+        allocation_axis.bar(x, [row["variable"]["mean_decoder_spatial_actions"] for row in per_seed], width=0.18, alpha=0.25, color="tab:green", label="actual mean K")
+        allocation_axis.axhline(16, color="tab:green", linewidth=1, linestyle=":")
+        allocation_axis.set_ylabel("actual decoder spatial actions/frame")
+        handles2, labels2 = allocation_axis.get_legend_handles_labels()
+        handles1 += handles2
+        labels1 += labels2
+    accuracy_axis.legend(handles1, labels1, loc="best", fontsize=8)
     figure.tight_layout()
     figure.savefig(args.output_dir / "actual_vs_forced_k16.png", dpi=300)
     figure.savefig(args.output_dir / "actual_vs_forced_k16.pdf")
     plt.close(figure)
 
+    delta_figure, axes = plt.subplots(1, 2, figsize=(7.2, 3.4), sharey=True)
+    comparison = aggregate["variable_minus_forced_k16"]
+    for axis, title, mean, video_interval, seed_interval, seed_values in (
+        (axes[0], "Primary: video-macro", comparison["mean_macro_video_accuracy_difference"], comparison["paired_video_bootstrap"]["interval"], comparison["seed_t95_interval"], deltas),
+        (axes[1], "Secondary: question-micro", comparison["mean_question_micro_accuracy_difference"], comparison["question_micro_paired_video_bootstrap"]["interval"], comparison["question_micro_seed_t95_interval"], micro_deltas),
+    ):
+        axis.axhline(0, color="0.5", linewidth=0.8, linestyle=":")
+        axis.scatter([-0.16, 0, 0.16], np.asarray(seed_values) * 100, color="0.45", s=22, label="three paired seeds")
+        for position, interval, label, color in ((0.65, video_interval, "video clusters: 90%", "tab:blue"), (1.25, seed_interval, "seeds: t95%", "tab:orange")):
+            axis.plot([position, position], np.asarray(interval) * 100, color=color, linewidth=2, label=label)
+            axis.scatter(position, mean * 100, color=color, s=28)
+        axis.set_xticks([])
+        axis.set_title(title, fontsize=10)
+        axis.grid(axis="y", alpha=0.2)
+    axes[0].set_ylabel("Variable EOS − forced K16\n(percentage points)")
+    axes[1].legend(fontsize=7, loc="best")
+    delta_figure.tight_layout()
+    delta_figure.savefig(args.output_dir / "paired_accuracy_deltas.png", dpi=300)
+    delta_figure.savefig(args.output_dir / "paired_accuracy_deltas.pdf")
+    plt.close(delta_figure)
+
     manifest = {
         "schema_version": 1,
-        "run_id": args.run_id,
+        "run_id": curation_id,
+        "source_qa_run_id": args.run_id,
         "code_commit": args.code_commit,
+        "curation_code_commit": curation_commit,
+        "curation_code_dirty": curation_dirty,
+        "curation_timestamp": datetime.now(timezone.utc).isoformat(),
+        "curation_command": [sys.executable, *sys.argv],
+        "curation_runtime": {"python": platform.python_version(), "numpy": np.__version__, "matplotlib": plt.matplotlib.__version__, "pyyaml": yaml.__version__, "hostname": platform.node(), "device": "CPU; no model generation"},
+        "source_config_sha256": sha256_file(args.config),
+        "accuracy_only": args.accuracy_only,
         "heavy_artifact_root": str((args.artifact_root / args.run_id).resolve()),
         "benchmark_protocol": EXPECTED_PROTOCOL,
         "artifact_inputs": {
@@ -600,8 +766,10 @@ def main() -> None:
             for seed in SEEDS
             for mode in MODES
         },
+        "qa_endpoint_identities": {f"seed{seed}_{mode}": {key: summaries[(seed, mode)]["r2d_hlvid_adapter"][key] for key in ("base_seed", "training_seed", "execution", "checkpoint", "eos_calibration", "action_contract", "benchmark_protocol")} for seed in SEEDS for mode in MODES},
+        "scheduler_provenance": {"local_path": "scheduler/scheduler_provenance.json", "sha256": sha256_file(args.scheduler_provenance_dir / "scheduler_provenance.json"), "historical_node_override_source": scheduler["node_relaxation_receipt"]["source_commit"]} if scheduler else None,
+        "supporting_processor_initialization": {"local_path": "processor_initialization_smoke.json", "sha256": sha256_file(args.supporting_processor_smoke), "source_commit": processor_smoke["code_commit"], "allocation_semantics_verified": False} if processor_smoke else None,
     }
-    (args.output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     readme = f"""# R2f R2d HLVid secondary evaluation
 
 This bundle compares each completed R2d checkpoint under its actual calibrated
@@ -617,13 +785,25 @@ video-bootstrap and three-seed intervals; `paired_questions.csv` preserves the
 auditable within-question contrasts, while `paired_videos.csv` is the source
 table for clustered comparisons.
 
-The variable allocation/resource fields come from a validated processor-only
+The variable allocation/resource fields, when available, come from a validated processor-only
 replay over the same source videos; the replay makes zero NVILA generation
 calls and reproduces an uninterrupted VARIABLE preflight exactly. Legacy
 process-exit counters are not accepted unless their observation coverage is
 explicitly complete. Forced-K16 action and recovered-patch lengths are nominal
 from the coherent exact-K contract; unavailable legacy per-question context
 fields remain null rather than being inferred.
+
+Allocation status in this bundle: `{metrics['allocation_status']}`. An accuracy-only
+bundle contains all three complete QA pairs but **does not establish actual
+variable cost or efficiency**. Missing variable values are null, not K16,
+calibration lengths, tail-only process means, or zero. A later validated replay
+will be published as a separate immutable joint bundle, preserving this stage.
+
+Seed t95 intervals describe variation across three independently trained paired
+seeds. Video intervals resample the same 77 video clusters jointly across both
+policies and all seeds (10,000 replicates; 90% percentile); they do not resample
+seeds. Question-micro sensitivity weights each sampled video by its question
+count. These are separate uncertainty views, not a joint population interval.
 
 This is a deployment-policy contrast, not an isolated allocation experiment:
 stopping at EOS also changes which later spatial actions are emitted. The
@@ -633,6 +813,25 @@ lengths. Its small allocation signal does not override the observed in-domain
 coverage degradation or require a positive HLVid story.
 """
     (args.output_dir / "README.md").write_text(readme)
+    captions = """# Figure captions
+
+`actual_vs_forced_k16`: HLVid video-macro exact-match accuracy for the same three
+independently trained R2d checkpoints under calibrated variable EOS and coherent
+forced K16. Each endpoint contains all 268 official test questions / 77 videos.
+Lines join seeds only for legibility, not training trajectories. Costs are not
+shown in accuracy-only curation because full variable observations are missing.
+
+`paired_accuracy_deltas`: Within-checkpoint variable-EOS minus forced-K16 accuracy
+(percentage points); video-macro is primary and question-micro is sensitivity.
+Gray dots are the three paired seeds. Blue intervals are paired video-cluster
+90% percentiles (10,000 resamples jointly shared across policies and seeds);
+orange intervals are t95 intervals over the three independent seed contrasts.
+These separate uncertainty views are not combined. Deployment EOS also changes
+later spatial ordering: this is not an allocation-only causal comparison.
+"""
+    (args.output_dir / "captions.md").write_text(captions)
+    manifest["bundle_file_hashes"] = {str(path.relative_to(args.output_dir)): sha256_file(path) for path in sorted(args.output_dir.rglob("*")) if path.is_file()}
+    (args.output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
 
 if __name__ == "__main__":
