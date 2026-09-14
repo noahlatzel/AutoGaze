@@ -1,0 +1,44 @@
+schema_version: 1
+experiment_id: r2e_hlvid_k16_causal_controls
+execution_contract: experiments/human_gaze/configs/r2e_hlvid_k16_causal_controls.yaml
+dataset:
+  parquet: /storage/slurm/latn/data/AutoGaze/HLVid/data/test-00000-of-00001.parquet
+  sha256: ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a
+  questions: 268
+  videos: 77
+  split: official_huggingface_test
+trained:
+  raw_root: /home/stud/latn/.codex/worktrees/3f12/master-thesis/AutoGaze/outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_all_seeds_mtv48
+  seeds:
+  - 440826
+  - 440827
+  - 440828
+  - 440829
+  - 440830
+  - 440831
+  evaluation_commit: 7835a4bf00c4abbb620d325fdc7c8a9514bd16df
+  prior_table: experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/per_seed.csv
+  prior_table_sha256: 1804d97507d4f6d7ec405cb7b129c0f3e81906ee4f9a55fb8babbd5dd7beb3c0
+  hardware: NVIDIA H100 NVL (node21; prior frozen SLURM provenance)
+controls:
+  raw_root: /storage/user/latn/worktrees/autogaze-r2e-k16-controls-b795de0/outputs/human_gaze/hlvid_nvila/r2e_k16_causal_controls_mtv48
+  ids:
+  - pretrained_exact_k16
+  - stavis_center16
+  evaluation_commit: b795de084001c3a8ef1c147bc850d7764c867cb3
+  hardware: NVIDIA A40 (actual node15/node16/node17 segments)
+resource_segments: experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/provenance/slurm_control_segments_20260914.csv
+analysis:
+  primary_metric: question_micro_accuracy
+  sensitivity_metric: macro_video_accuracy
+  confidence_level: 0.9
+  bootstrap_iterations: 10000
+  bootstrap_seed: 20260909
+  training_seed_interval: Student t df=5 critical=2.015048373 across six endpoint
+    metrics
+  video_interval: paired 77-video cluster bootstrap; conditional on evaluated training
+    seeds
+  control_seed_interval: not applicable (one deterministic evaluation per control)
+  compute_this_curation: CPU-only; zero model loads, zero new QA
+claim_boundary: Descriptive cross-hardware QA; no combined seed/video CI, causal superiority,
+  equivalence or cross-hardware latency claim.

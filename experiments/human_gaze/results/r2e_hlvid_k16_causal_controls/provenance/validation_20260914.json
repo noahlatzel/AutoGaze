@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "verified_at_utc": "2026-09-13T23:52:40Z",
+  "run_id": "20260914-0149_r2e-k16-causal-curation_084d563",
+  "curation_commit": "084d563b5be87d9c8215383b555934e175922021",
+  "test_file_sha256": "cfc762c88f5ffa65b0d94630125930923bfef96a7f3451c4a63a99eb568895c0",
+  "focused_test_command": "CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2 PYTHONDONTWRITEBYTECODE=1 uv run --no-project /home/stud/latn/miniconda3/envs/vila-autogaze-eval/bin/python -m unittest discover -s tests -p test_hlvid_k16_control_curation.py -v",
+  "focused_test_result": "13 tests passed in 0.008 seconds before curation; no redundant full suite",
+  "test_timestamp_qualification": "Exact earlier test completion time was not separately captured; verified_at_utc is the output-check timestamp, not the test timestamp.",
+  "curation_command": "CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2 PYTHONDONTWRITEBYTECODE=1 uv run --no-project /home/stud/latn/miniconda3/envs/vila-autogaze-eval/bin/python scripts/human_gaze/curate_hlvid_k16_controls.py --config experiments/human_gaze/configs/r2e_hlvid_k16_causal_curation_v1.yaml --output-dir experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563",
+  "curation_exit_code": 0,
+  "curation_wall_seconds": 28.60,
+  "curation_maxrss_kib": 183004,
+  "new_qa": 0,
+  "output_hashes_verified": 11,
+  "manifest_sha256": "90eed361a9c4e5a5f506b6b8b68501ddd5d29eeef0b67edeae8845b0e292e03c",
+  "independent_stdlib_csv_check": "All 8 method/seed rows match per-video correct totals and macro means; 616 video rows, 536 control telemetry rows, 809 correct across 1608 unchanged trained QA.",
+  "figure_visual_check": "PNG inspected; final legend is below panels without obscuring confidence intervals.",
+  "preserved_first_plot_draft": "/storage/user/latn/artifacts/autogaze-r2e-controls-curation/20260914-0147_r2e-k16-causal-curation_22d7d1e",
+  "draft_qualification": "Completed first curation preserved externally after a legend-only plotting adjustment; no raw QA or metric was changed.",
+  "resource_qualification": "Slurm -D duplicate records include all five allocation segments, including automatic preemption; 34:06:35 A40 allocation time, not pure generation."
+}

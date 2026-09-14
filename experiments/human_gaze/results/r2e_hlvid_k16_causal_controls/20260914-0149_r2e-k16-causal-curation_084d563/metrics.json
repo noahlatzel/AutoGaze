@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "primary_metric": "question_micro_accuracy",
+  "sensitivity_metric": "macro_video_accuracy",
+  "confidence_level": 0.9,
+  "dataset_questions": 268,
+  "dataset_videos": 77,
+  "trained_seeds": 6,
+  "reused_trained_completed_QA": 1608,
+  "control_completed_QA": 536,
+  "new_QA_this_curation": 0,
+  "trained": {
+    "question_micro_accuracy": {
+      "mean": 0.5031094527363185,
+      "seed_sd": 0.010921219611201587,
+      "training_seed_ci90_low": 0.4941252200513011,
+      "training_seed_ci90_high": 0.5120936854213358,
+      "training_seeds": 6
+    },
+    "macro_video_accuracy": {
+      "mean": 0.49986878201163915,
+      "seed_sd": 0.016501142531193096,
+      "training_seed_ci90_low": 0.48629428123730994,
+      "training_seed_ci90_high": 0.5134432827859684,
+      "training_seeds": 6
+    }
+  },
+  "control_metrics": [
+    {
+      "method": "pretrained_exact_k16",
+      "base_seed": null,
+      "num_correct": 134,
+      "question_micro_accuracy": 0.5,
+      "macro_video_accuracy": 0.48245920745920745,
+      "hardware": "NVIDIA A40 (actual node15/node16/node17 segments)"
+    },
+    {
+      "method": "stavis_center16",
+      "base_seed": null,
+      "num_correct": 137,
+      "question_micro_accuracy": 0.5111940298507462,
+      "macro_video_accuracy": 0.5195863660149374,
+      "hardware": "NVIDIA A40 (actual node15/node16/node17 segments)"
+    }
+  ],
+  "trained_minus_controls": [
+    {
+      "control": "pretrained_exact_k16",
+      "metric": "question_micro_accuracy",
+      "difference": 0.003109452736318406,
+      "paired_video_ci90_low": -0.02316835339119462,
+      "paired_video_ci90_high": 0.03207514948979052,
+      "seed_sd": 0.010921219611201587,
+      "training_seed_ci90_low": -0.005874779948698975,
+      "training_seed_ci90_high": 0.01209368542133579,
+      "training_seeds": 6,
+      "paired_video_interval_scope": "conditional on evaluated six training seeds"
+    },
+    {
+      "control": "pretrained_exact_k16",
+      "metric": "macro_video_accuracy",
+      "difference": 0.017409574552431695,
+      "paired_video_ci90_low": -0.019216141001855282,
+      "paired_video_ci90_high": 0.0541705318491032,
+      "seed_sd": 0.016501142531193096,
+      "training_seed_ci90_low": 0.00383507377810245,
+      "training_seed_ci90_high": 0.030984075326760903,
+      "training_seeds": 6,
+      "paired_video_interval_scope": "conditional on evaluated six training seeds"
+    },
+    {
+      "control": "stavis_center16",
+      "metric": "question_micro_accuracy",
+      "difference": -0.008084577114427862,
+      "paired_video_ci90_low": -0.03368794326241134,
+      "paired_video_ci90_high": 0.02013422818791946,
+      "seed_sd": 0.010921219611201587,
+      "training_seed_ci90_low": -0.017068809799445223,
+      "training_seed_ci90_high": 0.0008996555705895453,
+      "training_seeds": 6,
+      "paired_video_interval_scope": "conditional on evaluated six training seeds"
+    },
+    {
+      "control": "stavis_center16",
+      "metric": "macro_video_accuracy",
+      "difference": -0.01971758400329829,
+      "paired_video_ci90_low": -0.05098613687899402,
+      "paired_video_ci90_high": 0.008529169243454952,
+      "seed_sd": 0.016501142531193096,
+      "training_seed_ci90_low": -0.03329208477762745,
+      "training_seed_ci90_high": -0.006143083228968995,
+      "training_seeds": 6,
+      "paired_video_interval_scope": "conditional on evaluated six training seeds"
+    }
+  ],
+  "events": {
+    "pretrained_exact_k16": {
+      "state_counts": {
+        "attempt_started": 269,
+        "completed_answer": 268
+      },
+      "unclosed_started_attempts": 1,
+      "first_event_at": "2026-09-11T10:00:17.297177+00:00",
+      "last_event_at": "2026-09-13T11:44:11.573948+00:00",
+      "attempt_count_is_not_completed_QA_count": true
+    },
+    "stavis_center16": {
+      "state_counts": {
+        "attempt_started": 270,
+        "completed_answer": 268
+      },
+      "unclosed_started_attempts": 2,
+      "first_event_at": "2026-09-12T04:57:16.213925+00:00",
+      "last_event_at": "2026-09-13T21:25:15.688890+00:00",
+      "attempt_count_is_not_completed_QA_count": true
+    }
+  },
+  "resource_allocation_seconds": {
+    "pretrained_exact_k16": 66309,
+    "stavis_center16": 56486
+  },
+  "resource_boundary": "All A40 allocation segments, including preemption; not pure generation or cross-hardware latency",
+  "uncertainty_boundary": "Training-seed t and paired-video bootstrap intervals are separate, not a combined CI",
+  "reuse_qualification": "Healthy bounded processor compatibility and clean shared decode audit support reuse; they do not retrospectively certify every historic decoded read. Missing historic counters stay missing.",
+  "claim_boundary": "Descriptive cross-hardware QA; no combined seed/video CI, causal superiority, equivalence or cross-hardware latency claim."
+}
