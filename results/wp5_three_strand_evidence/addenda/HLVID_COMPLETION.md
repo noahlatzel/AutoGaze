@@ -22,7 +22,12 @@ training-seed count; one evaluation is not one independently trained seed.
 
 Seed uncertainty is 90% Student t over six independent trained endpoints, df5.
 Video uncertainty resamples 77 paired video clusters, conditional on those
-six endpoints, with 10,000 replicates and bootstrap RNG 20260909. Per-endpoint
+six endpoints, with 10,000 replicates. The configured bootstrap base seed is
+20260909. The source curator uses effective RNG seeds 20261909 for the aggregate
+pretrained contrast and 20261910 for the aggregate Center16 contrast. Each
+per-endpoint contrast uses 20260909 + endpoint base ID + 100 times the zero-based
+control index (pretrained 0, Center16 1). `metrics.csv` records these effective
+seeds, preserving the source intervals without drawing new samples. Per-endpoint
 video intervals remain available. These are separate uncertainty views, not
 one combined interval. Base IDs 440826–440831 map to continuation training seeds
 540826–540831; bootstrap RNG is neither kind of training seed.
@@ -72,7 +77,7 @@ source scheduler tables. Original replay 1700681 failed before observations.
 
 Both additions reuse the official HLVid test (77 videos, 268 questions), which
 has historical exposure. This is not a newly unseen benchmark. The separate
-protected human-gaze test was not opened by these curations. The current decode
+human-gaze test was not accessed by these curations. The current decode
 audit qualifies requested decoding, but does not certify all historical reads.
 
 ## Source tables, figures and provenance
@@ -103,7 +108,10 @@ The standard-library checker verifies source Git blobs/hashes, all 305 original
 metric rows, unique metric IDs, claim references, copied source bytes, explicit
 missing rows and every protected original file. It loads no model or dataset,
 and invokes no scheduler. `hlvid_completion_validation.json` preserves its
-reviewed output. The checker is required index-behavior verification, not a
+reviewed initial output. `hlvid_completion_metadata_review.json` records the
+independent Git-blob preservation and effective-RNG correction review; it does
+not claim a new Linux checker run or scientific recomputation. The checker is
+required index-behavior verification, not a
 fresh scientific test or raw QA certification.
 
 To reconstruct the additive data from the exact base, make an isolated worktree

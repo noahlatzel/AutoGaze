@@ -106,7 +106,20 @@
     "deterministic_control_training_seed_count": null,
     "seed_interval": "90% Student t, df5, six independent trained endpoints",
     "video_interval": "90% paired 77-video bootstrap, conditional on six endpoints",
-    "split": "HLVid official test; historically exposed; protected human-gaze test unopened",
+    "bootstrap_rng": {
+      "configured_base_seed": 20260909,
+      "control_order": [
+        "pretrained_exact_k16",
+        "stavis_center16"
+      ],
+      "aggregate_effective_seeds": {
+        "pretrained_exact_k16": 20261909,
+        "stavis_center16": 20261910
+      },
+      "per_endpoint_effective_seed": "configured_base_seed + endpoint_base_seed + 100 * zero_based_control_index",
+      "indexed_bootstrap_seed": "effective RNG passed to the source bootstrap, not the configured base seed"
+    },
+    "split": "HLVid official test; historically exposed; human-gaze test not accessed by this curation",
     "hardware": "trained H100 NVL; controls A40; QA comparison approved; timing not hardware-matched",
     "compute": "A40 reservation segments include preemptions; per-example stage telemetry separate",
     "source_checkpoint_code_data_identities": "source_bundle/manifest.json; source_bundle/config.yaml"

@@ -164,7 +164,7 @@
     "video_interval": "90% paired 77-video bootstrap, same draws across both policies and all seeds",
     "allocation_status": "unavailable_pending_validated_replay",
     "variable_costs": null,
-    "split": "HLVid official test; reused historically exposed benchmark; protected human-gaze test unopened",
+    "split": "HLVid official test; reused historically exposed benchmark; human-gaze test not accessed by this curation",
     "hardware": "A40; actual allocation nodes preserved in scheduler/sacct_segments.psv",
     "compute": "reservation accounting is not inference latency or measured efficiency",
     "comparison": "deployment policy contrast; EOS changes later spatial ordering; not allocation-only",

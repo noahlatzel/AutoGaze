@@ -20,6 +20,8 @@ VARIABLE = Path("results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accu
 CONTROLS = Path("experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563")
 VCOMMIT = "03cd606257b9f3f28ac295e62533453b2e2b2612"
 CCOMMIT = "51b41662b801afb4b3ec3ae870b80403ce3abcb3"
+CONTROL_BOOTSTRAP_BASE_SEED = 20260909
+CONTROL_BOOTSTRAP_ORDER = ("pretrained_exact_k16", "stavis_center16")
 EDITABLE = {"README.md", "manifest.json", "metrics.csv", "claims.csv",
             "artifacts.csv", "figures.csv", "studies.csv", "owner_status.csv",
             "readiness.json", "READINESS.md", "FIGURE_REGENERATION.md"}
@@ -35,6 +37,13 @@ def frozen(path):
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def control_bootstrap_seed(control, endpoint_base_seed=None):
+    """Effective RNG used by the pinned control curator, without drawing samples."""
+    control_index = CONTROL_BOOTSTRAP_ORDER.index(control)
+    offset = 1000 + control_index if endpoint_base_seed is None else int(endpoint_base_seed) + 100 * control_index
+    return CONTROL_BOOTSTRAP_BASE_SEED + offset
 
 
 def load(path):
@@ -106,7 +115,14 @@ def build():
         "deterministic_control_training_seed_count": None,
         "seed_interval": "90% Student t, df5, six independent trained endpoints",
         "video_interval": "90% paired 77-video bootstrap, conditional on six endpoints",
-        "split": "HLVid official test; historically exposed; protected human-gaze test unopened",
+        "bootstrap_rng": {
+            "configured_base_seed": CONTROL_BOOTSTRAP_BASE_SEED,
+            "control_order": list(CONTROL_BOOTSTRAP_ORDER),
+            "aggregate_effective_seeds": {control: control_bootstrap_seed(control) for control in CONTROL_BOOTSTRAP_ORDER},
+            "per_endpoint_effective_seed": "configured_base_seed + endpoint_base_seed + 100 * zero_based_control_index",
+            "indexed_bootstrap_seed": "effective RNG passed to the source bootstrap, not the configured base seed",
+        },
+        "split": "HLVid official test; historically exposed; human-gaze test not accessed by this curation",
         "hardware": "trained H100 NVL; controls A40; QA comparison approved; timing not hardware-matched",
         "compute": "A40 reservation segments include preemptions; per-example stage telemetry separate",
         "source_checkpoint_code_data_identities": "source_bundle/manifest.json; source_bundle/config.yaml",
@@ -118,7 +134,7 @@ def build():
         "seed_interval": "95% Student t across three paired trained endpoints, df2",
         "video_interval": "90% paired 77-video bootstrap, same draws across both policies and all seeds",
         "allocation_status": v["allocation_status"], "variable_costs": None,
-        "split": "HLVid official test; reused historically exposed benchmark; protected human-gaze test unopened",
+        "split": "HLVid official test; reused historically exposed benchmark; human-gaze test not accessed by this curation",
         "hardware": "A40; actual allocation nodes preserved in scheduler/sacct_segments.psv",
         "compute": "reservation accounting is not inference latency or measured efficiency",
         "comparison": "deployment policy contrast; EOS changes later spatial ordering; not allocation-only",
@@ -180,7 +196,7 @@ def build():
                    "trained_k16", contrast["metric"], contrast["difference"],
                    interval=[contrast[low], contrast[high]], level=0.90, n_seeds=6,
                    interval_method="paired video bootstrap; six endpoints fixed" if uncertainty == "video90" else "Student t across six paired training seeds, df5",
-                   bootstrap=20260909 if uncertainty == "video90" else "",
+                   bootstrap=control_bootstrap_seed(contrast["control"]) if uncertainty == "video90" else "",
                    primary=contrast["metric"] == c["primary_metric"], role="paired_difference",
                    contrast=f"trained_k16_minus_{contrast['control']}", source_field=f"contrast_summary.csv:{contrast['control']}:{contrast['metric']}:{low}/{high}")
     for contrast in csv.DictReader((CONTROLS / "paired_per_seed.csv").open()):
@@ -188,7 +204,7 @@ def build():
                "trained_k16", contrast["metric"], float(contrast["difference"]),
                interval=[float(contrast["paired_video_ci90_low"]), float(contrast["paired_video_ci90_high"])],
                level=0.90, interval_method="paired video bootstrap within one endpoint", n_seeds=1,
-               seed=contrast["base_seed"], bootstrap=20260909, role="paired_difference",
+               seed=contrast["base_seed"], bootstrap=control_bootstrap_seed(contrast["control"], contrast["base_seed"]), role="paired_difference",
                primary=contrast["metric"] == c["primary_metric"], contrast=f"trained_k16_minus_{contrast['control']}",
                source_field=f"paired_per_seed.csv:{contrast['control']}:{contrast['base_seed']}:{contrast['metric']}")
     for method, seconds in c["resource_allocation_seconds"].items():
@@ -243,7 +259,7 @@ def build():
         dict(artifact_id=ca, study_id="spatial_gaze", result_bundle=str(CONTROLS),
              source_table="addenda/r2e_controls/source_bundle/contrast_summary.csv;addenda/r2e_controls/source_bundle/per_seed.csv;addenda/r2e_controls/source_bundle/control_per_example_telemetry.csv",
              repository="noahlatzel/AutoGaze", commit=CCOMMIT, data_hash=load(CONTROLS / "manifest.json")["parquet_sha256"],
-             split="HLVid official test; historically exposed; human-gaze protected test unopened",
+             split="HLVid official test; historically exposed; human-gaze test not accessed by this curation",
              uncertainty_unit="six training seeds and 77 paired video clusters kept separate; deterministic controls evaluated once",
              compute_boundary=c["resource_boundary"], status="complete_descriptive",
              notes="536 control QA;1608 unchanged trained QA; execution b795de0/7835a4b; actual A40 allocation segments retained; not cross-hardware latency"),
@@ -251,7 +267,7 @@ def build():
              source_table="addenda/r2f_variable_accuracy/source_bundle/paired_aggregate.csv;addenda/r2f_variable_accuracy/source_bundle/paired_videos.csv;addenda/r2f_variable_accuracy/source_bundle/per_seed.csv",
              repository="noahlatzel/AutoGaze", commit=VCOMMIT,
              data_hash=load(CONTROLS / "manifest.json")["parquet_sha256"],
-             split="HLVid official test; reused historically exposed benchmark; human-gaze protected test unopened",
+             split="HLVid official test; reused historically exposed benchmark; human-gaze test not accessed by this curation",
              uncertainty_unit="three paired training seeds, t95; 77 shared paired video clusters, bootstrap90; no joint interval",
              compute_boundary="accuracy only; variable actions/recovered patches/expanded tokens/context missing pending validated replay",
              status="complete_accuracy_only_costs_missing", notes="1608 QA; macro primary; EOS deployment contrast not allocation-only; actual allocation nodes in copied scheduler records"),
@@ -317,6 +333,12 @@ def check(outputs, rows):
     assert meta["primary_variable_metric"] == "macro_video_accuracy"
     assert meta["variable_actual_costs"] is None
     assert meta["added_metric_rows"] == len(rows) and meta["total_metric_rows"] == len(final)
+    control_video_rows = [x for x in final if x["artifact_id"] == "gaze_r2e_controls" and x["bootstrap_seed"]]
+    assert len(control_video_rows) == 28
+    for row in control_video_rows:
+        control = row["contrast"].removeprefix("trained_k16_minus_")
+        endpoint = row["seed_ids"] if row["n_seeds"] == "1" else None
+        assert int(row["bootstrap_seed"]) == control_bootstrap_seed(control, endpoint)
     source_counts = {}
     for label in ("r2e_controls", "r2f_variable_accuracy"):
         addendum = load(ROOT / "addenda" / label / "manifest.json")
@@ -329,6 +351,7 @@ def check(outputs, rows):
     return {"status": "passed", "base": BASE, "prior_metric_rows_unchanged": 305,
             "added_metric_rows": len(rows), "total_metric_rows": len(final),
             "missing_metric_rows": len(missing), "protected_files_unchanged": protected,
+            "effective_control_bootstrap_seed_rows_checked": len(control_video_rows),
             "exact_generated_files_checked": len(outputs), "source_counts": source_counts,
             "table_inventory_rows": len(table_rows), "new_inference": False,
             "new_bootstrap": False, "new_render": False}

@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "reviewed_at_utc": "2026-09-14T08:16:21.344713+00:00",
+  "incoming_index_commit": "4883493f63e855a9a480ac579d660883340799ce",
+  "preserved_base_commit": "473662d93d9005becb5e996e92b87ef6fa8b6368",
+  "source_control_curator_commit": "084d563b5be87d9c8215383b555934e175922021",
+  "source_control_curator_sha256": "1169d24915bd849674934faefbf7066dd97407df937be54a23b2688d056e457d",
+  "validation_method": "Executed the corrected index build/check through a read-only POSIX-path/Git-blob adapter on Windows, then independently compared committed source hashes and all index rows. No native Linux CLI checker run is claimed.",
+  "index_check_summary": {
+    "status": "passed",
+    "base": "473662d93d9005becb5e996e92b87ef6fa8b6368",
+    "prior_metric_rows_unchanged": 305,
+    "added_metric_rows": 124,
+    "total_metric_rows": 429,
+    "missing_metric_rows": 27,
+    "effective_control_bootstrap_seed_rows_checked": 28,
+    "exact_generated_files_checked": 32,
+    "source_counts": {
+      "r2e_controls": {
+        "published_files_hashed": 12,
+        "exact_local_copies": 10
+      },
+      "r2f_variable_accuracy": {
+        "published_files_hashed": 21,
+        "exact_local_copies": 16
+      }
+    },
+    "table_inventory_rows": 11,
+    "new_inference": false,
+    "new_bootstrap": false,
+    "new_render": false
+  },
+  "protected_prior_blobs_verified": 57,
+  "published_source_hashes_verified": 33,
+  "byte_exact_source_copies_verified": 26,
+  "all_429_metric_rows_preserved_except_28_effective_rng_fields": true,
+  "all_scientific_point_estimate_and_interval_strings_unchanged": true,
+  "in_domain_figure_rows_unchanged": true,
+  "new_figure_links_verified": 3,
+  "new_inference": false,
+  "new_bootstrap": false,
+  "new_render": false,
+  "corrected_files_lf_sha256": {
+    "results/wp5_three_strand_evidence/addenda/HLVID_COMPLETION.md": "ffd61a9bbce2af58d18dfebd8ce5dab8be1831d87d17406a1600c8b903a764f0",
+    "results/wp5_three_strand_evidence/addenda/r2e_controls/manifest.json": "e408580ee74106b1404ce12340a7ba5ef8feaae343c4ab586dec24fff2b6a1e6",
+    "results/wp5_three_strand_evidence/addenda/r2f_variable_accuracy/manifest.json": "f9a58f922add8a3039d06c8059acf489e83c6791981d3c502531dc975da1dca8",
+    "results/wp5_three_strand_evidence/artifacts.csv": "b72178a8ab9f74cdf168ab0a8b1ca74a4900c52f2cc4e11219275791105bb2fd",
+    "results/wp5_three_strand_evidence/metrics.csv": "1242d4383f563d46ff7e8f465e7b9658cb1c12a3b0c79a9be7dcc149445a5578",
+    "results/wp5_three_strand_evidence/scripts/index_hlvid_completion.py": "86a51f1b4c238fcef0a910b098b20547ec03cbcc0a16b52d9604ac86fb8e0c58"
+  },
+  "effective_rng_corrections": [
+    {
+      "metric_id": "controls_diff_pretrained_exact_k16_question_micro_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20261909
+    },
+    {
+      "metric_id": "controls_diff_pretrained_exact_k16_macro_video_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20261909
+    },
+    {
+      "metric_id": "controls_diff_stavis_center16_question_micro_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20261910
+    },
+    {
+      "metric_id": "controls_diff_stavis_center16_macro_video_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20261910
+    },
+    {
+      "metric_id": "controls_diff_pretrained_exact_k16_seed440826_question_micro_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701735
+    },
+    {
+      "metric_id": "controls_diff_pretrained_exact_k16_seed440826_macro_video_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701735
+    },
+    {
+      "metric_id": "controls_diff_pretrained_exact_k16_seed440827_question_micro_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701736
+    },
+    {
+      "metric_id": "controls_diff_pretrained_exact_k16_seed440827_macro_video_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701736
+    },
+    {
+      "metric_id": "controls_diff_pretrained_exact_k16_seed440828_question_micro_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701737
+    },
+    {
+      "metric_id": "controls_diff_pretrained_exact_k16_seed440828_macro_video_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701737
+    },
+    {
+      "metric_id": "controls_diff_pretrained_exact_k16_seed440829_question_micro_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701738
+    },
+    {
+      "metric_id": "controls_diff_pretrained_exact_k16_seed440829_macro_video_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701738
+    },
+    {
+      "metric_id": "controls_diff_pretrained_exact_k16_seed440830_question_micro_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701739
+    },
+    {
+      "metric_id": "controls_diff_pretrained_exact_k16_seed440830_macro_video_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701739
+    },
+    {
+      "metric_id": "controls_diff_pretrained_exact_k16_seed440831_question_micro_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701740
+    },
+    {
+      "metric_id": "controls_diff_pretrained_exact_k16_seed440831_macro_video_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701740
+    },
+    {
+      "metric_id": "controls_diff_stavis_center16_seed440826_question_micro_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701835
+    },
+    {
+      "metric_id": "controls_diff_stavis_center16_seed440826_macro_video_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701835
+    },
+    {
+      "metric_id": "controls_diff_stavis_center16_seed440827_question_micro_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701836
+    },
+    {
+      "metric_id": "controls_diff_stavis_center16_seed440827_macro_video_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701836
+    },
+    {
+      "metric_id": "controls_diff_stavis_center16_seed440828_question_micro_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701837
+    },
+    {
+      "metric_id": "controls_diff_stavis_center16_seed440828_macro_video_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701837
+    },
+    {
+      "metric_id": "controls_diff_stavis_center16_seed440829_question_micro_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701838
+    },
+    {
+      "metric_id": "controls_diff_stavis_center16_seed440829_macro_video_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701838
+    },
+    {
+      "metric_id": "controls_diff_stavis_center16_seed440830_question_micro_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701839
+    },
+    {
+      "metric_id": "controls_diff_stavis_center16_seed440830_macro_video_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701839
+    },
+    {
+      "metric_id": "controls_diff_stavis_center16_seed440831_question_micro_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701840
+    },
+    {
+      "metric_id": "controls_diff_stavis_center16_seed440831_macro_video_accuracy_video90",
+      "old_configured_base_seed": 20260909,
+      "effective_seed": 20701840
+    }
+  ],
+  "test_access_wording_correction": {
+    "scope": "human-gaze test not accessed by this curation; no claim that the test was globally unopened",
+    "artifact_split_rows_updated": 2,
+    "addendum_split_contracts_updated": 2,
+    "immutable_source_copies_changed": false
+  }
+}
