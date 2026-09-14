@@ -2,7 +2,7 @@
 
 This package integrates three complementary component studies: within-encoder token merging, temporal frame selection, and within-frame gaze selection. Each study preserves its source metric and uncertainty definitions, including any missing primary-metric declaration. Unrelated metrics are not forced onto one axis. Independent resource savings are not multiplied, and this package does not claim an integrated end-to-end system.
 
-Verified inputs comprise the complete R2e HLVid fixed-budget gaze evaluation, curated existing in-domain gaze evidence, the present-day HLVid decode audit (WP0), corrected historical temporal evidence (WP1), and the completed DINO encoder comparison (WP2). The overall package remains partial only because K16 causal controls and refreshed variable-budget/replay results remain pending or partial.
+Verified inputs comprise the complete R2e HLVid fixed-budget gaze evaluation, curated existing in-domain gaze evidence, the present-day HLVid decode audit (WP0), corrected historical temporal evidence (WP1), the completed DINO encoder comparison (WP2), the completed six-endpoint K16 control comparison, and all three paired variable-EOS/forced-K16 QA endpoints. The available-evidence index is complete. Actual variable allocation costs remain missing pending a separately validated processor replay; this is not a complete efficiency package.
 
 ## Files
 
@@ -12,9 +12,28 @@ Verified inputs comprise the complete R2e HLVid fixed-budget gaze evaluation, cu
 - `metrics.csv`: normalized compact source data.
 - `claims.csv`: claim-to-artifact and claim-to-metric index.
 - `figures.csv`: source tables, formats, regeneration commands, and status.
+- `tables.csv`: completed HLVid control/variable table inventory and estimands.
 - `HANDOFF_SCHEMA.md`: owner handoff contract.
 - `STYLE.md` and `scripts/publication_style.py`: shared publication defaults.
 - `addenda/`: preserved study-specific source tables and identities.
+
+The September 14 HLVid additions are indexed from AutoGaze main
+`473662d93d9005becb5e996e92b87ef6fa8b6368`: controls `51b4166` and variable
+paired accuracy `03cd606`. All 305 earlier metric rows and protected source,
+figure and script bytes remain unchanged. There are now 429 metric rows,
+including 27 explicitly missing resource rows, 26 byte-identical new compact
+source copies and three linked PDF/PNG figures. SVGs are absent in those source
+bundles and are not invented or regenerated.
+
+Controls retain primary question-micro QA, six-endpoint seed90 uncertainty,
+separate paired-video90 uncertainty and approved cross-hardware QA provenance.
+Variable transfer retains primary video-macro QA, three paired seed95 intervals,
+separate paired-video90 intervals and missing actual resource values. Neither
+micro seed sensitivity nor macro control seed sensitivity replaces a declared
+primary metric or video uncertainty. Reservation accounting and hardware-specific
+telemetry are not pooled into latency claims. See `addenda/HLVID_COMPLETION.md`
+for provenance, limitations and indexing commands, and
+`addenda/hlvid_completion_validation.json` for consistency checks.
 
 Missing values are empty, never zero. Provisional, partial, snapshot, unsupported, missing, and historical-exploratory evidence cannot silently support a final empirical claim.
 

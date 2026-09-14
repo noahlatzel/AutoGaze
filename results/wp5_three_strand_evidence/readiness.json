@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "status": "partial_pending_controls_variable_and_replay",
+  "status": "available_evidence_index_complete_variable_costs_pending",
   "scientific_claims_added": true,
   "items": [
     {
@@ -127,19 +127,32 @@
     },
     {
       "id": "fixed_k_controls",
-      "commit": "b795de084001c3a8ef1c147bc850d7764c867cb3",
-      "slurm_job": "1700678",
-      "status": "pending",
-      "eligible_for_empirical_claims": false
+      "commit": "51b41662b801afb4b3ec3ae870b80403ce3abcb3",
+      "slurm_job": "1701485",
+      "status": "complete_two_controls_and_six_reused_trained_endpoints",
+      "eligible_for_empirical_claims": true,
+      "execution_commit": "b795de084001c3a8ef1c147bc850d7764c867cb3",
+      "former_unstarted_job": {
+        "id": "1700678",
+        "state": "cancelled_under_explicit_approval"
+      },
+      "source_manifest": "addenda/r2e_controls/manifest.json",
+      "primary_metric": "question_micro_accuracy",
+      "claim_scope": "descriptive approved cross-hardware QA; separate seed90/video90 uncertainty; no cross-hardware latency"
     },
     {
       "id": "refreshed_variable_budget",
-      "source_commit": "ecd72f151e4ca5066ce48b9ecb0032af1cb06645",
+      "source_commit": "ecf1535617250b706528b4b5ca278fccfbd85f4c",
       "variable_slurm_job": "1690935",
-      "variable_status": "partial; no final aggregate",
+      "variable_status": "complete_three_pairs_1608_QA",
       "replay_slurm_job": "1700681",
-      "replay_status": "waiting dependency",
-      "eligible_for_empirical_claims": false
+      "replay_status": "original 1700681 failed before observations; replacement 1705996 pending in parent 2026-09-14 01:59 CEST snapshot; no indexed outputs",
+      "eligible_for_empirical_claims": true,
+      "result_commit": "03cd606257b9f3f28ac295e62533453b2e2b2612",
+      "source_manifest": "addenda/r2f_variable_accuracy/manifest.json",
+      "primary_metric": "macro_video_accuracy",
+      "actual_variable_costs": null,
+      "claim_scope": "secondary descriptive deployment QA only; no allocation-only or efficiency claim"
     },
     {
       "id": "combined_autogaze_cpu_validation",

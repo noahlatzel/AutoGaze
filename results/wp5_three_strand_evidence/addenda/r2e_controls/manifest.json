@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "repository": "noahlatzel/AutoGaze",
+  "result_commit": "51b41662b801afb4b3ec3ae870b80403ce3abcb3",
+  "result_bundle": "experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563",
+  "curator_commit": "084d563b5be87d9c8215383b555934e175922021",
+  "source_files": {
+    "README.md": {
+      "sha256": "02ed1ad0e316e5a946538a019e1fe3e8a8b7c18e289e4135825b7a63930c40a0",
+      "bytes": 2924,
+      "git_blob": "c18c60a1d0828cb7dabe6e0a3c73aece2382e8b5",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/51b41662b801afb4b3ec3ae870b80403ce3abcb3/experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563/README.md"
+    },
+    "config.yaml": {
+      "sha256": "cea55edfa68c4d00424eb282dc024fc3af0ad8908680c1f1a3caa297c84f0cbc",
+      "bytes": 2023,
+      "git_blob": "32c26df4c449817164486573240af8cd467966d4",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/51b41662b801afb4b3ec3ae870b80403ce3abcb3/experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563/config.yaml"
+    },
+    "contrast_summary.csv": {
+      "sha256": "982e454842daa4bc4b4adf65a68cb1b8f2bf5adec41fa3f332d35d162b3d0518",
+      "bytes": 1021,
+      "git_blob": "1489adb383272b32340983ec91934f76c82a93d1",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/51b41662b801afb4b3ec3ae870b80403ce3abcb3/experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563/contrast_summary.csv"
+    },
+    "control_comparison.pdf": {
+      "sha256": "0b11022607ffb0ffce48839bdcedd491ef4410b22ff6ac15dce3e7a28e678936",
+      "bytes": 18069,
+      "git_blob": "f427e5185f40b13ef9edaece8951c9a1ac03854f",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/51b41662b801afb4b3ec3ae870b80403ce3abcb3/experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563/control_comparison.pdf"
+    },
+    "control_comparison.png": {
+      "sha256": "d7feba37c5014dd5ba12ee6ce2d667c4fb6e7a2671826914156c9b604384d2d0",
+      "bytes": 138728,
+      "git_blob": "14be24992fc3ae263bd5409141c16580c658f1b0",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/51b41662b801afb4b3ec3ae870b80403ce3abcb3/experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563/control_comparison.png"
+    },
+    "control_per_example_telemetry.csv": {
+      "sha256": "7ae572c388feb21f68d749a6773a4bafc66a9c09e2539b9448af608665efe288",
+      "bytes": 205193,
+      "git_blob": "9338a882f3c3a0cac180a95e8ba0c22c0fba9116",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/51b41662b801afb4b3ec3ae870b80403ce3abcb3/experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563/control_per_example_telemetry.csv"
+    },
+    "manifest.json": {
+      "sha256": "90eed361a9c4e5a5f506b6b8b68501ddd5d29eeef0b67edeae8845b0e292e03c",
+      "bytes": 19046,
+      "git_blob": "c3527c2ad679d75a70423bcaf560eaf117158bae",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/51b41662b801afb4b3ec3ae870b80403ce3abcb3/experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563/manifest.json"
+    },
+    "metrics.json": {
+      "sha256": "5c5d95bce0dbed333e3c81a837cd002c7a6dbce3d61aa1da23ac5f72ebf5b1c8",
+      "bytes": 4831,
+      "git_blob": "c74f087285601fbf4268dbce4546dab73056065d",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/51b41662b801afb4b3ec3ae870b80403ce3abcb3/experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563/metrics.json"
+    },
+    "paired_per_seed.csv": {
+      "sha256": "5009814a434627154ef985f44fcb445e203ded8b21a9ea88498e1f17fcef01dc",
+      "bytes": 2685,
+      "git_blob": "e683dc553519fc0b39af0d6e23896184311a15a4",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/51b41662b801afb4b3ec3ae870b80403ce3abcb3/experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563/paired_per_seed.csv"
+    },
+    "per_seed.csv": {
+      "sha256": "f6494fd9f2a1e6c69770c1bbc38bca969e2a8c8b949a7ef75f0f6c1ae2fcae01",
+      "bytes": 981,
+      "git_blob": "d265012e35896c86c2990a1b77126ef0bf7c0465",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/51b41662b801afb4b3ec3ae870b80403ce3abcb3/experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563/per_seed.csv"
+    },
+    "per_video.csv": {
+      "sha256": "5c6e8e2eec38bc32914d45db3aaf8415484e38c8d0fd268390c46e4828cae855",
+      "bytes": 35034,
+      "git_blob": "009c623a3bc0b78996f5bc95edf989ae3ca19503",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/51b41662b801afb4b3ec3ae870b80403ce3abcb3/experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563/per_video.csv"
+    },
+    "resource_segments.csv": {
+      "sha256": "9ef49b8a913f0a7d4ead22ed74dd16d7f8e2c43672eca8c47687d68fc798f285",
+      "bytes": 768,
+      "git_blob": "a096f8e08221fe0790d2d78cbbc104759367f1b8",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/51b41662b801afb4b3ec3ae870b80403ce3abcb3/experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563/resource_segments.csv"
+    }
+  },
+  "local_source_copies": [
+    "README.md",
+    "config.yaml",
+    "contrast_summary.csv",
+    "control_per_example_telemetry.csv",
+    "manifest.json",
+    "metrics.json",
+    "paired_per_seed.csv",
+    "per_seed.csv",
+    "per_video.csv",
+    "resource_segments.csv"
+  ],
+  "contract": {
+    "status": "complete_descriptive",
+    "primary_metric": "question_micro_accuracy",
+    "sensitivity_metric": "macro_video_accuracy",
+    "training_seed_count": 6,
+    "base_seed_to_training_seed": {
+      "440826": 540826,
+      "440827": 540827,
+      "440828": 540828,
+      "440829": 540829,
+      "440830": 540830,
+      "440831": 540831
+    },
+    "deterministic_control_training_seed_count": null,
+    "seed_interval": "90% Student t, df5, six independent trained endpoints",
+    "video_interval": "90% paired 77-video bootstrap, conditional on six endpoints",
+    "split": "HLVid official test; historically exposed; protected human-gaze test unopened",
+    "hardware": "trained H100 NVL; controls A40; QA comparison approved; timing not hardware-matched",
+    "compute": "A40 reservation segments include preemptions; per-example stage telemetry separate",
+    "source_checkpoint_code_data_identities": "source_bundle/manifest.json; source_bundle/config.yaml"
+  },
+  "new_inference": false,
+  "new_bootstrap": false,
+  "new_render": false,
+  "heavy_artifacts_reverified_here": false
+}

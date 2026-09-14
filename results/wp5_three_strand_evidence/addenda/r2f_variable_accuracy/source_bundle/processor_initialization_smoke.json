@@ -1,0 +1,33 @@
+{
+  "allocation_semantics_verified": false,
+  "autogaze_load_calls": [
+    {
+      "checkpoint": "/storage/user/latn/worktrees/autogaze-r2d-variable-budget/outputs/human_gaze/grpo/r2d_variable_k16_stable_base440826_seed740826/checkpoint_latest_gaze",
+      "kwargs": {
+        "device_map": null
+      },
+      "type": "str"
+    }
+  ],
+  "checkpoint_config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+  "checkpoint_path": "/storage/user/latn/worktrees/autogaze-r2d-variable-budget/outputs/human_gaze/grpo/r2d_variable_k16_stable_base440826_seed740826/checkpoint_latest_gaze",
+  "code_commit": "d3b8d5a4abc448e78021f7085563c0f930113618",
+  "code_dirty": false,
+  "cuda_allocation_performed": false,
+  "heavy_autogaze_weight_loader_stubbed": true,
+  "hostname": "atcremers63",
+  "max_tiles_video": 48,
+  "model_path": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video",
+  "num_video_frames": 128,
+  "num_video_frames_thumbnail": 64,
+  "nvila_generation_calls": 0,
+  "nvila_model_loaded": false,
+  "original_path_failure_reproduced": "Object of type PosixPath is not JSON serializable",
+  "processing_nvila_sha256": "2b9dbf36a9c69954af7e7cc8478a980e406e91c2ba27b7f2f164167da70dbc9a",
+  "python_version": "3.11.15",
+  "real_processor_class": "transformers_modules.nvidia_hyphen__hyphen_NVILA_hyphen_8B_hyphen_HD_hyphen_Video.processing_nvila.NVILAProcessor",
+  "scope": "real_processor_initialization_with_autogaze_weight_loader_fixture",
+  "status": "pass",
+  "timestamp": "2026-09-13T23:45:10.539548+00:00",
+  "transformers_version": "4.57.6"
+}

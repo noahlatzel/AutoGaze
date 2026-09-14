@@ -1,0 +1,9 @@
+method,base_seed,num_correct,question_micro_accuracy,macro_video_accuracy,hardware
+trained_k16,440826,137,0.5111940298507462,0.5035381285381285,NVIDIA H100 NVL (node21; prior frozen SLURM provenance)
+trained_k16,440827,132,0.4925373134328358,0.47527591456162877,NVIDIA H100 NVL (node21; prior frozen SLURM provenance)
+trained_k16,440828,131,0.48880597014925375,0.4850780172208744,NVIDIA H100 NVL (node21; prior frozen SLURM provenance)
+trained_k16,440829,134,0.5,0.5060736882165453,NVIDIA H100 NVL (node21; prior frozen SLURM provenance)
+trained_k16,440830,137,0.5111940298507462,0.5095987345987346,NVIDIA H100 NVL (node21; prior frozen SLURM provenance)
+trained_k16,440831,138,0.5149253731343284,0.5196482089339232,NVIDIA H100 NVL (node21; prior frozen SLURM provenance)
+pretrained_exact_k16,,134,0.5,0.48245920745920745,NVIDIA A40 (actual node15/node16/node17 segments)
+stavis_center16,,137,0.5111940298507462,0.5195863660149374,NVIDIA A40 (actual node15/node16/node17 segments)

@@ -1,0 +1,2 @@
+# Preserve exact published source bytes across host line-ending settings.
+* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "repository": "noahlatzel/AutoGaze",
+  "result_commit": "03cd606257b9f3f28ac295e62533453b2e2b2612",
+  "result_bundle": "results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7",
+  "curator_commit": "6b4eef79d7105fd40f5932f1fb8fb9d4c6be3377",
+  "source_files": {
+    "README.md": {
+      "sha256": "b9565b8abb4328c222b548b60c5021d246d1594f944e4ff586620c10075603f8",
+      "bytes": 2541,
+      "git_blob": "814b2515323daac985623d683a1b1eafa0aef982",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/README.md"
+    },
+    "actual_vs_forced_k16.pdf": {
+      "sha256": "4ffd039f717f7a126b638b8db5ce5c5e4a9e9014ffa91058a6325b95abf5b37b",
+      "bytes": 15860,
+      "git_blob": "08f63a57c5a057d089206df5c30d21c2c9230fea",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/actual_vs_forced_k16.pdf"
+    },
+    "actual_vs_forced_k16.png": {
+      "sha256": "49d8e1282d6f043413c470a965a7fa711c96e2acabd6fce6f8bf682942fd61e1",
+      "bytes": 141170,
+      "git_blob": "82b33fd45f4a2681a9a12ef931295af1060a9e92",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/actual_vs_forced_k16.png"
+    },
+    "captions.md": {
+      "sha256": "904a17e0e7d7f9ae5d78cfec62135b7b0a507bdcc1cd27faac392e362545dad2",
+      "bytes": 970,
+      "git_blob": "1d81f6403b9e6019e07517dd0452e29be522ee7d",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/captions.md"
+    },
+    "config.yaml": {
+      "sha256": "9e164da4eec4789662ae0187fb01846e661f0f53ea0622073e351b5d0b1de5f5",
+      "bytes": 4466,
+      "git_blob": "a7a47638accee8f6a230ef736008c484fe587205",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/config.yaml"
+    },
+    "interpretation.md": {
+      "sha256": "a01d2bd799130010a91c700c8d23ecbe3da285ddd93984dec8262bc576612539",
+      "bytes": 4216,
+      "git_blob": "7c8afb120ed3f3d456770f8776ace735a980610f",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/interpretation.md"
+    },
+    "manifest.json": {
+      "sha256": "c3cd6927fe11b5ec3adffcc63c057cbf872facb47ee89d141cfcf0dea245a7e6",
+      "bytes": 25923,
+      "git_blob": "c6b03c64a4d44c71331eab0dad5a02ae69007d94",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/manifest.json"
+    },
+    "metrics.json": {
+      "sha256": "4b4e55a53baa8359d3e4000be3738dec7a44e4977a6cd280c9b611018a8a4954",
+      "bytes": 8927,
+      "git_blob": "3cefee57b9576b022a6d4f1594969e175e5786db",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/metrics.json"
+    },
+    "paired_accuracy_deltas.pdf": {
+      "sha256": "71b30e0baecbe594125a41be8afab730698bc2d35970fcfdba8f3cdcdf5681bc",
+      "bytes": 18673,
+      "git_blob": "3e129fa073afa400c320efa8812a15a2bc539455",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/paired_accuracy_deltas.pdf"
+    },
+    "paired_accuracy_deltas.png": {
+      "sha256": "e7477f5043908287bf74a9c748f09ea4516cbc3e0cdc36d1b2bee7189fd8b354",
+      "bytes": 91760,
+      "git_blob": "a768709cd6a163300c28d86d359a19639857a1dd",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/paired_accuracy_deltas.png"
+    },
+    "paired_aggregate.csv": {
+      "sha256": "60d2face1ada9e522353f85fc1345c8fcac8487b40a0fa84a820843eb7f3a105",
+      "bytes": 468,
+      "git_blob": "2d84724b53902a4ea3ef84cda8a8f92d6ce2a8fc",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/paired_aggregate.csv"
+    },
+    "paired_questions.csv": {
+      "sha256": "7c6f121702b7a8757801d5690670fe0ea3bdfe1e6cab4f3a66f03348177c35ac",
+      "bytes": 39951,
+      "git_blob": "cfbe3bf99f73129d3514f565a8c95ef99417587c",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/paired_questions.csv"
+    },
+    "paired_videos.csv": {
+      "sha256": "bdc1c28c46223f46a112220bf3b9efa37cab37ae534ff711e6febf61f4aa0e06",
+      "bytes": 13177,
+      "git_blob": "9ed2723555a6586397b7e83c3f1e37640c85ae4f",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/paired_videos.csv"
+    },
+    "per_category.csv": {
+      "sha256": "80d0727953ad50d35b7b54630495e02c888a72c5c3c7a10db0ee450f11213823",
+      "bytes": 665,
+      "git_blob": "c5c20115111f603ef8bc6ac57dd7b947214897ce",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/per_category.csv"
+    },
+    "per_seed.csv": {
+      "sha256": "d2762d2728bbb6039ed113999d3805f896fdcb2a5afd197cb6429bd12c6e5716",
+      "bytes": 1047,
+      "git_blob": "6662049f5930c3e340838730882a50f64b514f02",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/per_seed.csv"
+    },
+    "processor_initialization_smoke.json": {
+      "sha256": "bcdfecb57b65cf841b86917bf23e6df302d4e8aa9e941e6bb8979e87c85a20d8",
+      "bytes": 1597,
+      "git_blob": "533fe06eab987afa95858e5438eeb34d90903b97",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/processor_initialization_smoke.json"
+    },
+    "replay_recovery_handoff.md": {
+      "sha256": "97098c345d3334993f33f2449c53151e3f19c6a4e580b485f6fbbc5b4bb41b1b",
+      "bytes": 3114,
+      "git_blob": "11acab5a653c8266ed861e9817d93cbbf5136784",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/replay_recovery_handoff.md"
+    },
+    "scheduler/sacct_segments.psv": {
+      "sha256": "88f15fc94a61cc0b52d99bc2eb3ea96228098165de93667b6c19540685a74942",
+      "bytes": 13685,
+      "git_blob": "d5ff6b791a82a9fa4c72f48b0d8ad65457b0e2b1",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/scheduler/sacct_segments.psv"
+    },
+    "scheduler/scheduler_node_relaxation_receipt.json": {
+      "sha256": "f91399df92f8513e6cf3170460b0aabc8fead83c3259d7229df7a48e20d03a54",
+      "bytes": 5567,
+      "git_blob": "47a5c2244a31e3a35097e5d1c20b5eb7b5180f03",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/scheduler/scheduler_node_relaxation_receipt.json"
+    },
+    "scheduler/scheduler_provenance.json": {
+      "sha256": "a5c24aee38b597ae1eabcb078613ba102d0c208e40877cd7b84201f6eaa72b51",
+      "bytes": 39650,
+      "git_blob": "d145824093906ab9a8b92ce26827a49cb57e1139",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/scheduler/scheduler_provenance.json"
+    },
+    "supplement_manifest.json": {
+      "sha256": "e5756471ac81b005d2909e63ec0eda91439054adf5a8ecf30d982284ad18b341",
+      "bytes": 778,
+      "git_blob": "c2125447b3d4b831bda13c4b8ebbb712097e5c61",
+      "url": "https://github.com/noahlatzel/AutoGaze/blob/03cd606257b9f3f28ac295e62533453b2e2b2612/results/human_gaze/20260914-0202_r2f-hlvid-complete-paired-accuracy_6b4eef7/supplement_manifest.json"
+    }
+  },
+  "local_source_copies": [
+    "README.md",
+    "captions.md",
+    "config.yaml",
+    "interpretation.md",
+    "manifest.json",
+    "metrics.json",
+    "paired_aggregate.csv",
+    "paired_videos.csv",
+    "per_category.csv",
+    "per_seed.csv",
+    "processor_initialization_smoke.json",
+    "replay_recovery_handoff.md",
+    "scheduler/sacct_segments.psv",
+    "scheduler/scheduler_node_relaxation_receipt.json",
+    "scheduler/scheduler_provenance.json",
+    "supplement_manifest.json"
+  ],
+  "contract": {
+    "status": "complete_accuracy_only_costs_missing",
+    "primary_metric": "macro_video_accuracy",
+    "sensitivity_metric": "question_micro_accuracy",
+    "training_seed_count": 3,
+    "base_seed_to_training_seed": {
+      "440826": 740826,
+      "440827": 740827,
+      "440828": 740828
+    },
+    "seed_interval": "95% Student t across three paired trained endpoints, df2",
+    "video_interval": "90% paired 77-video bootstrap, same draws across both policies and all seeds",
+    "allocation_status": "unavailable_pending_validated_replay",
+    "variable_costs": null,
+    "split": "HLVid official test; reused historically exposed benchmark; protected human-gaze test unopened",
+    "hardware": "A40; actual allocation nodes preserved in scheduler/sacct_segments.psv",
+    "compute": "reservation accounting is not inference latency or measured efficiency",
+    "comparison": "deployment policy contrast; EOS changes later spatial ordering; not allocation-only",
+    "source_checkpoint_code_data_identities": "source_bundle/manifest.json; source_bundle/config.yaml"
+  },
+  "new_inference": false,
+  "new_bootstrap": false,
+  "new_render": false,
+  "heavy_artifacts_reverified_here": false
+}

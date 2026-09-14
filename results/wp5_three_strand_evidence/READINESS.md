@@ -1,8 +1,9 @@
 # Implementation and evidence readiness
 
-The overall WP5 package is partial. Completed curated evidence and implementation
-readiness have distinct claim scopes; execution completion alone adds no pending
-numerical result to metrics.csv.
+The available-evidence WP5 index is complete as of the September 14 additions.
+Actual variable allocation costs remain missing. Completed curated evidence and
+implementation readiness have distinct claim scopes; queued replay or supervised
+work adds no unvalidated numerical result to metrics.csv.
 
 ## Completed protocol audit (WP0)
 
@@ -59,13 +60,24 @@ plus 12 focused compatibility tests; benchmark validation was 57 prior tests
 plus three focused central-control tests. These describe separate test scopes,
 not fresh combined totals.
 
-## Controls and refreshed variable budget remain incomplete
+## Completed controls and paired variable QA; costs remain missing
 
-K16 controls run from frozen AutoGaze
-`b795de084001c3a8ef1c147bc850d7764c867cb3` under Slurm 1700678; results are pending.
-Variable-budget job 1690935 is partial, without a final aggregate. Allocation
-replay job 1700681 depends on completion. No partial-run numerical aggregate is
-promoted. Existing R2d in-domain evidence remains historical.
+Control result `51b41662b801afb4b3ec3ae870b80403ce3abcb3` completes two
+deterministic arms from frozen execution `b795de0` on A40 array 1701485 and
+reuses all six H100 K16 trained endpoints unchanged. Former unstarted H100
+array 1700678 was cancelled under explicit user approval, not completed.
+Question-micro QA remains primary; seed90 and video90 uncertainty are separate.
+Hardware-specific telemetry and actual allocation nodes remain in source tables.
+
+Variable result `03cd606257b9f3f28ac295e62533453b2e2b2612` completes all six
+streams from 1690935 (1,608 QA, three paired endpoints). Video-macro is primary;
+seed95 and video90 uncertainty are separate. Actual variable actions, recovered
+patches, visual tokens and expanded context remain null. Forced-K16 actions and
+recovered patches are nominal, not measured variable costs. Original replay
+1700681 failed before observations. The parent reports replacement 1705996 and
+supervised restart 1705995 queued at the September 14 01:59 CEST snapshot; no
+output from either is indexed. Existing R2d remains historical. See
+`addenda/HLVID_COMPLETION.md`.
 
 Integration `d649ad05c15b8f58edd0990140e05c23a4b9c183` had 109 native Windows CPU
 passes and one Linux-directory-fsync limitation. Production code and tests were

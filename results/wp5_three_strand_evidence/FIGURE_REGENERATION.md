@@ -63,7 +63,11 @@ renormalized or modified.
 No bootstrap was recomputed. The source's video-resampling intervals condition
 on the observed three-seed set and do not resample training seeds. All intervals
 include zero; the figure makes no reliable ordering or equivalence claim. The
-additional K16 endpoints and pending pretrained/Center16 controls are excluded.
+additional K16 endpoints and pretrained/Center16 controls are excluded from
+these unchanged matched-budget figures. Completed control and paired variable
+figures are linked separately in `figures.csv` and are not rerendered in WP5.
+Those source bundles publish PDF/PNG only, so SVG fields remain empty. Their
+immutable curator commands are documented in `addenda/HLVID_COMPLETION.md`.
 
 Both PNGs were visually reviewed for legibility, clipping, overlapping labels,
 and visible endpoint markers. No immutable source table or experimental artifact

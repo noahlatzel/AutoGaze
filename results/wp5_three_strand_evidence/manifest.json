@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "package_id": "wp5_three_strand_evidence",
-  "status": "partial_pending_controls_variable_and_replay",
+  "status": "available_evidence_index_complete_variable_costs_pending",
   "published_base": {
     "repository": "noahlatzel/AutoGaze",
     "commit": "a0a5bde41909a0fbbafcf18c25a636b5e1a85489",
@@ -13,12 +13,12 @@
     "r2d_variable_fine_token_budget",
     "wp0_present_day_decode_audit",
     "t0_historical_temporal_evidence_50c1949",
-    "wp2_dinov3_curated_v2"
+    "wp2_dinov3_curated_v2",
+    "r2e_k16_six_endpoint_controls_51b4166",
+    "r2f_three_paired_accuracy_03cd606_costs_missing"
   ],
   "pending": [
-    "pretrained_and_center16_k16_controls",
-    "refreshed_variable_budget_paired_tables",
-    "r2d_allocation_replay_after_variable_completion"
+    "r2d_validated_allocation_replay_for_actual_variable_costs"
   ],
   "missing_values_are_zero": false,
   "joint_system_speedup_supported": false,
@@ -70,7 +70,9 @@
     "wp0_decode": "addenda/wp0_decode/manifest.json",
     "temporal": "addenda/temporal/manifest.json",
     "dino": "addenda/dino/manifest.json",
-    "conceptual": "addenda/conceptual/manifest.json"
+    "conceptual": "addenda/conceptual/manifest.json",
+    "r2e_controls": "addenda/r2e_controls/manifest.json",
+    "r2f_variable_accuracy": "addenda/r2f_variable_accuracy/manifest.json"
   },
   "temporal_metric_contract": {
     "historical_source_declares_primary_metric": false,
@@ -78,5 +80,25 @@
     "question_micro_preserved": true,
     "cost_aggregation": "question mean",
     "training_seed_counts_available": false
+  },
+  "hlvid_completion_index": {
+    "base_repository": "noahlatzel/AutoGaze",
+    "base_commit": "473662d93d9005becb5e996e92b87ef6fa8b6368",
+    "control_result_commit": "51b41662b801afb4b3ec3ae870b80403ce3abcb3",
+    "variable_result_commit": "03cd606257b9f3f28ac295e62533453b2e2b2612",
+    "prior_metric_rows_unchanged": 305,
+    "added_metric_rows": 124,
+    "total_metric_rows": 429,
+    "missing_resource_rows": 27,
+    "new_source_copies": 26,
+    "primary_control_metric": "question_micro_accuracy",
+    "primary_variable_metric": "macro_video_accuracy",
+    "variable_actual_costs": null,
+    "uncertainty_combined": false,
+    "timing_pooled_across_hardware": false,
+    "new_inference": false,
+    "new_bootstrap": false,
+    "new_render": false,
+    "validation": "addenda/hlvid_completion_validation.json"
   }
 }
