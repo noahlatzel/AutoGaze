@@ -508,8 +508,10 @@ def test_resource_summary_counts_recovery_attempt_time() -> None:
         }
         if seed == BASE_SEEDS[0]:
             sacct["attempts"] = [
-                {"elapsed_seconds": 5, "allocated_gpu_count": 1},
-                {"elapsed_seconds": 10, "allocated_gpu_count": 1},
+                {"elapsed_seconds": 5, "allocated_gpu_count": 1,
+                 "base_clip_presentations": 40000, "nominal_action_rows": 10240000},
+                {"elapsed_seconds": 10, "allocated_gpu_count": 1,
+                 "base_clip_presentations": 40000, "nominal_action_rows": 10240000},
             ]
         readiness["resource_receipts"][str(seed)] = {
             "complete": True,

@@ -761,26 +761,38 @@ def resource_summary(readiness: dict[str, Any]) -> dict[str, Any]:
         sacct = receipt["sacct"]
         lineage = receipt.get("restart_of") or {}
         attempts = sacct.get("attempts")
+        clips, rows = 0, 0
+        training_attempts = attempts if isinstance(attempts, list) else []
         if lineage:
-            clips, rows = 0, 0
-            for attempt in attempts:
-                if attempt["job_id"] == lineage["failed_array_element"]:
-                    clips += int(lineage["failed_base_clip_presentations"])
-                    rows += int(lineage["failed_nominal_action_rows"])
-                elif attempt["job_id"] == receipt["current_array_element"]:
-                    clips += 80000
-                    rows += 20480000
-                else:
-                    extra_clips, extra_rows = attempt.get("base_clip_presentations"), attempt.get("nominal_action_rows")
-                    if type(extra_clips) is not int or extra_clips < 0 or type(extra_rows) is not int or extra_rows != extra_clips * 256:
-                        raise ValueError("Additional restart/recovery attempt lacks verified logical exposure; withholding gate")
-                    clips += extra_clips
-                    rows += extra_rows
-            all_attempt_base_clips.append(clips)
-            all_attempt_nominal_rows.append(rows)
-        else:
-            all_attempt_base_clips.append(80000)
-            all_attempt_nominal_rows.append(20480000)
+            failed = [attempt for attempt in training_attempts
+                      if attempt.get("job_id") == lineage["failed_array_element"]]
+            if len(failed) != 1:
+                raise ValueError("Restart accounting lacks its unique original failed attempt")
+            clips = int(lineage["failed_base_clip_presentations"])
+            rows = int(lineage["failed_nominal_action_rows"])
+            training_attempts = [attempt for attempt in training_attempts
+                                 if attempt.get("job_id") != lineage["failed_array_element"]]
+        successful_clips, successful_rows = 0, 0
+        for attempt in training_attempts:
+            attempt_clips = attempt.get("base_clip_presentations")
+            attempt_rows = attempt.get("nominal_action_rows")
+            if len(training_attempts) == 1 and attempt_clips is None and attempt_rows is None:
+                # One uninterrupted, authoritatively completed 20k chain may
+                # use its fixed exposure. On recovery, every attempt (including
+                # the original restart) needs its own measured consumption;
+                # the 80k endpoint is not an additional attempt's exposure.
+                attempt_clips, attempt_rows = 80000, 20480000
+            if (type(attempt_clips) is not int or attempt_clips < 0
+                    or type(attempt_rows) is not int or attempt_rows != attempt_clips * 256):
+                raise ValueError("Restart/recovery attempt lacks verified logical exposure; withholding gate")
+            successful_clips += attempt_clips
+            successful_rows += attempt_rows
+        if not training_attempts and not lineage:
+            successful_clips, successful_rows = 80000, 20480000
+        if successful_clips < 80000:
+            raise ValueError("Measured attempt logical exposure does not cover the complete 20k endpoint; withholding gate")
+        all_attempt_base_clips.append(clips + successful_clips)
+        all_attempt_nominal_rows.append(rows + successful_rows)
         if isinstance(attempts, list) and attempts:
             elapsed.append(float(sum(row["elapsed_seconds"] for row in attempts)))
             gpu_seconds.append(
@@ -811,7 +823,7 @@ def resource_summary(readiness: dict[str, Any]) -> dict[str, Any]:
         "fixed_endpoint_successful_nominal_action_rows": 20480000,
         "all_attempt_base_clip_presentations_including_original_failure": six_seed_summary(all_attempt_base_clips),
         "all_attempt_nominal_action_rows_including_original_failure": six_seed_summary(all_attempt_nominal_rows),
-        "exposure_curve_scope": "successful_restart_model_history; original failed exposure is separate overhead counted here",
+        "exposure_curve_scope": "successful_model_history; total cost sums per-attempt consumption without adding endpoint exposure twice",
     }
 
 

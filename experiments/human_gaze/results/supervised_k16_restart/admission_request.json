@@ -63,7 +63,8 @@
       "440831": "31c84cb923bcb6d45edb063bb2ceb3f5e1ffa29868d357fde8662a8ec7b484ee"
     }
   },
-  "verification": {"full_cpu_tests_passed": 286, "full_cpu_suite_preceding_analysis_source": "7c3d53984257a8e7ffa1556f30a678b04590ed7d", "actual_admission_metadata_focused_tests_passed": 26, "actual_admission_metadata_focused_test_seconds": 7.77, "new_real_constructor_regressions": 6, "restart_lineage_regressions": 4, "exports_present": 0, "exports_expected": 36},
+  "verification": {"full_cpu_tests_passed": 287, "full_cpu_test_seconds": 17.74, "full_cpu_suite_includes_actual_admission_and_partial_resume_accounting": true, "actual_admission_metadata_focused_tests_passed": 26, "actual_admission_metadata_focused_test_seconds": 7.77, "partial_resume_accounting_focused_tests_passed": 27, "partial_resume_accounting_focused_test_seconds": 6.93, "new_real_constructor_regressions": 6, "restart_lineage_regressions": 5, "exports_present": 0, "exports_expected": 36},
+  "recovered_exposure_accounting": "sum_measured_non_original_attempt_consumption_plus_verified_original_failure_never_add_fixed_endpoint_twice_missing_multi_attempt_exposure_withholds_cost_gate",
   "analysis_config": "experiments/human_gaze/configs/supervised_k16_restart_analysis.yaml",
   "analysis_config_sha256": "99a3e1d2f08da2d6bb832224f1d36e9102a59090322ab75088505c51873d3898",
   "checkpoint_inventory_sha256": "38bd1f184b9e9612529621f0f790b1cc5a0e396c3c1cc62e9785d958f5139870",

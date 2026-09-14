@@ -116,6 +116,25 @@ for each seed must have an `attempts` list covering the original1702710 element
 and the completed1705995 restart element, plus any subsequent recovery attempts. The
 CPU resource validator fails closed if failed allocation time is omitted.
 
+If a restart is interrupted and resumed, every non-original attempt must record
+its measured `base_clip_presentations` and `nominal_action_rows` in the owner's
+all-attempt receipt, derived from the retained attempt logs/cursors. Rows equal
+256 times clips for this full16-frame/exactK16 recipe. Sum those consumed
+exposures, including work lost after the saved cursor; do not assign80k to the
+first partial restart and then add its resume. A10k+exact10k resume therefore
+costs80400 clips/20582400 rows including the original400-clip failure, not120400.
+If1k additional updates were discarded before that exact resume, it costs84400
+clips. A single uninterrupted complete restart may infer80k from its verified
+endpoint; missing multi-attempt exposure counts or totals below80k withhold the
+cost gate. All elapsed/allocation time still includes every attempt.
+
+The meaningful partial-resume regression also verifies discarded1k-update work
+and rejection of missing first-restart consumption. The corresponding27 focused
+tests passed in6.93s, and the final full CPU suite passed287 tests in17.74s.
+Legacy multi-attempt accounting also sums measured consumption; the elapsed/GPU
+time summation and the fixed20k/80k primary endpoint are unchanged. No model,
+training config, queued execution source or Slurm job was changed by this fix.
+
 Fresh-restart process logs do not reconstruct prior failed time; wall-time
 convergence curves are withheld. Nominal exposure curves remain available and
 final scheduler/GPU totals include all attempts. The full-validation analysis is

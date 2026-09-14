@@ -122,3 +122,47 @@ def test_restart_resource_receipt_cannot_omit_failed_allocation(tmp_path):
     readiness["resource_receipts"][str(SEED)] = {"complete": True, **extra_detail}
     with pytest.raises(ValueError, match="logical exposure"):
         resource_summary(readiness)
+
+
+def test_partial_restart_exact_resume_counts_each_attempt_not_endpoint_twice():
+    readiness = {"resource_receipts": {}}
+    for seed in range(440826, 440832):
+        index = seed - 440826
+        lineage = restart_identity(ROOT, seed, verify_live=False)
+        readiness["resource_receipts"][str(seed)] = {
+            "complete": True, "restart_of": lineage,
+            "current_array_element": f"1705995_{index}",
+            "sacct": {"elapsed_seconds": 1100, "allocated_gpu_count": 1,
+                      "max_rss_bytes": 1000, "gpu_memory_peak_bytes": 2000,
+                      "attempts": [
+                          {"job_id": f"1702710_{index}", "elapsed_seconds": 250,
+                           "allocated_gpu_count": 1},
+                          {"job_id": f"1705995_{index}", "elapsed_seconds": 1000,
+                           "allocated_gpu_count": 1, "base_clip_presentations": 40000,
+                           "nominal_action_rows": 10240000},
+                          {"job_id": f"1706100_{index}", "elapsed_seconds": 1100,
+                           "allocated_gpu_count": 1, "base_clip_presentations": 40000,
+                           "nominal_action_rows": 10240000},
+                      ]},
+        }
+    # 100 discarded original updates, then 10k + exact-resumed 10k; never
+    # 80k attributed to the first restart plus another 40k for its resume.
+    cost = resource_summary(readiness)
+    assert cost["all_attempt_base_clip_presentations_including_original_failure"]["mean"] == 80400
+    assert cost["all_attempt_nominal_action_rows_including_original_failure"]["mean"] == 20582400
+    assert cost["all_attempt_scheduler_elapsed_seconds"]["mean"] == 2350
+    assert cost["all_attempt_allocated_gpu_seconds"]["mean"] == 2350
+    for receipt in readiness["resource_receipts"].values():
+        first_restart = receipt["sacct"]["attempts"][1]
+        # If 1k updates were consumed after the saved10k bundle, those lost
+        # updates really are extra training work and must not be subtracted.
+        first_restart["base_clip_presentations"] = 44000
+        first_restart["nominal_action_rows"] = 11264000
+    replayed = resource_summary(readiness)
+    assert replayed["all_attempt_base_clip_presentations_including_original_failure"]["mean"] == 84400
+    assert replayed["all_attempt_nominal_action_rows_including_original_failure"]["mean"] == 21606400
+    first_restart = readiness["resource_receipts"][str(SEED)]["sacct"]["attempts"][1]
+    first_restart.pop("base_clip_presentations")
+    first_restart.pop("nominal_action_rows")
+    with pytest.raises(ValueError, match="logical exposure"):
+        resource_summary(readiness)
