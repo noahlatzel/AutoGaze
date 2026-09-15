@@ -779,6 +779,49 @@ def main() -> None:
         "scheduler_provenance": {"local_path": "scheduler/scheduler_provenance.json", "sha256": sha256_file(args.scheduler_provenance_dir / "scheduler_provenance.json"), "historical_node_override_source": scheduler["node_relaxation_receipt"]["source_commit"]} if scheduler else None,
         "supporting_processor_initialization": {"local_path": "processor_initialization_smoke.json", "sha256": sha256_file(args.supporting_processor_smoke), "source_commit": processor_smoke["code_commit"], "allocation_semantics_verified": False} if processor_smoke else None,
     }
+    if args.accuracy_only:
+        allocation_summary = """This accuracy-only stage contains all three complete QA pairs but **does not
+establish actual variable cost or efficiency**. Missing variable values are
+null, not K16, calibration lengths, tail-only process means, or zero. A later
+validated replay must be published as a separate immutable joint bundle."""
+        cost_caption = """Costs are not shown because full variable observations are
+missing in this accuracy-only curation."""
+        scheduler_summary = "Scheduler evidence is retained where available."
+    else:
+        variable = aggregate["variable"]
+        comparison = aggregate["variable_minus_forced_k16"]
+        action_reduction = 100.0 * (
+            1.0 - variable["mean_decoder_spatial_actions_over_seeds"] / 16.0
+        )
+        allocation_summary = f"""The processor-only replay is complete and validated. Across the three
+seeds, actual variable EOS used {variable['mean_decoder_spatial_actions_over_seeds']:.3f}
+spatial actions and {variable['mean_retained_patches_over_seeds']:.3f} retained
+patches per frame on average, {action_reduction:.1f}% below the exact-K16
+contract. Mean visual and expanded-context counts were
+{variable['mean_visual_tokens_over_seeds']:.3f} and
+{variable['mean_expanded_context_tokens_over_seeds']:.3f}, respectively.
+Forced-K16 visual/context counts are unavailable in the preserved legacy QA, so
+no visual-token ratio or end-to-end speedup is inferred. The primary
+variable-minus-forced accuracy difference was
+{100.0 * comparison['mean_macro_video_accuracy_difference']:.2f} percentage
+points; both retained uncertainty views are reported in `metrics.json`."""
+        cost_caption = """Green bars report question-weighted actual mean spatial
+actions from the validated replay; the dotted reference is the exact-K16
+contract. Recovered patches are four times the spatial-action count."""
+        if scheduler:
+            completed_replay = scheduler["completed_replay"]
+            segments = ", ".join(
+                f"{row['NodeList']} {row['State'].lower()} {int(row['ElapsedRaw']) / 3600.0:.2f} h"
+                for row in completed_replay["segments"]
+            )
+            scheduler_summary = f"""Slurm job {completed_replay['job_id']} consumed
+{completed_replay['reserved_gpu_seconds_including_preemption'] / 3600.0:.2f}
+allocated A40-hours across its preserved parent attempts ({segments}). This is
+allocated lane wall time, not measured CUDA utilization. Exact accounting rows
+and the admission/node-relaxation receipts are under `scheduler/`."""
+        else:
+            scheduler_summary = "Scheduler accounting was not supplied to this curation."
+
     readme = f"""# R2f R2d HLVid secondary evaluation
 
 This bundle compares each completed R2d checkpoint under its actual calibrated
@@ -802,11 +845,10 @@ explicitly complete. Forced-K16 action and recovered-patch lengths are nominal
 from the coherent exact-K contract; unavailable legacy per-question context
 fields remain null rather than being inferred.
 
-Allocation status in this bundle: `{metrics['allocation_status']}`. An accuracy-only
-bundle contains all three complete QA pairs but **does not establish actual
-variable cost or efficiency**. Missing variable values are null, not K16,
-calibration lengths, tail-only process means, or zero. A later validated replay
-will be published as a separate immutable joint bundle, preserving this stage.
+Allocation status in this bundle: `{metrics['allocation_status']}`.
+{allocation_summary}
+
+{scheduler_summary}
 
 Seed t95 intervals describe variation across three independently trained paired
 seeds. Video intervals resample the same 77 video clusters jointly across both
@@ -822,13 +864,12 @@ lengths. Its small allocation signal does not override the observed in-domain
 coverage degradation or require a positive HLVid story.
 """
     (args.output_dir / "README.md").write_text(readme)
-    captions = """# Figure captions
+    captions = f"""# Figure captions
 
 `actual_vs_forced_k16`: HLVid video-macro exact-match accuracy for the same three
 independently trained R2d checkpoints under calibrated variable EOS and coherent
 forced K16. Each endpoint contains all 268 official test questions / 77 videos.
-Lines join seeds only for legibility, not training trajectories. Costs are not
-shown in accuracy-only curation because full variable observations are missing.
+Lines join seeds only for legibility, not training trajectories. {cost_caption}
 
 `paired_accuracy_deltas`: Within-checkpoint variable-EOS minus forced-K16 accuracy
 (percentage points); video-macro is primary and question-micro is sensitivity.
