@@ -1,0 +1,701 @@
+{
+  "schema_version": 1,
+  "run_id": "20260916-0016_r2f-hlvid-joint-variable-cost_87c83c2",
+  "source_qa_run_id": "20260901-0156_r2f-r2d-hlvid-secondary_ecf1535",
+  "code_commit": "ecf1535617250b706528b4b5ca278fccfbd85f4c",
+  "curation_code_commit": "87c83c2863ab348764887fd117f187d6903a5ad3",
+  "curation_code_dirty": false,
+  "curation_timestamp": "2026-09-15T22:16:44.433116+00:00",
+  "curation_command": [
+    "/home/stud/latn/miniconda3/envs/vila-autogaze-eval/bin/python",
+    "scripts/human_gaze/curate_r2d_hlvid_secondary.py",
+    "--run-id",
+    "20260901-0156_r2f-r2d-hlvid-secondary_ecf1535",
+    "--curation-run-id",
+    "20260916-0016_r2f-hlvid-joint-variable-cost_87c83c2",
+    "--artifact-root",
+    "/storage/user/latn/artifacts/autogaze-r2f",
+    "--allocation-replay-root",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260914-0153_r2f-r2d-hlvid-allocation-replay_d3b8d5a/replays",
+    "--config",
+    "experiments/human_gaze/configs/r2f_r2d_hlvid_secondary.yaml",
+    "--output-dir",
+    "results/human_gaze/20260916-0016_r2f-hlvid-joint-variable-cost_87c83c2",
+    "--code-commit",
+    "ecf1535617250b706528b4b5ca278fccfbd85f4c",
+    "--scheduler-provenance-dir",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260916-0009_r2f-complete-scheduler-provenance_69cae54",
+    "--supporting-processor-smoke",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260914-0147_r2f-processor-path-repair_d3b8d5a/processor_initialization_smoke.json"
+  ],
+  "curation_runtime": {
+    "python": "3.11.15",
+    "numpy": "1.26.4",
+    "matplotlib": "3.10.9",
+    "pyyaml": "6.0.3",
+    "hostname": "atcremers63",
+    "device": "CPU; no model generation"
+  },
+  "source_config_sha256": "35230547f1d92e6aa0af35851770be8c151506322dc8bb489e39082e2421386d",
+  "accuracy_only": false,
+  "heavy_artifact_root": "/storage/user/latn/artifacts/autogaze-r2f/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535",
+  "benchmark_protocol": {
+    "num_examples": 268,
+    "frame_source": "uniform",
+    "num_video_frames": 128,
+    "num_video_frames_thumbnail": 64,
+    "thumbnail_sampling": "full",
+    "max_tiles_video": 48,
+    "tile_len": 16,
+    "delta_gap": 0,
+    "max_new_tokens": 16,
+    "metric": "exact_match_multiple_choice_accuracy"
+  },
+  "artifact_inputs": {
+    "/home/stud/latn/.codex/worktrees/r2f-replay-path-repair/experiments/human_gaze/configs/r2f_r2d_hlvid_secondary.yaml": "35230547f1d92e6aa0af35851770be8c151506322dc8bb489e39082e2421386d",
+    "/home/stud/latn/.codex/worktrees/r2f-replay-path-repair/experiments/human_gaze/results/r2d_variable_fine_token_budget/metrics.json": "d173ee5f998c53509b60e7718915e92cf9ee191a26fd5808b4f67191d5e7d71f",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535/rollouts/seed440826_variable/summary.json": "2a68843578d89718c0810288dbc533942b41d606582783d9dfc52ea68b9d810c",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535/rollouts/seed440826_variable/results.jsonl": "4b15849c446180b0ffa9ef4ef98abc16fb87d810501a3338130c245a5b67e73a",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260914-0153_r2f-r2d-hlvid-allocation-replay_d3b8d5a/replays/seed440826_variable/summary.json": "fb79215954231e9312234fbe6ffcfe0ee869393511f27c05b7a9de24fe3cbb69",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260914-0153_r2f-r2d-hlvid-allocation-replay_d3b8d5a/replays/seed440826_variable/results.jsonl": "99201790d7c33d64d8028dee328502277346f98dff33c783b830dfb0aefb949a",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260914-0153_r2f-r2d-hlvid-allocation-replay_d3b8d5a/replays/seed440826_variable/evidence.jsonl": "822d0545f65c153e589cc85dd3b1dca94de1770bc3fc30e1a560c41f0c50314a",
+    "/home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d/summary.json": "36b3e76dd1d3b64cfb8a0d37782746b8ab64fd38630fe4c6b0c25d8bf648fbf5",
+    "/home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d/protocol_runtime_manifest.json": "ca584503958f6be661bc1e9dc79a2fd5f89bbccbab01e348431f8773908ecb60",
+    "/home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d/decode_audit.jsonl": "563e6c8f29b70f7c70b93668aee53624d68a9148521847998ab326ecc07f26b9",
+    "/home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d/live_runtime_supplement.json": "f2679ed4c90c6884e15243c78d38d78c4613861109098cb4521fcb3b1a4e1bf7",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535/rollouts/seed440826_forced_k16/summary.json": "380ef26b3e49d1707f3ed6527b5b4505eda82cd27cdc699400c2a202bb215b29",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535/rollouts/seed440826_forced_k16/results.jsonl": "7285338370a0ec3cfd5d7e628d7438ebd3b1aaf447d1d4483d3d9e3bf9594fda",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535/rollouts/seed440827_variable/summary.json": "48f729c243235687578518925eda9a23bc964be97bfd56ddb3a70a1fc801458d",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535/rollouts/seed440827_variable/results.jsonl": "67e7712dab5637737128ca69967d77cc3d7718bc275e52adbe250232f44aef52",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260914-0153_r2f-r2d-hlvid-allocation-replay_d3b8d5a/replays/seed440827_variable/summary.json": "d7b100906831edde6788fc0fe531f15bb8ed9891a4cab0e55fa88780a0b73129",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260914-0153_r2f-r2d-hlvid-allocation-replay_d3b8d5a/replays/seed440827_variable/results.jsonl": "8562791689fb1cbf55370db913133e920b270ccb3b8bc6571a028c34d6b88167",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260914-0153_r2f-r2d-hlvid-allocation-replay_d3b8d5a/replays/seed440827_variable/evidence.jsonl": "f61149cee5c6289198d5ba4375483b3c15939128fcff72b070a127e1805d3e23",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535/rollouts/seed440827_forced_k16/summary.json": "8b075c95031eb184ddffb64a699502ff81a64420ba7d4fc0f53726ca2247604e",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535/rollouts/seed440827_forced_k16/results.jsonl": "fb81e1bd3214d48fec14b715b72240d02440396b3ccb4e01a0e129a5a15bed45",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535/rollouts/seed440828_variable/summary.json": "1633c0b6c00b615d9a4f41da293d5fad13f8ff2c8a988866626303da9540c80b",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535/rollouts/seed440828_variable/results.jsonl": "80e1d1858c52bf576ab9a306c89966c5e6c0c47c130086c9bb7202c66e6f380b",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260914-0153_r2f-r2d-hlvid-allocation-replay_d3b8d5a/replays/seed440828_variable/summary.json": "093fed86f6ede0b1caee6fb4e0c845f0185923fbe25421304e3faf870f7430dd",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260914-0153_r2f-r2d-hlvid-allocation-replay_d3b8d5a/replays/seed440828_variable/results.jsonl": "2553d022465aa6708f07e73f839195b20a555bad27c569b53f8b64733fe1597c",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260914-0153_r2f-r2d-hlvid-allocation-replay_d3b8d5a/replays/seed440828_variable/evidence.jsonl": "dcd34618707dcb6ef3564b0cfd98ae97d492c5821a51e0f0169d6fd0573a9f94",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535/rollouts/seed440828_forced_k16/summary.json": "1e9a22a028e34303baec7301aafa52ecc148192940126e75993f917c7f4ed68c",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260901-0156_r2f-r2d-hlvid-secondary_ecf1535/rollouts/seed440828_forced_k16/results.jsonl": "e2eb607d617fa6e220b7ceb9046b6ca30a4c62c8e03f5e9e24b3c5fae4b172fa",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260916-0009_r2f-complete-scheduler-provenance_69cae54/scheduler_provenance.json": "07d4c91ed5e2b100027f0005136b327888b20b7d2032f45e02706d0be54c554f",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260916-0009_r2f-complete-scheduler-provenance_69cae54/sacct_segments.psv": "4044d4b1221715e6259aee884c65e7c534063eedf8904f918d939a5721039228",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260916-0009_r2f-complete-scheduler-provenance_69cae54/scheduler_node_relaxation_receipt.json": "f91399df92f8513e6cf3170460b0aabc8fead83c3259d7229df7a48e20d03a54",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260916-0009_r2f-complete-scheduler-provenance_69cae54/repair_admission_receipt.json": "c7cb220637d09960bc16c31f805a65e55718c3377645d65a9d335225426d8cff",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260916-0009_r2f-complete-scheduler-provenance_69cae54/repair_admission_receipt.md": "26918b356746762ff0c0f8fc0e5f0252e05d15217445427098298dfa3a159abf",
+    "/storage/user/latn/artifacts/autogaze-r2f/20260914-0147_r2f-processor-path-repair_d3b8d5a/processor_initialization_smoke.json": "bcdfecb57b65cf841b86917bf23e6df302d4e8aa9e941e6bb8979e87c85a20d8"
+  },
+  "allocation_evidence": {
+    "seed440826_variable": {
+      "source": "validated_question_agnostic_processor_replay",
+      "process_summary_counter_scope_complete": false,
+      "statistics": {
+        "decoder": {
+          "calls": 6164,
+          "eos_action_rate": 0.9864719371890547,
+          "frame_observations": 6174720,
+          "padded_position_slots": 191099968,
+          "padded_position_slots_per_frame_mean": 30.948766583747926,
+          "spatial_action_histogram": {
+            "10": 3854,
+            "11": 2258,
+            "12": 2838,
+            "13": 2711,
+            "14": 1894,
+            "15": 5533,
+            "16": 8775,
+            "17": 13969,
+            "18": 20609,
+            "19": 38807,
+            "20": 33604,
+            "21": 26183,
+            "22": 26754,
+            "23": 22605,
+            "24": 10489,
+            "25": 26975,
+            "26": 45026,
+            "27": 46560,
+            "28": 52867,
+            "29": 60561,
+            "30": 18119,
+            "31": 11360,
+            "32": 12209,
+            "33": 10215,
+            "34": 6067,
+            "35": 11220,
+            "36": 83532,
+            "4": 2047431,
+            "5": 632658,
+            "6": 789473,
+            "7": 678267,
+            "8": 645736,
+            "9": 775561
+          },
+          "spatial_actions_per_frame_max": 36,
+          "spatial_actions_per_frame_mean": 7.91331995620854,
+          "spatial_actions_per_frame_min": 4,
+          "valid_action_tokens": 54953723,
+          "valid_action_tokens_per_frame_mean": 8.899791893397595
+        },
+        "model_calls": 6164,
+        "post_resolution_adaptation": {
+          "frame_observations": 1543680,
+          "padded_position_slots": 94210656,
+          "padded_position_slots_per_frame_mean": 61.02991293532338,
+          "retained_patches_per_frame_max": 144,
+          "retained_patches_per_frame_mean": 31.65327982483416,
+          "retained_patches_per_frame_min": 16,
+          "valid_retained_patches": 48862535
+        }
+      },
+      "mean_visual_tokens": 27738.003731343284,
+      "mean_expanded_context_tokens": 27821.89552238806,
+      "replay_compatibility_key": "cff03b25a3f52882ba26c38333936bf25f543f67d80542f1524e41bad9e70188"
+    },
+    "seed440826_forced_k16": {
+      "source": "coherent_exact_forced_k16_action_contract",
+      "process_summary_counter_scope_complete": false,
+      "statistics": {
+        "decoder": {
+          "spatial_actions_per_frame_mean": 16.0,
+          "eos_action_rate": 0.0
+        },
+        "post_resolution_adaptation": {
+          "retained_patches_per_frame_mean": 64.0
+        }
+      },
+      "mean_visual_tokens": null,
+      "mean_expanded_context_tokens": null,
+      "missing_resource_fields_reason": "The exact-K contract establishes actions and recovered patches, but the legacy QA stream did not persist per-question expanded token/context counts."
+    },
+    "seed440827_variable": {
+      "source": "validated_question_agnostic_processor_replay",
+      "process_summary_counter_scope_complete": false,
+      "statistics": {
+        "decoder": {
+          "calls": 6164,
+          "eos_action_rate": 0.9927195079291045,
+          "frame_observations": 6174720,
+          "padded_position_slots": 177243968,
+          "padded_position_slots_per_frame_mean": 28.704778192371474,
+          "spatial_action_histogram": {
+            "10": 3679,
+            "11": 2584,
+            "12": 2860,
+            "13": 3146,
+            "14": 2056,
+            "15": 6619,
+            "16": 9459,
+            "17": 17786,
+            "18": 31006,
+            "19": 48712,
+            "20": 28531,
+            "21": 22347,
+            "22": 22932,
+            "23": 18436,
+            "24": 10256,
+            "25": 24869,
+            "26": 38088,
+            "27": 44718,
+            "28": 47797,
+            "29": 42196,
+            "30": 8974,
+            "31": 5408,
+            "32": 6763,
+            "33": 5456,
+            "34": 3383,
+            "35": 7066,
+            "36": 44955,
+            "4": 2235762,
+            "5": 658066,
+            "6": 786247,
+            "7": 627735,
+            "8": 679831,
+            "9": 676997
+          },
+          "spatial_actions_per_frame_max": 36,
+          "spatial_actions_per_frame_mean": 7.367539742692786,
+          "spatial_actions_per_frame_min": 4,
+          "valid_action_tokens": 51622260,
+          "valid_action_tokens_per_frame_mean": 8.36025925062189
+        },
+        "model_calls": 6164,
+        "post_resolution_adaptation": {
+          "frame_observations": 1543680,
+          "padded_position_slots": 85168248,
+          "padded_position_slots_per_frame_mean": 55.172217039801,
+          "retained_patches_per_frame_max": 136,
+          "retained_patches_per_frame_mean": 29.470158970771145,
+          "retained_patches_per_frame_min": 16,
+          "valid_retained_patches": 45492495
+        }
+      },
+      "mean_visual_tokens": 26342.35447761194,
+      "mean_expanded_context_tokens": 26426.246268656716,
+      "replay_compatibility_key": "8ab630feaf42303023a197d0002001000d634dcf0e76a08931b9d02f2105db86"
+    },
+    "seed440827_forced_k16": {
+      "source": "coherent_exact_forced_k16_action_contract",
+      "process_summary_counter_scope_complete": false,
+      "statistics": {
+        "decoder": {
+          "spatial_actions_per_frame_mean": 16.0,
+          "eos_action_rate": 0.0
+        },
+        "post_resolution_adaptation": {
+          "retained_patches_per_frame_mean": 64.0
+        }
+      },
+      "mean_visual_tokens": null,
+      "mean_expanded_context_tokens": null,
+      "missing_resource_fields_reason": "The exact-K contract establishes actions and recovered patches, but the legacy QA stream did not persist per-question expanded token/context counts."
+    },
+    "seed440828_variable": {
+      "source": "validated_question_agnostic_processor_replay",
+      "process_summary_counter_scope_complete": false,
+      "statistics": {
+        "decoder": {
+          "calls": 6164,
+          "eos_action_rate": 0.9885040941127695,
+          "frame_observations": 6174720,
+          "padded_position_slots": 186625600,
+          "padded_position_slots_per_frame_mean": 30.224139718076284,
+          "spatial_action_histogram": {
+            "10": 3708,
+            "11": 2590,
+            "12": 2613,
+            "13": 2793,
+            "14": 2192,
+            "15": 5682,
+            "16": 9932,
+            "17": 19347,
+            "18": 32391,
+            "19": 48041,
+            "20": 31348,
+            "21": 26625,
+            "22": 26067,
+            "23": 22722,
+            "24": 11780,
+            "25": 30261,
+            "26": 44791,
+            "27": 54643,
+            "28": 59280,
+            "29": 53401,
+            "30": 15185,
+            "31": 9491,
+            "32": 11049,
+            "33": 8233,
+            "34": 4871,
+            "35": 10878,
+            "36": 70984,
+            "4": 2130247,
+            "5": 615884,
+            "6": 747818,
+            "7": 695471,
+            "8": 653671,
+            "9": 710731
+          },
+          "spatial_actions_per_frame_max": 36,
+          "spatial_actions_per_frame_mean": 7.84828186541252,
+          "spatial_actions_per_frame_min": 4,
+          "valid_action_tokens": 54564679,
+          "valid_action_tokens_per_frame_mean": 8.83678595952529
+        },
+        "model_calls": 6164,
+        "post_resolution_adaptation": {
+          "frame_observations": 1543680,
+          "padded_position_slots": 92232704,
+          "padded_position_slots_per_frame_mean": 59.748590381426204,
+          "retained_patches_per_frame_max": 140,
+          "retained_patches_per_frame_mean": 31.39312746165008,
+          "retained_patches_per_frame_min": 16,
+          "valid_retained_patches": 48460943
+        }
+      },
+      "mean_visual_tokens": 27572.126865671642,
+      "mean_expanded_context_tokens": 27656.018656716416,
+      "replay_compatibility_key": "9ce419d3a410bd5ce877b19141cb9f52e2c2844715ddbd567b73c459b9529938"
+    },
+    "seed440828_forced_k16": {
+      "source": "coherent_exact_forced_k16_action_contract",
+      "process_summary_counter_scope_complete": false,
+      "statistics": {
+        "decoder": {
+          "spatial_actions_per_frame_mean": 16.0,
+          "eos_action_rate": 0.0
+        },
+        "post_resolution_adaptation": {
+          "retained_patches_per_frame_mean": 64.0
+        }
+      },
+      "mean_visual_tokens": null,
+      "mean_expanded_context_tokens": null,
+      "missing_resource_fields_reason": "The exact-K contract establishes actions and recovered patches, but the legacy QA stream did not persist per-question expanded token/context counts."
+    }
+  },
+  "qa_endpoint_identities": {
+    "seed440826_variable": {
+      "base_seed": 440826,
+      "training_seed": 740826,
+      "execution": {
+        "code_commit": "ecf1535617250b706528b4b5ca278fccfbd85f4c",
+        "code_dirty": false,
+        "cuda_device_name": "NVIDIA A40",
+        "cuda_total_memory_bytes": 47696969728
+      },
+      "checkpoint": {
+        "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2d_variable_k16_stable_base440826_seed740826/checkpoint_latest_gaze",
+        "model_sha256": "91398442482aa9faf3bfa61aafb235095a7d6f36dd3796f826420e2b1530dbaa",
+        "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "num_vision_tokens_each_frame": 265
+      },
+      "eos_calibration": {
+        "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/diagnostics/r2d_variable_k16_stable_base440826_seed740826/variable_budget_val.json",
+        "sha256": "95bb0ebfe145510669b1a5d256092146ff5c55170b074dbdc74d96a224246ccf",
+        "split": "train_source_balanced_fixed_subset",
+        "clips_per_source": 8,
+        "num_clips": 48,
+        "seed": 200826,
+        "target_mean_tokens": 16.0,
+        "selected_bias": 2.3046875,
+        "selected_mean_tokens": 16.091145833333332
+      },
+      "action_contract": {
+        "fine_action_ids": [
+          69,
+          264
+        ],
+        "eos_action_id": 265,
+        "variable_min_spatial_actions": 4,
+        "variable_max_generation_tokens": 36,
+        "forced_spatial_actions": 16,
+        "calibrated_eos_logit_bias": 2.3046875
+      },
+      "benchmark_protocol": {
+        "dataset_split": "test",
+        "num_examples": 268,
+        "frame_source": "uniform",
+        "num_video_frames": 128,
+        "num_video_frames_thumbnail": 64,
+        "thumbnail_sampling": "full",
+        "max_tiles_video": 48,
+        "tile_len": 16,
+        "delta_gap": 0,
+        "max_new_tokens": 16,
+        "metric": "exact_match_multiple_choice_accuracy",
+        "dataset_root": "/storage/slurm/latn/data/AutoGaze/HLVid",
+        "dataset_parquet_sha256": "ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a",
+        "model_path": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video",
+        "preflight": false
+      }
+    },
+    "seed440826_forced_k16": {
+      "base_seed": 440826,
+      "training_seed": 740826,
+      "execution": {
+        "code_commit": "ecf1535617250b706528b4b5ca278fccfbd85f4c",
+        "code_dirty": false,
+        "cuda_device_name": "NVIDIA A40",
+        "cuda_total_memory_bytes": 47696969728
+      },
+      "checkpoint": {
+        "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2d_variable_k16_stable_base440826_seed740826/checkpoint_latest_gaze",
+        "model_sha256": "91398442482aa9faf3bfa61aafb235095a7d6f36dd3796f826420e2b1530dbaa",
+        "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "num_vision_tokens_each_frame": 265
+      },
+      "eos_calibration": {
+        "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/diagnostics/r2d_variable_k16_stable_base440826_seed740826/variable_budget_val.json",
+        "sha256": "95bb0ebfe145510669b1a5d256092146ff5c55170b074dbdc74d96a224246ccf",
+        "split": "train_source_balanced_fixed_subset",
+        "clips_per_source": 8,
+        "num_clips": 48,
+        "seed": 200826,
+        "target_mean_tokens": 16.0,
+        "selected_bias": 2.3046875,
+        "selected_mean_tokens": 16.091145833333332
+      },
+      "action_contract": {
+        "fine_action_ids": [
+          69,
+          264
+        ],
+        "eos_action_id": 265,
+        "variable_min_spatial_actions": 4,
+        "variable_max_generation_tokens": 36,
+        "forced_spatial_actions": 16,
+        "calibrated_eos_logit_bias": 2.3046875
+      },
+      "benchmark_protocol": {
+        "dataset_split": "test",
+        "num_examples": 268,
+        "frame_source": "uniform",
+        "num_video_frames": 128,
+        "num_video_frames_thumbnail": 64,
+        "thumbnail_sampling": "full",
+        "max_tiles_video": 48,
+        "tile_len": 16,
+        "delta_gap": 0,
+        "max_new_tokens": 16,
+        "metric": "exact_match_multiple_choice_accuracy",
+        "dataset_root": "/storage/slurm/latn/data/AutoGaze/HLVid",
+        "dataset_parquet_sha256": "ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a",
+        "model_path": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video",
+        "preflight": false
+      }
+    },
+    "seed440827_variable": {
+      "base_seed": 440827,
+      "training_seed": 740827,
+      "execution": {
+        "code_commit": "ecf1535617250b706528b4b5ca278fccfbd85f4c",
+        "code_dirty": false,
+        "cuda_device_name": "NVIDIA A40",
+        "cuda_total_memory_bytes": 47696969728
+      },
+      "checkpoint": {
+        "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2d_variable_k16_stable_base440827_seed740827/checkpoint_latest_gaze",
+        "model_sha256": "0d1736f07c381e4c77a4f297fa09cfa61b4483c48f02303a8e16ccdf09ee5363",
+        "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "num_vision_tokens_each_frame": 265
+      },
+      "eos_calibration": {
+        "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/diagnostics/r2d_variable_k16_stable_base440827_seed740827/variable_budget_val.json",
+        "sha256": "c7c8b5041f081aab7f2bed40408a181a4f30d0bc9cba5a95faba126262e519eb",
+        "split": "train_source_balanced_fixed_subset",
+        "clips_per_source": 8,
+        "num_clips": 48,
+        "seed": 200826,
+        "target_mean_tokens": 16.0,
+        "selected_bias": 2.421875,
+        "selected_mean_tokens": 16.00390625
+      },
+      "action_contract": {
+        "fine_action_ids": [
+          69,
+          264
+        ],
+        "eos_action_id": 265,
+        "variable_min_spatial_actions": 4,
+        "variable_max_generation_tokens": 36,
+        "forced_spatial_actions": 16,
+        "calibrated_eos_logit_bias": 2.421875
+      },
+      "benchmark_protocol": {
+        "dataset_split": "test",
+        "num_examples": 268,
+        "frame_source": "uniform",
+        "num_video_frames": 128,
+        "num_video_frames_thumbnail": 64,
+        "thumbnail_sampling": "full",
+        "max_tiles_video": 48,
+        "tile_len": 16,
+        "delta_gap": 0,
+        "max_new_tokens": 16,
+        "metric": "exact_match_multiple_choice_accuracy",
+        "dataset_root": "/storage/slurm/latn/data/AutoGaze/HLVid",
+        "dataset_parquet_sha256": "ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a",
+        "model_path": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video",
+        "preflight": false
+      }
+    },
+    "seed440827_forced_k16": {
+      "base_seed": 440827,
+      "training_seed": 740827,
+      "execution": {
+        "code_commit": "ecf1535617250b706528b4b5ca278fccfbd85f4c",
+        "code_dirty": false,
+        "cuda_device_name": "NVIDIA A40",
+        "cuda_total_memory_bytes": 47699722240
+      },
+      "checkpoint": {
+        "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2d_variable_k16_stable_base440827_seed740827/checkpoint_latest_gaze",
+        "model_sha256": "0d1736f07c381e4c77a4f297fa09cfa61b4483c48f02303a8e16ccdf09ee5363",
+        "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "num_vision_tokens_each_frame": 265
+      },
+      "eos_calibration": {
+        "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/diagnostics/r2d_variable_k16_stable_base440827_seed740827/variable_budget_val.json",
+        "sha256": "c7c8b5041f081aab7f2bed40408a181a4f30d0bc9cba5a95faba126262e519eb",
+        "split": "train_source_balanced_fixed_subset",
+        "clips_per_source": 8,
+        "num_clips": 48,
+        "seed": 200826,
+        "target_mean_tokens": 16.0,
+        "selected_bias": 2.421875,
+        "selected_mean_tokens": 16.00390625
+      },
+      "action_contract": {
+        "fine_action_ids": [
+          69,
+          264
+        ],
+        "eos_action_id": 265,
+        "variable_min_spatial_actions": 4,
+        "variable_max_generation_tokens": 36,
+        "forced_spatial_actions": 16,
+        "calibrated_eos_logit_bias": 2.421875
+      },
+      "benchmark_protocol": {
+        "dataset_split": "test",
+        "num_examples": 268,
+        "frame_source": "uniform",
+        "num_video_frames": 128,
+        "num_video_frames_thumbnail": 64,
+        "thumbnail_sampling": "full",
+        "max_tiles_video": 48,
+        "tile_len": 16,
+        "delta_gap": 0,
+        "max_new_tokens": 16,
+        "metric": "exact_match_multiple_choice_accuracy",
+        "dataset_root": "/storage/slurm/latn/data/AutoGaze/HLVid",
+        "dataset_parquet_sha256": "ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a",
+        "model_path": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video",
+        "preflight": false
+      }
+    },
+    "seed440828_variable": {
+      "base_seed": 440828,
+      "training_seed": 740828,
+      "execution": {
+        "code_commit": "ecf1535617250b706528b4b5ca278fccfbd85f4c",
+        "code_dirty": false,
+        "cuda_device_name": "NVIDIA A40",
+        "cuda_total_memory_bytes": 47696969728
+      },
+      "checkpoint": {
+        "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2d_variable_k16_stable_base440828_seed740828/checkpoint_latest_gaze",
+        "model_sha256": "297e436cc599a6904478554763a746f6733854c544faabf9a3aa652179f370c9",
+        "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "num_vision_tokens_each_frame": 265
+      },
+      "eos_calibration": {
+        "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/diagnostics/r2d_variable_k16_stable_base440828_seed740828/variable_budget_val.json",
+        "sha256": "15756e1577173a7b1be3a67f81544d13f2cc819370f3caf42cacb198ce7ba3e8",
+        "split": "train_source_balanced_fixed_subset",
+        "clips_per_source": 8,
+        "num_clips": 48,
+        "seed": 200826,
+        "target_mean_tokens": 16.0,
+        "selected_bias": 2.3828125,
+        "selected_mean_tokens": 16.098958333333332
+      },
+      "action_contract": {
+        "fine_action_ids": [
+          69,
+          264
+        ],
+        "eos_action_id": 265,
+        "variable_min_spatial_actions": 4,
+        "variable_max_generation_tokens": 36,
+        "forced_spatial_actions": 16,
+        "calibrated_eos_logit_bias": 2.3828125
+      },
+      "benchmark_protocol": {
+        "dataset_split": "test",
+        "num_examples": 268,
+        "frame_source": "uniform",
+        "num_video_frames": 128,
+        "num_video_frames_thumbnail": 64,
+        "thumbnail_sampling": "full",
+        "max_tiles_video": 48,
+        "tile_len": 16,
+        "delta_gap": 0,
+        "max_new_tokens": 16,
+        "metric": "exact_match_multiple_choice_accuracy",
+        "dataset_root": "/storage/slurm/latn/data/AutoGaze/HLVid",
+        "dataset_parquet_sha256": "ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a",
+        "model_path": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video",
+        "preflight": false
+      }
+    },
+    "seed440828_forced_k16": {
+      "base_seed": 440828,
+      "training_seed": 740828,
+      "execution": {
+        "code_commit": "ecf1535617250b706528b4b5ca278fccfbd85f4c",
+        "code_dirty": false,
+        "cuda_device_name": "NVIDIA A40",
+        "cuda_total_memory_bytes": 47696969728
+      },
+      "checkpoint": {
+        "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2d_variable_k16_stable_base440828_seed740828/checkpoint_latest_gaze",
+        "model_sha256": "297e436cc599a6904478554763a746f6733854c544faabf9a3aa652179f370c9",
+        "config_sha256": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "num_vision_tokens_each_frame": 265
+      },
+      "eos_calibration": {
+        "path": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/diagnostics/r2d_variable_k16_stable_base440828_seed740828/variable_budget_val.json",
+        "sha256": "15756e1577173a7b1be3a67f81544d13f2cc819370f3caf42cacb198ce7ba3e8",
+        "split": "train_source_balanced_fixed_subset",
+        "clips_per_source": 8,
+        "num_clips": 48,
+        "seed": 200826,
+        "target_mean_tokens": 16.0,
+        "selected_bias": 2.3828125,
+        "selected_mean_tokens": 16.098958333333332
+      },
+      "action_contract": {
+        "fine_action_ids": [
+          69,
+          264
+        ],
+        "eos_action_id": 265,
+        "variable_min_spatial_actions": 4,
+        "variable_max_generation_tokens": 36,
+        "forced_spatial_actions": 16,
+        "calibrated_eos_logit_bias": 2.3828125
+      },
+      "benchmark_protocol": {
+        "dataset_split": "test",
+        "num_examples": 268,
+        "frame_source": "uniform",
+        "num_video_frames": 128,
+        "num_video_frames_thumbnail": 64,
+        "thumbnail_sampling": "full",
+        "max_tiles_video": 48,
+        "tile_len": 16,
+        "delta_gap": 0,
+        "max_new_tokens": 16,
+        "metric": "exact_match_multiple_choice_accuracy",
+        "dataset_root": "/storage/slurm/latn/data/AutoGaze/HLVid",
+        "dataset_parquet_sha256": "ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a",
+        "model_path": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--NVILA-8B-HD-Video",
+        "preflight": false
+      }
+    }
+  },
+  "scheduler_provenance": {
+    "local_path": "scheduler/scheduler_provenance.json",
+    "sha256": "07d4c91ed5e2b100027f0005136b327888b20b7d2032f45e02706d0be54c554f",
+    "historical_node_override_source": "d5c7ae6f42d8a50a9072e25a2b4b3b11180846dc"
+  },
+  "supporting_processor_initialization": {
+    "local_path": "processor_initialization_smoke.json",
+    "sha256": "bcdfecb57b65cf841b86917bf23e6df302d4e8aa9e941e6bb8979e87c85a20d8",
+    "source_commit": "d3b8d5a4abc448e78021f7085563c0f930113618",
+    "allocation_semantics_verified": false
+  },
+  "bundle_file_hashes": {
+    "README.md": "0bec7b687bd87804871db69d20aa151184c6f1bbbc773034d4a258f1738c3ea0",
+    "actual_vs_forced_k16.pdf": "e7b8fa74d10fbf01b40fda59243d2ed210e5183b19d0ca587f827d0ae2d470f8",
+    "actual_vs_forced_k16.png": "981be69bac2d62f95d6d36d9d1128cf05591e6b99340a7b5ba79d95817d7df1b",
+    "captions.md": "c8fdbc60a6de5a415c5817290daf7509ef15fe9be77b72f508b922e60ff00f3a",
+    "config.yaml": "9bdbe098227ce7d4e3aad15a15b5ff3fc7471de040821a2d7fce910885d567ab",
+    "metrics.json": "8a42beedaa20dac2788ae8bb9e6a84be40df03c3f90418a35f8eb1d157849ce6",
+    "paired_accuracy_deltas.pdf": "fa8d06f679197def4028c0b7a7b0772645e33be7988cf41409f267f792b6715c",
+    "paired_accuracy_deltas.png": "e7477f5043908287bf74a9c748f09ea4516cbc3e0cdc36d1b2bee7189fd8b354",
+    "paired_aggregate.csv": "60d2face1ada9e522353f85fc1345c8fcac8487b40a0fa84a820843eb7f3a105",
+    "paired_questions.csv": "7c6f121702b7a8757801d5690670fe0ea3bdfe1e6cab4f3a66f03348177c35ac",
+    "paired_videos.csv": "bdc1c28c46223f46a112220bf3b9efa37cab37ae534ff711e6febf61f4aa0e06",
+    "per_category.csv": "80d0727953ad50d35b7b54630495e02c888a72c5c3c7a10db0ee450f11213823",
+    "per_seed.csv": "705d03b0683009c2ce8bacb935876cba7d056621e594e1ea772d137f4a7ab96e",
+    "processor_initialization_smoke.json": "bcdfecb57b65cf841b86917bf23e6df302d4e8aa9e941e6bb8979e87c85a20d8",
+    "scheduler/repair_admission_receipt.json": "c7cb220637d09960bc16c31f805a65e55718c3377645d65a9d335225426d8cff",
+    "scheduler/repair_admission_receipt.md": "26918b356746762ff0c0f8fc0e5f0252e05d15217445427098298dfa3a159abf",
+    "scheduler/sacct_segments.psv": "4044d4b1221715e6259aee884c65e7c534063eedf8904f918d939a5721039228",
+    "scheduler/scheduler_node_relaxation_receipt.json": "f91399df92f8513e6cf3170460b0aabc8fead83c3259d7229df7a48e20d03a54",
+    "scheduler/scheduler_provenance.json": "07d4c91ed5e2b100027f0005136b327888b20b7d2032f45e02706d0be54c554f"
+  }
+}
