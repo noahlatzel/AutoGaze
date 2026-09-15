@@ -562,7 +562,7 @@ def validate_args(args: argparse.Namespace) -> None:
     }
     if drift:
         raise ValueError(f"Established HLVid/NVILA protocol drift: {drift}")
-    if args.exact_budget not in {16, 24, 32, 36}:
+    if args.exact_budget not in {8, 16, 24, 32, 36}:
         raise ValueError(f"Unsupported fixed budget: {args.exact_budget}")
     if args.policy_kind in {"pretrained", "center16"} and args.exact_budget != 16:
         raise ValueError("Causal controls are frozen at exact K16")
