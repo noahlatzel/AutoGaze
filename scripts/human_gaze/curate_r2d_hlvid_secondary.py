@@ -618,12 +618,21 @@ def main() -> None:
     }
     supporting_files = []
     scheduler = None
+    scheduler_files = []
     if args.scheduler_provenance_dir:
         scheduler_file = args.scheduler_provenance_dir / "scheduler_provenance.json"
         scheduler = json.loads(scheduler_file.read_text())
         snapshot_files = [args.scheduler_provenance_dir / filename for filename in ("scheduler_provenance.json", "sacct_segments.psv", "scheduler_node_relaxation_receipt.json")]
         if sha256_file(snapshot_files[1]) != scheduler["raw_sacct_sha256"] or sha256_file(snapshot_files[2]) != scheduler["node_relaxation_receipt"]["sha256"]:
             raise ValueError("Scheduler provenance input/hash mismatch")
+        admission = scheduler.get("repair_admission_receipt")
+        if admission:
+            for filename, identity in admission["files"].items():
+                path = args.scheduler_provenance_dir / filename
+                if not path.is_file() or sha256_file(path) != identity["sha256"]:
+                    raise ValueError(f"Repair admission receipt/hash mismatch: {filename}")
+                snapshot_files.append(path)
+        scheduler_files = snapshot_files
         supporting_files.extend(snapshot_files)
     processor_smoke = None
     if args.supporting_processor_smoke:
@@ -636,7 +645,7 @@ def main() -> None:
     args.output_dir.mkdir(parents=True, exist_ok=False)
     if scheduler:
         (args.output_dir / "scheduler").mkdir()
-        for path in supporting_files[:3]:
+        for path in scheduler_files:
             shutil.copyfile(path, args.output_dir / "scheduler" / path.name)
     if processor_smoke:
         shutil.copyfile(args.supporting_processor_smoke, args.output_dir / "processor_initialization_smoke.json")
