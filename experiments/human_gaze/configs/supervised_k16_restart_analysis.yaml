@@ -22,3 +22,36 @@ checkpoint_provenance:
 paths:
   supervised_training_root: /storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0158_supervised-k16-comparison_ec320a5
   action_export_root: /storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0158_supervised-k16-comparison_ec320a5/action_exports
+posthoc_seed_policy:
+  decision_date: '2026-09-16'
+  kind: posthoc_operational_attrition_before_scientific_curation
+  basis: scheduler_completion_status_and_thesis_timeline_not_method_metrics
+  planned_base_seeds: [440826, 440827, 440828, 440829, 440830, 440831]
+  included_base_seeds: [440826, 440827, 440828, 440829, 440831]
+  included_training_seeds: [540826, 540827, 540828, 540829, 540831]
+  excluded_base_seed: 440830
+  excluded_training_seed: 540830
+  excluded_array_element: 4
+  excluded_reason: scheduler_preemption_user_abandoned_for_timeline
+  paired_rl_subset_same_base_seeds: true
+  excluded_from_utility_convergence_and_agreement: true
+  included_in_total_compute_accounting: true
+  abandoned_original_failed_base_clips: 400
+  abandoned_preempted_attempt_base_clips: 47660
+  abandoned_total_base_clips: 48060
+  abandoned_total_nominal_action_rows: 12303360
+  abandoned_attempt_job_ids: ['1702710_4', '1838748']
+  require_abandoned_attempt_resource_receipt_for_gate: true
+  hlvid_if_gate_passes: all_five_included_supervised_endpoints_and_matching_five_rl_endpoints
+action_export:
+  required_for_supervised: all_five_included_seeds_at_all_five_fixed_checkpoints
+  required_for_rl: matching_five_fixed_20k_endpoints
+agreement:
+  sl_vs_rl: same_base_seed_pairs_all_five_included_endpoints
+  rl_vs_rl: all_10_unordered_included_endpoint_seed_pairs_context_only
+uncertainty:
+  seeds: mean_sample_sd_and_descriptive_90_percent_t_interval_n5
+practical_hlvid_gate:
+  complete_six_seed_validation_required: false
+  complete_five_included_seed_validation_required: true
+  if_passed: evaluate_all_five_included_supervised_fixed_endpoints_only

@@ -652,22 +652,41 @@ def policy_report(
     }
 
 
-def six_seed_summary(values: Sequence[float]) -> dict[str, Any]:
-    """Return the preregistered descriptive six-seed 90% t interval."""
+def seed_summary(
+    values: Sequence[float], *, expected_count: int
+) -> dict[str, Any]:
+    """Return a descriptive 90% t interval for a fixed seed set."""
     array = np.asarray(values, dtype=np.float64)
-    if array.shape != (6,) or not np.isfinite(array).all():
-        raise ValueError("A complete summary requires exactly six finite seed values")
+    if array.shape != (expected_count,) or not np.isfinite(array).all():
+        raise ValueError(
+            f"A complete summary requires exactly {expected_count} finite seed values"
+        )
+    critical_by_df = {
+        4: 2.131846786326649,
+        5: 2.0150483733330233,
+    }
+    if expected_count - 1 not in critical_by_df:
+        raise ValueError("Only the frozen five- and six-seed analyses are supported")
     mean = float(array.mean())
     sample_sd = float(array.std(ddof=1))
-    half_width = 2.0150483733330233 * sample_sd / math.sqrt(6)
+    half_width = critical_by_df[expected_count - 1] * sample_sd / math.sqrt(
+        expected_count
+    )
     return {
-        "num_seeds": 6,
+        "num_seeds": expected_count,
         "mean": mean,
         "sample_sd": sample_sd,
         "ci90_low": mean - half_width,
         "ci90_high": mean + half_width,
-        "interval": "descriptive_two_sided_t_df5_unadjusted",
+        "interval": (
+            f"descriptive_two_sided_t_df{expected_count - 1}_unadjusted"
+        ),
     }
+
+
+def six_seed_summary(values: Sequence[float]) -> dict[str, Any]:
+    """Return the original preregistered descriptive six-seed interval."""
+    return seed_summary(values, expected_count=6)
 
 
 def source_stratified_video_bootstrap_delta(
@@ -676,10 +695,16 @@ def source_stratified_video_bootstrap_delta(
     *,
     iterations: int = 10000,
     seed: int = 20260910,
+    expected_seed_count: int = 6,
 ) -> dict[str, Any]:
-    """Paired source-stratified video bootstrap, averaged across six seeds."""
-    if len(left_reports) != 6 or len(right_reports) != 6:
-        raise ValueError("Bootstrap requires six paired seed reports")
+    """Paired source-stratified video bootstrap, averaged across fixed seeds."""
+    if (
+        len(left_reports) != expected_seed_count
+        or len(right_reports) != expected_seed_count
+    ):
+        raise ValueError(
+            f"Bootstrap requires {expected_seed_count} paired seed reports"
+        )
     if iterations <= 0:
         raise ValueError("Bootstrap iterations must be positive")
     source_video_deltas: dict[str, np.ndarray] = {}
@@ -732,9 +757,14 @@ def evaluate_practical_gate(
     supervised_nominal_action_rows: int,
     rl_nominal_action_rows: int,
     thresholds: Mapping[str, Any],
+    expected_seeds: Sequence[int] = tuple(range(440826, 440832)),
 ) -> dict[str, Any]:
     """Evaluate the practical HLVid gate; missing evidence never admits HLVid."""
-    expected_seeds = tuple(range(440826, 440832))
+    expected_seeds = tuple(expected_seeds)
+    if len(expected_seeds) not in (5, 6) or len(set(expected_seeds)) != len(
+        expected_seeds
+    ):
+        raise ValueError("Practical gate requires the frozen five- or six-seed set")
     missing = []
     for seed in expected_seeds:
         if seed not in supervised_reports:

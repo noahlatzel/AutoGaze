@@ -9,7 +9,16 @@ from autogaze.human_gaze.supervised_restart import (
     restart_identity, verify_published_restart_source,
 )
 from autogaze.human_gaze.supervised_analysis import sha256_file
-from scripts.human_gaze.curate_supervised_k16_comparison import load_frozen_analysis_config, resource_summary, supervised_training_wall, validate_analysis_config, validate_resource_receipt
+from scripts.human_gaze.curate_supervised_k16_comparison import (
+    analysis_base_seeds,
+    expected_action_paths,
+    load_frozen_analysis_config,
+    resource_summary,
+    supervised_training_wall,
+    validate_abandoned_resource_receipt,
+    validate_analysis_config,
+    validate_resource_receipt,
+)
 from scripts.human_gaze.verify_supervised_k16_execution import load_execution_config
 from tests.test_supervised_k16_checkpoint_provenance import make_fixture, write_json, SEED
 
@@ -51,8 +60,14 @@ def test_restart_analysis_keeps_frozen_gate_subgroup_and_rl_checkpoint_matrix():
     cfg = load_frozen_analysis_config(ROOT / "experiments/human_gaze/configs/supervised_k16_restart_analysis.yaml")
     validate_analysis_config(cfg)
     original = load_frozen_analysis_config(ROOT / "experiments/human_gaze/configs/supervised_k16_analysis.yaml")
-    for key in ("data", "offcenter_subgroup", "checkpoints", "metrics", "agreement", "practical_hlvid_gate", "qualitative"):
+    for key in ("data", "offcenter_subgroup", "checkpoints", "metrics", "qualitative"):
         assert cfg[key] == original[key]
+    assert cfg["practical_hlvid_gate"]["route_a"] == original[
+        "practical_hlvid_gate"
+    ]["route_a"]
+    assert cfg["practical_hlvid_gate"]["route_b"] == original[
+        "practical_hlvid_gate"
+    ]["route_b"]
     inventory = load_checkpoint_inventory(ROOT / cfg["checkpoint_provenance"]["inventory"],
         expected_sha256=cfg["checkpoint_provenance"]["inventory_sha256"], repository_root=ROOT, verify_live_lineage=False)
     assert len(inventory["rl_endpoints"]) == 6
@@ -68,6 +83,102 @@ def test_restart_analysis_keeps_frozen_gate_subgroup_and_rl_checkpoint_matrix():
     cfg["submitted_execution"]["run_id"] = "20260914-0152_supervised-k16-comparison_ec320a5"
     with pytest.raises(ValueError, match="lineage drift"):
         validate_analysis_config(cfg)
+
+
+def test_posthoc_attrition_uses_five_paired_seeds_and_thirty_exports():
+    cfg = load_frozen_analysis_config(
+        ROOT / "experiments/human_gaze/configs/supervised_k16_restart_analysis.yaml"
+    )
+    validate_analysis_config(cfg)
+    assert analysis_base_seeds(cfg) == (440826, 440827, 440828, 440829, 440831)
+    paths = expected_action_paths(cfg, Path("/actions"))
+    assert len(paths) == 30
+    assert not any(seed == 440830 for _method, seed, _step in paths)
+    assert sum(method == "supervised" for method, _seed, _step in paths) == 25
+    assert sum(method == "rl" for method, _seed, _step in paths) == 5
+
+    cfg["posthoc_seed_policy"]["included_base_seeds"][-1] = 440830
+    with pytest.raises(ValueError, match="post-hoc seed policy"):
+        validate_analysis_config(cfg)
+
+
+def test_abandoned_seed_is_excluded_from_metrics_but_charged_to_cost(tmp_path):
+    cfg = load_frozen_analysis_config(
+        ROOT / "experiments/human_gaze/configs/supervised_k16_restart_analysis.yaml"
+    )
+    policy = cfg["posthoc_seed_policy"]
+    receipt_path = tmp_path / "abandoned_resource_receipt.json"
+    receipt = {
+        "schema_version": 1,
+        "status": "abandoned_complete_resource_accounting",
+        "base_seed": 440830,
+        "training_seed": 540830,
+        "endpoint_complete": False,
+        "included_in_scientific_metrics": False,
+        "total_base_clip_presentations": 48060,
+        "total_nominal_action_rows": 12303360,
+        "attempts": [
+            {
+                "job_id": "1702710_4",
+                "elapsed_seconds": 100,
+                "allocated_gpu_count": 1,
+                "base_clip_presentations": 400,
+                "nominal_action_rows": 102400,
+                "max_rss_bytes": 1000,
+                "gpu_memory_peak_bytes": 2000,
+            },
+            {
+                "job_id": "1838748",
+                "elapsed_seconds": 6060,
+                "allocated_gpu_count": 1,
+                "base_clip_presentations": 47660,
+                "nominal_action_rows": 12200960,
+                "max_rss_bytes": 3000,
+                "gpu_memory_peak_bytes": 4000,
+            },
+        ],
+    }
+    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+    complete, abandoned = validate_abandoned_resource_receipt(receipt_path, policy)
+    assert complete
+
+    readiness = {
+        "resource_receipts": {},
+        "abandoned_seed_resource_receipt": {"complete": True, **abandoned},
+    }
+    for seed in analysis_base_seeds(cfg):
+        lineage = restart_identity(ROOT, seed, verify_live=False)
+        readiness["resource_receipts"][str(seed)] = {
+            "complete": True,
+            "restart_of": lineage,
+            "sacct": {
+                "elapsed_seconds": 1000,
+                "allocated_gpu_count": 1,
+                "max_rss_bytes": 1000,
+                "gpu_memory_peak_bytes": 2000,
+                "attempts": [
+                    {
+                        "job_id": lineage["failed_array_element"],
+                        "elapsed_seconds": 10,
+                        "allocated_gpu_count": 1,
+                    },
+                    {
+                        "job_id": f"complete_{seed}",
+                        "elapsed_seconds": 1000,
+                        "allocated_gpu_count": 1,
+                        "base_clip_presentations": 80000,
+                        "nominal_action_rows": 20480000,
+                    },
+                ],
+            },
+        }
+    cost = resource_summary(readiness, cfg)
+    attrition = cost["posthoc_attrition_accounting"]
+    assert attrition["total_supervised_base_clip_presentations_all_attempts"] == 450060
+    assert attrition["total_supervised_nominal_action_rows_all_attempts"] == 115215360
+    assert attrition[
+        "amortized_supervised_nominal_action_rows_per_evaluated_endpoint"
+    ] == pytest.approx(23043072)
 
 
 def test_all_five_restart_bundles_bind_source_seed_and_original_failed_attempt(tmp_path, monkeypatch):

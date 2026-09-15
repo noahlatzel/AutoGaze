@@ -137,10 +137,32 @@ training config, queued execution source or Slurm job was changed by this fix.
 
 Fresh-restart process logs do not reconstruct prior failed time; wall-time
 convergence curves are withheld. Nominal exposure curves remain available and
-final scheduler/GPU totals include all attempts. The full-validation analysis is
-still30 SL exports plus six frozen RL exports; no extraction is launched here.
-Frozen human-only off-center subgroup, Center16/static/shuffle controls,
-SL-RL/RL-RL agreement, qualitative seed440826 panel and practical HLVid gate are
-unchanged. HLVid remains closed until complete all-six validation/resource
-evidence passes the descriptive practical gate; then evaluate all six SL20k
-endpoints and reuse the six existing RL HLVid endpoints.
+final scheduler/GPU totals include all attempts.
+
+## Post-hoc operational attrition decision — 2026-09-16
+
+Array element4 (base seed440830/training seed540830) was preempted before its
+20k endpoint. The user stopped further recovery for thesis-timeline reasons.
+This is a post-hoc operational decision based on scheduler completion state,
+not on comparative method metrics. The scientific comparison therefore uses
+the five completed supervised endpoints440826,440827,440828,440829,440831 and
+the matching five frozen RL seeds. Seed440830 is excluded from utility,
+convergence, uncertainty and agreement summaries; it is not replaced.
+
+The required full-validation extraction is now25 supervised exports (five
+fixed checkpoints for each included seed) plus five matched RL endpoint exports.
+The fixed qualitative seed440826 panel and frozen human-only off-center subgroup,
+Center16/static/shuffle controls, and paired SL-RL/RL-RL analyses remain
+unchanged. Descriptive seed intervals use n=5. If the practical gate passes,
+HLVid evaluates all five included SL endpoints and reuses the matching five
+existing RL endpoints, never a favorable subset.
+
+Efficiency accounting does not discard the abandoned work. The original
+failed seed440830 attempt consumed400 base clips and the preempted attempt
+consumed47660, for48060 clips/12303360 nominal action rows. Together with the
+five completed seeds and their original400-clip failures, total supervised
+consumption is450060 clips/115215360 nominal rows, amortized as23043072 rows per
+evaluated endpoint. Final scheduler/GPU-time accounting must likewise include
+both abandoned allocations. HLVid remains closed until the five endpoint
+receipts and the abandoned-attempt receipt are complete. Nominal rows are not
+physical FLOPs or measured runtime.

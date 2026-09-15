@@ -15,6 +15,7 @@ from autogaze.human_gaze.supervised_analysis import (
     evaluate_practical_gate,
     load_action_export,
     policy_report,
+    seed_summary,
     sha256_file,
     six_seed_summary,
     source_stratified_video_bootstrap_delta,
@@ -352,6 +353,28 @@ def test_six_seed_interval_and_paired_video_bootstrap() -> None:
     assert bootstrap["difference"] == pytest.approx(0.1)
     assert bootstrap["ci90_low"] == pytest.approx(0.1)
     assert bootstrap["ci90_high"] == pytest.approx(0.1)
+
+
+def test_posthoc_five_seed_interval_bootstrap_and_gate() -> None:
+    seeds = (440826, 440827, 440828, 440829, 440831)
+    summary = seed_summary([1, 2, 3, 4, 5], expected_count=5)
+    assert summary["num_seeds"] == 5
+    assert summary["interval"] == "descriptive_two_sided_t_df4_unadjusted"
+    supervised = {seed: fake_policy(0.445, 0.50, 0.01, 0.02) for seed in seeds}
+    rl = {seed: fake_policy(0.45, 0.49, 0.01, 0.01) for seed in seeds}
+    gate = evaluate_practical_gate(
+        supervised_reports=supervised,
+        rl_reports=rl,
+        supervised_resource_complete={seed: True for seed in seeds},
+        supervised_nominal_action_rows=23043072,
+        rl_nominal_action_rows=81920000,
+        thresholds=gate_thresholds(),
+        expected_seeds=seeds,
+    )
+    assert gate["hlvid_admitted"] is True
+    assert gate["evidence"][
+        "nominal_training_trajectory_action_row_reduction"
+    ] == pytest.approx(1 - 23043072 / 81920000)
 
 
 def test_resource_receipt_and_same_seed_recovery_fail_closed(tmp_path: Path) -> None:
