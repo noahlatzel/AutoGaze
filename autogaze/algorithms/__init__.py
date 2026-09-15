@@ -12,3 +12,4 @@
 from .grpo import GRPO
 from .ntp import NTP
 from .dummy import Dummy
+from .human_gaze_ntp import HumanGazeNTP

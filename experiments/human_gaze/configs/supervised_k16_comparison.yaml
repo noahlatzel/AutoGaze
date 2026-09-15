@@ -1,0 +1,85 @@
+experiment_id: supervised_k16_comparison
+status: implementation_and_real_model_preflight
+user_authorized: 2026-09-10
+reference_integration: 065c0277a0f883b11838defd513f8af67fc1e943
+budget: 16
+base_seeds: [440826, 440827, 440828, 440829, 440830, 440831]
+continuation_seeds: [540826, 540827, 540828, 540829, 540830, 540831]
+initialization: shared_original_pretrained_autogaze
+initialization_model_sha256: a48e6a83a198368e3798420ff5d5df42af7c0003c9230f85581c39a2ea64e9eb
+historical_rl_sources:
+  stage1_and_stage2: 50fe23244f45316386e29d763010754f16c0bd2b
+  stage3: ce32f9aeb6ef378593d88f434e6cd79ca9abdfd3
+dataset:
+  protocol: av_gaze_stavis_fold1_direct_full_field_224_3fps_clip16
+  manifest_sha256: 0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10
+  cell_mass_sha256: fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8
+  live_input_hash_verification_required: true
+trainable: autoregressive_decoder_only
+objective: remaining_human_mass_soft_cross_entropy
+teacher_history: human_mass_sampled_without_replacement
+teacher_rng: dedicated_checkpointed_cpu_generator
+annotation_exhaustion: uniform_legal_continuation_with_zero_distribution_loss
+residual_mass_epsilon: 0.0
+validation_decoding: greedy_self_history_without_teacher_loss
+stages:
+  - config: av_gaze_stavis_supervised_k16_stage1
+    updates: 2315
+    optimizer_initialization: fresh_adam
+  - config: av_gaze_stavis_supervised_k16_stage2
+    updates: 17685
+    optimizer_initialization: fresh_adam_from_same_seed_supervised_stage1_weights
+    learning_rate: 0.000003
+base_clips_per_update: 4
+base_clip_presentations_per_seed: 80000
+teacher_trajectories_per_clip: 1
+rl_trajectories_per_clip: 4
+primary_endpoint_updates: 20000
+secondary_checkpoint_updates: [5000, 10000, 15000]
+primary_metric: validation_source_macro_video_aggregated_human_coverage_k16
+qualitative_panel: experiments/human_gaze/results/r2c_qualitative_offcenter/qualitative_manifest.json
+qualitative_base_seed: 440826
+offcenter_subgroup:
+  unit: clip
+  ranking: mean_human_mass_outside_center32_descending_within_source
+  size: ceil_one_quarter_of_validation_clips_per_source
+  tie_breaker: stable_clip_id_ascending
+  freeze_manifest_before_model_outputs: true
+  aggregation: eligible_clips_to_video_means_to_equal_source_means
+  record_all_clip_video_and_source_counts: true
+uncertainty:
+  training_seeds: mean_sd_and_90_percent_t_interval
+  video_pairing: source_stratified_video_cluster_bootstrap
+  bootstrap_iterations: 10000
+  bootstrap_seed: 20260910
+  interpretation: descriptive_unadjusted
+test_scope: historically_exposed_optional_frozen_descriptive_pass_never_selection
+hlvid_admission:
+  rule_type: practical_transfer_gate_not_inferential_claim
+  complete_six_seed_validation_required: true
+  dynamic_coverage_above_static_and_shuffled_required: true
+  dynamic_control_aggregation: equal_seed_mean_of_source_macro_video_coverage
+  route_a:
+    minimum_supervised_minus_rl_coverage: -0.01
+    minimum_reduction_in_nominal_training_trajectory_action_rows: 0.50
+    complete_measured_time_and_resource_accounting_required: true
+    timing_claim: nominal_action_row_reduction_is_not_a_measured_speedup
+  route_b:
+    minimum_overall_coverage_improvement: 0.01
+    or_minimum_offcenter_coverage_improvement: 0.02
+    minimum_overall_supervised_minus_rl_coverage: -0.02
+  all_six_fixed_endpoints_if_admitted: true
+  input_contract:
+    frames: 128
+    thumbnails: 64
+    max_tiles_video: 48
+    exact_k: 16
+  scoring_and_precision: unchanged_frozen_hlvid_protocol
+resources:
+  admission_owner_task: 01a05a0a-3c7e-7053-aa24-5069bff7fa96
+  gpus_per_training_seed: 1
+  provisional_global_max_gpus: 3
+  provisional_global_max_host_ram_gib: 384
+  new_training_concurrency: requires_live_admission
+  allocation_request: requires_real_model_memory_and_throughput_preflight
+  submitted_jobs: []

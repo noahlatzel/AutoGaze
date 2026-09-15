@@ -244,6 +244,28 @@
     "claim_boundary": "trained-versus-control QA is descriptive cross-hardware; latency remains hardware-specific",
     "global_cap": "up to two R2f A40/128G tasks plus one serialized control A40/128G task = 3 GPUs and 384G; replay 1700681 is afterok:1690935_*"
   },
+  "supervised_k16_submission": {
+    "status": "submitted_dependency_pending",
+    "authorized_scope": "six matched supervised human-gaze K16 training seeds; no HLVid",
+    "receipt": "experiments/human_gaze/results/r2e_hlvid_nvila_fixed_budget_all_seeds/supervised_k16_admission_receipt_20260910T225706+0200.json",
+    "receipt_sha256": "28ef1776b71c65f6bd219b78a8bb81f756d72a9b1a203846d04eba6393499044",
+    "array_job_id": "1702710",
+    "run_id": "20260910-2128_supervised-k16-comparison_5a31685",
+    "submitted_at": "2026-09-10T22:56:57+02:00",
+    "source_commit": "5a31685d56ec727b9a46db60598a0693fae7e20e",
+    "source_repository": "git@github.com:noahlatzel/AutoGaze.git",
+    "source_checkout": "/storage/user/latn/worktrees/autogaze-supervised-k16-execution",
+    "array": "0-5%1",
+    "request_per_active_task": "cpu=5,mem=32G,gres/gpu:a40=1,24h",
+    "effective_dependency": "afterany:1690935_*(unfulfilled)",
+    "dependency_correction": "Omitted the proposed dependency on replay 1700681 because replay itself is afterok:1690935 and can remain unsatisfied after a variable failure; afterany:1690935 preserves existing workload priority without a deadlock path.",
+    "automatic_requeue": false,
+    "state_after_submission": "PENDING Dependency",
+    "projected_start": null,
+    "submitted_elements_after": "14 of QOS maximum 20",
+    "maximum_overlap_after_dependency_release": "control 1x128G plus replay 1x128G plus supervised 1x32G = 3 GPUs and 288G",
+    "existing_jobs_modified": false
+  },
   "local_vm": {
     "hostname": "atcremers63",
     "gpu": "NVIDIA RTX A2000 12GB",

@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "purpose": "Global Slurm admission receipt for the user-authorized six-seed supervised human-gaze K16 comparison",
+  "observed_at": "2026-09-10T22:57:06+02:00",
+  "authorization": {
+    "status": "explicitly_user_authorized",
+    "scope": "six matched K16 supervised training seeds, convergence and gaze-behavior evidence; no HLVid in this submission",
+    "sole_slurm_admission_owner": "01a05a0a-3c7e-7053-aa24-5069bff7fa96",
+    "existing_jobs_changed": false,
+    "duplicate_submission": false
+  },
+  "immutable_source": {
+    "repository": "git@github.com:noahlatzel/AutoGaze.git",
+    "repository_owner_boundary": "noahlatzel user fork; NVlabs upstream was not used",
+    "branch": "codex/supervised-k16-execution",
+    "execution_commit": "5a31685d56ec727b9a46db60598a0693fae7e20e",
+    "implementation_base_commit": "d85c6558bf9e8f02ece1f3516b4709a715ebec63",
+    "checkout": "/storage/user/latn/worktrees/autogaze-supervised-k16-execution",
+    "checkout_detached": true,
+    "checkout_clean_before_submission": true,
+    "execution_config": "experiments/human_gaze/configs/supervised_k16_execution.yaml",
+    "execution_config_sha256": "e0ee7948b695a7f43ec40d4209437bdf8bcd138d1776b751195004eadac02050",
+    "scientific_config": "experiments/human_gaze/configs/supervised_k16_comparison.yaml",
+    "scientific_config_sha256": "6730eb010584e50e8e11c20ed1c175553cbb14e6ec32e43e9b1ee7f81f301ada",
+    "launcher": "experiments/human_gaze/slurm/run_supervised_k16_comparison_array.sbatch",
+    "launcher_sha256": "3c5176bc95c59183a6a7bf2b5c8829d0b4ec9454a855d2a607d79f6d1266861d",
+    "verifier": "scripts/human_gaze/verify_supervised_k16_execution.py",
+    "verifier_sha256": "138c2f51c4147937ca69a602d5e0ee474fd0f5102627b7b6f25f373b945c5f22",
+    "stored_slurm_batch_script_sha256": "3c5176bc95c59183a6a7bf2b5c8829d0b4ec9454a855d2a607d79f6d1266861d"
+  },
+  "input_identity": {
+    "dataset_root": "/storage/user/zverev/datasets/av-gaze-stavis",
+    "training_manifest": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl",
+    "training_manifest_sha256": "0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10",
+    "cell_mass": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy",
+    "cell_mass_sha256": "fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8",
+    "pretrained_model": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze/model.safetensors",
+    "pretrained_model_sha256": "a48e6a83a198368e3798420ff5d5df42af7c0003c9230f85581c39a2ea64e9eb",
+    "live_identity_check": "pass"
+  },
+  "real_model_preflight": {
+    "published_source_commit": "736dd73beefeab337a38b107924ee3cf02fb6021",
+    "executed_harness_commit": "21e9ab8415be7f3515b6ed75539cf12060d42ecc",
+    "bundle": "experiments/human_gaze/results/supervised_k16_real_preflight/20260909-230035_supervised-k16-real-preflight_21e9ab8",
+    "bundle_manifest_sha256": "225462949cac7b22b3ab4f116a666a9ab6fe472b374c28fea2109156d53527f1",
+    "bundle_metrics_sha256": "9692b69cf51adca06a10f5e00a59c8ca974d3dc9ca8d0b908d2f22a378f0e38b",
+    "full_complete_receipt_sha256": "8f675692cb3f39f5f216e5cb4e8ac30d60547742793205f43df9b2f2988ceb79",
+    "status": "pass",
+    "coverage": "one TRAIN clip from each of six sources; six single-rank NCCL DDP forward/backward iterations and six label-free greedy exact-K16 checks",
+    "optimizer_steps": 0,
+    "peak_cuda_allocated_bytes": 407873536,
+    "peak_cuda_reserved_bytes": 450887680,
+    "peak_process_rss_bytes": 2149191680,
+    "environment": {
+      "gpu": "NVIDIA RTX A2000 12GB",
+      "python": "3.11.15",
+      "python_executable": "/home/stud/latn/miniconda3/envs/vila-autogaze-eval/bin/python",
+      "torch": "2.11.0",
+      "transformers": "4.57.6",
+      "cuda": "13.0"
+    },
+    "scope_boundary": "non-scientific mechanism/resource smoke, not a training seed or throughput estimate"
+  },
+  "admission_precheck": {
+    "status": "pass",
+    "verified_utc": "2026-09-10T20:56:36.018720+00:00",
+    "array_index_checked": 0,
+    "base_seed_checked": 440826,
+    "continuation_seed_checked": 540826,
+    "temporary_output_sha256": "2a9bb5f84c87d64364672f86a768e07789370d78027a0ef256ec413e1c150a4e",
+    "verified": "detached clean user-fork source, permitted diff, exact source/data/init/config hashes, seed matrix, fixed exposure, and no-HLVid contract",
+    "owner_reported_cpu_suite": "254 passed at execution commit; not redundantly rerun by admission owner"
+  },
+  "scientific_execution": {
+    "run_id": "20260910-2128_supervised-k16-comparison_5a31685",
+    "artifact_root": "/storage/user/latn/artifacts/autogaze-supervised-k16",
+    "run_directory_absent_before_submission": true,
+    "base_seeds": [440826, 440827, 440828, 440829, 440830, 440831],
+    "continuation_seeds": [540826, 540827, 540828, 540829, 540830, 540831],
+    "array_mapping": {
+      "0": "440826 -> 540826",
+      "1": "440827 -> 540827",
+      "2": "440828 -> 540828",
+      "3": "440829 -> 540829",
+      "4": "440830 -> 540830",
+      "5": "440831 -> 540831"
+    },
+    "stage1_updates": 2315,
+    "stage2_updates": 17685,
+    "cumulative_updates_per_seed": 20000,
+    "base_clip_presentations_per_seed": 80000,
+    "exact_k": 16,
+    "phase_chain": ["stage1", "verify_stage1", "stage2", "verify_stage2"],
+    "stage2_initialization": "verified same-seed supervised stage1 checkpoint with fresh Adam",
+    "resume": "disabled for initial admission",
+    "hlvid_included": false
+  },
+  "dependency_review": {
+    "owner_proposal": "afterany:1690935:1701485:1700681",
+    "owner_proposal_used": false,
+    "material_risk": "1700681 itself depends on afterok:1690935; if a variable element fails, replay can remain DependencyNeverSatisfied and a further afterany dependency on replay can block supervised work indefinitely.",
+    "effective_dependency": "afterany:1690935",
+    "why_safe": "The supervised array remains ineligible until every variable element terminates regardless of result. Thereafter, the maximum possible overlap is control %1 plus replay 1 plus supervised %1.",
+    "existing_priority_preservation": "No existing job was modified; controls and replay were submitted earlier and retain scheduler priority.",
+    "failure_behavior": "A failed variable element still releases the supervised afterany dependency while replay may remain unsatisfied; there is no dependency cycle or indefinite replay coupling."
+  },
+  "resource_admission": {
+    "array": "0-5%1",
+    "gpu_per_active_task": "a40:1",
+    "cpus_per_active_task": 5,
+    "host_memory_per_active_task": "32G",
+    "time_limit": "1-00:00:00",
+    "required_node_list": null,
+    "automatic_requeue": false,
+    "automatic_requeue_override": "--no-requeue added at submission because the immutable launcher has resume disabled and refuses an existing seed directory",
+    "recovery_boundary": "preemption, timeout, or failure requires deliberate checkpoint-aware review; do not assume automatic resume",
+    "production_environment": {
+      "python": "/home/stud/latn/miniconda3/envs/autogaze/bin/python",
+      "conda_environment": "autogaze",
+      "cuda_module": "cuda/12.8.1",
+      "hf_home": "/storage/slurm/latn/data/huggingface_cache"
+    }
+  },
+  "global_ledger_at_admission": {
+    "observed_at": "2026-09-10T22:56:42+02:00",
+    "running_user_jobs": 0,
+    "submitted_task_elements_before": 8,
+    "submitted_task_elements_after": 14,
+    "qos_max_submit_jobs_per_user": 20,
+    "qos_max_running_jobs_per_user": 15,
+    "qos_max_tres_per_user": "cpu=100,gres/gpu=9,mem=512G",
+    "orchestration_ceiling": "3 concurrent GPU allocations and 384G requested host memory",
+    "before_variable_termination": "supervised dependency blocks it; existing R2f %2 plus control %1 remains at most 3 GPUs/384G",
+    "after_successful_variable_termination": "control %1 (128G) plus replay 1 (128G) plus supervised %1 (32G) = at most 3 GPUs/288G",
+    "after_unsuccessful_variable_termination": "replay may remain dependency-unsatisfied; control %1 plus supervised %1 = at most 2 GPUs/160G",
+    "limit_result": "pass"
+  },
+  "submission": {
+    "submitted_at": "2026-09-10T22:56:57+02:00",
+    "array_job_id": "1702710",
+    "command": "sbatch --dependency=afterany:1690935 --no-requeue --export=ALL,AUTOGAZE_WORKTREE=/storage/user/latn/worktrees/autogaze-supervised-k16-execution,AUTOGAZE_EXECUTION_COMMIT=5a31685d56ec727b9a46db60598a0693fae7e20e,SUPERVISED_K16_RUN_ID=20260910-2128_supervised-k16-comparison_5a31685 experiments/human_gaze/slurm/run_supervised_k16_comparison_array.sbatch",
+    "state": "PENDING",
+    "reason": "Dependency",
+    "scheduler_dependency": "afterany:1690935_*(unfulfilled)",
+    "projected_start": null,
+    "runtime": "00:00:00",
+    "allocated_node": null,
+    "effective_ReqTRES": "cpu=5,mem=32G,node=1,billing=5,gres/gpu=1,gres/gpu:a40=1",
+    "effective_ReqNodeList": null,
+    "effective_Requeue": 0,
+    "array_task_throttle": 1,
+    "output_template": "/storage/user/latn/slurm/logs/gaze-supervised-k16-1702710_%a.out"
+  },
+  "stop_conditions": {
+    "do_not_launch_hlvid_from_this_job": true,
+    "do_not_add_scientific_variants": true,
+    "on_source_input_or_checkpoint_mismatch": "fail closed",
+    "on_failure_or_timeout": "preserve artifacts and review a checkpoint-aware recovery before any new scheduler action",
+    "after_six_endpoints": "run the preregistered validation/convergence/behavior analysis before deciding the conditional all-six HLVid gate"
+  }
+}

@@ -1,0 +1,13 @@
+defaults:
+  - av_gaze_stavis_supervised_k16
+  - _self_
+
+# Same pretrained initialization, input sampler, trainable decoder, Adam and
+# executable stage-one LR schedule as the historical RL comparator. Teacher
+# trajectories are drawn from human mass instead of four policy rollouts.
+trainer:
+  seed: 440826
+  max_train_steps: 2315
+  exp_name: supervised_k16_stage1_seed${trainer.seed}
+  logdir: outputs/human_gaze/supervised_k16
+  resume: false

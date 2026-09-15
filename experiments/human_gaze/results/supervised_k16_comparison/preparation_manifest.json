@@ -1,0 +1,43 @@
+{
+  "analysis_scope": {
+    "action_exports_expected": 36,
+    "action_exports_present_at_freeze": 0,
+    "full_validation_rl_endpoint_exports_required": 6,
+    "full_validation_supervised_exports_required": 30,
+    "gpu_extraction_launched": false,
+    "hlvid_launched": false,
+    "training_launched_by_analysis_branch": false
+  },
+  "execution": {
+    "admission_receipt_committed_byte_sha256": "28ef1776b71c65f6bd219b78a8bb81f756d72a9b1a203846d04eba6393499044",
+    "admission_receipt_integration_commit": "bdd5789d4717075d20d317984f4096551bd4cdb7",
+    "dependency": "afterany:1690935",
+    "immutable_source_commit": "5a31685d56ec727b9a46db60598a0693fae7e20e",
+    "run_id": "20260910-2128_supervised-k16-comparison_5a31685",
+    "slurm_array_job_id": 1702710
+  },
+  "frozen_inputs": {
+    "cell_mass_sha256": "fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8",
+    "checkpoint_provenance_inventory_sha256": "9c824436ef21eb0b00a538eb8b9b65ca82ddc1571b28615458c787050ff042a5",
+    "fixed_qualitative_manifest_sha256": "d3e3062277c579db5379c37675105537a54668baaeb9ec568e3c72c50533b03b",
+    "offcenter_manifest_sha256": "69e6f3ba51c8dd3c4388dc082d4ccc96f44e4941090ace23be9e91c03638c7fb",
+    "offcenter_selection_sha256": "6af272437fa4cc06610314e98f7630d9c2527e0d771ea2db1a2c2852c4123e3c",
+    "stavis_manifest_sha256": "0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10"
+  },
+  "remaining_inputs": {
+    "all_six_supervised_training_endpoints": "pending Slurm dependency and execution",
+    "all_six_supervised_resource_receipts": "pending terminal allocations and fixed-owner sacct curation",
+    "rl_full_validation_actions": "not present; six endpoint exports are the minimal new extraction",
+    "supervised_full_validation_actions": "not present; six seeds times five fixed checkpoints are required"
+  },
+  "schema_version": 1,
+  "status": "analysis_pipeline_ready_waiting_for_declared_evidence",
+  "verification": {
+    "frozen_offcenter_regeneration_file_sha256": "69e6f3ba51c8dd3c4388dc082d4ccc96f44e4941090ace23be9e91c03638c7fb",
+    "full_cpu_tests_passed": 276,
+    "focused_analysis_tests_passed": 22,
+    "readiness_expected_action_exports": 36,
+    "readiness_present_action_exports": 0,
+    "readiness_status": "waiting_for_declared_inputs"
+  }
+}

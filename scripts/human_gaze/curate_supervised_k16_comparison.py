@@ -1,0 +1,1382 @@
+#!/usr/bin/env python3
+"""Curate the fixed supervised K16 comparison and practical gate."""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import math
+import subprocess
+import sys
+from itertools import combinations
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+from omegaconf import OmegaConf
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
+
+from autogaze.datasets.av_gaze_stavis import read_manifest
+from autogaze.human_gaze.checkpoint_provenance import (
+    load_checkpoint_inventory,
+    verify_rl_checkpoint,
+    verify_supervised_checkpoint,
+)
+from autogaze.human_gaze.supervised_analysis import (
+    agreement_report,
+    cell_mass_for_records,
+    evaluate_practical_gate,
+    load_action_export,
+    policy_report,
+    selected_mass,
+    seed_summary,
+    sha256_file,
+    source_prior_cells,
+    source_stratified_video_bootstrap_delta,
+)
+
+
+FIXED_STEPS = (2315, 5000, 10000, 15000, 20000)
+PLANNED_BASE_SEEDS = tuple(range(440826, 440832))
+POSTHOC_INCLUDED_BASE_SEEDS = (440826, 440827, 440828, 440829, 440831)
+POSTHOC_EXCLUDED_BASE_SEED = 440830
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--config",
+        type=Path,
+        default=Path("experiments/human_gaze/configs/supervised_k16_analysis.yaml"),
+    )
+    parser.add_argument("--action-root", type=Path)
+    parser.add_argument("--training-root", type=Path)
+    parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--readiness-only", action="store_true")
+    return parser.parse_args()
+
+
+def load_json(path: Path) -> dict[str, Any]:
+    with path.open("r", encoding="utf-8") as handle:
+        value = json.load(handle)
+    if not isinstance(value, dict):
+        raise ValueError(f"Expected JSON object: {path}")
+    return value
+
+
+def resolve_repo_path(path: str | Path) -> Path:
+    value = Path(path)
+    return value if value.is_absolute() else REPOSITORY_ROOT / value
+
+
+def load_frozen_analysis_config(path: Path) -> dict[str, Any]:
+    cfg = OmegaConf.to_container(OmegaConf.load(path), resolve=True)
+    if isinstance(cfg, dict) and "base_analysis_config" in cfg:
+        base_path = resolve_repo_path(cfg["base_analysis_config"])
+        if (cfg["base_analysis_config"] != "experiments/human_gaze/configs/supervised_k16_analysis.yaml"
+                or cfg.get("base_analysis_config_sha256") != "0a831927a80d15dc9a0db8e8450229375f8b09ca90f4fa5c91eca6fe1e82465e"
+                or sha256_file(base_path) != cfg["base_analysis_config_sha256"]
+                or set(cfg) - {"schema_version", "experiment_id", "base_analysis_config", "base_analysis_config_sha256", "submitted_execution", "checkpoint_provenance", "paths", "posthoc_seed_policy", "action_export", "agreement", "uncertainty", "practical_hlvid_gate"}):
+            raise ValueError("Restart analysis changes more than frozen source/path provenance")
+        overlay = {key: value for key, value in cfg.items() if key not in ("base_analysis_config", "base_analysis_config_sha256")}
+        cfg = OmegaConf.to_container(OmegaConf.merge(OmegaConf.load(base_path), overlay), resolve=True)
+    if not isinstance(cfg, dict):
+        raise ValueError("Analysis config must resolve to a mapping")
+    return cfg
+
+
+def validate_analysis_config(cfg: dict[str, Any]) -> None:
+    """Reject changes to the preregistered comparison and action support."""
+    if cfg.get("schema_version") != 1 or cfg.get("experiment_id") != "supervised_k16_comparison":
+        raise ValueError("Unexpected analysis config identity")
+    data = cfg.get("data", {})
+    expected_data = {
+        "split": "val",
+        "clips": 427,
+        "clip_len": 16,
+        "fine_cells": 196,
+        "exact_k": 16,
+        "fine_action_offset": 69,
+    }
+    for key, value in expected_data.items():
+        if data.get(key) != value:
+            raise ValueError(f"Analysis config violates frozen data field {key}")
+    if cfg.get("seeds", {}).get("base") != list(PLANNED_BASE_SEEDS):
+        raise ValueError("Analysis config violates the frozen base-seed matrix")
+    if cfg.get("seeds", {}).get("training") != [seed + 100000 for seed in PLANNED_BASE_SEEDS]:
+        raise ValueError("Analysis config violates the frozen training-seed matrix")
+    checkpoints = cfg.get("checkpoints", {})
+    if (
+        checkpoints.get("supervised_cumulative_updates") != list(FIXED_STEPS)
+        or checkpoints.get("primary_endpoint_update") != 20000
+        or checkpoints.get("rl_action_export_updates") != [20000]
+    ):
+        raise ValueError("Analysis config violates the frozen checkpoint matrix")
+    export = cfg.get("action_export", {})
+    if (
+        export.get("split") != "val"
+        or export.get("decoding") != "greedy_self_history"
+        or export.get("exact_k") != 16
+        or export.get("allowed_local_action_ids_inclusive") != [69, 264]
+        or export.get("no_repeat") is not True
+    ):
+        raise ValueError("Analysis config violates the frozen action-export contract")
+    compute = cfg.get("compute_accounting", {})
+    if (
+        compute.get("supervised_base_clip_presentations_per_seed") != 80000
+        or compute.get("rl_base_clip_presentations_per_seed") != 80000
+        or compute.get("supervised_nominal_training_trajectory_action_rows_per_seed") != 20480000
+        or compute.get("rl_nominal_training_trajectory_action_rows_per_seed") != 81920000
+    ):
+        raise ValueError("Analysis config violates matched exposure or nominal action rows")
+    offcenter = cfg.get("offcenter_subgroup", {})
+    if offcenter.get("total_clips") != 110 or offcenter.get("total_videos") != 23:
+        raise ValueError("Analysis config violates the frozen off-center counts")
+    recovery = cfg.get("recovery", {})
+    if not all(
+        recovery.get(key) is True
+        for key in (
+            "same_seed_only",
+            "require_verified_phase_receipts",
+            "require_immutable_source_and_data_identity",
+            "require_failed_and_recovery_job_ids",
+            "require_all_attempts_in_resource_accounting",
+        )
+    ):
+        raise ValueError("Analysis config weakens the frozen recovery contract")
+    provenance = cfg.get("checkpoint_provenance", {})
+    frozen_inventories = {
+        ("experiments/human_gaze/results/supervised_k16_comparison/checkpoint_provenance_inventory.json", "9c824436ef21eb0b00a538eb8b9b65ca82ddc1571b28615458c787050ff042a5"),
+        ("experiments/human_gaze/results/supervised_k16_restart/checkpoint_provenance_inventory.json", "38bd1f184b9e9612529621f0f790b1cc5a0e396c3c1cc62e9785d958f5139870"),
+    }
+    if (
+        (provenance.get("inventory"), provenance.get("inventory_sha256")) not in frozen_inventories
+        or provenance.get("supervised_authority")
+        != "canonical_execution_manifest_phase_receipt_completion_marker_and_train_state"
+        or provenance.get("rl_authority")
+        != "published_r2e_frozen_checkpoint_hash_inventory"
+        or provenance.get("supervised_endpoint_completion_marker_required") is not True
+        or provenance.get("supervised_intermediate_periodic_state_required") is not True
+        or provenance.get("reject_cli_or_export_metadata_as_authority") is not True
+    ):
+        raise ValueError("Analysis config weakens checkpoint provenance")
+    if "restart_original_execution_commit" in provenance:
+        expected_source = "ec320a5435275c6098c6d299b11d98d18d9b1afb"
+        expected_run = "20260914-0158_supervised-k16-comparison_ec320a5"
+        if (provenance["restart_original_execution_commit"] != "5a31685d56ec727b9a46db60598a0693fae7e20e"
+                or provenance.get("metadata_repair_commit") != "13179be38351df168d702962d81ebdca85691a33"
+                or cfg["submitted_execution"].get("immutable_source_commit") != expected_source
+                or cfg["submitted_execution"].get("run_id") != expected_run
+                or cfg["paths"].get("supervised_training_root") != f"/storage/user/latn/artifacts/autogaze-supervised-k16/{expected_run}"):
+            raise ValueError("Restart analysis source/seed lineage drift")
+    policy = cfg.get("posthoc_seed_policy")
+    if policy is not None:
+        expected_policy = {
+            "decision_date": "2026-09-16",
+            "kind": "posthoc_operational_attrition_before_scientific_curation",
+            "basis": "scheduler_completion_status_and_thesis_timeline_not_method_metrics",
+            "planned_base_seeds": list(PLANNED_BASE_SEEDS),
+            "included_base_seeds": list(POSTHOC_INCLUDED_BASE_SEEDS),
+            "included_training_seeds": [
+                seed + 100000 for seed in POSTHOC_INCLUDED_BASE_SEEDS
+            ],
+            "excluded_base_seed": POSTHOC_EXCLUDED_BASE_SEED,
+            "excluded_training_seed": POSTHOC_EXCLUDED_BASE_SEED + 100000,
+            "excluded_array_element": 4,
+            "excluded_reason": "scheduler_preemption_user_abandoned_for_timeline",
+            "paired_rl_subset_same_base_seeds": True,
+            "excluded_from_utility_convergence_and_agreement": True,
+            "included_in_total_compute_accounting": True,
+            "abandoned_original_failed_base_clips": 400,
+            "abandoned_preempted_attempt_base_clips": 47660,
+            "abandoned_total_base_clips": 48060,
+            "abandoned_total_nominal_action_rows": 12303360,
+            "abandoned_attempt_job_ids": ["1702710_4", "1838748"],
+            "require_abandoned_attempt_resource_receipt_for_gate": True,
+            "hlvid_if_gate_passes": "all_five_included_supervised_endpoints_and_matching_five_rl_endpoints",
+        }
+        if policy != expected_policy:
+            raise ValueError("Analysis config violates the frozen post-hoc seed policy")
+        if (
+            cfg["action_export"].get("required_for_supervised")
+            != "all_five_included_seeds_at_all_five_fixed_checkpoints"
+            or cfg["action_export"].get("required_for_rl")
+            != "matching_five_fixed_20k_endpoints"
+            or cfg["agreement"].get("sl_vs_rl")
+            != "same_base_seed_pairs_all_five_included_endpoints"
+            or cfg["agreement"].get("rl_vs_rl")
+            != "all_10_unordered_included_endpoint_seed_pairs_context_only"
+            or cfg["uncertainty"].get("seeds")
+            != "mean_sample_sd_and_descriptive_90_percent_t_interval_n5"
+            or cfg["practical_hlvid_gate"].get(
+                "complete_six_seed_validation_required"
+            )
+            is not False
+            or cfg["practical_hlvid_gate"].get(
+                "complete_five_included_seed_validation_required"
+            )
+            is not True
+            or cfg["practical_hlvid_gate"].get("if_passed")
+            != "evaluate_all_five_included_supervised_fixed_endpoints_only"
+        ):
+            raise ValueError("Analysis config has contradictory post-hoc outputs")
+
+
+def analysis_base_seeds(cfg: dict[str, Any]) -> tuple[int, ...]:
+    policy = cfg.get("posthoc_seed_policy")
+    if policy is None:
+        return PLANNED_BASE_SEEDS
+    return tuple(int(seed) for seed in policy["included_base_seeds"])
+
+
+def summarize(values: list[float] | tuple[float, ...], seeds: tuple[int, ...]) -> dict[str, Any]:
+    return seed_summary(values, expected_count=len(seeds))
+
+
+def format_template(template: str, seed: int, step: int | None = None, phase: str | None = None) -> str:
+    values = {
+        "base_seed": seed,
+        "training_seed": seed + 100000,
+        "cumulative_update": step,
+        "phase": phase,
+    }
+    return template.format(**values)
+
+
+def expected_action_paths(cfg: dict, action_root: Path) -> dict[tuple[str, int, int], Path]:
+    result = {}
+    for seed in analysis_base_seeds(cfg):
+        for step in FIXED_STEPS:
+            relative = format_template(
+                cfg["paths"]["supervised_action_export_template"], seed, step
+            )
+            result[("supervised", seed, step)] = action_root / relative
+        relative = format_template(cfg["paths"]["rl_action_export_template"], seed, 20000)
+        result[("rl", seed, 20000)] = action_root / relative
+    return result
+
+
+def validate_abandoned_resource_receipt(
+    path: Path, policy: dict[str, Any]
+) -> tuple[bool, dict[str, Any]]:
+    if not path.is_file():
+        return False, {"status": "missing", "missing": [str(path)]}
+    receipt = load_json(path)
+    problems = []
+    required = {
+        "schema_version": 1,
+        "status": "abandoned_complete_resource_accounting",
+        "base_seed": policy["excluded_base_seed"],
+        "training_seed": policy["excluded_training_seed"],
+        "endpoint_complete": False,
+        "included_in_scientific_metrics": False,
+        "total_base_clip_presentations": policy["abandoned_total_base_clips"],
+        "total_nominal_action_rows": policy["abandoned_total_nominal_action_rows"],
+    }
+    for key, expected in required.items():
+        if receipt.get(key) != expected:
+            problems.append(key)
+    attempts = receipt.get("attempts")
+    expected_job_ids = set(policy["abandoned_attempt_job_ids"])
+    if not isinstance(attempts, list) or not attempts:
+        problems.append("attempts")
+        attempts = []
+    observed_job_ids = {str(attempt.get("job_id")) for attempt in attempts}
+    if observed_job_ids != expected_job_ids or len(attempts) != len(observed_job_ids):
+        problems.append("attempt_job_ids")
+    clips = 0
+    rows = 0
+    elapsed = 0.0
+    gpu_seconds = 0.0
+    max_rss = []
+    gpu_peak = []
+    for attempt in attempts:
+        attempt_clips = attempt.get("base_clip_presentations")
+        attempt_rows = attempt.get("nominal_action_rows")
+        attempt_elapsed = attempt.get("elapsed_seconds")
+        allocated = attempt.get("allocated_gpu_count")
+        if (
+            type(attempt_clips) is not int
+            or attempt_clips < 0
+            or type(attempt_rows) is not int
+            or attempt_rows != attempt_clips * 256
+            or isinstance(attempt_elapsed, bool)
+            or not isinstance(attempt_elapsed, (int, float))
+            or attempt_elapsed <= 0
+            or allocated != 1
+        ):
+            problems.append("attempt_resources_or_exposure")
+            continue
+        clips += attempt_clips
+        rows += attempt_rows
+        elapsed += float(attempt_elapsed)
+        gpu_seconds += float(attempt_elapsed * allocated)
+        for field, target in (
+            ("max_rss_bytes", max_rss),
+            ("gpu_memory_peak_bytes", gpu_peak),
+        ):
+            value = attempt.get(field)
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or value <= 0:
+                problems.append(f"attempt_{field}")
+            else:
+                target.append(float(value))
+    if clips != policy["abandoned_total_base_clips"]:
+        problems.append("attempt_base_clip_total")
+    if rows != policy["abandoned_total_nominal_action_rows"]:
+        problems.append("attempt_nominal_action_row_total")
+    return not problems, {
+        "status": "pass" if not problems else "invalid",
+        "problems": sorted(set(problems)),
+        "path": str(path),
+        "sha256": sha256_file(path),
+        "receipt": receipt,
+        "scheduler_elapsed_seconds": elapsed,
+        "allocated_gpu_seconds": gpu_seconds,
+        "max_rss_bytes": max(max_rss) if max_rss else None,
+        "gpu_memory_peak_bytes": max(gpu_peak) if gpu_peak else None,
+    }
+
+
+def validate_resource_receipt(seed_root: Path, seed: int) -> tuple[bool, dict[str, Any]]:
+    execution_path = seed_root / "execution_manifest.json"
+    sacct_path = seed_root / "final_sacct.json"
+    missing = [str(path) for path in (execution_path, sacct_path) if not path.is_file()]
+    if missing:
+        return False, {"status": "missing", "missing": missing}
+    execution = load_json(execution_path)
+    sacct = load_json(sacct_path)
+    problems = []
+    if execution.get("base_seed") != seed or execution.get("continuation_seed") != seed + 100000:
+        problems.append("execution_seed_identity")
+    if not str(execution.get("status", "")).startswith("training_complete"):
+        problems.append("execution_not_complete")
+    required_sacct = {
+        "schema_version": 1,
+        "status": "complete",
+        "terminal_state": "COMPLETED",
+        "exit_code": "0:0",
+        "base_seed": seed,
+        "allocated_gpu_count": 1,
+        "requested_host_memory_bytes": 32 * 1024**3,
+    }
+    for key, expected in required_sacct.items():
+        if sacct.get(key) != expected:
+            problems.append(f"final_sacct_{key}")
+    for key in (
+        "elapsed_seconds",
+        "max_rss_bytes",
+        "gpu_memory_peak_bytes",
+    ):
+        value = sacct.get(key)
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or value <= 0:
+            problems.append(f"final_sacct_{key}")
+    recovery_path = seed_root / "recovery_manifest.json"
+    expected_job_ids = set()
+    if execution.get("restart_of") is not None:
+        lineage = execution["restart_of"]
+        slurm = execution.get("slurm", {})
+        if (lineage.get("base_seed") != seed or lineage.get("continuation_seed") != seed + 100000
+                or lineage.get("failed_array_element") != f"1702710_{seed - 440826}"
+                or not slurm.get("SLURM_ARRAY_JOB_ID") or slurm.get("SLURM_ARRAY_TASK_ID") != str(seed - 440826)):
+            problems.append("restart_attempt_identity")
+        else:
+            expected_job_ids.update((lineage["failed_array_element"], f"{slurm['SLURM_ARRAY_JOB_ID']}_{slurm['SLURM_ARRAY_TASK_ID']}"))
+    if recovery_path.is_file():
+        recovery = load_json(recovery_path)
+        expected_job_ids.update({
+            str(job_id)
+            for key in ("failed_job_ids", "recovery_job_ids")
+            for job_id in recovery.get(key, [])
+        })
+    if expected_job_ids or recovery_path.is_file():
+        attempts = sacct.get("attempts")
+        if not expected_job_ids or not isinstance(attempts, list) or not attempts:
+            problems.append("recovery_attempt_accounting")
+        else:
+            observed_job_ids = {str(attempt.get("job_id")) for attempt in attempts}
+            if len(observed_job_ids) != len(attempts):
+                problems.append("recovery_attempt_duplicate_job_ids")
+            if not expected_job_ids.issubset(observed_job_ids):
+                problems.append("recovery_attempt_job_ids")
+            for attempt in attempts:
+                elapsed = attempt.get("elapsed_seconds")
+                allocated = attempt.get("allocated_gpu_count")
+                if (
+                    isinstance(elapsed, bool)
+                    or not isinstance(elapsed, (int, float))
+                    or elapsed <= 0
+                    or allocated != 1
+                ):
+                    problems.append("recovery_attempt_resources")
+                    break
+    records = execution.get("resource_records", {})
+    for name in ("stage1_time", "stage2_time", "gpu_telemetry"):
+        record = records.get(name, {})
+        path = Path(record.get("path", ""))
+        if not path.is_file() or sha256_file(path) != record.get("sha256"):
+            problems.append(f"execution_resource_{name}")
+    return not problems, {
+        "status": "pass" if not problems else "invalid",
+        "problems": problems,
+        "execution_manifest": str(execution_path),
+        "execution_manifest_sha256": sha256_file(execution_path),
+        "final_sacct": str(sacct_path),
+        "final_sacct_sha256": sha256_file(sacct_path),
+        "sacct": sacct,
+        "restart_of": execution.get("restart_of"),
+        "current_array_element": (
+            f"{execution.get('slurm', {}).get('SLURM_ARRAY_JOB_ID')}_{execution.get('slurm', {}).get('SLURM_ARRAY_TASK_ID')}"
+            if execution.get("restart_of") is not None else None
+        ),
+    }
+
+
+def collect_readiness(cfg: dict, action_root: Path, training_root: Path) -> dict[str, Any]:
+    action_paths = expected_action_paths(cfg, action_root)
+    missing_actions = [
+        {"method": method, "base_seed": seed, "cumulative_update": step, "path": str(path)}
+        for (method, seed, step), path in action_paths.items()
+        if not (path / "manifest.json").is_file()
+    ]
+    resources = {}
+    seed_template = cfg["paths"]["supervised_seed_root_template"]
+    seeds = analysis_base_seeds(cfg)
+    for seed in seeds:
+        seed_root = training_root / format_template(seed_template, seed)
+        complete, detail = validate_resource_receipt(seed_root, seed)
+        resources[str(seed)] = {"complete": complete, **detail}
+    missing_resources = [seed for seed, value in resources.items() if not value["complete"]]
+    abandoned = None
+    missing_abandoned_resource = False
+    policy = cfg.get("posthoc_seed_policy")
+    if policy is not None:
+        receipt_path = training_root / format_template(
+            cfg["paths"]["supervised_seed_root_template"],
+            int(policy["excluded_base_seed"]),
+        ) / "abandoned_resource_receipt.json"
+        complete, detail = validate_abandoned_resource_receipt(receipt_path, policy)
+        abandoned = {"complete": complete, **detail}
+        missing_abandoned_resource = not complete
+    waiting = bool(missing_actions or missing_resources or missing_abandoned_resource)
+    return {
+        "schema_version": 1,
+        "experiment_id": "supervised_k16_comparison",
+        "status": (
+            "ready_for_complete_cpu_curation"
+            if not waiting
+            else "waiting_for_declared_inputs"
+        ),
+        "analysis_base_seeds": list(seeds),
+        "excluded_base_seed": policy["excluded_base_seed"] if policy else None,
+        "expected_action_exports": len(action_paths),
+        "available_action_exports": len(action_paths) - len(missing_actions),
+        "missing_action_exports": missing_actions,
+        "resource_receipts": resources,
+        "missing_complete_resource_seeds": missing_resources,
+        "abandoned_seed_resource_receipt": abandoned,
+        "missing_abandoned_seed_resource_receipt": missing_abandoned_resource,
+        "fail_closed_hlvid_admission": waiting,
+    }
+
+
+def load_histories(run: Path, filename: str) -> list[dict[str, Any]]:
+    path = run / filename
+    with path.open("r", encoding="utf-8") as handle:
+        return [json.loads(line) for line in handle if line.strip()]
+
+
+def phase_wall_at(training_history: list[dict[str, Any]], phase_step: int) -> float:
+    if phase_step == 0:
+        return 0.0
+    steps = [int(row["train_step"]) for row in training_history]
+    elapsed = [float(row["elapsed_seconds"]) for row in training_history]
+    if len(steps) != len(set(steps)) or steps != sorted(steps):
+        raise ValueError("Training history has duplicate or nonmonotonic steps across attempts")
+    if any(not math.isfinite(value) or value < 0 for value in elapsed):
+        raise ValueError("Training history has an invalid elapsed timestamp")
+    if any(right < left for left, right in zip(elapsed, elapsed[1:])):
+        raise ValueError("Training history elapsed time resets across attempts")
+    target = phase_step - 1
+    matches = [row for row in training_history if int(row["train_step"]) == target]
+    if len(matches) != 1:
+        raise ValueError(f"Training history does not reach phase step {phase_step}")
+    return float(matches[0]["elapsed_seconds"])
+
+
+def supervised_training_wall(
+    inventory: dict,
+    training_root: Path,
+    seed: int,
+) -> dict[str, Any]:
+    stage1_checkpoint, stage1_provenance = verify_supervised_checkpoint(
+        inventory,
+        training_root=training_root,
+        base_seed=seed,
+        cumulative_update=2315,
+    )
+    stage2_checkpoint, stage2_provenance = verify_supervised_checkpoint(
+        inventory,
+        training_root=training_root,
+        base_seed=seed,
+        cumulative_update=20000,
+    )
+    if (
+        stage1_provenance["recovery_manifest"] is not None
+        or stage2_provenance["recovery_manifest"] is not None
+        or stage1_provenance["restart_of"] is not None
+        or stage2_provenance["restart_of"] is not None
+    ):
+        return {
+            "status": "withheld_recovery_attempt_timing_not_reconstructable",
+            "points": {},
+            "reason": (
+                "Fresh-restart/recovered histories omit time already spent in failed attempts; "
+                "use final scheduler totals for total cost."
+            ),
+        }
+    stage1 = load_histories(stage1_checkpoint.parent, "training_metrics.jsonl")
+    stage2 = load_histories(stage2_checkpoint.parent, "training_metrics.jsonl")
+    try:
+        stage1_final = phase_wall_at(stage1, 2315)
+        points = {
+            2315: stage1_final,
+            **{
+                step: stage1_final + phase_wall_at(stage2, step - 2315)
+                for step in FIXED_STEPS[1:]
+            },
+        }
+    except ValueError as error:
+        return {
+            "status": "withheld_ambiguous_or_reset_process_elapsed_history",
+            "points": {},
+            "reason": str(error),
+        }
+    return {"status": "complete_uninterrupted_process_elapsed", "points": points}
+
+
+def rl_validation_curve(cfg: dict, seed: int) -> list[dict[str, float]]:
+    root = Path(cfg["paths"]["rl_root"])
+    training_seed = seed + 100000
+    runs = [
+        root / format_template(cfg["paths"]["rl_stage1_template"], seed),
+        root / format_template(cfg["paths"]["rl_stage2_template"], seed),
+        root / format_template(cfg["paths"]["rl_stage3_template"], seed),
+    ]
+    histories = [load_histories(run, "validation_metrics.jsonl") for run in runs]
+    phase_final_elapsed = [float(history[-1]["elapsed_seconds"]) for history in histories]
+    records = []
+    for phase, history in enumerate(histories):
+        for row in history:
+            phase_step = int(row["train_step"])
+            if phase == 0:
+                cumulative_step = phase_step
+                wall = float(row["elapsed_seconds"])
+            elif phase == 1:
+                if phase_step == 0:
+                    continue
+                cumulative_step = 2315 + phase_step
+                wall = phase_final_elapsed[0] + float(row["elapsed_seconds"])
+            else:
+                if phase_step <= 7685:
+                    continue
+                cumulative_step = 2315 + phase_step
+                wall = sum(phase_final_elapsed[:2]) + float(row["elapsed_seconds"])
+            records.append(
+                {
+                    "cumulative_update": cumulative_step,
+                    "base_clip_presentations": cumulative_step * 4,
+                    "nominal_training_trajectory_action_rows": cumulative_step * 4 * 4 * 16 * 16,
+                    "training_wall_seconds": wall,
+                    "training_gpu_seconds": wall,
+                    "coverage_macro_source": float(row["coverage_k16_macro_source"]),
+                }
+            )
+    by_step = {int(row["cumulative_update"]): row for row in records}
+    return [by_step[step] for step in sorted(by_step)]
+
+
+def summarize_convergence(
+    cfg: dict,
+    inventory: dict,
+    training_root: Path,
+    supervised_reports: dict[int, dict[int, dict]],
+) -> dict[str, Any]:
+    seeds = analysis_base_seeds(cfg)
+    supervised_by_seed = {}
+    supervised_timing_status = {}
+    for seed in seeds:
+        timing = supervised_training_wall(inventory, training_root, seed)
+        supervised_timing_status[str(seed)] = {
+            key: value for key, value in timing.items() if key != "points"
+        }
+        supervised_by_seed[str(seed)] = [
+            {
+                "cumulative_update": step,
+                "base_clip_presentations": step * 4,
+                "nominal_training_trajectory_action_rows": step * 4 * 16 * 16,
+                "training_wall_seconds": timing["points"].get(step),
+                "training_gpu_seconds": timing["points"].get(step),
+                "wall_time_status": timing["status"],
+                "coverage_macro_source": supervised_reports[step][seed]["coverage"]["actual"]["full_validation"]["macro_source_mean"],
+            }
+            for step in FIXED_STEPS
+        ]
+    rl_by_seed = {str(seed): rl_validation_curve(cfg, seed) for seed in seeds}
+    supervised_summary = []
+    for step in FIXED_STEPS:
+        rows = [
+            next(row for row in supervised_by_seed[str(seed)] if row["cumulative_update"] == step)
+            for seed in seeds
+        ]
+        available_wall = [
+            row["training_wall_seconds"]
+            for row in rows
+            if row["training_wall_seconds"] is not None
+        ]
+        wall_summary = (
+            summarize(available_wall, seeds)
+            if len(available_wall) == len(seeds)
+            else {
+                "status": "withheld_without_all_evaluated_seed_process_histories",
+                "available_seeds": len(available_wall),
+                "missing_seeds": [
+                    seed
+                    for seed, row in zip(seeds, rows)
+                    if row["training_wall_seconds"] is None
+                ],
+            }
+        )
+        supervised_summary.append(
+            {
+                "cumulative_update": step,
+                "base_clip_presentations": step * 4,
+                "nominal_training_trajectory_action_rows": step * 4 * 16 * 16,
+                "coverage": summarize([row["coverage_macro_source"] for row in rows], seeds),
+                "training_wall_seconds": wall_summary,
+            }
+        )
+    common_rl_steps = sorted(
+        set.intersection(
+            *[
+                {int(row["cumulative_update"]) for row in rl_by_seed[str(seed)]}
+                for seed in seeds
+            ]
+        )
+    )
+    rl_summary = []
+    for step in common_rl_steps:
+        rows = [
+            next(row for row in rl_by_seed[str(seed)] if row["cumulative_update"] == step)
+            for seed in seeds
+        ]
+        rl_summary.append(
+            {
+                "cumulative_update": step,
+                "base_clip_presentations": step * 4,
+                "nominal_training_trajectory_action_rows": step * 4 * 4 * 16 * 16,
+                "coverage": summarize([row["coverage_macro_source"] for row in rows], seeds),
+                "training_wall_seconds": summarize([row["training_wall_seconds"] for row in rows], seeds),
+            }
+        )
+    return {
+        "supervised_fixed_checkpoints": supervised_summary,
+        "rl_existing_actual_logged_updates": rl_summary,
+        "per_seed": {
+            "supervised": supervised_by_seed,
+            "supervised_timing_status": supervised_timing_status,
+            "rl": rl_by_seed,
+        },
+        "wall_time_scope": "training_process_elapsed_including_periodic_validation",
+        "gpu_time_scope": "single_gpu_wall_time_on_method_specific_hardware",
+        "hardware": {"supervised": "A40", "rl": cfg["compute_accounting"]["rl_hardware"]},
+        "warning": (
+            "Hardware-specific wall/GPU time is descriptive; nominal action rows are not FLOPs. "
+            "Recovered process-history timing is withheld unless attempt-aware reconstruction exists; "
+            "final scheduler totals still include all attempts."
+        ),
+    }
+
+
+def agreement_summary(
+    records: list[dict],
+    supervised_actions: dict[int, np.ndarray],
+    rl_actions: dict[int, np.ndarray],
+    offcenter_ids: set[str],
+    seeds: tuple[int, ...],
+) -> dict[str, Any]:
+    paired = {}
+    for seed in seeds:
+        paired[str(seed)] = agreement_report(
+            records,
+            supervised_actions[seed],
+            rl_actions[seed],
+            offcenter_clip_ids=offcenter_ids,
+        )
+    paired_summary = {}
+    for metric in ("intersection_over_k", "set_jaccard"):
+        paired_summary[metric] = {}
+        for subgroup in ("full_validation", "offcenter_top_quartile"):
+            paired_summary[metric][subgroup] = summarize(
+                [paired[str(seed)][metric][subgroup]["macro_source_mean"] for seed in seeds],
+                seeds,
+            )
+
+    rl_pairs = []
+    for left, right in combinations(seeds, 2):
+        report = agreement_report(
+            records,
+            rl_actions[left],
+            rl_actions[right],
+            offcenter_clip_ids=offcenter_ids,
+        )
+        rl_pairs.append(
+            {
+                "left_base_seed": left,
+                "right_base_seed": right,
+                "intersection_over_k_full_macro": report["intersection_over_k"]["full_validation"]["macro_source_mean"],
+                "set_jaccard_full_macro": report["set_jaccard"]["full_validation"]["macro_source_mean"],
+                "intersection_over_k_offcenter_macro": report["intersection_over_k"]["offcenter_top_quartile"]["macro_source_mean"],
+                "set_jaccard_offcenter_macro": report["set_jaccard"]["offcenter_top_quartile"]["macro_source_mean"],
+            }
+        )
+    rl_context = {}
+    for key in (
+        "intersection_over_k_full_macro",
+        "set_jaccard_full_macro",
+        "intersection_over_k_offcenter_macro",
+        "set_jaccard_offcenter_macro",
+    ):
+        values = np.asarray([row[key] for row in rl_pairs], dtype=np.float64)
+        rl_context[key] = {
+            "num_unordered_seed_pairs": len(rl_pairs),
+            "mean": float(values.mean()),
+            "min": float(values.min()),
+            "max": float(values.max()),
+            "note": "Pairs share seeds and are contextual, not independent replicates.",
+        }
+    return {
+        "paired_supervised_vs_rl": paired,
+        "paired_supervised_vs_rl_summary": paired_summary,
+        "rl_vs_rl_context": {"pairs": rl_pairs, "summary": rl_context},
+    }
+
+
+def qualitative_selection(
+    fixed_manifest: dict,
+    records: list[dict],
+    cell_mass: np.ndarray,
+    supervised_actions: np.ndarray,
+    rl_actions: np.ndarray,
+) -> dict[str, Any]:
+    index = {record["clip_id"]: position for position, record in enumerate(records)}
+    supervised_coverage = selected_mass(cell_mass, supervised_actions)
+    rl_coverage = selected_mass(cell_mass, rl_actions)
+    rows = []
+    for example in fixed_manifest["examples"]:
+        clip_id = example["clip_id"]
+        if clip_id not in index:
+            raise ValueError(f"Fixed qualitative clip is absent: {clip_id}")
+        position = index[clip_id]
+        start = int(example["window_start"])
+        stop = start + int(fixed_manifest["selection"]["frames_per_clip"])
+        if not 0 <= start < stop <= cell_mass.shape[1]:
+            raise ValueError(f"Fixed qualitative window is invalid: {clip_id}")
+        sl = float(supervised_coverage[position, start:stop].mean())
+        rl = float(rl_coverage[position, start:stop].mean())
+        rows.append(
+            {
+                "clip_id": clip_id,
+                "source": example["source"],
+                "video_id": example["video_id"],
+                "source_rank": int(example["source_rank"]),
+                "window_start": start,
+                "window_stop_exclusive": stop,
+                "supervised_window_coverage": sl,
+                "rl_window_coverage": rl,
+                "supervised_minus_rl_window_coverage": sl - rl,
+            }
+        )
+    selections = []
+    for source in sorted({row["source"] for row in rows}):
+        candidates = [row for row in rows if row["source"] == source]
+        median = float(np.median([row["supervised_minus_rl_window_coverage"] for row in candidates]))
+        representative = min(
+            candidates,
+            key=lambda row: (
+                abs(row["supervised_minus_rl_window_coverage"] - median),
+                row["clip_id"],
+            ),
+        )
+        failure = min(
+            candidates,
+            key=lambda row: (row["supervised_minus_rl_window_coverage"], row["clip_id"]),
+        )
+        selections.append(
+            {
+                "source": source,
+                "source_median_delta": median,
+                "representative_clip_id": representative["clip_id"],
+                "failure_clip_id": failure["clip_id"],
+                "roles_may_share_a_clip": representative["clip_id"] == failure["clip_id"],
+            }
+        )
+    return {
+        "fixed_panel_base_seed": 440826,
+        "fixed_panel_clips": len(rows),
+        "selection_rules": {
+            "representative": "within-source closest to median SL-minus-RL four-frame window coverage, then clip ID",
+            "failure": "within-source lowest SL-minus-RL four-frame window coverage, then clip ID",
+        },
+        "all_fixed_panel_rows": rows,
+        "selected_roles": selections,
+    }
+
+
+def compact_policy_row(method: str, seed: int, step: int, report: dict) -> dict[str, Any]:
+    coverage = report["coverage"]
+    saliency = report["saliency"]
+    return {
+        "method": method,
+        "base_seed": seed,
+        "training_seed": seed + 100000,
+        "cumulative_update": step,
+        "coverage_full_macro": coverage["actual"]["full_validation"]["macro_source_mean"],
+        "coverage_offcenter_macro": coverage["actual"]["offcenter_top_quartile"]["macro_source_mean"],
+        "coverage_static_macro": coverage["selection_frequency_top16"]["full_validation"]["macro_source_mean"],
+        "coverage_shuffled_macro": coverage["same_source_shuffled_video"]["full_validation"]["macro_source_mean"],
+        "coverage_center_macro": coverage["center16"]["full_validation"]["macro_source_mean"],
+        "coverage_train_prior_macro": coverage["train_source_prior16"]["full_validation"]["macro_source_mean"],
+        "sim_full_macro": saliency["uniform_selected_density_sim"]["full_validation"]["macro_source_mean"],
+        "cc_full_macro": saliency["uniform_selected_density_cc"]["full_validation"]["macro_source_mean"],
+        "sim_offcenter_macro": saliency["uniform_selected_density_sim"]["offcenter_top_quartile"]["macro_source_mean"],
+        "cc_offcenter_macro": saliency["uniform_selected_density_cc"]["offcenter_top_quartile"]["macro_source_mean"],
+        "center_overlap_full_macro": report["structure"]["center16_overlap_fraction"]["full_validation"]["macro_source_mean"],
+        "normalized_selection_entropy": report["structure"]["normalized_selection_entropy"],
+        "actual_minus_static_macro": report["content_dependence"]["actual_minus_static_macro"],
+        "actual_minus_shuffled_macro": report["content_dependence"]["actual_minus_shuffled_macro"],
+    }
+
+
+def endpoint_diagnostic_summary(
+    supervised_reports: dict[int, dict],
+    rl_reports: dict[int, dict],
+    seeds: tuple[int, ...],
+) -> dict[str, Any]:
+    result = {}
+    for method, reports in (("supervised", supervised_reports), ("rl", rl_reports)):
+        result[method] = {
+            "coverage_full": summarize(
+                [reports[seed]["coverage"]["actual"]["full_validation"]["macro_source_mean"] for seed in seeds], seeds
+            ),
+            "coverage_offcenter": summarize(
+                [reports[seed]["coverage"]["actual"]["offcenter_top_quartile"]["macro_source_mean"] for seed in seeds], seeds
+            ),
+            "coverage_static": summarize(
+                [reports[seed]["coverage"]["selection_frequency_top16"]["full_validation"]["macro_source_mean"] for seed in seeds], seeds
+            ),
+            "coverage_shuffled": summarize(
+                [reports[seed]["coverage"]["same_source_shuffled_video"]["full_validation"]["macro_source_mean"] for seed in seeds], seeds
+            ),
+            "coverage_center": summarize(
+                [reports[seed]["coverage"]["center16"]["full_validation"]["macro_source_mean"] for seed in seeds], seeds
+            ),
+            "coverage_train_prior": summarize(
+                [reports[seed]["coverage"]["train_source_prior16"]["full_validation"]["macro_source_mean"] for seed in seeds], seeds
+            ),
+            "sim_full": summarize(
+                [reports[seed]["saliency"]["uniform_selected_density_sim"]["full_validation"]["macro_source_mean"] for seed in seeds], seeds
+            ),
+            "cc_full": summarize(
+                [reports[seed]["saliency"]["uniform_selected_density_cc"]["full_validation"]["macro_source_mean"] for seed in seeds], seeds
+            ),
+            "center_overlap": summarize(
+                [reports[seed]["structure"]["center16_overlap_fraction"]["full_validation"]["macro_source_mean"] for seed in seeds], seeds
+            ),
+            "selection_entropy": summarize(
+                [reports[seed]["structure"]["normalized_selection_entropy"] for seed in seeds], seeds
+            ),
+            "per_source": {
+                source: {
+                    "coverage_full": summarize(
+                        [reports[seed]["coverage"]["actual"]["full_validation"]["per_source"][source]["mean_video_value"] for seed in seeds], seeds
+                    ),
+                    "coverage_offcenter": summarize(
+                        [reports[seed]["coverage"]["actual"]["offcenter_top_quartile"]["per_source"][source]["mean_video_value"] for seed in seeds], seeds
+                    ),
+                }
+                for source in sorted(reports[seeds[0]]["coverage"]["actual"]["full_validation"]["per_source"])
+            },
+        }
+    return result
+
+
+def resource_summary(
+    readiness: dict[str, Any], cfg: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    seeds = analysis_base_seeds(cfg) if cfg is not None else PLANNED_BASE_SEEDS
+    elapsed = []
+    gpu_seconds = []
+    max_rss = []
+    gpu_peak = []
+    all_attempt_base_clips = []
+    all_attempt_nominal_rows = []
+    for seed in seeds:
+        receipt = readiness["resource_receipts"][str(seed)]
+        if not receipt.get("complete"):
+            raise ValueError("Resource summary requires all evaluated seed receipts")
+        sacct = receipt["sacct"]
+        lineage = receipt.get("restart_of") or {}
+        attempts = sacct.get("attempts")
+        clips, rows = 0, 0
+        training_attempts = attempts if isinstance(attempts, list) else []
+        if lineage:
+            failed = [attempt for attempt in training_attempts
+                      if attempt.get("job_id") == lineage["failed_array_element"]]
+            if len(failed) != 1:
+                raise ValueError("Restart accounting lacks its unique original failed attempt")
+            clips = int(lineage["failed_base_clip_presentations"])
+            rows = int(lineage["failed_nominal_action_rows"])
+            training_attempts = [attempt for attempt in training_attempts
+                                 if attempt.get("job_id") != lineage["failed_array_element"]]
+        successful_clips, successful_rows = 0, 0
+        for attempt in training_attempts:
+            attempt_clips = attempt.get("base_clip_presentations")
+            attempt_rows = attempt.get("nominal_action_rows")
+            if len(training_attempts) == 1 and attempt_clips is None and attempt_rows is None:
+                # One uninterrupted, authoritatively completed 20k chain may
+                # use its fixed exposure. On recovery, every attempt (including
+                # the original restart) needs its own measured consumption;
+                # the 80k endpoint is not an additional attempt's exposure.
+                attempt_clips, attempt_rows = 80000, 20480000
+            if (type(attempt_clips) is not int or attempt_clips < 0
+                    or type(attempt_rows) is not int or attempt_rows != attempt_clips * 256):
+                raise ValueError("Restart/recovery attempt lacks verified logical exposure; withholding gate")
+            successful_clips += attempt_clips
+            successful_rows += attempt_rows
+        if not training_attempts and not lineage:
+            successful_clips, successful_rows = 80000, 20480000
+        if successful_clips < 80000:
+            raise ValueError("Measured attempt logical exposure does not cover the complete 20k endpoint; withholding gate")
+        all_attempt_base_clips.append(clips + successful_clips)
+        all_attempt_nominal_rows.append(rows + successful_rows)
+        if isinstance(attempts, list) and attempts:
+            elapsed.append(float(sum(row["elapsed_seconds"] for row in attempts)))
+            gpu_seconds.append(
+                float(
+                    sum(
+                        row["elapsed_seconds"] * row["allocated_gpu_count"]
+                        for row in attempts
+                    )
+                )
+            )
+        else:
+            elapsed.append(float(sacct["elapsed_seconds"]))
+            gpu_seconds.append(
+                float(sacct["elapsed_seconds"] * sacct["allocated_gpu_count"])
+            )
+        max_rss.append(float(sacct["max_rss_bytes"]))
+        gpu_peak.append(float(sacct["gpu_memory_peak_bytes"]))
+    result = {
+        "hardware": "NVIDIA A40",
+        "allocated_gpus_per_attempt": 1,
+        "requested_host_memory_bytes_per_attempt": 32 * 1024**3,
+        "evaluated_base_seeds": list(seeds),
+        "all_attempt_scheduler_elapsed_seconds": summarize(elapsed, seeds),
+        "all_attempt_allocated_gpu_seconds": summarize(gpu_seconds, seeds),
+        "per_seed_max_rss_bytes": summarize(max_rss, seeds),
+        "per_seed_gpu_memory_peak_bytes": summarize(gpu_peak, seeds),
+        "recovery_attempts_included_when_present": True,
+        "fixed_endpoint_successful_base_clip_presentations": 80000,
+        "fixed_endpoint_successful_nominal_action_rows": 20480000,
+        "all_attempt_base_clip_presentations_including_original_failure": summarize(all_attempt_base_clips, seeds),
+        "all_attempt_nominal_action_rows_including_original_failure": summarize(all_attempt_nominal_rows, seeds),
+        "exposure_curve_scope": "successful_model_history; total cost sums per-attempt consumption without adding endpoint exposure twice",
+    }
+    if cfg is not None and cfg.get("posthoc_seed_policy") is not None:
+        abandoned = readiness.get("abandoned_seed_resource_receipt") or {}
+        if not abandoned.get("complete"):
+            raise ValueError("Resource summary requires abandoned-seed resource accounting")
+        abandoned_receipt = abandoned["receipt"]
+        total_clips = sum(all_attempt_base_clips) + int(
+            abandoned_receipt["total_base_clip_presentations"]
+        )
+        total_rows = sum(all_attempt_nominal_rows) + int(
+            abandoned_receipt["total_nominal_action_rows"]
+        )
+        result["posthoc_attrition_accounting"] = {
+            "excluded_base_seed": cfg["posthoc_seed_policy"]["excluded_base_seed"],
+            "excluded_endpoint_complete": False,
+            "excluded_from_scientific_metrics": True,
+            "abandoned_base_clip_presentations": abandoned_receipt[
+                "total_base_clip_presentations"
+            ],
+            "abandoned_nominal_action_rows": abandoned_receipt[
+                "total_nominal_action_rows"
+            ],
+            "total_supervised_base_clip_presentations_all_attempts": total_clips,
+            "total_supervised_nominal_action_rows_all_attempts": total_rows,
+            "total_supervised_scheduler_elapsed_seconds_all_attempts": (
+                sum(elapsed) + abandoned["scheduler_elapsed_seconds"]
+            ),
+            "total_supervised_allocated_gpu_seconds_all_attempts": (
+                sum(gpu_seconds) + abandoned["allocated_gpu_seconds"]
+            ),
+            "amortized_supervised_nominal_action_rows_per_evaluated_endpoint": (
+                total_rows / len(seeds)
+            ),
+            "abandoned_scheduler_elapsed_seconds": abandoned[
+                "scheduler_elapsed_seconds"
+            ],
+            "abandoned_allocated_gpu_seconds": abandoned[
+                "allocated_gpu_seconds"
+            ],
+            "accounting_note": (
+                "Abandoned seed compute is charged to the five evaluated endpoints; "
+                "nominal rows are not FLOPs or measured runtime."
+            ),
+        }
+    return result
+
+
+def write_json(path: Path, value: Any) -> None:
+    with path.open("x", encoding="utf-8") as handle:
+        json.dump(value, handle, indent=2, sort_keys=True, allow_nan=False)
+        handle.write("\n")
+
+
+def write_result_readme(path: Path, metrics: dict[str, Any], gate: dict[str, Any]) -> None:
+    endpoint = metrics["endpoint_coverage"]
+    num_seeds = len(metrics["analysis_base_seeds"])
+    lines = [
+        "# S1 supervised human-gaze K16 comparison",
+        "",
+        f"Status: complete {num_seeds}-seed paired fixed-endpoint validation curation.",
+        "",
+        (
+            "Primary source/video-macro K16 coverage: "
+            f"supervised {endpoint['supervised']['mean']:.6f}, "
+            f"RL {endpoint['rl']['mean']:.6f}, paired delta "
+            f"{endpoint['paired_supervised_minus_rl']['mean']:+.6f}."
+        ),
+        (
+            "Human-only off-center paired coverage delta: "
+            f"{endpoint['offcenter_paired_supervised_minus_rl']['mean']:+.6f}."
+        ),
+        "",
+        f"Practical HLVid gate: `{gate['decision']}`.",
+        "",
+        "Intervals in `metrics.json` are descriptive and unadjusted; validation was historically explored.",
+        "Nominal training trajectory action rows are an exposure/accounting quantity, not FLOPs or measured runtime.",
+    ]
+    if metrics.get("posthoc_seed_policy") is not None:
+        lines.insert(
+            -1,
+            "Seed 440830 is a post-hoc operational attrition after scheduler preemption; it is excluded from scientific summaries but charged to total compute.",
+        )
+    with path.open("x", encoding="utf-8") as handle:
+        handle.write("\n".join(lines) + "\n")
+
+
+def git_identity() -> dict[str, Any]:
+    def git(*args: str) -> str:
+        return subprocess.run(
+            ["git", *args],
+            cwd=REPOSITORY_ROOT,
+            check=True,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        ).stdout.strip()
+
+    return {
+        "repository": git("remote", "get-url", "origin"),
+        "commit": git("rev-parse", "HEAD"),
+        "dirty": bool(git("status", "--porcelain=v1", "--untracked-files=all")),
+    }
+
+
+def main() -> None:
+    args = parse_args()
+    if args.output_dir.exists():
+        raise FileExistsError(f"Refusing to replace curation output: {args.output_dir}")
+    cfg = load_frozen_analysis_config(args.config)
+    if not isinstance(cfg, dict):
+        raise ValueError("Analysis config must resolve to a mapping")
+    validate_analysis_config(cfg)
+    seeds = analysis_base_seeds(cfg)
+    inventory_path = resolve_repo_path(cfg["checkpoint_provenance"]["inventory"])
+    inventory = load_checkpoint_inventory(
+        inventory_path,
+        expected_sha256=cfg["checkpoint_provenance"]["inventory_sha256"],
+        repository_root=REPOSITORY_ROOT,
+    )
+    action_root = args.action_root or Path(cfg["paths"]["action_export_root"])
+    training_root = args.training_root or Path(cfg["paths"]["supervised_training_root"])
+    args.output_dir.mkdir(parents=True)
+    readiness = collect_readiness(cfg, action_root, training_root)
+    write_json(args.output_dir / "readiness.json", readiness)
+    if args.readiness_only:
+        print(json.dumps({"status": readiness["status"], "output": str(args.output_dir)}))
+        return
+    if readiness["status"] != "ready_for_complete_cpu_curation":
+        gate = evaluate_practical_gate(
+            supervised_reports={},
+            rl_reports={},
+            supervised_resource_complete={},
+            supervised_nominal_action_rows=20480000,
+            rl_nominal_action_rows=81920000,
+            thresholds=cfg["practical_hlvid_gate"],
+            expected_seeds=seeds,
+        )
+        write_json(args.output_dir / "gate.json", gate)
+        raise SystemExit("Required action/resource inputs are incomplete; HLVid remains closed")
+    curation_source = git_identity()
+    if curation_source["dirty"]:
+        raise ValueError("Complete curation requires a clean versioned source checkout")
+
+    manifest_path = Path(cfg["data"]["manifest"])
+    cell_mass_path = Path(cfg["data"]["cell_mass"])
+    if sha256_file(manifest_path) != cfg["data"]["manifest_sha256"]:
+        raise ValueError("STAViS manifest hash drift")
+    if sha256_file(cell_mass_path) != cfg["data"]["cell_mass_sha256"]:
+        raise ValueError("STAViS cell-mass hash drift")
+    offcenter_path = resolve_repo_path(cfg["offcenter_subgroup"]["manifest"])
+    if sha256_file(offcenter_path) != cfg["offcenter_subgroup"]["manifest_sha256"]:
+        raise ValueError("Frozen off-center manifest hash drift")
+    offcenter = load_json(offcenter_path)
+    if offcenter.get("selection_sha256") != cfg["offcenter_subgroup"]["selection_sha256"]:
+        raise ValueError("Frozen off-center selection identity drift")
+    offcenter_ids = {row["clip_id"] for row in offcenter["clips"]}
+    all_records = read_manifest(manifest_path)
+    cache = np.load(cell_mass_path, mmap_mode="r")
+    all_mass = cell_mass_for_records(all_records, cache)
+    prior_cells = source_prior_cells(all_records, all_mass)
+    records = [record for record in all_records if record["split"] == "val"]
+    mass = cell_mass_for_records(records, cache)
+
+    action_paths = expected_action_paths(cfg, action_root)
+    supervised_reports: dict[int, dict[int, dict]] = {step: {} for step in FIXED_STEPS}
+    supervised_actions: dict[int, np.ndarray] = {}
+    rl_reports: dict[int, dict] = {}
+    rl_actions: dict[int, np.ndarray] = {}
+    action_manifests = []
+    compact_rows = []
+    for (method, seed, step), directory in sorted(action_paths.items()):
+        if method == "supervised":
+            _checkpoint, authoritative_provenance = verify_supervised_checkpoint(
+                inventory,
+                training_root=training_root,
+                base_seed=seed,
+                cumulative_update=step,
+            )
+        else:
+            _checkpoint, authoritative_provenance = verify_rl_checkpoint(
+                inventory,
+                base_seed=seed,
+                cumulative_update=step,
+            )
+        export_manifest, actions = load_action_export(
+            directory,
+            records,
+            expected_manifest_sha256=cfg["data"]["manifest_sha256"],
+            expected_cell_mass_sha256=cfg["data"]["cell_mass_sha256"],
+            expected_method=method,
+            expected_base_seed=seed,
+            expected_training_seed=seed + 100000,
+            expected_cumulative_update=step,
+            expected_checkpoint_provenance=authoritative_provenance,
+        )
+        report = policy_report(
+            records,
+            mass,
+            actions,
+            offcenter_clip_ids=offcenter_ids,
+            train_source_prior_cells=prior_cells,
+        )
+        if method == "supervised":
+            supervised_reports[step][seed] = report
+            if step == 20000:
+                supervised_actions[seed] = actions
+        else:
+            rl_reports[seed] = report
+            rl_actions[seed] = actions
+        compact_rows.append(compact_policy_row(method, seed, step, report))
+        action_manifests.append(
+            {
+                "method": method,
+                "base_seed": seed,
+                "cumulative_update": step,
+                "path": str(directory / "manifest.json"),
+                "sha256": sha256_file(directory / "manifest.json"),
+                "checkpoint_tree_sha256": export_manifest["inputs"]["checkpoint_tree_sha256"],
+                "actions_sha256": export_manifest["actions_sha256"],
+                "runtime": export_manifest["runtime"],
+            }
+        )
+
+    endpoint_sl = supervised_reports[20000]
+    endpoint_coverage = {
+        "supervised": summarize(
+            [endpoint_sl[seed]["coverage"]["actual"]["full_validation"]["macro_source_mean"] for seed in seeds], seeds
+        ),
+        "rl": summarize(
+            [rl_reports[seed]["coverage"]["actual"]["full_validation"]["macro_source_mean"] for seed in seeds], seeds
+        ),
+        "paired_supervised_minus_rl": summarize(
+            [
+                endpoint_sl[seed]["coverage"]["actual"]["full_validation"]["macro_source_mean"]
+                - rl_reports[seed]["coverage"]["actual"]["full_validation"]["macro_source_mean"]
+                for seed in seeds
+            ], seeds
+        ),
+        "offcenter_paired_supervised_minus_rl": summarize(
+            [
+                endpoint_sl[seed]["coverage"]["actual"]["offcenter_top_quartile"]["macro_source_mean"]
+                - rl_reports[seed]["coverage"]["actual"]["offcenter_top_quartile"]["macro_source_mean"]
+                for seed in seeds
+            ], seeds
+        ),
+    }
+    endpoint_diagnostics = endpoint_diagnostic_summary(endpoint_sl, rl_reports, seeds)
+    bootstrap = {
+        "full_validation": source_stratified_video_bootstrap_delta(
+            [endpoint_sl[seed]["coverage"]["actual"]["full_validation"] for seed in seeds],
+            [rl_reports[seed]["coverage"]["actual"]["full_validation"] for seed in seeds],
+            iterations=int(cfg["uncertainty"]["bootstrap_iterations"]),
+            seed=int(cfg["uncertainty"]["bootstrap_seed"]),
+            expected_seed_count=len(seeds),
+        ),
+        "offcenter_top_quartile": source_stratified_video_bootstrap_delta(
+            [endpoint_sl[seed]["coverage"]["actual"]["offcenter_top_quartile"] for seed in seeds],
+            [rl_reports[seed]["coverage"]["actual"]["offcenter_top_quartile"] for seed in seeds],
+            iterations=int(cfg["uncertainty"]["bootstrap_iterations"]),
+            seed=int(cfg["uncertainty"]["bootstrap_seed"]),
+            expected_seed_count=len(seeds),
+        ),
+    }
+    agreement = agreement_summary(
+        records, supervised_actions, rl_actions, offcenter_ids, seeds
+    )
+    fixed_qualitative_path = resolve_repo_path(cfg["qualitative"]["fixed_manifest"])
+    if sha256_file(fixed_qualitative_path) != cfg["qualitative"]["fixed_manifest_sha256"]:
+        raise ValueError("Fixed 24-clip qualitative manifest hash drift")
+    qualitative = qualitative_selection(
+        load_json(fixed_qualitative_path),
+        records,
+        mass,
+        supervised_actions[440826],
+        rl_actions[440826],
+    )
+    convergence = summarize_convergence(
+        cfg, inventory, training_root, supervised_reports
+    )
+    resources = resource_summary(readiness, cfg)
+    resource_complete = {
+        seed: readiness["resource_receipts"][str(seed)]["complete"] for seed in seeds
+    }
+    if cfg.get("posthoc_seed_policy") is not None:
+        supervised_nominal_rows = resources["posthoc_attrition_accounting"][
+            "amortized_supervised_nominal_action_rows_per_evaluated_endpoint"
+        ]
+    else:
+        supervised_nominal_rows = resources[
+            "all_attempt_nominal_action_rows_including_original_failure"
+        ]["mean"]
+    gate = evaluate_practical_gate(
+        supervised_reports=endpoint_sl,
+        rl_reports=rl_reports,
+        supervised_resource_complete=resource_complete,
+        supervised_nominal_action_rows=int(supervised_nominal_rows),
+        rl_nominal_action_rows=int(
+            cfg["compute_accounting"]["rl_nominal_training_trajectory_action_rows_per_seed"]
+        ),
+        thresholds=cfg["practical_hlvid_gate"],
+        expected_seeds=seeds,
+    )
+    metrics = {
+        "schema_version": 1,
+        "status": "complete",
+        "analysis_base_seeds": list(seeds),
+        "posthoc_seed_policy": cfg.get("posthoc_seed_policy"),
+        "primary_metric": cfg["metrics"]["primary"],
+        "endpoint_coverage": endpoint_coverage,
+        "endpoint_diagnostics": endpoint_diagnostics,
+        "paired_video_bootstrap": bootstrap,
+        "agreement": agreement,
+        "convergence": convergence,
+        "resources": resources,
+        "qualitative_selection": qualitative,
+        "per_seed_checkpoint_rows": compact_rows,
+        "offcenter_counts": offcenter["counts"],
+        "interpretation": "Descriptive and unadjusted; validation was historically explored.",
+    }
+    write_json(args.output_dir / "metrics.json", metrics)
+    write_json(args.output_dir / "gate.json", gate)
+    OmegaConf.save(
+        config=OmegaConf.create(cfg),
+        f=args.output_dir / "config.yaml",
+    )
+    write_result_readme(args.output_dir / "README.md", metrics, gate)
+    with (args.output_dir / "per_seed_checkpoint_metrics.csv").open(
+        "x", encoding="utf-8", newline=""
+    ) as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(compact_rows[0]))
+        writer.writeheader()
+        writer.writerows(compact_rows)
+    manifest = {
+        "schema_version": 1,
+        "status": "complete",
+        "experiment_id": "supervised_k16_comparison",
+        "analysis_base_seeds": list(seeds),
+        "posthoc_seed_policy": cfg.get("posthoc_seed_policy"),
+        "source": curation_source,
+        "config": str(args.config),
+        "config_sha256": sha256_file(args.config),
+        "resolved_config": str(args.output_dir / "config.yaml"),
+        "resolved_config_sha256": sha256_file(args.output_dir / "config.yaml"),
+        "checkpoint_provenance_inventory": str(inventory_path),
+        "checkpoint_provenance_inventory_sha256": sha256_file(inventory_path),
+        "data_sha256": {
+            "manifest": cfg["data"]["manifest_sha256"],
+            "cell_mass": cfg["data"]["cell_mass_sha256"],
+            "offcenter_manifest": cfg["offcenter_subgroup"]["manifest_sha256"],
+            "fixed_qualitative_manifest": cfg["qualitative"]["fixed_manifest_sha256"],
+        },
+        "action_exports": action_manifests,
+        "resource_receipts": readiness["resource_receipts"],
+        "abandoned_seed_resource_receipt": readiness[
+            "abandoned_seed_resource_receipt"
+        ],
+        "outputs": {
+            name: sha256_file(args.output_dir / name)
+            for name in (
+                "readiness.json",
+                "README.md",
+                "config.yaml",
+                "metrics.json",
+                "gate.json",
+                "per_seed_checkpoint_metrics.csv",
+            )
+        },
+        "hlvid_executed": False,
+        "existing_rl_hlvid_reused_only_if_gate_passes": cfg["existing_rl_hlvid_context"],
+    }
+    write_json(args.output_dir / "manifest.json", manifest)
+    print(
+        json.dumps(
+            {
+                "status": "complete",
+                "output": str(args.output_dir),
+                "hlvid_admitted": gate["hlvid_admitted"],
+            },
+            sort_keys=True,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()

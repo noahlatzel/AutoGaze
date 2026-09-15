@@ -54,6 +54,10 @@ AutoGaze reference is descriptive, not budget- or seed-matched.
   approval, zero-work H100 cancellation, immutable A40 replacement submission,
   per-element same-A40 node-pin relaxation, full-protocol VRAM evidence, and
   the descriptive cross-hardware QA/latency claim boundary.
+- `supervised_k16_admission_receipt_20260910T225706+0200.json`: sole-owner
+  admission for the user-authorized six-seed supervised K16 training array,
+  including immutable user-fork source and inputs, real-model preflight,
+  cycle-safe dependency correction, resources, global ledger, and job ID.
 - `per_seed.csv`, `per_category.csv`, and
   `matched_budget_differences.csv`: reviewable tables.
 - `hlvid_fixed_budget_all_seeds.{png,pdf}`: final figure.

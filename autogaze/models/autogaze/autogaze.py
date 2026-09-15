@@ -316,6 +316,7 @@ class AutoGaze(PreTrainedModel):
         past_attention_mask=None,
         past_conv_values=None,
         recurrent_frame_biases_override=None,
+        return_supervised_log_probs=False,
     ):
         """
         inputs:
@@ -338,6 +339,8 @@ class AutoGaze(PreTrainedModel):
         if not generate_only:
             assert past_key_values is None and past_inputs_embeds is None and past_attention_mask is None and past_conv_values is None, \
                 "If not in generate-only mode, we don't support past_key_values, past_inputs_embeds, past_attention_mask, and past_conv_values yet."
+        if return_supervised_log_probs and (generate_only or not gazing_info):
+            raise ValueError("Supervised distributions require supplied gazing_info and rescoring")
 
         video = inputs['video']
 
@@ -437,14 +440,17 @@ class AutoGaze(PreTrainedModel):
                     allowed_token_ids=allowed_token_ids,
                     allow_eos=allow_eos,
                     min_gaze_tokens_each_frame=min_gaze_tokens_each_frame,
+                    return_supervised_log_probs=return_supervised_log_probs,
                 )  # B * N
                 action_probs = forward_outputs.gaze_probs
                 action_log_probs_all = forward_outputs.gaze_log_probs_all
+                supervised_log_probs = forward_outputs.supervised_action_log_probs_all
                 task_loss_prediction = forward_outputs.task_loss_prediction
             log_action_probs = torch.log(action_probs + 1e-8)  # B * N
         else:
             log_action_probs = None
             action_log_probs_all = None
+            supervised_log_probs = None
             task_loss_prediction = None
 
         # Generate (multi-scale) gazing masks for ease of visualization
@@ -473,6 +479,8 @@ class AutoGaze(PreTrainedModel):
             "past_attention_mask": new_past_attention_mask if use_cache else None,
             "past_conv_values": new_past_conv_values if use_cache else None,
         }
+        if return_supervised_log_probs:
+            to_return["supervised_action_log_probs_all"] = supervised_log_probs
 
         # Postprocess the output to recover from resolution adaptation
         if target_scales is not None and target_patch_size is not None:
