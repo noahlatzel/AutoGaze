@@ -1,0 +1,70 @@
+schema_version: 1
+experiment_id: r2c_k32_fixed_budget_reproduction
+comparison_experiment: r2c_fixed_budget_scaling
+budget: 32
+report_budgets: [1, 2, 4, 8, 16, 24, 32]
+base_seeds: [440826, 440827, 440828]
+continuation_seeds: [540826, 540827, 540828]
+stage1_updates: 2315
+stage2_updates: 7685
+stage3_final_step: 17685
+stage3_milestone_step: 12685
+total_updates: 20000
+validation_interval: 100
+stage1_run_template: r2c_k32_reproduction_stage1_seed{base_seed}
+stage2_run_template: r2c_k32_reproduction_stage2_base{base_seed}_seed{continuation_seed}
+stage3_run_template: r2c_k32_reproduction_stage3_base{base_seed}_seed{continuation_seed}
+static_baselines: outputs/human_gaze/baselines/r2c_k32_fixed_budget_baselines_val.json
+pretrained: outputs/human_gaze/baselines/pretrained_fixedk32_val.json
+k36_reference_root: /storage/user/latn/worktrees/autogaze-r2c-fixed-budgets/outputs/human_gaze
+k36_config: /storage/user/latn/worktrees/autogaze-r2c-fixed-budgets/outputs/human_gaze/grpo/r2c_fixedk36_stage1_seed440826/config.yaml
+reference_budgets:
+  k16:
+    seeds: [440826, 440827, 440828, 440829, 440830, 440831]
+    run_template: r2b_fresh20k_stage3_base{base_seed}_seed{continuation_seed}
+    metric: coverage_k16_macro_source
+  k24:
+    seeds: [440826, 440827, 440828]
+    run_template: r2c_fixedk24_stage3_base{base_seed}_seed{continuation_seed}
+    metric: coverage_k24_macro_source
+  k36:
+    seeds: [440826, 440827, 440828]
+    run_template: r2c_fixedk36_stage3_base{base_seed}_seed{continuation_seed}
+    metric: coverage_k36_macro_source
+training:
+  initialization: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+  trainable: autoregressive_decoder_only
+  frozen: [vision_encoder, connector, task_model]
+  stage1:
+    updates: 2315
+    optimizer: adam
+    learning_rate: 1.0e-5
+    schedule: linear_w_warmup
+    temperature: exponential_1.0_to_0.3
+  stage2:
+    updates: 7685
+    optimizer: adam_reset
+    learning_rate: 3.0e-6
+    schedule: constant
+    temperature: 0.3
+  stage3:
+    new_updates: 10000
+    optimizer: adam_preserved
+    learning_rate: 3.0e-6
+    schedule: constant
+    temperature: 0.3
+  endpoint_selection: fixed_step_20000
+diagnostics:
+  checkpoints_cumulative: [10000, 15000, 20000]
+  controls: [dynamic_policy, center_k, static_selection_frequency_topk, same_source_shuffled_video]
+decision_rules:
+  coverage_pass: final_three_seed_mean_strictly_exceeds_source_prior_k32
+  content_dependence_pass: every_endpoint_seed_dynamic_strictly_exceeds_static_topk_and_same_source_shuffled
+  checkpoint_selection: fixed_step_20000_not_best_validation
+  test_split_opened: false
+slurm:
+  partition: NORMAL
+  gpu_type: rtx_5000
+  training_array_tasks: 3
+  diagnostic_array_tasks: 3
+  maximum_counted_jobs: 10
