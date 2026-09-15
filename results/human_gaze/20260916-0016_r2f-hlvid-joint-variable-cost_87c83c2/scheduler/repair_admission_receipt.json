@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-09-13T23:59:05Z",
+  "sole_owner_task": "01a05a0a-3c7e-7053-aa24-5069bff7fa96",
+  "jobs": {
+    "replay": {
+      "job_id": "1705996",
+      "execution_commit": "d3b8d5a4abc448e78021f7085563c0f930113618",
+      "run_id": "20260914-0153_r2f-r2d-hlvid-allocation-replay_d3b8d5a",
+      "state": "PENDING",
+      "reason": "Priority",
+      "projected_start_cest": "2026-09-15T23:39:52+02:00",
+      "requested": {
+        "gpu_type": "a40",
+        "gpus": 1,
+        "cpus": 5,
+        "host_memory_gib": 128,
+        "wall_hours": 24
+      },
+      "dependency_submitted": "afterok:1690935",
+      "effective_dependency": "(null)"
+    },
+    "supervised": {
+      "array_job_id": "1705995",
+      "array": "0-5%1",
+      "execution_commit": "ec320a5435275c6098c6d299b11d98d18d9b1afb",
+      "run_id": "20260914-0158_supervised-k16-comparison_ec320a5",
+      "state": "PENDING",
+      "reason": "Priority",
+      "projected_start_cest": "2026-09-16T23:40:00+02:00",
+      "requested": {
+        "gpu_type": "a40",
+        "gpus": 1,
+        "cpus": 5,
+        "host_memory_gib": 32,
+        "wall_hours": 24,
+        "requeue": false
+      },
+      "effective_dependency": "(null)",
+      "same_base_seeds": [
+        440826,
+        440827,
+        440828,
+        440829,
+        440830,
+        440831
+      ],
+      "continuation_seeds": [
+        540826,
+        540827,
+        540828,
+        540829,
+        540830,
+        540831
+      ]
+    }
+  },
+  "orchestration": {
+    "current_running_gpus": 0,
+    "pending_possible_concurrent_gpus": 2,
+    "pending_possible_requested_host_memory_gib": 160,
+    "ceiling_gpus": 3,
+    "ceiling_host_memory_gib": 384,
+    "counted_submissions": 7,
+    "last_verified_qos_submitted_cap": 20
+  },
+  "rejected_empty_nodelist_submit": {
+    "created_job": false,
+    "error": "Batch job submission failed: Requested node configuration is not available",
+    "requested_override": "--nodelist=",
+    "note": "Empty sbatch node override rejected; queue verified before successful unchanged-launcher submission. No duplicate job or allocation was created."
+  },
+  "replay_node_relaxation": {
+    "command": "scontrol update JobId=1705996 ReqNodeList=\"\"",
+    "before": "JobId=1705996 JobName=gaze-r2f-replay UserId=latn(18939) GroupId=tumuser(20909) MCS_label=N/A Priority=910111 Nice=0 Account=stud QOS=stud JobState=PENDING Reason=Priority Dependency=(null) Requeue=1 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0 RunTime=00:00:00 TimeLimit=1-00:00:00 TimeMin=N/A SubmitTime=2026-09-14T01:58:18 EligibleTime=2026-09-14T01:58:18 AccrueTime=2026-09-14T01:58:18 StartTime=Unknown EndTime=Unknown Deadline=N/A SuspendTime=None SecsPreSuspend=0 LastSchedEval=2026-09-14T01:58:28 Scheduler=Main Partition=NORMAL AllocNode:Sid=atcremers63:3223722 ReqNodeList=node17 ExcNodeList=(null) NodeList= NumNodes=1-1 NumCPUs=5 NumTasks=1 CPUs/Task=5 ReqB:S:C:T=0:0:*:* ReqTRES=cpu=5,mem=128G,node=1,billing=5,gres/gpu=1,gres/gpu:a40=1 AllocTRES=(null) Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=* MinCPUsNode=5 MinMemoryTRES=16000M MinTmpDiskNode=0 Features=(null) DelayBoot=00:00:00 OverSubscribe=OK Exclusive=NO Contiguous=0 Licenses=(null) LicensesAlloc=(null) Network=(null) Command=/home/stud/latn/.codex/worktrees/r2f-replay-d3b8d5a-20260914/experiments/human_gaze/slurm/run_r2d_hlvid_allocation_replay.sbatch SubmitLine=sbatch --parsable --dependency=afterok:1690935 --export=ALL,R2F_REPLAY_WORKTREE=/home/stud/latn/.codex/worktrees/r2f-replay-d3b8d5a-20260914,R2F_REPLAY_CODE_COMMIT=d3b8d5a4abc448e78021f7085563c0f930113618,R2F_REPLAY_RUN_ID=20260914-0153_r2f-r2d-hlvid-allocation-replay_d3b8d5a,R2F_PROTOCOL_AUDIT_DIR=/home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d experiments/human_gaze/slurm/run_r2d_hlvid_allocation_replay.sbatch WorkDir=/home/stud/latn/.codex/worktrees/r2f-replay-d3b8d5a-20260914 StdErr= StdIn=/dev/null StdOut=/storage/user/latn/slurm/logs/gaze-r2f-replay-1705996.out MemPerTres=gpu:16000 TresPerNode=gres/gpu:a40:1 TresPerTask=cpu=5\n",
+    "after": "JobId=1705996 JobName=gaze-r2f-replay UserId=latn(18939) GroupId=tumuser(20909) MCS_label=N/A Priority=910113 Nice=0 Account=stud QOS=stud JobState=PENDING Reason=None Dependency=(null) Requeue=1 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0 RunTime=00:00:00 TimeLimit=1-00:00:00 TimeMin=N/A SubmitTime=2026-09-14T01:58:18 EligibleTime=2026-09-14T01:58:18 AccrueTime=2026-09-14T01:58:18 StartTime=Unknown EndTime=Unknown Deadline=N/A SuspendTime=None SecsPreSuspend=0 LastSchedEval=2026-09-14T01:58:28 Scheduler=Main Partition=NORMAL AllocNode:Sid=atcremers63:3223722 ReqNodeList=(null) ExcNodeList=(null) NodeList= NumNodes=1-1 NumCPUs=5 NumTasks=1 CPUs/Task=5 ReqB:S:C:T=0:0:*:* ReqTRES=cpu=5,mem=128G,node=1,billing=5,gres/gpu=1,gres/gpu:a40=1 AllocTRES=(null) Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=* MinCPUsNode=5 MinMemoryTRES=16000M MinTmpDiskNode=0 Features=(null) DelayBoot=00:00:00 OverSubscribe=OK Exclusive=NO Contiguous=0 Licenses=(null) LicensesAlloc=(null) Network=(null) Command=/home/stud/latn/.codex/worktrees/r2f-replay-d3b8d5a-20260914/experiments/human_gaze/slurm/run_r2d_hlvid_allocation_replay.sbatch SubmitLine=sbatch --parsable --dependency=afterok:1690935 --export=ALL,R2F_REPLAY_WORKTREE=/home/stud/latn/.codex/worktrees/r2f-replay-d3b8d5a-20260914,R2F_REPLAY_CODE_COMMIT=d3b8d5a4abc448e78021f7085563c0f930113618,R2F_REPLAY_RUN_ID=20260914-0153_r2f-r2d-hlvid-allocation-replay_d3b8d5a,R2F_PROTOCOL_AUDIT_DIR=/home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d experiments/human_gaze/slurm/run_r2d_hlvid_allocation_replay.sbatch WorkDir=/home/stud/latn/.codex/worktrees/r2f-replay-d3b8d5a-20260914 StdErr= StdIn=/dev/null StdOut=/storage/user/latn/slurm/logs/gaze-r2f-replay-1705996.out MemPerTres=gpu:16000 TresPerNode=gres/gpu:a40:1 TresPerTask=cpu=5\n",
+    "req_node_before": "node17",
+    "req_node_after": "(null)",
+    "changed_scientific_or_resource_fields": false,
+    "checked_unchanged_fields": [
+      "JobId",
+      "JobName",
+      "ReqTRES",
+      "TimeLimit",
+      "NumCPUs",
+      "NumTasks",
+      "CPUs/Task",
+      "Partition",
+      "Command",
+      "WorkDir",
+      "Requeue",
+      "Restarts",
+      "MemPerTres",
+      "TresPerNode",
+      "TresPerTask",
+      "Dependency"
+    ]
+  },
+  "queue_uncertainty": "squeue --start projections are dynamic, not guaranteed. The common array projection does not imply six simultaneous starts; throttle remains1.",
+  "nvila_qa_in_new_jobs": 0,
+  "frozen_completed_artifacts_overwritten": false
+}

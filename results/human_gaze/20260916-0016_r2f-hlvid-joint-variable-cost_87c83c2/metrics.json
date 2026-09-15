@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "run_id": "20260916-0016_r2f-hlvid-joint-variable-cost_87c83c2",
+  "source_qa_run_id": "20260901-0156_r2f-r2d-hlvid-secondary_ecf1535",
+  "status": "complete_secondary_descriptive",
+  "accuracy_status": "complete_three_seed_pairs",
+  "allocation_status": "validated_replay_complete",
+  "benchmark": "HLVid official test",
+  "human_gaze_protected_test_accessed": false,
+  "interpretation_boundary": "Separate secondary deployment evidence; does not alter the primary fixed-budget conclusion and does not isolate allocation from changed later spatial ordering.",
+  "primary_estimand": "equal-seed_mean_macro_video_exact_accuracy",
+  "secondary_estimand": "equal-seed_mean_question_micro_exact_accuracy",
+  "r2d_in_domain_context": {
+    "source_metrics_sha256": "d173ee5f998c53509b60e7718915e92cf9ee191a26fd5808b4f67191d5e7d71f",
+    "decision": "negative_retain_fixed_k16",
+    "fixed_endpoint_updates": 20000,
+    "matched_compute_band": [
+      15.5,
+      16.5
+    ],
+    "three_seed_means": {
+      "calibrated_validation_mean_k": 15.155946417959834,
+      "variable_coverage": 0.3787515245426074,
+      "forced_k16_coverage": 0.417116669753735,
+      "variable_minus_forced_k16": -0.038365145211127605,
+      "allocation_lift": 0.007764457516113728
+    },
+    "allocation_only_control": "actual versus same-source shuffled lengths on common forced-K36 spatial ordering; not EOS versus forced-K16"
+  },
+  "eos_calibration_transfer": [
+    {
+      "base_seed": 440826,
+      "training_split": "train_source_balanced_fixed_subset",
+      "target_mean_spatial_actions": 16.0,
+      "calibration_mean_spatial_actions": 16.091145833333332,
+      "hlvid_mean_spatial_actions": 7.91331995620854
+    },
+    {
+      "base_seed": 440827,
+      "training_split": "train_source_balanced_fixed_subset",
+      "target_mean_spatial_actions": 16.0,
+      "calibration_mean_spatial_actions": 16.00390625,
+      "hlvid_mean_spatial_actions": 7.367539742692786
+    },
+    {
+      "base_seed": 440828,
+      "training_split": "train_source_balanced_fixed_subset",
+      "target_mean_spatial_actions": 16.0,
+      "calibration_mean_spatial_actions": 16.098958333333332,
+      "hlvid_mean_spatial_actions": 7.84828186541252
+    }
+  ],
+  "per_seed": [
+    {
+      "base_seed": 440826,
+      "variable": {
+        "num_correct": 132,
+        "question_micro_accuracy": 0.4925373134328358,
+        "macro_video_accuracy": 0.4938442509871082,
+        "num_videos": 77,
+        "mean_decoder_spatial_actions": 7.91331995620854,
+        "decoder_eos_action_rate": 0.9864719371890547,
+        "mean_retained_patches": 31.65327982483416,
+        "mean_visual_tokens": 27738.003731343284,
+        "mean_expanded_context_tokens": 27821.89552238806,
+        "allocation_evidence_source": "validated_question_agnostic_processor_replay",
+        "legacy_process_counter_scope_complete": false
+      },
+      "forced_k16": {
+        "num_correct": 137,
+        "question_micro_accuracy": 0.5111940298507462,
+        "macro_video_accuracy": 0.5100316350316351,
+        "num_videos": 77,
+        "mean_decoder_spatial_actions": 16.0,
+        "decoder_eos_action_rate": 0.0,
+        "mean_retained_patches": 64.0,
+        "mean_visual_tokens": null,
+        "mean_expanded_context_tokens": null,
+        "allocation_evidence_source": "coherent_exact_forced_k16_action_contract",
+        "legacy_process_counter_scope_complete": false
+      },
+      "variable_minus_forced_k16_macro_video": -0.016187384044526854,
+      "variable_minus_forced_k16_question_micro": -0.018656716417910446
+    },
+    {
+      "base_seed": 440827,
+      "variable": {
+        "num_correct": 130,
+        "question_micro_accuracy": 0.48507462686567165,
+        "macro_video_accuracy": 0.4739153703439417,
+        "num_videos": 77,
+        "mean_decoder_spatial_actions": 7.367539742692786,
+        "decoder_eos_action_rate": 0.9927195079291045,
+        "mean_retained_patches": 29.470158970771145,
+        "mean_visual_tokens": 26342.35447761194,
+        "mean_expanded_context_tokens": 26426.246268656716,
+        "allocation_evidence_source": "validated_question_agnostic_processor_replay",
+        "legacy_process_counter_scope_complete": false
+      },
+      "forced_k16": {
+        "num_correct": 135,
+        "question_micro_accuracy": 0.503731343283582,
+        "macro_video_accuracy": 0.5063519813519813,
+        "num_videos": 77,
+        "mean_decoder_spatial_actions": 16.0,
+        "decoder_eos_action_rate": 0.0,
+        "mean_retained_patches": 64.0,
+        "mean_visual_tokens": null,
+        "mean_expanded_context_tokens": null,
+        "allocation_evidence_source": "coherent_exact_forced_k16_action_contract",
+        "legacy_process_counter_scope_complete": false
+      },
+      "variable_minus_forced_k16_macro_video": -0.03243661100803963,
+      "variable_minus_forced_k16_question_micro": -0.01865671641791039
+    },
+    {
+      "base_seed": 440828,
+      "variable": {
+        "num_correct": 127,
+        "question_micro_accuracy": 0.47388059701492535,
+        "macro_video_accuracy": 0.48110460967603824,
+        "num_videos": 77,
+        "mean_decoder_spatial_actions": 7.84828186541252,
+        "decoder_eos_action_rate": 0.9885040941127695,
+        "mean_retained_patches": 31.39312746165008,
+        "mean_visual_tokens": 27572.126865671642,
+        "mean_expanded_context_tokens": 27656.018656716416,
+        "allocation_evidence_source": "validated_question_agnostic_processor_replay",
+        "legacy_process_counter_scope_complete": false
+      },
+      "forced_k16": {
+        "num_correct": 131,
+        "question_micro_accuracy": 0.48880597014925375,
+        "macro_video_accuracy": 0.48486156700442407,
+        "num_videos": 77,
+        "mean_decoder_spatial_actions": 16.0,
+        "decoder_eos_action_rate": 0.0,
+        "mean_retained_patches": 64.0,
+        "mean_visual_tokens": null,
+        "mean_expanded_context_tokens": null,
+        "allocation_evidence_source": "coherent_exact_forced_k16_action_contract",
+        "legacy_process_counter_scope_complete": false
+      },
+      "variable_minus_forced_k16_macro_video": -0.0037569573283858237,
+      "variable_minus_forced_k16_question_micro": -0.014925373134328401
+    }
+  ],
+  "aggregate": {
+    "variable": {
+      "mean_macro_video_accuracy_over_seeds": 0.4829547436690294,
+      "macro_video_accuracy_seed_sd": 0.010092438643182834,
+      "macro_video_accuracy_seed_t95_interval": [
+        0.4578837362310954,
+        0.5080257511069634
+      ],
+      "mean_question_micro_accuracy_over_seeds": 0.48383084577114427,
+      "question_micro_accuracy_seed_sd": 0.009390341337401431,
+      "question_micro_accuracy_seed_t95_interval": [
+        0.4605039447278812,
+        0.5071577468144073
+      ],
+      "mean_decoder_spatial_actions_over_seeds": 7.709713854771283,
+      "mean_retained_patches_over_seeds": 30.83885541908513,
+      "mean_visual_tokens_over_seeds": 27217.49502487562,
+      "mean_expanded_context_tokens_over_seeds": 27301.3868159204
+    },
+    "forced_k16": {
+      "mean_macro_video_accuracy_over_seeds": 0.5004150611293469,
+      "macro_video_accuracy_seed_sd": 0.013594791187107377,
+      "macro_video_accuracy_seed_t95_interval": [
+        0.4666437276569008,
+        0.5341863946017928
+      ],
+      "mean_question_micro_accuracy_over_seeds": 0.5012437810945273,
+      "question_micro_accuracy_seed_sd": 0.011399442027253306,
+      "question_micro_accuracy_seed_t95_interval": [
+        0.47292599726072493,
+        0.5295615649283296
+      ],
+      "mean_decoder_spatial_actions_over_seeds": 16.0,
+      "mean_retained_patches_over_seeds": 64.0,
+      "mean_visual_tokens_over_seeds": null,
+      "mean_expanded_context_tokens_over_seeds": null
+    },
+    "variable_minus_forced_k16": {
+      "mean_macro_video_accuracy_difference": -0.017460317460317436,
+      "paired_video_bootstrap": {
+        "method": "paired_video_cluster_percentile_bootstrap",
+        "confidence": 0.9,
+        "replicates": 10000,
+        "seed": 20260901,
+        "estimand": "macro_video",
+        "seed_resampling": false,
+        "pairing": "same_video_sample_across_policies_and_all_three_seeds",
+        "point_estimate": -0.017460317460317464,
+        "interval": [
+          -0.05562770562770563,
+          0.017536075036074985
+        ]
+      },
+      "seed_t95_interval": [
+        -0.05318752970278,
+        0.018266894782145122
+      ],
+      "question_micro_paired_video_bootstrap": {
+        "method": "paired_video_cluster_percentile_bootstrap",
+        "confidence": 0.9,
+        "replicates": 10000,
+        "seed": 20260901,
+        "estimand": "question_micro",
+        "seed_resampling": false,
+        "pairing": "same_video_sample_across_policies_and_all_three_seeds",
+        "point_estimate": -0.017412935323383085,
+        "interval": [
+          -0.048524230879521534,
+          0.01379469251549338
+        ]
+      },
+      "question_micro_seed_t95_interval": [
+        -0.022764493445149143,
+        -0.012061377201617013
+      ],
+      "mean_question_micro_accuracy_difference": -0.017412935323383078,
+      "mean_decoder_spatial_actions_difference": -8.290286145228716
+    }
+  }
+}
