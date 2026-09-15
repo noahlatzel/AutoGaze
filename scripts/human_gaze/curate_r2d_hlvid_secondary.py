@@ -790,21 +790,26 @@ missing in this accuracy-only curation."""
     else:
         variable = aggregate["variable"]
         comparison = aggregate["variable_minus_forced_k16"]
+        calibration_means = [
+            row["calibration_mean_spatial_actions"]
+            for row in metrics["eos_calibration_transfer"]
+        ]
         action_reduction = 100.0 * (
             1.0 - variable["mean_decoder_spatial_actions_over_seeds"] / 16.0
         )
         allocation_summary = f"""The processor-only replay is complete and validated. Across the three
-seeds, actual variable EOS used {variable['mean_decoder_spatial_actions_over_seeds']:.3f}
-spatial actions and {variable['mean_retained_patches_over_seeds']:.3f} retained
-patches per frame on average, {action_reduction:.1f}% below the exact-K16
-contract. Mean visual and expanded-context counts were
-{variable['mean_visual_tokens_over_seeds']:.3f} and
-{variable['mean_expanded_context_tokens_over_seeds']:.3f}, respectively.
+seeds, actual variable EOS used {variable['mean_decoder_spatial_actions_over_seeds']:.3f} spatial actions and
+{variable['mean_retained_patches_over_seeds']:.3f} retained patches per frame on average—{action_reduction:.1f}% below
+the exact-K16 contract. Mean visual and expanded-context counts were
+{variable['mean_visual_tokens_over_seeds']:.3f} and {variable['mean_expanded_context_tokens_over_seeds']:.3f}, respectively.
+Training-only calibration means were {', '.join(f'{value:.3f}' for value in calibration_means)} against
+the K16 target, so the roughly K7.7 HLVid deployment is a calibration-transfer
+miss rather than evidence that the target budget was met.
 Forced-K16 visual/context counts are unavailable in the preserved legacy QA, so
 no visual-token ratio or end-to-end speedup is inferred. The primary
-variable-minus-forced accuracy difference was
-{100.0 * comparison['mean_macro_video_accuracy_difference']:.2f} percentage
-points; both retained uncertainty views are reported in `metrics.json`."""
+variable-minus-forced accuracy difference was {100.0 * comparison['mean_macro_video_accuracy_difference']:.2f}
+percentage points; both retained uncertainty views are reported in
+`metrics.json`."""
         cost_caption = """Green bars report question-weighted actual mean spatial
 actions from the validated replay; the dotted reference is the exact-K16
 contract. Recovered patches are four times the spatial-action count."""
@@ -815,10 +820,10 @@ contract. Recovered patches are four times the spatial-action count."""
                 for row in completed_replay["segments"]
             )
             scheduler_summary = f"""Slurm job {completed_replay['job_id']} consumed
-{completed_replay['reserved_gpu_seconds_including_preemption'] / 3600.0:.2f}
-allocated A40-hours across its preserved parent attempts ({segments}). This is
-allocated lane wall time, not measured CUDA utilization. Exact accounting rows
-and the admission/node-relaxation receipts are under `scheduler/`."""
+{completed_replay['reserved_gpu_seconds_including_preemption'] / 3600.0:.2f} allocated A40-hours across its preserved parent attempts
+({segments}). This is allocated lane wall time, not measured CUDA utilization.
+Exact accounting rows and the admission/node-relaxation receipts are under
+`scheduler/`."""
         else:
             scheduler_summary = "Scheduler accounting was not supplied to this curation."
 
@@ -869,7 +874,8 @@ coverage degradation or require a positive HLVid story.
 `actual_vs_forced_k16`: HLVid video-macro exact-match accuracy for the same three
 independently trained R2d checkpoints under calibrated variable EOS and coherent
 forced K16. Each endpoint contains all 268 official test questions / 77 videos.
-Lines join seeds only for legibility, not training trajectories. {cost_caption}
+Lines join seeds only for legibility, not training trajectories.
+{cost_caption}
 
 `paired_accuracy_deltas`: Within-checkpoint variable-EOS minus forced-K16 accuracy
 (percentage points); video-macro is primary and question-micro is sensitivity.
