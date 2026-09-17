@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "completed_unique_answers": 1608,
+  "questions_per_seed": 268,
+  "seed_count": 6,
+  "evidence_states": {
+    "attempt_started": 1611,
+    "completed_answer": 1608,
+    "failed": 2
+  },
+  "checks": [
+    "dataset identity and parquet hash",
+    "prediction parsing and correctness",
+    "per-run summary/results/event/manifest hashes",
+    "checkpoint hashes",
+    "durable evidence identities and unique completed answers",
+    "exact 128-frame sampling and successful decoding",
+    "exact eight unique fine actions",
+    "post-adaptation patches/padding",
+    "no context truncation",
+    "independent paired-CSV count recomputation"
+  ],
+  "tests": {
+    "passed": 40,
+    "command": "PYTHONPATH=\"$PWD\" uv run --no-project --python /home/stud/latn/miniconda3/envs/autogaze/bin/python -m pytest tests/test_hlvid_k8_curation.py tests/test_hlvid_fixed_budget_adapter.py tests/test_hlvid_fixed_budget_evaluator.py tests/test_hlvid_evidence.py -q"
+  },
+  "limitations": [
+    "Historical reference has no exact per-question decode/runtime provenance or token telemetry.",
+    "Bootstrap is descriptive, post-hoc and conditional on the six observed policies."
+  ]
+}

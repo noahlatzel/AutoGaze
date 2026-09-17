@@ -1,0 +1,166 @@
+{
+  "accounting_includes": "Both decode failures, both explicit retries, and both preempted/requeued seed-440831 segments.",
+  "analysis_script_sha256": "25ad8349b43adf38a53d9f2ed1f2b0f689f8a59d4ee0ce5e35c75a405555b27f",
+  "curated_file_sha256": {
+    "README.md": "36d5f41b7ba5e202c6453b395d97467c64697f435256de252936bf21766c1a22",
+    "accuracy_by_seed.pdf": "bd0e55bd01ef88f4c358af6ea0cc98ad56dd14c7ddf892666d32199e83052aaf",
+    "accuracy_by_seed.png": "bdef4379ffc8707041b6aa867ea0a77f340776d85478ca7edcebbf70a7ed19d2",
+    "config.yaml": "f25204289c6a70f8159185eaa8ed167e11af39932ac9afdfe7dc61b2fc009822",
+    "metrics.json": "171af3326c80f4c0dc1108edb47c22830f35e4ae18e6ebcbc5e763a1e5bb80df",
+    "paired_correctness.csv": "a2d0054fa052e6a67986aefbf0c3eec0cdc24305878906914039962d65f63686",
+    "per_seed.csv": "5076e588d6240f6edd464eb86276e2647639a3e686cd79349c8aeebf853bd4eb",
+    "resources.csv": "6371e34ce55701afbdc8a7b69ef169b0af3a8f21ef5149aa3a96c98c705ce755",
+    "slurm_allocations.psv": "6213fe3df74a255171021fd0fc67f93ba8d78465d04710fe4c28328cdda74b89",
+    "verification.json": "42ac99e1f23e14c74a2959f289241c5481d6a23affe33781e422a39add96c3eb"
+  },
+  "dataset_sha256": "ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a",
+  "execution_commit": "b1cf8c2f572033b84d4c4d47e65fa3faca6bfcda",
+  "historical_reference_hashes": {
+    "results.jsonl": "a8d905c749c8958c69e06004b255cb69adb517d5eefb0bfa9235ac965fe3c715",
+    "summary.json": "d08fc9b0fa8d89cf584d2fad56549c19d3a79788f065662304dc3a5e0a6e132e"
+  },
+  "historical_reference_path": "/home/stud/latn/AutoGaze/outputs/hlvid/nvila_default_autogaze",
+  "protocol_comparability": "Question IDs, answers, videos, recorded frame/thumbnail/tile settings, model path, dtype and batch sizes match. Historical reference lacks per-question exact-decode, runtime/model hashes and token telemetry; strict runtime/token matching is unverified.",
+  "runs": [
+    {
+      "artifact_path": "/storage/user/latn/worktrees/autogaze-hlvid-k16-at-k8/outputs/human_gaze/hlvid_nvila/r2e_k16_at_k8/20260916-0019_r2e_k16-at-k8_b1cf8c2_seed440826",
+      "checkpoint_hashes": {
+        "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "model.safetensors": "d008a458e62a15c69a236e4585a248b185343e82c2b6ece205d6638d4578b9ff",
+        "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+      },
+      "evidence_index_sha256": "00e764a2b6b3842ed5bd3b7219f2ec8dedb72d8eb52a8535e872b8cd3dfc5caf",
+      "hashes": {
+        "config.yaml": "d98c8077533cd1904a7431f620782636b240bc8a8feb0072c9bbd379fde162e1",
+        "events.jsonl": "4fe5737ad855aa247d040642326bee1898b5751237aa80389cee53cd06585e83",
+        "results.jsonl": "a30d7a11cf4e24c2177fe8ec45322f670901b70976c0cd5569b81114382326b7",
+        "run_manifest.json": "eaeb07125b110c5397164cb27505607c84844c9b83a883e0429ef976417c1d73",
+        "summary.json": "d8e71953305ed3823187a1f4121b8b89d9cc6c700056fe9da03c152f8edbbd30"
+      },
+      "record_count": 536,
+      "run_id": "20260916-0019_r2e_k16-at-k8_b1cf8c2_seed440826",
+      "states": {
+        "attempt_started": 268,
+        "completed_answer": 268
+      },
+      "unterminated_attempts": 0
+    },
+    {
+      "artifact_path": "/storage/user/latn/worktrees/autogaze-hlvid-k16-at-k8/outputs/human_gaze/hlvid_nvila/r2e_k16_at_k8/20260916-0019_r2e_k16-at-k8_b1cf8c2_seed440827",
+      "checkpoint_hashes": {
+        "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "model.safetensors": "669777ee6191c2a01ba1069f3492cb8e75aeaae307bdc5bf895ff13145c4f22a",
+        "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+      },
+      "evidence_index_sha256": "f881ac5bda5114bd3ec4909048657906a8af6ef6d4f41265633cb63942a71f50",
+      "hashes": {
+        "config.yaml": "d98c8077533cd1904a7431f620782636b240bc8a8feb0072c9bbd379fde162e1",
+        "events.jsonl": "a65bfb7b8191a85e47b67fb1bcec1db13713335c727b3a4d602292f8f9ca4bf9",
+        "results.jsonl": "921640294621e6012cd4eddfc4e8cf2869579176e032256c3f2fc73d76b3f265",
+        "run_manifest.json": "3d0d4c797df508c94950ff7085d43f43ed662378bd46ce81aad4c45bd4639e9d",
+        "summary.json": "f4516fe22c92e63eaec6a374c166ebce4c6203ef8a1ec44f2063a72b98dc0929"
+      },
+      "record_count": 536,
+      "run_id": "20260916-0019_r2e_k16-at-k8_b1cf8c2_seed440827",
+      "states": {
+        "attempt_started": 268,
+        "completed_answer": 268
+      },
+      "unterminated_attempts": 0
+    },
+    {
+      "artifact_path": "/storage/user/latn/worktrees/autogaze-hlvid-k16-at-k8/outputs/human_gaze/hlvid_nvila/r2e_k16_at_k8/20260916-0019_r2e_k16-at-k8_b1cf8c2_seed440828",
+      "checkpoint_hashes": {
+        "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "model.safetensors": "83cdc62cda40d75d9dedf34134484715f38a984542d1e27e1dd78c9bcfa69596",
+        "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+      },
+      "evidence_index_sha256": "3d686fece8dcbea2f273782c7c508fadff5c440fad74de0f353f7dfabf1c736b",
+      "hashes": {
+        "config.yaml": "d98c8077533cd1904a7431f620782636b240bc8a8feb0072c9bbd379fde162e1",
+        "events.jsonl": "559e41730f7c66f8d74b1fc58963a9e725ee388b16411957d1d612a613eee9e5",
+        "results.jsonl": "3dd6aa377d2502cedc9bc2d70dadda74c5c56274067f1d579067776590be019a",
+        "run_manifest.json": "0af1010a877cd8eeb7b93c983306da84bf2a0be9e593c48dd104938365841472",
+        "summary.json": "5bc91fdb9103c631f3b4063ce43122f123fc70536e8d49a502d495eb2eed2621"
+      },
+      "record_count": 536,
+      "run_id": "20260916-0019_r2e_k16-at-k8_b1cf8c2_seed440828",
+      "states": {
+        "attempt_started": 268,
+        "completed_answer": 268
+      },
+      "unterminated_attempts": 0
+    },
+    {
+      "artifact_path": "/storage/user/latn/worktrees/autogaze-hlvid-k16-at-k8/outputs/human_gaze/hlvid_nvila/r2e_k16_at_k8/20260916-0019_r2e_k16-at-k8_b1cf8c2_seed440829",
+      "checkpoint_hashes": {
+        "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "model.safetensors": "fe287cc2aaaf84153f277da87103b37c3c7949ce3f66c9ebbedfeeeebc37658d",
+        "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+      },
+      "evidence_index_sha256": "3495637ee4967dc794951de4e32f9b5a80729e8721a4f41f27de581c1b0d18b4",
+      "hashes": {
+        "config.yaml": "d98c8077533cd1904a7431f620782636b240bc8a8feb0072c9bbd379fde162e1",
+        "events.jsonl": "c554f2e403f51742916d9275caa7ea0a58d58792252f487b190b12103386fe82",
+        "results.jsonl": "cf238a31be143875765179a109df69cb3dfa13959c5a25c291babf71d150810a",
+        "run_manifest.json": "270217264b9b80a4572d463e7c55473135e198c0897d3b139b0304df610754fb",
+        "summary.json": "bb67d6256a698ecc528996c25941896f2497307350893ac1a14921b1d2a932c8"
+      },
+      "record_count": 538,
+      "run_id": "20260916-0019_r2e_k16-at-k8_b1cf8c2_seed440829",
+      "states": {
+        "attempt_started": 269,
+        "completed_answer": 268,
+        "failed": 1
+      },
+      "unterminated_attempts": 0
+    },
+    {
+      "artifact_path": "/storage/user/latn/worktrees/autogaze-hlvid-k16-at-k8/outputs/human_gaze/hlvid_nvila/r2e_k16_at_k8/20260916-0019_r2e_k16-at-k8_b1cf8c2_seed440830",
+      "checkpoint_hashes": {
+        "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "model.safetensors": "ec287894d2f77b8fcd6e6fa102460c7b4533a671942dd713506ca8abc6788180",
+        "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+      },
+      "evidence_index_sha256": "6359c84e327130243149009f02e236809b545f6dedd4e32ddd736c33c0b6beff",
+      "hashes": {
+        "config.yaml": "d98c8077533cd1904a7431f620782636b240bc8a8feb0072c9bbd379fde162e1",
+        "events.jsonl": "647ec7acfa617e780dfc4d859725602f76eb7c38f9b97fbd4d644d0b03f3df7d",
+        "results.jsonl": "8a6a3a1b36957cc64128e752df31de94b778a91f3bbd687cd93badf9e0209777",
+        "run_manifest.json": "936a4bafb8839390e2a3792ae20d0db4847d9ebac8b173d305eb3fc5f737226b",
+        "summary.json": "5988199aa15fadc95290d9e35a2c6a2979ac22171492f353f3c9e103447764a7"
+      },
+      "record_count": 538,
+      "run_id": "20260916-0019_r2e_k16-at-k8_b1cf8c2_seed440830",
+      "states": {
+        "attempt_started": 269,
+        "completed_answer": 268,
+        "failed": 1
+      },
+      "unterminated_attempts": 0
+    },
+    {
+      "artifact_path": "/storage/user/latn/worktrees/autogaze-hlvid-k16-at-k8/outputs/human_gaze/hlvid_nvila/r2e_k16_at_k8/20260916-0019_r2e_k16-at-k8_b1cf8c2_seed440831",
+      "checkpoint_hashes": {
+        "config.json": "2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887",
+        "model.safetensors": "1721a2175adc3fbf95e2ad293736e80345ac4c89f1d2e3c514f4acd5261a7781",
+        "preprocessor_config.json": "a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3"
+      },
+      "evidence_index_sha256": "5ba20a6c9254028e54a6d4c49da3ff46896e0bca8f99c948e04d55d48ada753d",
+      "hashes": {
+        "config.yaml": "d98c8077533cd1904a7431f620782636b240bc8a8feb0072c9bbd379fde162e1",
+        "events.jsonl": "711acd395a2ec236166db6a08991808cca6c9e7f33a7488dac61a9aafe40b8d2",
+        "results.jsonl": "1c87c5619454a6a163ee6a717351799ee96c67fb2c24232c1e2cf672538ed20a",
+        "run_manifest.json": "ffe532c636960411f6ac204ef4fd4b64323bce8649d3684b10e81fa6e442e793",
+        "summary.json": "ef4e1cabe6ac3dc26dca277bcc249e9807e0bfa7d663eb8c4e0663583fe36da7"
+      },
+      "record_count": 537,
+      "run_id": "20260916-0019_r2e_k16-at-k8_b1cf8c2_seed440831",
+      "states": {
+        "attempt_started": 269,
+        "completed_answer": 268
+      },
+      "unterminated_attempts": 1
+    }
+  ]
+}

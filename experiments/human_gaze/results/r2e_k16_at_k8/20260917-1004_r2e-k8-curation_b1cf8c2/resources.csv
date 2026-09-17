@@ -1,0 +1,7 @@
+seed,raw_actions_per_crop,retained_patches_per_tile_frame,padded_slots_per_tile_frame,visual_tokens_mean,visual_tokens_min,visual_tokens_max
+440826,8,32,32,27904.0,27904,27904
+440827,8,32,32,27904.0,27904,27904
+440828,8,32,32,27904.0,27904,27904
+440829,8,32,32,27904.0,27904,27904
+440830,8,32,32,27904.0,27904,27904
+440831,8,32,32,27904.0,27904,27904

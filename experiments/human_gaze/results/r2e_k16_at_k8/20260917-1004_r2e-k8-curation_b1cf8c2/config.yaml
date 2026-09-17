@@ -1,0 +1,103 @@
+experiment: r2e_k16_at_k8
+date: '2026-09-16'
+status: preregistered
+dataset:
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+  split: test
+  examples: 268
+  sha256: ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a
+protocol:
+  training_budget: 16
+  evaluation_budget: 8
+  endpoint_updates: 20000
+  num_video_frames: 128
+  num_video_frames_thumbnail: 64
+  max_tiles_video: 48
+  tile_len: 16
+  thumbnails: full
+  fine_action_ids:
+  - 69
+  - 264
+  unique_actions: true
+  allow_eos: false
+  generation: greedy
+  max_new_tokens: 16
+  torch_dtype: bfloat16
+seeds:
+- base_seed: 440826
+  continuation_seed: 540826
+  checkpoint: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440826_seed540826/checkpoint_ep40_iter0/checkpoint_gaze
+  checkpoint_sha256:
+    model.safetensors: d008a458e62a15c69a236e4585a248b185343e82c2b6ece205d6638d4578b9ff
+    config.json: 2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887
+    preprocessor_config.json: a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3
+  train_step: 17685
+  cumulative_updates: 20000
+- base_seed: 440827
+  continuation_seed: 540827
+  checkpoint: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440827_seed540827/checkpoint_ep40_iter0/checkpoint_gaze
+  checkpoint_sha256:
+    model.safetensors: 669777ee6191c2a01ba1069f3492cb8e75aeaae307bdc5bf895ff13145c4f22a
+    config.json: 2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887
+    preprocessor_config.json: a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3
+  train_step: 17685
+  cumulative_updates: 20000
+- base_seed: 440828
+  continuation_seed: 540828
+  checkpoint: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440828_seed540828/checkpoint_ep40_iter0/checkpoint_gaze
+  checkpoint_sha256:
+    model.safetensors: 83cdc62cda40d75d9dedf34134484715f38a984542d1e27e1dd78c9bcfa69596
+    config.json: 2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887
+    preprocessor_config.json: a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3
+  train_step: 17685
+  cumulative_updates: 20000
+- base_seed: 440829
+  continuation_seed: 540829
+  checkpoint: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440829_seed540829/checkpoint_ep40_iter0/checkpoint_gaze
+  checkpoint_sha256:
+    model.safetensors: fe287cc2aaaf84153f277da87103b37c3c7949ce3f66c9ebbedfeeeebc37658d
+    config.json: 2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887
+    preprocessor_config.json: a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3
+  train_step: 17685
+  cumulative_updates: 20000
+- base_seed: 440830
+  continuation_seed: 540830
+  checkpoint: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440830_seed540830/checkpoint_ep40_iter0/checkpoint_gaze
+  checkpoint_sha256:
+    model.safetensors: ec287894d2f77b8fcd6e6fa102460c7b4533a671942dd713506ca8abc6788180
+    config.json: 2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887
+    preprocessor_config.json: a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3
+  train_step: 17685
+  cumulative_updates: 20000
+- base_seed: 440831
+  continuation_seed: 540831
+  checkpoint: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/grpo/r2b_fresh20k_stage3_base440831_seed540831/checkpoint_ep40_iter0/checkpoint_gaze
+  checkpoint_sha256:
+    model.safetensors: 1721a2175adc3fbf95e2ad293736e80345ac4c89f1d2e3c514f4acd5261a7781
+    config.json: 2fbb670402ba0ac378b97a7ef82f4f69740fa94b4523cc34ca6b6bcd2a2f9887
+    preprocessor_config.json: a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3
+  train_step: 17685
+  cumulative_updates: 20000
+analysis:
+  primary_metric: exact_match_multiple_choice_accuracy
+  summary: six-seed mean and population SD; per-seed paired differences against normal
+    AutoGaze when row-level reference protocol matches
+  decision: descriptive transfer evaluation; no pass/fail threshold or checkpoint
+    selection
+  resource_counts: raw actions, retained patches, padding and downstream tokens
+budget:
+  jobs: 6
+  gpus_per_job: 1
+  gpu: nvidia_h100_nvl
+  wall_hours_per_job: 24
+  max_gpu_hours: 144
+  logical_nvila_rollouts: 1608
+analysis_posthoc:
+  cluster_bootstrap_draws: 10000
+  seed: 170926
+  interval: 0.9
+  cluster: video
+  trained_seed_set: fixed six seeds
+  reference: single historical normal AutoGaze run
+  rationale: Descriptive paired uncertainty following existing HLVid curation convention;
+    not a preregistered pass/fail test

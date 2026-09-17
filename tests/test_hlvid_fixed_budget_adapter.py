@@ -1,3 +1,4 @@
+import pytest
 import torch
 
 from autogaze.human_gaze.coverage import center_order
@@ -22,9 +23,10 @@ class DummyAutoGaze(torch.nn.Module):
         return {"num_gazing_each_frame": torch.tensor([96, 92, 96])}
 
 
-def test_fixed_budget_adapter_overrides_nvila_generation_contract():
+@pytest.mark.parametrize("budget", [8, 16, 24])
+def test_fixed_budget_adapter_overrides_nvila_generation_contract(budget):
     model = DummyAutoGaze()
-    stats = install_fixed_budget_forward(model, exact_budget=24)
+    stats = install_fixed_budget_forward(model, exact_budget=budget)
 
     model(
         {"video": torch.zeros(1)},
@@ -34,7 +36,7 @@ def test_fixed_budget_adapter_overrides_nvila_generation_contract():
 
     assert model.seen_kwargs["gazing_ratio"] is None
     assert model.seen_kwargs["task_loss_requirement"] is None
-    assert model.seen_kwargs["max_gaze_tokens_each_frame"] == 24
+    assert model.seen_kwargs["max_gaze_tokens_each_frame"] == budget
     assert model.seen_kwargs["allowed_token_ids"] == tuple(range(69, 265))
     assert model.seen_kwargs["allow_eos"] is False
     assert stats.as_dict() == {

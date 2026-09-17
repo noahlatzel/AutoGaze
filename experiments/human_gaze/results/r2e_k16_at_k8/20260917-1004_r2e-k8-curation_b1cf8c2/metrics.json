@@ -1,0 +1,142 @@
+{
+  "allocated_h100_hours": 67.30611111111111,
+  "completed_logical_answers": 1608,
+  "evidence_states": {
+    "attempt_started": 1611,
+    "completed_answer": 1608,
+    "failed": 2
+  },
+  "historical_reference": {
+    "accuracy": 0.48507462686567165,
+    "correct": 130,
+    "total": 268
+  },
+  "logical_rollout_boundary": "1608 completed answer passes; unfinished attempts may add work, see evidence states and allocation ledger",
+  "paired_comparison": {
+    "ci90": [
+      -0.022782008767985612,
+      0.03333333333333333
+    ],
+    "cluster_unit": "video",
+    "clusters": 77,
+    "difference": 0.006840796019900498,
+    "draws": 10000,
+    "interpretation": "Post-hoc descriptive interval conditional on these six trained policies and historical reference; not seed-resampled or causal.",
+    "seed": 170926
+  },
+  "per_seed": [
+    {
+      "accuracy": 0.4962686567164179,
+      "correct": 133,
+      "difference_vs_reference": 0.011194029850746268,
+      "losses": 13,
+      "seed": 440826,
+      "total": 268,
+      "wins": 16
+    },
+    {
+      "accuracy": 0.48880597014925375,
+      "correct": 131,
+      "difference_vs_reference": 0.0037313432835820895,
+      "losses": 12,
+      "seed": 440827,
+      "total": 268,
+      "wins": 13
+    },
+    {
+      "accuracy": 0.4925373134328358,
+      "correct": 132,
+      "difference_vs_reference": 0.007462686567164179,
+      "losses": 14,
+      "seed": 440828,
+      "total": 268,
+      "wins": 16
+    },
+    {
+      "accuracy": 0.48134328358208955,
+      "correct": 129,
+      "difference_vs_reference": -0.0037313432835820895,
+      "losses": 13,
+      "seed": 440829,
+      "total": 268,
+      "wins": 12
+    },
+    {
+      "accuracy": 0.4925373134328358,
+      "correct": 132,
+      "difference_vs_reference": 0.007462686567164179,
+      "losses": 14,
+      "seed": 440830,
+      "total": 268,
+      "wins": 16
+    },
+    {
+      "accuracy": 0.5,
+      "correct": 134,
+      "difference_vs_reference": 0.014925373134328358,
+      "losses": 12,
+      "seed": 440831,
+      "total": 268,
+      "wins": 16
+    }
+  ],
+  "resources": [
+    {
+      "padded_slots_per_tile_frame": 32,
+      "raw_actions_per_crop": 8,
+      "retained_patches_per_tile_frame": 32,
+      "seed": 440826,
+      "visual_tokens_max": 27904,
+      "visual_tokens_mean": 27904.0,
+      "visual_tokens_min": 27904
+    },
+    {
+      "padded_slots_per_tile_frame": 32,
+      "raw_actions_per_crop": 8,
+      "retained_patches_per_tile_frame": 32,
+      "seed": 440827,
+      "visual_tokens_max": 27904,
+      "visual_tokens_mean": 27904.0,
+      "visual_tokens_min": 27904
+    },
+    {
+      "padded_slots_per_tile_frame": 32,
+      "raw_actions_per_crop": 8,
+      "retained_patches_per_tile_frame": 32,
+      "seed": 440828,
+      "visual_tokens_max": 27904,
+      "visual_tokens_mean": 27904.0,
+      "visual_tokens_min": 27904
+    },
+    {
+      "padded_slots_per_tile_frame": 32,
+      "raw_actions_per_crop": 8,
+      "retained_patches_per_tile_frame": 32,
+      "seed": 440829,
+      "visual_tokens_max": 27904,
+      "visual_tokens_mean": 27904.0,
+      "visual_tokens_min": 27904
+    },
+    {
+      "padded_slots_per_tile_frame": 32,
+      "raw_actions_per_crop": 8,
+      "retained_patches_per_tile_frame": 32,
+      "seed": 440830,
+      "visual_tokens_max": 27904,
+      "visual_tokens_mean": 27904.0,
+      "visual_tokens_min": 27904
+    },
+    {
+      "padded_slots_per_tile_frame": 32,
+      "raw_actions_per_crop": 8,
+      "retained_patches_per_tile_frame": 32,
+      "seed": 440831,
+      "visual_tokens_max": 27904,
+      "visual_tokens_mean": 27904.0,
+      "visual_tokens_min": 27904
+    }
+  ],
+  "seed_accuracy_mean": 0.49191542288557216,
+  "seed_accuracy_population_sd": 0.005866903689089923,
+  "status": "complete_verified"
+}

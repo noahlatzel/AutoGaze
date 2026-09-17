@@ -1,0 +1,10 @@
+JobID|State|ExitCode|Start|End|ElapsedRaw|AllocTRES
+1839332_0|COMPLETED|0:0|2026-09-16T02:41:21|2026-09-16T14:23:40|42139|billing=8,cpu=8,gres/gpu:nvidia_h100_nvl=1,gres/gpu=1,mem=128G,node=1
+1839332_1|COMPLETED|0:0|2026-09-16T04:07:23|2026-09-16T14:32:44|37521|billing=8,cpu=8,gres/gpu:nvidia_h100_nvl=1,gres/gpu=1,mem=128G,node=1
+1839332_2|COMPLETED|0:0|2026-09-16T04:11:23|2026-09-16T14:52:23|38460|billing=8,cpu=8,gres/gpu:nvidia_h100_nvl=1,gres/gpu=1,mem=128G,node=1
+1839332_3|FAILED|1:0|2026-09-16T08:29:23|2026-09-16T15:23:21|24838|billing=8,cpu=8,gres/gpu:nvidia_h100_nvl=1,gres/gpu=1,mem=128G,node=1
+1839332_4|FAILED|1:0|2026-09-16T14:24:30|2026-09-16T17:20:28|10558|billing=8,cpu=8,gres/gpu:nvidia_h100_nvl=1,gres/gpu=1,mem=128G,node=1
+1839332_5|PREEMPTED|0:0|2026-09-16T15:23:36|2026-09-17T01:57:56|38060|billing=8,cpu=8,gres/gpu:nvidia_h100_nvl=1,gres/gpu=1,mem=128G,node=1
+1840359_3|COMPLETED|0:0|2026-09-16T17:41:48|2026-09-16T22:15:58|16450|billing=8,cpu=8,gres/gpu:nvidia_h100_nvl=1,gres/gpu=1,mem=128G,node=1
+1840731_4|COMPLETED|0:0|2026-09-16T22:31:37|2026-09-17T06:42:41|29464|billing=8,cpu=8,gres/gpu:nvidia_h100_nvl=1,gres/gpu=1,mem=128G,node=1
+1839332_5|COMPLETED|0:0|2026-09-17T04:23:34|2026-09-17T05:43:46|4812|billing=8,cpu=8,gres/gpu:nvidia_h100_nvl=1,gres/gpu=1,mem=128G,node=1
