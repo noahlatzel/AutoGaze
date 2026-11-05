@@ -103,6 +103,7 @@ def export(args, cfg, records, inventory):
         raise ValueError("Incomplete test inference")
     torch.cuda.synchronize()
     manifest = dict(schema_version=1, status="complete", experiment_id=cfg["experiment_id"],
+        run_id=cfg["run_id"],
         method=args.model, base_seed=int(args.model[2:]) if args.model.startswith("rl") else None,
         cumulative_update=20000 if args.model.startswith("rl") else 0,
         split="test", clip_len=16, exact_k=16, num_fine_cells=196, fine_action_offset=69,
@@ -116,6 +117,8 @@ def export(args, cfg, records, inventory):
             peak_allocated_bytes=torch.cuda.max_memory_allocated(), python=platform.python_version(), torch=torch.__version__),
         slurm={k: v for k, v in os.environ.items() if k.startswith("SLURM_")},
         prior_exposure=cfg["test"]["prior_exposure"], logical_nvila_rollouts=0)
+    OmegaConf.save(OmegaConf.create(cfg), output / "config.yaml")
+    manifest["inputs"]["resolved_config_sha256"] = sha256_file(output / "config.yaml")
     write(output / "manifest.json", manifest)
     print(json.dumps({"model": args.model, "clips": written, "elapsed_seconds": manifest["runtime"]["elapsed_seconds"]}))
 
@@ -152,7 +155,7 @@ def curate(args, cfg, all_records, inventory):
         for name in ("train_source_prior", "center16", "pretrained")}
     primary = contrasts["train_source_prior"]
     decision = "supports_advantage" if primary["ci90_low"] > 0 else "negative" if primary["ci90_high"] < 0 else "inconclusive"
-    metrics = dict(schema_version=1, status="complete", primary=primary, decision=decision,
+    metrics = dict(schema_version=1, status="complete", run_id=cfg["run_id"], primary=primary, decision=decision,
         contrasts=contrasts, per_model=reports,
         rl_seed_summary=seed_summary([r["macro_source_mean"] for r in rl], expected_count=6),
         prior_exposure=cfg["test"]["prior_exposure"])
@@ -164,7 +167,9 @@ def curate(args, cfg, all_records, inventory):
         f"paired video 90% CI [{primary['ci90_low']:+.6f}, {primary['ci90_high']:+.6f}].\n\n" +
         cfg["test"]["prior_exposure"] + "\n\nThe interval averages the six fixed seeds; seed variation is reported separately. No QA inference or training.\n")
     write(args.output / "manifest.json", dict(schema_version=1, status="complete", source=source,
+        run_id=cfg["run_id"],
         data=cfg["data"], config_sha256=sha256_file(args.config), action_exports=exports,
+        resolved_config_sha256=sha256_file(args.output / "config.yaml"),
         logical_nvila_rollouts=0, heavy_artifacts=str(args.actions)))
     print(json.dumps({"status": "complete", "decision": decision, "output": str(args.output)}))
 
@@ -178,6 +183,8 @@ def main():
     parser.add_argument("--actions", type=Path)
     args = parser.parse_args()
     cfg, records, inventory = inputs(args.config)
+    artifact_root = args.output.parent.parent if args.command == "export" else args.output.parent
+    cfg["run_id"] = os.environ.get("GAZE_COMPLETION_RUN_ID", artifact_root.name)
     if args.command == "preflight":
         models = {name: checkpoint_for(name, cfg, inventory)[1] for name in cfg["test"]["models"]}
         args.output.parent.mkdir(parents=True, exist_ok=True)

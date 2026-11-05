@@ -7,6 +7,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import subprocess
 import sys
 from itertools import combinations
@@ -1077,7 +1078,11 @@ def write_result_readme(path: Path, metrics: dict[str, Any], gate: dict[str, Any
     if metrics.get("posthoc_seed_policy") is not None:
         lines.insert(
             -1,
-            "Seed 440830 is a post-hoc operational attrition after scheduler preemption; it is excluded from scientific summaries but charged to total compute.",
+            (
+                "Seed 440830 is a post-hoc operational attrition after scheduler preemption; excluded attempts and nominal exposure remain recorded, but complete resource totals are unavailable."
+                if metrics.get("quality_only_amendment") else
+                "Seed 440830 is a post-hoc operational attrition after scheduler preemption; it is excluded from scientific summaries but charged to total compute."
+            ),
         )
     if metrics.get("quality_only_amendment"):
         lines += ["", "November 5 quality-only amendment: missing scheduler receipts are retained in readiness.json; complete training resource totals are withheld. HLVid admission remains closed. Coverage and exposure summaries require all 30 verified exports. No training was resumed."]
@@ -1280,6 +1285,7 @@ def main() -> None:
         cfg, inventory, training_root, supervised_reports
     )
     if args.quality_only:
+        cfg["run_id"] = os.environ.get("GAZE_COMPLETION_RUN_ID", args.output_dir.parent.name)
         cfg["execution_amendment"] = {
             "date": "2026-11-05", "quality_only": True, "hlvid_authorized": False,
             "reason": "Missing scheduler receipts do not block verified coverage/exposure; resource totals remain withheld.",
@@ -1315,6 +1321,7 @@ def main() -> None:
     metrics = {
         "schema_version": 1,
         "status": "complete",
+        "run_id": cfg.get("run_id"),
         "quality_only_amendment": args.quality_only,
         "analysis_base_seeds": list(seeds),
         "posthoc_seed_policy": cfg.get("posthoc_seed_policy"),
@@ -1346,6 +1353,7 @@ def main() -> None:
     manifest = {
         "schema_version": 1,
         "status": "complete",
+        "run_id": cfg.get("run_id"),
         "experiment_id": "supervised_k16_comparison",
         "analysis_base_seeds": list(seeds),
         "posthoc_seed_policy": cfg.get("posthoc_seed_policy"),

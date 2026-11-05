@@ -11,6 +11,7 @@
 set -euo pipefail
 : "${GAZE_COMPLETION_WORKTREE:?Supply frozen clean source checkout}"
 : "${GAZE_COMPLETION_ROOT:?Supply new append-only artifact run directory}"
+export GAZE_COMPLETION_RUN_ID="${GAZE_COMPLETION_RUN_ID:-$(basename "$GAZE_COMPLETION_ROOT")}"
 cd "$GAZE_COMPLETION_WORKTREE"
 export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}" WANDB_MODE=disabled OMP_NUM_THREADS=5
 export HF_HOME=/storage/slurm/latn/data/huggingface_cache

@@ -248,6 +248,7 @@ def main() -> None:
     manifest = {
         "schema_version": 1,
         "status": "complete",
+        "run_id": os.environ.get("GAZE_COMPLETION_RUN_ID"),
         "experiment_id": "supervised_k16_comparison",
         "kind": "full_validation_greedy_exact_action_export",
         "method": args.method,
