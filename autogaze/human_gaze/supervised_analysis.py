@@ -228,8 +228,11 @@ def load_action_export(
     expected_training_seed: int | None = None,
     expected_cumulative_update: int | None = None,
     expected_checkpoint_provenance: Mapping[str, Any] | None = None,
+    expected_split: str = "val",
 ) -> tuple[dict[str, Any], np.ndarray]:
     """Load a complete exact-action export and reject drift or partial files."""
+    if expected_split not in ("val", "test") or any(r.get("split") != expected_split for r in records):
+        raise ValueError("Action records do not match the declared evaluation split")
     root = Path(directory)
     manifest_path = root / "manifest.json"
     with manifest_path.open("r", encoding="utf-8") as handle:
@@ -253,7 +256,7 @@ def load_action_export(
     if inputs.get("cell_mass_sha256") != expected_cell_mass_sha256:
         raise ValueError("Action export uses a different human cell-mass cache")
     frozen_contract = {
-        "split": "val",
+        "split": expected_split,
         "clip_len": 16,
         "exact_k": 16,
         "num_fine_cells": 196,

@@ -242,6 +242,25 @@ def test_action_export_loader_checks_alignment_and_checksum(tmp_path: Path) -> N
 
     assert loaded_manifest["status"] == "complete"
     np.testing.assert_array_equal(loaded, actions)
+    with pytest.raises(ValueError, match="evaluation split"):
+        load_action_export(
+            directory, records, expected_manifest_sha256="a" * 64,
+            expected_cell_mass_sha256="b" * 64, expected_split="test",
+        )
+    # A test-split export is accepted only when both the records and receipt agree.
+    test_records = [{**row, "split": "test"} for row in records]
+    with pytest.raises(ValueError, match="split contract"):
+        load_action_export(
+            directory, test_records, expected_manifest_sha256="a" * 64,
+            expected_cell_mass_sha256="b" * 64, expected_split="test",
+        )
+    (directory / "manifest.json").write_text(json.dumps({**manifest, "split": "test"}), encoding="utf-8")
+    _, test_actions = load_action_export(
+        directory, test_records, expected_manifest_sha256="a" * 64,
+        expected_cell_mass_sha256="b" * 64, expected_split="test",
+    )
+    np.testing.assert_array_equal(test_actions, actions)
+    (directory / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
     with pytest.raises(ValueError, match="training_seed"):
         load_action_export(
             directory,

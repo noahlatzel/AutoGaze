@@ -57,6 +57,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--training-root", type=Path)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--readiness-only", action="store_true")
+    parser.add_argument("--quality-only", action="store_true",
+        help="November 5 amendment: curate verified coverage/exposure; withhold incomplete resource totals and keep HLVid closed")
     return parser.parse_args()
 
 
@@ -1077,6 +1079,8 @@ def write_result_readme(path: Path, metrics: dict[str, Any], gate: dict[str, Any
             -1,
             "Seed 440830 is a post-hoc operational attrition after scheduler preemption; it is excluded from scientific summaries but charged to total compute.",
         )
+    if metrics.get("quality_only_amendment"):
+        lines += ["", "November 5 quality-only amendment: missing scheduler receipts are retained in readiness.json; complete training resource totals are withheld. HLVid admission remains closed. Coverage and exposure summaries require all 30 verified exports. No training was resumed."]
     with path.open("x", encoding="utf-8") as handle:
         handle.write("\n".join(lines) + "\n")
 
@@ -1122,7 +1126,8 @@ def main() -> None:
     if args.readiness_only:
         print(json.dumps({"status": readiness["status"], "output": str(args.output_dir)}))
         return
-    if readiness["status"] != "ready_for_complete_cpu_curation":
+    quality_ready = args.quality_only and not readiness["missing_action_exports"]
+    if readiness["status"] != "ready_for_complete_cpu_curation" and not quality_ready:
         gate = evaluate_practical_gate(
             supervised_reports={},
             rl_reports={},
@@ -1274,32 +1279,43 @@ def main() -> None:
     convergence = summarize_convergence(
         cfg, inventory, training_root, supervised_reports
     )
-    resources = resource_summary(readiness, cfg)
-    resource_complete = {
-        seed: readiness["resource_receipts"][str(seed)]["complete"] for seed in seeds
-    }
-    if cfg.get("posthoc_seed_policy") is not None:
-        supervised_nominal_rows = resources["posthoc_attrition_accounting"][
-            "amortized_supervised_nominal_action_rows_per_evaluated_endpoint"
-        ]
+    if args.quality_only:
+        cfg["execution_amendment"] = {
+            "date": "2026-11-05", "quality_only": True, "hlvid_authorized": False,
+            "reason": "Missing scheduler receipts do not block verified coverage/exposure; resource totals remain withheld.",
+            "protocol": "experiments/human_gaze/configs/gaze_completion_20261105.yaml",
+        }
+        resources = {"status": "withheld_in_quality_only_amendment",
+            "readiness": readiness["resource_receipts"],
+            "abandoned_seed_resource_receipt": readiness["abandoned_seed_resource_receipt"],
+            "nominal_base_clips_per_completed_seed": 80000,
+            "excluded_seed_nominal_base_clips": cfg.get("posthoc_seed_policy", {}).get("abandoned_total_base_clips"),
+            "hardware_comparability": "Wall-time histories are descriptive; historical SL and RL hardware differs."}
+        gate = {"hlvid_admitted": False, "decision": "closed_quality_only_amendment_no_qa_authorization"}
     else:
-        supervised_nominal_rows = resources[
-            "all_attempt_nominal_action_rows_including_original_failure"
-        ]["mean"]
-    gate = evaluate_practical_gate(
-        supervised_reports=endpoint_sl,
-        rl_reports=rl_reports,
-        supervised_resource_complete=resource_complete,
-        supervised_nominal_action_rows=int(supervised_nominal_rows),
-        rl_nominal_action_rows=int(
-            cfg["compute_accounting"]["rl_nominal_training_trajectory_action_rows_per_seed"]
-        ),
-        thresholds=cfg["practical_hlvid_gate"],
-        expected_seeds=seeds,
-    )
+        resources = resource_summary(readiness, cfg)
+        resource_complete = {
+            seed: readiness["resource_receipts"][str(seed)]["complete"] for seed in seeds
+        }
+        if cfg.get("posthoc_seed_policy") is not None:
+            supervised_nominal_rows = resources["posthoc_attrition_accounting"][
+                "amortized_supervised_nominal_action_rows_per_evaluated_endpoint"
+            ]
+        else:
+            supervised_nominal_rows = resources[
+                "all_attempt_nominal_action_rows_including_original_failure"
+            ]["mean"]
+        gate = evaluate_practical_gate(
+            supervised_reports=endpoint_sl, rl_reports=rl_reports,
+            supervised_resource_complete=resource_complete,
+            supervised_nominal_action_rows=int(supervised_nominal_rows),
+            rl_nominal_action_rows=int(cfg["compute_accounting"]["rl_nominal_training_trajectory_action_rows_per_seed"]),
+            thresholds=cfg["practical_hlvid_gate"], expected_seeds=seeds,
+        )
     metrics = {
         "schema_version": 1,
         "status": "complete",
+        "quality_only_amendment": args.quality_only,
         "analysis_base_seeds": list(seeds),
         "posthoc_seed_policy": cfg.get("posthoc_seed_policy"),
         "primary_metric": cfg["metrics"]["primary"],

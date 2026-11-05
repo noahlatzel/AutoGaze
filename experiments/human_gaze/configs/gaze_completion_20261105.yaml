@@ -1,0 +1,62 @@
+schema_version: 1
+experiment_id: gaze_completion_20261105
+kind: frozen_endpoint_inference_and_existing_supervised_reconciliation
+training_authorized: false
+hlvid_authorized: false
+data:
+  root: /storage/user/zverev/datasets/av-gaze-stavis
+  manifest: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+  manifest_sha256: 0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10
+  cell_mass: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+  cell_mass_sha256: fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8
+  expected_clips: {train: 1854, val: 427, test: 663}
+checkpoint_inventory: experiments/human_gaze/results/supervised_k16_restart/checkpoint_provenance_inventory.json
+checkpoint_inventory_sha256: 38bd1f184b9e9612529621f0f790b1cc5a0e396c3c1cc62e9785d958f5139870
+pretrained:
+  path: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+  model_safetensors_sha256: a48e6a83a198368e3798420ff5d5df42af7c0003c9230f85581c39a2ea64e9eb
+test:
+  seeds: [440826, 440827, 440828, 440829, 440830, 440831]
+  endpoint: fixed_20000_updates_no_test_selection
+  models: [rl440826, rl440827, rl440828, rl440829, rl440830, rl440831, pretrained]
+  clips_per_model: 663
+  clip_len: 16
+  exact_k: 16
+  local_actions_inclusive: [69, 264]
+  decoding: greedy_no_repeat_no_eos
+  preprocessing: frozen_AVGazeStavisDataset_and_checkpoint_image_processor
+  primary: rl_minus_train_source_prior_source_macro_video_coverage
+  secondary: [rl_minus_center16, rl_minus_pretrained_fine_k16]
+  uncertainty: source_stratified_paired_video_bootstrap_fixed_seed_average
+  bootstrap_iterations: 10000
+  bootstrap_seed: 20261105
+  confidence: 0.90
+  seed_variation: separate_six_seed_sd_and_descriptive_t_interval
+  decision_rule: ci90_low_above_zero_supports_advantage_ci90_high_below_zero_negative_else_inconclusive
+  prior_exposure: Earlier no-KL policies and baselines were evaluated on these same test clips; this is endpoint confirmation on an historically exposed held-out split, not a pristine first test opening.
+  prior_exposure_result: experiments/human_gaze/results/r0_r1_direct_coverage_grpo_fold1/README.md
+supervised:
+  analysis_config: experiments/human_gaze/configs/supervised_k16_restart_analysis.yaml
+  included_seeds: [440826, 440827, 440828, 440829, 440831]
+  excluded_seed: 440830
+  exclusion: inherited_20260916_operational_preemption_attrition
+  steps: [2315, 5000, 10000, 15000, 20000]
+  validation_clips_per_export: 427
+  num_exports: 30
+  primary: paired_supervised_minus_rl_source_macro_video_coverage_at_20000_updates
+  quality_only_amendment: Missing final scheduler receipts do not block verified model coverage and exposure curation; resource totals remain unavailable and HLVid admission remains closed.
+  learning_curves: fixed_supervised_checkpoints_and_actual_logged_rl_updates_vs_base_clip_presentations
+  wall_time: descriptive_different_hardware_only_when_all_process_histories_valid
+resources:
+  partition: NORMAL
+  gpu_type: a40
+  gpus_per_task: 1
+  cpus_per_task: 5
+  host_memory_gib: 32
+  test_max_minutes_per_model: 30
+  supervised_max_minutes_per_seed: 120
+  total_gpu_hour_ceiling: 13.5
+  array_concurrency: 1
+  expected_gpu_hours: 2
+  num_workers: 4
+  batch_size: 16
