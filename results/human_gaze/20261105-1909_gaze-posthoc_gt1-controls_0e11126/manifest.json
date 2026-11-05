@@ -1,0 +1,71 @@
+{
+  "compute": "CPU-only; zero model loads, zero inference, zero training",
+  "evidential_status": "post_hoc",
+  "heavy_artifacts": {
+    "gt1_test_actions": "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions",
+    "hlvid_raw_results": "see inputs_sha256 results.jsonl paths"
+  },
+  "inputs_sha256": {
+    "/home/stud/latn/.codex/worktrees/3f12/master-thesis/AutoGaze/outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_all_seeds_mtv48/fixedk16_seed440826/results.jsonl": "4496c3394b09c9511577592cfc20c250b38f9e5004c55f4e9858cf3e454509cf",
+    "/home/stud/latn/.codex/worktrees/3f12/master-thesis/AutoGaze/outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_all_seeds_mtv48/fixedk16_seed440827/results.jsonl": "0a04084a4c9bd7b2ed021992ec552917a82016fdb06a3604fee231ae1e50df0e",
+    "/home/stud/latn/.codex/worktrees/3f12/master-thesis/AutoGaze/outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_all_seeds_mtv48/fixedk16_seed440828/results.jsonl": "2565826fcb85e71304f3d0c0ea5ce53ad3519aa9bdc6d06f2b806cf2029ae24e",
+    "/home/stud/latn/.codex/worktrees/3f12/master-thesis/AutoGaze/outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_all_seeds_mtv48/fixedk16_seed440829/results.jsonl": "1ccc58b463cf496609146bd326f12580ba0bfc865450f9676dfbf67ad27c64ca",
+    "/home/stud/latn/.codex/worktrees/3f12/master-thesis/AutoGaze/outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_all_seeds_mtv48/fixedk16_seed440830/results.jsonl": "6b5cac42146e3e94b883e6a8903c60c1aa395be83d27d098d73dbf450c65770e",
+    "/home/stud/latn/.codex/worktrees/3f12/master-thesis/AutoGaze/outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_all_seeds_mtv48/fixedk16_seed440831/results.jsonl": "5b2d86438a4d98fa2a0f15a6121163755b60e042f479521afffabb9967f759e0",
+    "/home/stud/latn/master-thesis/AutoGaze/experiments/human_gaze/configs/gaze_posthoc_gt1_controls_20261105.yaml": "20b0555ce747dd1ec46dc9197a65abe54ad7fd794f783b95385e82f76fbc7f33",
+    "/home/stud/latn/master-thesis/AutoGaze/experiments/human_gaze/results/r2c_k32_fixed_budget_reproduction/metrics.json": "6056d9428e2aeeac6593f0201f1c5e36c31f8e4a1b32301b2c91b3575642283a",
+    "/home/stud/latn/master-thesis/AutoGaze/experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563/contrast_summary.csv": "982e454842daa4bc4b4adf65a68cb1b8f2bf5adec41fa3f332d35d162b3d0518",
+    "/home/stud/latn/master-thesis/AutoGaze/experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563/manifest.json": "90eed361a9c4e5a5f506b6b8b68501ddd5d29eeef0b67edeae8845b0e292e03c",
+    "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy": "fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8",
+    "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl": "0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10",
+    "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/summary.json": "f2bbd4d432a222a873f995b13a41cf13d19a435fd9edc8afb9c40c7161842d5f",
+    "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/diagnostics/r2b_fresh20k_stage3_base440826_seed540826/center_collapse_val_step20000.json": "f79688eaaf653fc7ad2775231715ddb5ace3f7757c0c5379c12bb33edce3e561",
+    "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/diagnostics/r2b_fresh20k_stage3_base440827_seed540827/center_collapse_val_step20000.json": "ac54134bde928cfb9a0bbe3e515b6aa0b814082f7d47e3687dd539ec1b32ec21",
+    "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/diagnostics/r2b_fresh20k_stage3_base440828_seed540828/center_collapse_val_step20000.json": "e12d9387fa96adb639bc691ce772e46f4f7d60cff1322040f112b996932b0426",
+    "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/diagnostics/r2b_fresh20k_stage3_base440829_seed540829/center_collapse_val_step20000.json": "dda92a85b14481eb30d6b89bf62a3b527aff6a9b1455db16e7bf6182cd5c16a9",
+    "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/diagnostics/r2b_fresh20k_stage3_base440830_seed540830/center_collapse_val_step20000.json": "5598056861d01ab31b411cef3556b464042f9c9843a8b0c29bb36466225cc925",
+    "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/diagnostics/r2b_fresh20k_stage3_base440831_seed540831/center_collapse_val_step20000.json": "c6f2225892c484ba7daee91bfc38f77f654bff1b52660892c9dfc493062df587",
+    "/home/stud/latn/master-thesis/AutoGaze/results/human_gaze/20261105-1447_gaze-completion_94e3da6/test_confirmation/execution_manifest.json": "31fe08325989721d8b0fbddf4355d31d51e1ae1582d7330fc4c35b2427e56f58",
+    "/home/stud/latn/master-thesis/AutoGaze/results/human_gaze/20261105-1447_gaze-completion_94e3da6/test_confirmation/metrics.json": "e4bcd29bccc60c179c6ef8c89859691219f80883e096eb6f013ba0e688b9563e",
+    "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/pretrained/actions.jsonl": "8099b0580f6be8e73d7d835b924e376bc4bd9ffee70eacf88cdb85ccd810ea04",
+    "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/pretrained/manifest.json": "f4fb22e873f65a1bf26b4d7de26d1c98d641f94aad246e1243939fe9bc417ee8",
+    "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440826/actions.jsonl": "3101b625d2a782a3955bcbcbed618503a1f4e4b81b4bc2a6307f88ec91c39b99",
+    "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440826/manifest.json": "a9c50137a29484c0a4ac5b36aa80b45c33705042871a790031ead1ba231427d7",
+    "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440827/actions.jsonl": "c56cd96d6826a612156af144ad12983dbb0fc2b476fb1c7464814e538fcb3c58",
+    "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440827/manifest.json": "84de2148f2f2574683bc19c74cbd1f654ae8fa5c17ab6e81523ad407fb5dd787",
+    "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440828/actions.jsonl": "701c23b2186486b3f2a35f266f95ecee1420ccd76f3b03a1dd036c73b51ad93f",
+    "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440828/manifest.json": "d95d347ca903cf93af5627addb7d81cbe63124b87b98f0c9d446ff9ccbf6ac1b",
+    "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440829/actions.jsonl": "1bb0f63a1cedf7f768a5a439de421b1b129273f158d2dbb9718711141d0a0419",
+    "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440829/manifest.json": "7aad12f2fea94d1e1621a65463ded910144b0edece9bf83ef3a409ed4a0cf4af",
+    "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440830/actions.jsonl": "bad0508c66b066d4df7f1c530d6d41a8eabd930765df46b1f9ea697f902c9387",
+    "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440830/manifest.json": "6d6407b287fa8aa64349e4b112271faf2a5d81b05991c4390345447893908ce8",
+    "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440831/actions.jsonl": "eb98bb723b912f0da840cf816a38d78e0f2e9b288540473240f0a2a91ff46cae",
+    "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440831/manifest.json": "a32f5bc9d7ba568ad6626796f090c5318ce67f508ede11f17b96cb01404d8d6d",
+    "/storage/user/latn/worktrees/autogaze-r2e-k16-controls-b795de0/outputs/human_gaze/hlvid_nvila/r2e_k16_causal_controls_mtv48/pretrained_exact_k16/results.jsonl": "c00b06da0678939baa6db6aec1c33749b745492fc04cf30e7548ba7c6b4e2984",
+    "/storage/user/latn/worktrees/autogaze-r2e-k16-controls-b795de0/outputs/human_gaze/hlvid_nvila/r2e_k16_causal_controls_mtv48/stavis_center16/results.jsonl": "744b29884f74c6fea9fabc7ee736d89379684b552846f032c901c297070b1e64"
+  },
+  "logical_nvila_rollouts": 0,
+  "module": {
+    "path": "autogaze/human_gaze/posthoc_analysis.py",
+    "sha256": "f704c549e65589416fdfe8c7faff1e6ab708ab203d069680eb2904acb3b137ff"
+  },
+  "outputs_sha256": {
+    "README.md": "19bd57303ef76db850d90fa3883dc71318e73a4c572f55e2659dd5347a1e77b5",
+    "action_overlap_test.csv": "82d2121e5ab6152907789e0545a18b36d0c297597e81a4adc75f72492b7a7fea",
+    "config.yaml": "8e0a79a6d5bc4f5673f046953bcc59320034104627a006c8a48616550500f460",
+    "coverage_by_method.csv": "bdea9f432a819e5176982623f6a39ede5b8bb86affebfe8f8f0668b19490f469",
+    "coverage_contrasts.csv": "27533b49b98762b4ae738bf4517ffcc1208c647a3cf47ea7a5cfd92d87b53d0b",
+    "hlvid_answer_disagreement.csv": "b97c07b11f30ebd4c57c141a2169c07b73320ca246c44bed0fb2eccd11214abf",
+    "hlvid_contrast_summary_reused.csv": "982e454842daa4bc4b4adf65a68cb1b8f2bf5adec41fa3f332d35d162b3d0518",
+    "hlvid_disagreement_excess.csv": "17dcdc70c5faa2bce2f0248b463c7ea20c79b9d01afe3995198ffa1bfd6bdab3",
+    "metrics.json": "f8b5ae286c4f382503cdeaf243a3af6fbac55c41b3a890fa4a4cd0b616c096b6",
+    "test_video_reconciliation.csv": "683b2fc0470ec4063734f6ca134a17075670cd8dc5a6e58c1480327bd7675ee7"
+  },
+  "run_id": "20261105-1909_gaze-posthoc_gt1-controls_0e11126",
+  "schema_version": 1,
+  "script": {
+    "path": "scripts/human_gaze/posthoc_gt1_controls.py",
+    "sha256": "f95b6247416fc878027de474e1b6a0a0983e59001248af24cac567b7cc73e8f1"
+  },
+  "training_updates_run": 0
+}

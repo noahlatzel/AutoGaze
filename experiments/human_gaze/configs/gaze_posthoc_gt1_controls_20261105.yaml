@@ -1,0 +1,41 @@
+schema_version: 1
+experiment_id: gaze_posthoc_gt1_controls_20261105
+evidential_status: post_hoc
+test_exposure: >-
+  The STAViS fold-1 test split was already opened at R0/R1 (no-KL policies and
+  baselines) and again for the GT1 fixed-K16 confirmation. Every test number in
+  this bundle is a post-hoc descriptive analysis of already-saved actions; none
+  was preregistered and none may be used to select an endpoint.
+compute: CPU-only; zero model loads, zero inference, zero training
+data:
+  manifest: outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+  manifest_sha256: 0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10
+  cell_mass: outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+  cell_mass_sha256: fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8
+  d0_summary: outputs/human_gaze/d0_stavis_fold1_validated/summary.json
+gt1:
+  bundle: results/human_gaze/20261105-1447_gaze-completion_94e3da6/test_confirmation
+  actions_root: /storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions
+  seeds: [440826, 440827, 440828, 440829, 440830, 440831]
+  reproduction_tolerance: 1.0e-12
+validation:
+  diagnostics_template: outputs/human_gaze/diagnostics/r2b_fresh20k_stage3_base{seed}_seed{training_seed}/center_collapse_val_step20000.json
+  training_seed_offset: 100000
+  reference_metrics: experiments/human_gaze/results/r2c_k32_fixed_budget_reproduction/metrics.json
+  reference_tolerance: 1.0e-6
+bootstrap:
+  iterations: 10000
+  seed: 20261105
+  confidence: 0.9
+controls:
+  shuffled_video_pairing: >-
+    within_source_different_video_indices: per source, sort video IDs; video i
+    receives the RL actions of video (i+1) mod n; clip j receives clip
+    (j mod n_clips_target) of that video; frames are index-aligned.
+  static_top16_test_derived: per seed, top-16 cells by selection frequency over that seed's own test actions (ties by cell index)
+  static_top16_validation_derived: per seed, selection_frequency_top16_cells from that seed's step-20000 validation diagnostics
+hlvid:
+  curation_bundle: experiments/human_gaze/results/r2e_hlvid_k16_causal_controls/20260914-0149_r2e-k16-causal-curation_084d563
+  trained_seeds: [440826, 440827, 440828, 440829, 440830, 440831]
+  controls: [pretrained_exact_k16, stavis_center16]
+  answer_field: prediction_letter

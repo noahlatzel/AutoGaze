@@ -1,0 +1,5 @@
+field,across_group,minus,difference,ci90_low,ci90_high,num_video_clusters
+answer_letter,trained_vs_stavis_center16,within_trained_seed_pairs,0.037562189054726365,0.012878526645768027,0.06282855976200195,77
+answer_letter,trained_vs_pretrained_exact_k16,within_trained_seed_pairs,0.05746268656716418,0.03170301708469648,0.08590334585988416,77
+correctness,trained_vs_stavis_center16,within_trained_seed_pairs,0.026243781094527362,0.006059995112414466,0.046393202904396934,77
+correctness,trained_vs_pretrained_exact_k16,within_trained_seed_pairs,0.061069651741293536,0.03631983169098363,0.08787940630797772,77
