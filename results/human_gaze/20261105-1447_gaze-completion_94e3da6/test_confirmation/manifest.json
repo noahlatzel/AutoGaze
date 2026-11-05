@@ -1,0 +1,23 @@
+{
+  "component": "fixed_k16_test_confirmation",
+  "curation_job": 1990043,
+  "heavy_artifacts": "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6",
+  "inference_array": 1990041,
+  "logical_nvila_rollouts": 0,
+  "outputs": {
+    "README.md": "2a2937d3dc5fcf6bba910d890db73c9c15cb1c233ce99a39ea444b98957b9e84",
+    "config.yaml": "86069e7d2a2288d8c136a8e358565355643d49cb95c0c76889eb6a3e605e681d",
+    "execution_manifest.json": "31fe08325989721d8b0fbddf4355d31d51e1ae1582d7330fc4c35b2427e56f58",
+    "figures/fixed_k16_test_confirmation.pdf": "e917fde03b811aa8e9647ef6022cc2adc8076e0d14d634a9f6527fbc291ccf1c",
+    "figures/fixed_k16_test_confirmation.png": "15266cfb4b62e1df8710fd5d2149c916eaad0232b6dca0f4eb11ada199fbca43",
+    "figures/fixed_k16_test_confirmation.svg": "4353014315b3a0186f92dc3ec4d5ddb2db226ae389d6b2601a5e59971e37b4ac",
+    "metrics.json": "e4bcd29bccc60c179c6ef8c89859691219f80883e096eb6f013ba0e688b9563e",
+    "test-validation.json": "89d5b6283d933c5d96b5e43b8a92a7d576d5fa2eac411c0953a608b818d8df04",
+    "zero-bias-compatibility.json": "882ac0b500896a9dbe9fdb33882753244149f39c3eac54cbfd1390390a68b790"
+  },
+  "run_id": "20261105-1447_gaze-completion_94e3da6",
+  "schema_version": 1,
+  "source_commit": "94e3da6dee77ab6cdd3649e93dee5adf41ea30fe",
+  "status": "complete_independently_validated",
+  "training_updates_run": 0
+}

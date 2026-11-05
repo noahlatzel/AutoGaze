@@ -1,0 +1,112 @@
+{
+  "action_exports": [
+    {
+      "path": "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440826/manifest.json",
+      "runtime": {
+        "elapsed_seconds": 95.5319344997406,
+        "gpu": "NVIDIA A40",
+        "peak_allocated_bytes": 1467512320,
+        "python": "3.11.15",
+        "started_unix": 1793887911.3801634,
+        "torch": "2.11.0+cu130"
+      },
+      "sha256": "a9c50137a29484c0a4ac5b36aa80b45c33705042871a790031ead1ba231427d7"
+    },
+    {
+      "path": "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440827/manifest.json",
+      "runtime": {
+        "elapsed_seconds": 25.39512014389038,
+        "gpu": "NVIDIA A40",
+        "peak_allocated_bytes": 1467512320,
+        "python": "3.11.15",
+        "started_unix": 1793888073.2777593,
+        "torch": "2.11.0+cu130"
+      },
+      "sha256": "84de2148f2f2574683bc19c74cbd1f654ae8fa5c17ab6e81523ad407fb5dd787"
+    },
+    {
+      "path": "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440828/manifest.json",
+      "runtime": {
+        "elapsed_seconds": 76.9198088645935,
+        "gpu": "NVIDIA A40",
+        "peak_allocated_bytes": 1467512320,
+        "python": "3.11.15",
+        "started_unix": 1793888208.9128234,
+        "torch": "2.11.0+cu130"
+      },
+      "sha256": "d95d347ca903cf93af5627addb7d81cbe63124b87b98f0c9d446ff9ccbf6ac1b"
+    },
+    {
+      "path": "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440829/manifest.json",
+      "runtime": {
+        "elapsed_seconds": 25.862810850143433,
+        "gpu": "NVIDIA A40",
+        "peak_allocated_bytes": 1467512320,
+        "python": "3.11.15",
+        "started_unix": 1793888372.0549808,
+        "torch": "2.11.0+cu130"
+      },
+      "sha256": "7aad12f2fea94d1e1621a65463ded910144b0edece9bf83ef3a409ed4a0cf4af"
+    },
+    {
+      "path": "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440830/manifest.json",
+      "runtime": {
+        "elapsed_seconds": 24.56376624107361,
+        "gpu": "NVIDIA A40",
+        "peak_allocated_bytes": 1467512320,
+        "python": "3.11.15",
+        "started_unix": 1793888487.637421,
+        "torch": "2.11.0+cu130"
+      },
+      "sha256": "6d6407b287fa8aa64349e4b112271faf2a5d81b05991c4390345447893908ce8"
+    },
+    {
+      "path": "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/rl440831/manifest.json",
+      "runtime": {
+        "elapsed_seconds": 24.62757182121277,
+        "gpu": "NVIDIA A40",
+        "peak_allocated_bytes": 1467512320,
+        "python": "3.11.15",
+        "started_unix": 1793888547.928299,
+        "torch": "2.11.0+cu130"
+      },
+      "sha256": "a32f5bc9d7ba568ad6626796f090c5318ce67f508ede11f17b96cb01404d8d6d"
+    },
+    {
+      "path": "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions/pretrained/manifest.json",
+      "runtime": {
+        "elapsed_seconds": 25.4012668132782,
+        "gpu": "NVIDIA A40",
+        "peak_allocated_bytes": 1467512320,
+        "python": "3.11.15",
+        "started_unix": 1793888607.7112908,
+        "torch": "2.11.0+cu130"
+      },
+      "sha256": "f4fb22e873f65a1bf26b4d7de26d1c98d641f94aad246e1243939fe9bc417ee8"
+    }
+  ],
+  "config_sha256": "22d2603926d21788ea8980746b83cd849103c5d7cf98f6d38da3ee4a4c7a899d",
+  "data": {
+    "cell_mass": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy",
+    "cell_mass_sha256": "fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8",
+    "expected_clips": {
+      "test": 663,
+      "train": 1854,
+      "val": 427
+    },
+    "manifest": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl",
+    "manifest_sha256": "0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10",
+    "root": "/storage/user/zverev/datasets/av-gaze-stavis"
+  },
+  "heavy_artifacts": "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions",
+  "logical_nvila_rollouts": 0,
+  "resolved_config_sha256": "86069e7d2a2288d8c136a8e358565355643d49cb95c0c76889eb6a3e605e681d",
+  "run_id": "20261105-1447_gaze-completion_94e3da6",
+  "schema_version": 1,
+  "source": {
+    "commit": "94e3da6dee77ab6cdd3649e93dee5adf41ea30fe",
+    "dirty": false,
+    "repository": "git@github.com:noahlatzel/AutoGaze.git"
+  },
+  "status": "complete"
+}

@@ -1,0 +1,59 @@
+{
+  "status": "pass",
+  "models": {
+    "rl440826": {
+      "action_sha256": "3101b625d2a782a3955bcbcbed618503a1f4e4b81b4bc2a6307f88ec91c39b99",
+      "manifest_sha256": "a9c50137a29484c0a4ac5b36aa80b45c33705042871a790031ead1ba231427d7",
+      "num_clips": 663,
+      "max_abs_recomputed_error": 0,
+      "checkpoint_provenance_verified": true
+    },
+    "rl440827": {
+      "action_sha256": "c56cd96d6826a612156af144ad12983dbb0fc2b476fb1c7464814e538fcb3c58",
+      "manifest_sha256": "84de2148f2f2574683bc19c74cbd1f654ae8fa5c17ab6e81523ad407fb5dd787",
+      "num_clips": 663,
+      "max_abs_recomputed_error": 0,
+      "checkpoint_provenance_verified": true
+    },
+    "rl440828": {
+      "action_sha256": "701c23b2186486b3f2a35f266f95ecee1420ccd76f3b03a1dd036c73b51ad93f",
+      "manifest_sha256": "d95d347ca903cf93af5627addb7d81cbe63124b87b98f0c9d446ff9ccbf6ac1b",
+      "num_clips": 663,
+      "max_abs_recomputed_error": 0,
+      "checkpoint_provenance_verified": true
+    },
+    "rl440829": {
+      "action_sha256": "1bb0f63a1cedf7f768a5a439de421b1b129273f158d2dbb9718711141d0a0419",
+      "manifest_sha256": "7aad12f2fea94d1e1621a65463ded910144b0edece9bf83ef3a409ed4a0cf4af",
+      "num_clips": 663,
+      "max_abs_recomputed_error": 0,
+      "checkpoint_provenance_verified": true
+    },
+    "rl440830": {
+      "action_sha256": "bad0508c66b066d4df7f1c530d6d41a8eabd930765df46b1f9ea697f902c9387",
+      "manifest_sha256": "6d6407b287fa8aa64349e4b112271faf2a5d81b05991c4390345447893908ce8",
+      "num_clips": 663,
+      "max_abs_recomputed_error": 0,
+      "checkpoint_provenance_verified": true
+    },
+    "rl440831": {
+      "action_sha256": "eb98bb723b912f0da840cf816a38d78e0f2e9b288540473240f0a2a91ff46cae",
+      "manifest_sha256": "a32f5bc9d7ba568ad6626796f090c5318ce67f508ede11f17b96cb01404d8d6d",
+      "num_clips": 663,
+      "max_abs_recomputed_error": 0,
+      "checkpoint_provenance_verified": true
+    },
+    "pretrained": {
+      "action_sha256": "8099b0580f6be8e73d7d835b924e376bc4bd9ffee70eacf88cdb85ccd810ea04",
+      "manifest_sha256": "f4fb22e873f65a1bf26b4d7de26d1c98d641f94aad246e1243939fe9bc417ee8",
+      "num_clips": 663,
+      "max_abs_recomputed_error": 0,
+      "checkpoint_provenance_verified": true
+    }
+  },
+  "all_three_paired_bootstraps_exact_reproduction": true,
+  "historical_pretrained_coverage": 0.14506010569401476,
+  "new_pretrained_coverage": 0.1450638990995491,
+  "pretrained_change_percentage_points": 0.0003793405534330274,
+  "note": "Small historical/new pretrained difference; current comparison uses newly exported same-source/current-evaluator pretrained control."
+}

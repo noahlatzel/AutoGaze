@@ -1,0 +1,223 @@
+{
+  "status": "pass",
+  "kind": "postrun_CPU_model_loading_audit_no_inference",
+  "reports": [
+    {
+      "model": "pretrained",
+      "rng_seed": 0,
+      "loading": {
+        "missing_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "unexpected_keys": [],
+        "mismatched_keys": [],
+        "error_msgs": []
+      },
+      "compatibility": {
+        "accepted_runtime_only_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "buffer_name": "gazing_model.gaze_decoder.output_token_logit_bias",
+        "buffer_shape": [
+          266
+        ],
+        "buffer_dtype": "torch.float32",
+        "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation",
+        "max_absolute_value": 0.0
+      },
+      "max_abs_bias": 0.0,
+      "vocabulary_size": 266,
+      "zero_addition_neutral_fp32_fp16_bf16": true
+    },
+    {
+      "model": "rl440826",
+      "rng_seed": 0,
+      "loading": {
+        "missing_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "unexpected_keys": [],
+        "mismatched_keys": [],
+        "error_msgs": []
+      },
+      "compatibility": {
+        "accepted_runtime_only_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "buffer_name": "gazing_model.gaze_decoder.output_token_logit_bias",
+        "buffer_shape": [
+          266
+        ],
+        "buffer_dtype": "torch.float32",
+        "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation",
+        "max_absolute_value": 0.0
+      },
+      "max_abs_bias": 0.0,
+      "vocabulary_size": 266,
+      "zero_addition_neutral_fp32_fp16_bf16": true
+    },
+    {
+      "model": "rl440826",
+      "rng_seed": 98123,
+      "loading": {
+        "missing_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "unexpected_keys": [],
+        "mismatched_keys": [],
+        "error_msgs": []
+      },
+      "compatibility": {
+        "accepted_runtime_only_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "buffer_name": "gazing_model.gaze_decoder.output_token_logit_bias",
+        "buffer_shape": [
+          266
+        ],
+        "buffer_dtype": "torch.float32",
+        "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation",
+        "max_absolute_value": 0.0
+      },
+      "max_abs_bias": 0.0,
+      "vocabulary_size": 266,
+      "zero_addition_neutral_fp32_fp16_bf16": true
+    },
+    {
+      "model": "rl440827",
+      "rng_seed": 0,
+      "loading": {
+        "missing_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "unexpected_keys": [],
+        "mismatched_keys": [],
+        "error_msgs": []
+      },
+      "compatibility": {
+        "accepted_runtime_only_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "buffer_name": "gazing_model.gaze_decoder.output_token_logit_bias",
+        "buffer_shape": [
+          266
+        ],
+        "buffer_dtype": "torch.float32",
+        "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation",
+        "max_absolute_value": 0.0
+      },
+      "max_abs_bias": 0.0,
+      "vocabulary_size": 266,
+      "zero_addition_neutral_fp32_fp16_bf16": true
+    },
+    {
+      "model": "rl440828",
+      "rng_seed": 0,
+      "loading": {
+        "missing_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "unexpected_keys": [],
+        "mismatched_keys": [],
+        "error_msgs": []
+      },
+      "compatibility": {
+        "accepted_runtime_only_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "buffer_name": "gazing_model.gaze_decoder.output_token_logit_bias",
+        "buffer_shape": [
+          266
+        ],
+        "buffer_dtype": "torch.float32",
+        "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation",
+        "max_absolute_value": 0.0
+      },
+      "max_abs_bias": 0.0,
+      "vocabulary_size": 266,
+      "zero_addition_neutral_fp32_fp16_bf16": true
+    },
+    {
+      "model": "rl440829",
+      "rng_seed": 0,
+      "loading": {
+        "missing_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "unexpected_keys": [],
+        "mismatched_keys": [],
+        "error_msgs": []
+      },
+      "compatibility": {
+        "accepted_runtime_only_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "buffer_name": "gazing_model.gaze_decoder.output_token_logit_bias",
+        "buffer_shape": [
+          266
+        ],
+        "buffer_dtype": "torch.float32",
+        "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation",
+        "max_absolute_value": 0.0
+      },
+      "max_abs_bias": 0.0,
+      "vocabulary_size": 266,
+      "zero_addition_neutral_fp32_fp16_bf16": true
+    },
+    {
+      "model": "rl440830",
+      "rng_seed": 0,
+      "loading": {
+        "missing_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "unexpected_keys": [],
+        "mismatched_keys": [],
+        "error_msgs": []
+      },
+      "compatibility": {
+        "accepted_runtime_only_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "buffer_name": "gazing_model.gaze_decoder.output_token_logit_bias",
+        "buffer_shape": [
+          266
+        ],
+        "buffer_dtype": "torch.float32",
+        "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation",
+        "max_absolute_value": 0.0
+      },
+      "max_abs_bias": 0.0,
+      "vocabulary_size": 266,
+      "zero_addition_neutral_fp32_fp16_bf16": true
+    },
+    {
+      "model": "rl440831",
+      "rng_seed": 0,
+      "loading": {
+        "missing_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "unexpected_keys": [],
+        "mismatched_keys": [],
+        "error_msgs": []
+      },
+      "compatibility": {
+        "accepted_runtime_only_keys": [
+          "gazing_model.gaze_decoder.output_token_logit_bias"
+        ],
+        "buffer_name": "gazing_model.gaze_decoder.output_token_logit_bias",
+        "buffer_shape": [
+          266
+        ],
+        "buffer_dtype": "torch.float32",
+        "runtime_only_key_initialization": "registered exact-zero buffer; verified without mutation",
+        "max_absolute_value": 0.0
+      },
+      "max_abs_bias": 0.0,
+      "vocabulary_size": 266,
+      "zero_addition_neutral_fp32_fp16_bf16": true
+    }
+  ],
+  "note": "Missing historical output_token_logit_bias is a persistent zero buffer. Construction is deterministic, forward adds exactly zero. No train or GPU inference ran."
+}
