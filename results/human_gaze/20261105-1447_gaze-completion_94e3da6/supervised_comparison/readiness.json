@@ -1,0 +1,69 @@
+{
+  "abandoned_seed_resource_receipt": {
+    "complete": false,
+    "missing": [
+      "/storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0158_supervised-k16-comparison_ec320a5/seed440830_train540830/abandoned_resource_receipt.json"
+    ],
+    "status": "missing"
+  },
+  "analysis_base_seeds": [
+    440826,
+    440827,
+    440828,
+    440829,
+    440831
+  ],
+  "available_action_exports": 30,
+  "excluded_base_seed": 440830,
+  "expected_action_exports": 30,
+  "experiment_id": "supervised_k16_comparison",
+  "fail_closed_hlvid_admission": true,
+  "missing_abandoned_seed_resource_receipt": true,
+  "missing_action_exports": [],
+  "missing_complete_resource_seeds": [
+    "440826",
+    "440827",
+    "440828",
+    "440829",
+    "440831"
+  ],
+  "resource_receipts": {
+    "440826": {
+      "complete": false,
+      "missing": [
+        "/storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0158_supervised-k16-comparison_ec320a5/seed440826_train540826/final_sacct.json"
+      ],
+      "status": "missing"
+    },
+    "440827": {
+      "complete": false,
+      "missing": [
+        "/storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0158_supervised-k16-comparison_ec320a5/seed440827_train540827/final_sacct.json"
+      ],
+      "status": "missing"
+    },
+    "440828": {
+      "complete": false,
+      "missing": [
+        "/storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0158_supervised-k16-comparison_ec320a5/seed440828_train540828/final_sacct.json"
+      ],
+      "status": "missing"
+    },
+    "440829": {
+      "complete": false,
+      "missing": [
+        "/storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0158_supervised-k16-comparison_ec320a5/seed440829_train540829/final_sacct.json"
+      ],
+      "status": "missing"
+    },
+    "440831": {
+      "complete": false,
+      "missing": [
+        "/storage/user/latn/artifacts/autogaze-supervised-k16/20260914-0158_supervised-k16-comparison_ec320a5/seed440831_train540831/final_sacct.json"
+      ],
+      "status": "missing"
+    }
+  },
+  "schema_version": 1,
+  "status": "waiting_for_declared_inputs"
+}

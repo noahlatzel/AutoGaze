@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "run_id": "20261105-1447_gaze-completion_94e3da6",
+  "promoted": "2026-11-06",
+  "source_directory": "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/supervised_curation",
+  "heavy_artifacts": "/storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/supervised_actions",
+  "export_array": "1990042 (tasks 0-4, all COMPLETED 0:0)",
+  "curation_job": "1990044 (COMPLETED 0:0)",
+  "execution_commit": "94e3da6dee77ab6cdd3649e93dee5adf41ea30fe",
+  "independent_validation": {
+    "script": "validate_supervised.py",
+    "result": "supervised-validation.json",
+    "status": "pass",
+    "action_exports_verified": 30,
+    "paired_bootstrap_exact_reproduction": true
+  },
+  "metrics_json_preserved_verbatim": true,
+  "metrics_json_sha256": "65be26181145ad532910c724d8a7d173b7632ba1169b70e0ac6b78451f19f1ec",
+  "metadata_correction": {
+    "field": "metrics.json:convergence.warning",
+    "original_text": "Hardware-specific wall/GPU time is descriptive; nominal action rows are not FLOPs. Recovered process-history timing is withheld unless attempt-aware reconstruction exists; final scheduler totals still include all attempts.",
+    "corrected_final_sentence": "Complete scheduler resource totals for the original supervised training are unavailable (final_sacct receipts missing); no training cost totals are reported.",
+    "reason": "Inherited sentence claimed final scheduler totals include all attempts; readiness.json shows all five final_sacct receipts and the abandoned-seed receipt are missing.",
+    "numerical_changes": "none",
+    "also_affects": "figures/supervised_k16_convergence.* right-panel note 'See final scheduler totals' (figure preserved unchanged)"
+  },
+  "interpretation": "Descriptive, unadjusted; STAViS validation split was historically explored. No HLVid QA run (gate closed).",
+  "files_sha256": {
+    "README.md": "950caba2ff8a7e6aa95d75296dc1aed06000d664cb1cdd595075af63bfd127e4",
+    "config.yaml": "8c8014d5a53c766b5b051d8576e37435b323a2af9d89c6a185f09005153fc258",
+    "figures/supervised_k16_agreement.pdf": "58f20ac2d14e112b3101de85fae951a4c7950880dbe7cffa9d7f6dfc5bebabad",
+    "figures/supervised_k16_agreement.png": "f199c01c0f6814d8353d22f03050dd96b93dd6a7279b63c8cc4ae44ad50f3814",
+    "figures/supervised_k16_convergence.pdf": "b26057cea5371b350140433a544ce875af409d827d5725552dd8c632a48d7f2f",
+    "figures/supervised_k16_convergence.png": "5794e22d89ab7fc0c22aeab85839e9815e0b3166a79d40176472733215a2159c",
+    "figures/supervised_k16_endpoint_controls.pdf": "db8d59e7ce043364ff2004d31c8f6d761459af589ecf114aa6590bc35920524b",
+    "figures/supervised_k16_endpoint_controls.png": "a59ee24165857408c289cfa7163805f4836b7367e0d13d4a4e15e388b031a423",
+    "gate.json": "472e406985caae5caf7ae65325d25aa5c05420597b129754973ba3cbe6eb9d1c",
+    "manifest.json": "906269edf0ed302b22c46af59218833ce8d2dbad42c0642ba59eafc2a739b795",
+    "metrics.json": "65be26181145ad532910c724d8a7d173b7632ba1169b70e0ac6b78451f19f1ec",
+    "per_seed_checkpoint_metrics.csv": "d8720dfa6bc20f4829121934a9fb17cec5742fec7bd5d67bf80419e64f8b2871",
+    "readiness.json": "6aa0f6e074c153fa4875fbb71e7a031489e575b665e3e977a77ab749ae4994ec",
+    "supervised-validation.json": "56df97bf892264ebcc47a18bea7bea13146a55b69d93e0147bf08fef5eb443c8",
+    "validate_supervised.py": "fddf8d72ed6f841370784e14daf5116c49684109766136bda04081db09ee240d"
+  }
+}

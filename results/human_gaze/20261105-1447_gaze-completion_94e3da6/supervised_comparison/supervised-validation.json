@@ -1,0 +1,252 @@
+{
+  "status": "pass",
+  "checks": [
+    {
+      "method": "rl",
+      "seed": 440826,
+      "step": 20000,
+      "action_sha256": "dc7d8660df5d47b16a2773f1e7160af33fbda97c938c4dc4bbdf03d17bad8235",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "rl",
+      "seed": 440827,
+      "step": 20000,
+      "action_sha256": "29cd73f3e09524318f6f7a2733709300179faa84298ae4a61789e0f62cf19033",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "rl",
+      "seed": 440828,
+      "step": 20000,
+      "action_sha256": "43171c82f7abd97e896c28538b5c1b08ce8a4c538bcfa125cb30694d8eb1d868",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "rl",
+      "seed": 440829,
+      "step": 20000,
+      "action_sha256": "2004d787551041eb36b3390e037dfcc681ec695cd93aaa23c511cb072415b2cb",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "rl",
+      "seed": 440831,
+      "step": 20000,
+      "action_sha256": "97c57807a998e1256585ff211830119ca3f652679f86b99ef6284f0e9305264d",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440826,
+      "step": 2315,
+      "action_sha256": "3a7b37c1492498fe1994ee4307706017aea0a734cfdaa92d165ef323ce8f83bb",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440826,
+      "step": 5000,
+      "action_sha256": "fd1fcf6018a1d602b2e1c38cd026cecc3d574ecf0df5094cca7524a716185221",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440826,
+      "step": 10000,
+      "action_sha256": "f3e397b4668e37fbc5b43f33bb914f63e1b32ef6cd3d1e56c4c5f7cec9905b47",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440826,
+      "step": 15000,
+      "action_sha256": "bf387cefc56e6d2967fceb4a5c7ed73d34b8020e8abff33113fb952ee3fa23cd",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440826,
+      "step": 20000,
+      "action_sha256": "53a39be4530aaaf69a962a38004f9e0cb2ac4b37e57ee4b690f000de9f4fac94",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440827,
+      "step": 2315,
+      "action_sha256": "57525ccf638f217c3c73f2894f789cfda1d99537a6aedfa6dbbb810cc1886112",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440827,
+      "step": 5000,
+      "action_sha256": "183843ffa71fb7589f83f243a01515b9d15b517e0865b1fcc5614512ca5a06c1",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440827,
+      "step": 10000,
+      "action_sha256": "6b024e55b810dfae63e35cef8e97160702e3fd4f8eee9b06c05c3552ffb4a79a",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440827,
+      "step": 15000,
+      "action_sha256": "f1951c2d10f9d711f0427861a97339b6f35c7437cb7167e487d6148699c22393",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440827,
+      "step": 20000,
+      "action_sha256": "b388b02a35903873d26258dc43a85f20d7f260181ffead855bfdf9fb1dd6cb37",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440828,
+      "step": 2315,
+      "action_sha256": "ce4e5cf3d9abb5481be3632bef12eb60393a2810f01a0537a8ea28e87cb8ed07",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440828,
+      "step": 5000,
+      "action_sha256": "b0fbe5cc3062cd4142541b9832216ae42ab38a7b5243d2b664164cb400b279c6",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440828,
+      "step": 10000,
+      "action_sha256": "77d7d17e64e530dd8dcea7bb9e56c81bd17b7fe4bf392d84cc02c2fd647bbf5f",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440828,
+      "step": 15000,
+      "action_sha256": "d2799c17036de86c65187d8529aaaf8dcfbf4f48c95d258573024d4fc1a54ce0",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440828,
+      "step": 20000,
+      "action_sha256": "3163b5b119a5a6fa56664e4c1f60931ef6cfe77f971055ae329dbb79b17efb84",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440829,
+      "step": 2315,
+      "action_sha256": "5f593c807e0997c16dc3b2f358b52ccf6640be91ebeb44488e5fcc72667658f4",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440829,
+      "step": 5000,
+      "action_sha256": "1d40a9d924c2381e2a9da46af726fcf738dc64dd385e9707a97b76a5e902f4c3",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440829,
+      "step": 10000,
+      "action_sha256": "e60a8c90d380f605384ed24b0351b8ef27db8ff6a71cd0ef56739aefc48d1f35",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440829,
+      "step": 15000,
+      "action_sha256": "e8e1163fbedad7b0f649e71b0bff89204b56035c91bc0490a2b2d4af8d24a212",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440829,
+      "step": 20000,
+      "action_sha256": "977a039d605484115a9f1f7ec0e2681f87415d5a27615b369ff5af2dbacf20ef",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440831,
+      "step": 2315,
+      "action_sha256": "fcdb432c38b4980ce9480e1f638598dbfd37851b0a168d7b041cfc90e579821d",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440831,
+      "step": 5000,
+      "action_sha256": "bcdebe027297c38aa19fe859183867397f05667ff30e5a9559535245dbff1fcc",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440831,
+      "step": 10000,
+      "action_sha256": "bd18de8547495526aecc6a39197a45127be710983cb40f0f4ff957e46658eaa1",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440831,
+      "step": 15000,
+      "action_sha256": "3ef7f77e6dd3702915161ec6bc39cbf7a0abe69ff8a384dc73ce4ca890cb70e0",
+      "provenance_verified": true,
+      "clips": 427
+    },
+    {
+      "method": "supervised",
+      "seed": 440831,
+      "step": 20000,
+      "action_sha256": "25ea581ddc9c72388f5ba72cdbb0d5e5ddec691ed93a956f9d8983a007a872c9",
+      "provenance_verified": true,
+      "clips": 427
+    }
+  ],
+  "paired_bootstrap_intervals_exact_reproduction": true,
+  "frozen_offcenter_clips": 110,
+  "matching_base_clip_exposure": 80000,
+  "excluded_seed": 440830,
+  "hlvid_admitted": false,
+  "training_resource_totals": "withheld",
+  "metadata_correction_for_promotion": "Inherited convergence.warning final sentence says scheduler totals include all attempts. Correct to complete scheduler totals unavailable; no numerical changes."
+}
