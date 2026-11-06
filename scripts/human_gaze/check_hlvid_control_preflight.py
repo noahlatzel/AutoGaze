@@ -11,6 +11,7 @@ import tempfile
 from pathlib import Path
 
 from autogaze.human_gaze.coverage import center_order
+from autogaze.human_gaze.random_cells import random_fine_cells
 from scripts.runners.hlvid_evidence import fingerprint, load_resume_state
 
 
@@ -21,10 +22,32 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--summary", type=Path, required=True)
     parser.add_argument("--evidence-dir", type=Path, required=True)
-    parser.add_argument("--policy-kind", choices=("pretrained", "center16"), required=True)
+    parser.add_argument("--policy-kind", choices=("pretrained", "center16", "random16"), required=True)
     parser.add_argument("--attestation", type=Path, required=True)
     parser.add_argument("--admission-record", type=Path, required=True)
     return parser.parse_args()
+
+
+def validate_random16_actions(summary: dict, record: dict) -> None:
+    """Recompute every question-0 tile-frame draw from the recorded seed."""
+    seed = summary.get("fixed_budget_adapter", {}).get("random16_seed")
+    if not isinstance(seed, int):
+        raise ValueError("Random16 preflight summary lacks its fixed seed")
+    video_key = str(record["answer"]["video_path"])
+    if record.get("random16", {}).get("video_key") != video_key:
+        raise ValueError("Random16 selector key differs from the question video")
+    tile_index = 0
+    distinct_sets = set()
+    for call in record.get("raw_decoder_calls", []):
+        for batch in call.get("decoder_action_ids", []):
+            for frame_index, actions in enumerate(batch):
+                expected = [69 + cell for cell in random_fine_cells(seed, video_key, tile_index, frame_index)]
+                if actions != expected:
+                    raise ValueError("Random16 actions differ from the seeded per-tile-frame draw")
+                distinct_sets.add(tuple(actions))
+            tile_index += 1
+    if tile_index != record["random16"]["tiles"] or len(distinct_sets) < 2:
+        raise ValueError("Random16 tile accounting or draw diversity is inconsistent")
 
 
 def validate(
@@ -92,6 +115,8 @@ def validate(
         actions != CENTER16_ACTION_IDS for actions in action_batches
     ):
         raise ValueError("Center16 actions differ from the frozen STAViS tile-local order")
+    if policy_kind == "random16":
+        validate_random16_actions(summary, record)
     return {
         "status": "pass",
         "policy_kind": policy_kind,

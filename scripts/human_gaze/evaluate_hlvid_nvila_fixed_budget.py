@@ -25,6 +25,7 @@ import torch
 
 from autogaze.human_gaze.coverage import center_order
 from autogaze.human_gaze.hlvid import install_fixed_budget_forward, load_uniform_frames
+from autogaze.human_gaze.random_cells import RANDOM16_RULE, install_random_fine_cells
 from scripts.runners.hlvid_evidence import (
     counter_summary,
     export_evidence_jsonl,
@@ -45,9 +46,14 @@ CENTER16_FINE_CELLS = tuple(center_order(14)[:16].tolist())
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--exact-budget", type=int, required=True)
-    parser.add_argument("--policy-kind", choices=("trained", "pretrained", "center16"), default="trained")
+    parser.add_argument("--policy-kind", choices=("trained", "pretrained", "center16", "random16"), default="trained")
     parser.add_argument("--base-seed", type=int)
     parser.add_argument("--continuation-seed", type=int)
+    parser.add_argument(
+        "--random-cells-seed",
+        type=int,
+        help="Fixed seed for the deterministic per-(video, tile, frame) Random16 control",
+    )
     parser.add_argument("--policy-label", required=True)
     parser.add_argument("--dataset-root", type=Path, required=True)
     parser.add_argument("--expected-dataset-sha256", required=True)
@@ -564,8 +570,10 @@ def validate_args(args: argparse.Namespace) -> None:
         raise ValueError(f"Established HLVid/NVILA protocol drift: {drift}")
     if args.exact_budget not in {8, 16, 24, 32, 36}:
         raise ValueError(f"Unsupported fixed budget: {args.exact_budget}")
-    if args.policy_kind in {"pretrained", "center16"} and args.exact_budget != 16:
+    if args.policy_kind in {"pretrained", "center16", "random16"} and args.exact_budget != 16:
         raise ValueError("Causal controls are frozen at exact K16")
+    if (args.policy_kind == "random16") != (getattr(args, "random_cells_seed", None) is not None):
+        raise ValueError("--random-cells-seed is required for, and only for, random16")
     if args.policy_kind == "trained" and (args.base_seed is None or args.continuation_seed is None):
         raise ValueError("Trained policies require both seed identifiers")
     if not (args.autogaze_model_id / "model.safetensors").is_file():
@@ -579,7 +587,22 @@ def build_identity(
     decode_audit: dict[str, Any] | None,
 ) -> dict[str, Any]:
     checkpoint_path = args.autogaze_model_id / "model.safetensors"
+    # Random16 identity fields are added only for that policy so that existing
+    # control identities (and admission reconstruction) remain byte-identical.
+    random16_identity = (
+        {
+            "random16_seed": args.random_cells_seed,
+            "random16_rule": RANDOM16_RULE,
+            "random16_injection_boundary": "tile-local generation before resolution recovery",
+            "random16_inference_code_sha256": sha256(
+                Path(__file__).parents[2] / "autogaze" / "human_gaze" / "random_cells.py"
+            ),
+        }
+        if args.policy_kind == "random16"
+        else {}
+    )
     return {
+        **random16_identity,
         "schema_version": 1,
         "protocol_id": PROTOCOL_ID,
         "benchmark": "HLVid",
@@ -739,14 +762,24 @@ def main() -> None:
         processor._autogaze_model,
         args.autogaze_model_id / "model.safetensors",
     )
-    static_cells = CENTER16_FINE_CELLS if args.policy_kind == "center16" else None
-    stats = install_fixed_budget_forward(
-        processor._autogaze_model,
-        exact_budget=args.exact_budget,
-        fine_action_offset=args.fine_action_offset,
-        actions_per_frame=args.actions_per_frame,
-        static_fine_cells=static_cells,
-    )
+    random_selector = None
+    if args.policy_kind == "random16":
+        stats, random_selector = install_random_fine_cells(
+            processor._autogaze_model,
+            seed=args.random_cells_seed,
+            exact_budget=args.exact_budget,
+            fine_action_offset=args.fine_action_offset,
+            actions_per_frame=args.actions_per_frame,
+        )
+    else:
+        static_cells = CENTER16_FINE_CELLS if args.policy_kind == "center16" else None
+        stats = install_fixed_budget_forward(
+            processor._autogaze_model,
+            exact_budget=args.exact_budget,
+            fine_action_offset=args.fine_action_offset,
+            actions_per_frame=args.actions_per_frame,
+            static_fine_cells=static_cells,
+        )
     model = AutoModel.from_pretrained(
         str(args.model_path),
         trust_remote_code=True,
@@ -795,10 +828,14 @@ def main() -> None:
             decode_seconds = time.perf_counter() - started
             prompt = f"{video_token}\n\nQuestion: {row['question']}"
             stats.start_example()
+            if random_selector is not None:
+                random_selector.start_example(str(row["video_path"]))
             started = time.perf_counter()
             inputs = processor(text=prompt, videos=[frames], return_tensors="pt")
             processor_seconds = time.perf_counter() - started
             acquisition = normalize_acquisition(stats.finish_example())
+            if random_selector is not None:
+                acquisition["random16"] = random_selector.finish_example()
             input_ids = inputs["input_ids"]
             total_context_tokens = int(input_ids.shape[1])
             projected_visual_tokens = int(
@@ -899,6 +936,7 @@ def main() -> None:
                 "recorded_at": utc_now(),
                 "measurement_origin": "original_forward",
                 "answer": answer_record,
+                **({"random16": acquisition["random16"]} if "random16" in acquisition else {}),
                 "decode": decode_record,
                 "counters": acquisition["counters"],
                 "context": context,
@@ -1005,7 +1043,9 @@ def main() -> None:
                 if args.policy_kind == "center16"
                 else None,
                 "static_skips_learned_generation_and_probability_rescoring": args.policy_kind
-                == "center16",
+                in {"center16", "random16"},
+                "random16_seed": args.random_cells_seed if args.policy_kind == "random16" else None,
+                "random16_rule": RANDOM16_RULE if args.policy_kind == "random16" else None,
                 "legacy_process_accumulator_diagnostic_only": stats.as_dict(),
             },
             "per_example_telemetry": summarize_telemetry(ordered_telemetry),
