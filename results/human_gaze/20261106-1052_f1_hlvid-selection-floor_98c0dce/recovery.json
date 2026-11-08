@@ -1,0 +1,13 @@
+{
+  "original_job": "1992333",
+  "original_failed_seconds": 23908,
+  "authorized_cumulative_recovery_seconds": 28800,
+  "scientific_settings_changed": false,
+  "saved_center16_answers": 9,
+  "random16_preserved": true,
+  "receipts": [
+    "/storage/user/latn/artifacts/f1/20261106-1052_f1_hlvid-selection-floor_98c0dce/recovery/20261107-oom/attempt-20261107T164114204669Z.json",
+    "/storage/user/latn/artifacts/f1/20261106-1052_f1_hlvid-selection-floor_98c0dce/recovery/20261107-oom/attempt-20261107T223016381175Z.json",
+    "/storage/user/latn/artifacts/f1/20261106-1052_f1_hlvid-selection-floor_98c0dce/recovery/20261107-oom/attempt-20261108T101558054086Z.json"
+  ]
+}

@@ -1,0 +1,211 @@
+{
+  "config_sha256": "5611a04e090173840e49ebd0e7ad94e3f1dc1691b9c7e6a443f9be8fce1cc331",
+  "created_at_utc": "2026-11-08T10:55:33.851524+00:00",
+  "curation_commit": "98c0dce3d7e33dbe0ad982d4fda1ce7e4f49e656",
+  "curation_script_sha256": "41e7aca2d31a96e0e07e5752c18d9178220d8a80aae943d746979525805e4cb7",
+  "curation_slurm_job_id": "1997695",
+  "curation_tracked_dirty": false,
+  "environment": {
+    "hostname": "node2",
+    "numpy": "2.4.4",
+    "pyarrow": "24.0.0",
+    "python": "3.11.15"
+  },
+  "gate": "F1",
+  "gpu": [
+    "name, uuid, driver_version, memory.total [MiB]",
+    "NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-81f69603-2eef-4220-b4a7-f5ede59633fb, 615.71.09, 97887 MiB"
+  ],
+  "heavy_artifact_root": "/storage/user/latn/artifacts/f1/20261106-1052_f1_hlvid-selection-floor_98c0dce",
+  "human_gaze_protected_test_accessed": false,
+  "inference_commit": "98c0dce3d7e33dbe0ad982d4fda1ce7e4f49e656",
+  "inference_slurm_job_id": "1992333",
+  "inputs": [
+    {
+      "admission_sha256": "9f62d95b9d3c385d19f3bf97a3cc12dfe1009efac14a91d4cb32a582df5648c3",
+      "arm": "random16",
+      "autogaze_checkpoint_sha256": "a48e6a83a198368e3798420ff5d5df42af7c0003c9230f85581c39a2ea64e9eb",
+      "code_commit": "98c0dce3d7e33dbe0ad982d4fda1ce7e4f49e656",
+      "code_dirty": false,
+      "compatibility_key": "75486a69adf0e7033a444694738733084e41b7f37e5355ac257ad5140e62ca19",
+      "decode_audit": {
+        "decode_audit_jsonl_sha256": "563e6c8f29b70f7c70b93668aee53624d68a9148521847998ab326ecc07f26b9",
+        "historical_certification": false,
+        "live_model_files_verified": false,
+        "live_runtime": {
+          "git_commit": "4a10750e347985ca6f036cc256c55b11764f315c",
+          "git_dirty": false,
+          "hostname": "atcremers63",
+          "packages": {
+            "numpy": "1.26.4",
+            "opencv": "4.8.0",
+            "pillow": "12.2.0",
+            "pyarrow": "24.0.0"
+          }
+        },
+        "live_runtime_supplement_sha256": "f2679ed4c90c6884e15243c78d38d78c4613861109098cb4521fcb3b1a4e1bf7",
+        "protocol_runtime_manifest_sha256": "ca584503958f6be661bc1e9dc79a2fd5f89bbccbab01e348431f8773908ecb60",
+        "question_count": 268,
+        "reuse_qualification": "no_current_requested_decode_failures",
+        "root": "/home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d",
+        "summary_sha256": "36b3e76dd1d3b64cfb8a0d37782746b8ab64fd38630fe4c6b0c25d8bf648fbf5",
+        "video_count": 77
+      },
+      "environment": {
+        "cuda_available": true,
+        "hostname": "node22",
+        "packages": {
+          "numpy": "1.26.4",
+          "opencv-python": null,
+          "pyarrow": "24.0.0",
+          "torch": "2.11.0",
+          "transformers": "4.57.6"
+        },
+        "python": "3.11.15",
+        "slurm_array_job_id": null,
+        "slurm_array_task_id": null,
+        "slurm_job_id": "1992333"
+      },
+      "event_sha256": "bc401d08c411728759a92e4b1f70cdc4030d3a2091c038c63af0b80df363464e",
+      "event_summary": {
+        "attempt_count_is_not_completed_QA_count": true,
+        "first_event_at": "2026-11-07T09:30:44.132872+00:00",
+        "last_event_at": "2026-11-07T16:07:08.121491+00:00",
+        "state_counts": {
+          "attempt_started": 268,
+          "completed_answer": 268
+        },
+        "unclosed_started_attempts": 0
+      },
+      "inference_code_hashes": {
+        "evaluator_sha256": "26fcb52f155fed28d1aee3bc26ba4532cf735eec696b0203363db8a7c2a73936",
+        "fixed_budget_adapter_sha256": "2f6894ce6f726d1dcabec31f8b7c1acc86104a48460d11eed353c7a6b8ad4555"
+      },
+      "nvila_artifact_hashes": {
+        "config.json": "c1651402332c65b764a820b97cc5a8d284245fca38603444c7b174318a38f657",
+        "generation_config.json": "55b2b4462aedccc5858edd8d7aa0fa7aebf8a3bf9245f9a095ddeba8a9a1650a",
+        "modeling_nvila.py": "4ad40894a1c03ada5ce5c7b92c7ffaf658584fe572e1bb54924633d365a6f36a",
+        "preprocessor_config.json": "84641b6ff10af9951f96e58c2d77049e8ebd1ee9598dab3d55bd156e7b71863b",
+        "processing_nvila.py": "2b9dbf36a9c69954af7e7cc8478a980e406e91c2ba27b7f2f164167da70dbc9a",
+        "processor_config.json": "55e1660d43fd7e7b00d9b3bfd7266fa76f698c27e604d8d1fdcf4247401bf554",
+        "pytorch_model.bin.index.json": "b37a2f427b8aab3e25d7373bdf127765a3375d4d52306ecc315d5eba05039549",
+        "tokenizer_config.json": "a78516f2955346a04b72bb7dfa895cef476d190ed312143e2fbfe5d42ae7f13b"
+      },
+      "nvila_snapshot_revision": "7a5670e20da435d98b0efdc49f9a536f73985152",
+      "preflight_sha256": "c8a23f346f164686c2d183f6d7578fe00dc26746e17091d91b17b24d1d160b15",
+      "random16_rule": "per (video_key, tile_index, frame_index): numpy default_rng(SeedSequence(sha256('f1-random-cells|{seed}|{video_key}|{tile_index}|{frame_index}') as 4x uint64)).choice(num_cells, K, replace=False), sorted ascending; tile_index enumerates AutoGaze tile batch items in processor order within one question; frame_index is the decoder frame",
+      "random16_seed": 20261106,
+      "raw_directory": "/storage/user/latn/artifacts/f1/20261106-1052_f1_hlvid-selection-floor_98c0dce/random16",
+      "results_sha256": "7f5278dff39142c66c11f4e14a5c7cc46ff83c2f3ac27a74de48802da25d0dec",
+      "run_manifest_sha256": "80e29f7f41a753cb28a18a35e0c01d34504b52b967a22103b68f088af1cc3869",
+      "summary_sha256": "fe1f6ba55489b8d5a70e2ddf2c0c45ebc2d1dc5cabcdb5fe4bd3aaeb162716e1"
+    },
+    {
+      "admission_sha256": "9f62d95b9d3c385d19f3bf97a3cc12dfe1009efac14a91d4cb32a582df5648c3",
+      "arm": "stavis_center16",
+      "autogaze_checkpoint_sha256": "a48e6a83a198368e3798420ff5d5df42af7c0003c9230f85581c39a2ea64e9eb",
+      "code_commit": "98c0dce3d7e33dbe0ad982d4fda1ce7e4f49e656",
+      "code_dirty": false,
+      "compatibility_key": "db2dab9e234924a30efa90f914f76a658462dd79c67d1f388fd66e3131fe741f",
+      "decode_audit": {
+        "decode_audit_jsonl_sha256": "563e6c8f29b70f7c70b93668aee53624d68a9148521847998ab326ecc07f26b9",
+        "historical_certification": false,
+        "live_model_files_verified": false,
+        "live_runtime": {
+          "git_commit": "4a10750e347985ca6f036cc256c55b11764f315c",
+          "git_dirty": false,
+          "hostname": "atcremers63",
+          "packages": {
+            "numpy": "1.26.4",
+            "opencv": "4.8.0",
+            "pillow": "12.2.0",
+            "pyarrow": "24.0.0"
+          }
+        },
+        "live_runtime_supplement_sha256": "f2679ed4c90c6884e15243c78d38d78c4613861109098cb4521fcb3b1a4e1bf7",
+        "protocol_runtime_manifest_sha256": "ca584503958f6be661bc1e9dc79a2fd5f89bbccbab01e348431f8773908ecb60",
+        "question_count": 268,
+        "reuse_qualification": "no_current_requested_decode_failures",
+        "root": "/home/stud/latn/.codex/worktrees/r2f-hlvid-curation/outputs/hlvid/wp0_protocol_audit/20260909-0211_wp0-hlvid-protocol-audit_b98970d",
+        "summary_sha256": "36b3e76dd1d3b64cfb8a0d37782746b8ab64fd38630fe4c6b0c25d8bf648fbf5",
+        "video_count": 77
+      },
+      "environment": {
+        "cuda_available": true,
+        "hostname": "node22",
+        "packages": {
+          "numpy": "1.26.4",
+          "opencv-python": null,
+          "pyarrow": "24.0.0",
+          "torch": "2.11.0",
+          "transformers": "4.57.6"
+        },
+        "python": "3.11.15",
+        "slurm_array_job_id": null,
+        "slurm_array_task_id": null,
+        "slurm_job_id": "1997694"
+      },
+      "event_sha256": "6f07c184d3c7c9c27cb4373d7a33dd40af27ae337da49519e958525192f9dfe2",
+      "event_summary": {
+        "attempt_count_is_not_completed_QA_count": true,
+        "first_event_at": "2026-11-07T09:30:44.133467+00:00",
+        "last_event_at": "2026-11-08T10:53:22.053988+00:00",
+        "state_counts": {
+          "attempt_started": 270,
+          "completed_answer": 268,
+          "failed": 1
+        },
+        "unclosed_started_attempts": 2
+      },
+      "inference_code_hashes": {
+        "evaluator_sha256": "26fcb52f155fed28d1aee3bc26ba4532cf735eec696b0203363db8a7c2a73936",
+        "fixed_budget_adapter_sha256": "2f6894ce6f726d1dcabec31f8b7c1acc86104a48460d11eed353c7a6b8ad4555"
+      },
+      "nvila_artifact_hashes": {
+        "config.json": "c1651402332c65b764a820b97cc5a8d284245fca38603444c7b174318a38f657",
+        "generation_config.json": "55b2b4462aedccc5858edd8d7aa0fa7aebf8a3bf9245f9a095ddeba8a9a1650a",
+        "modeling_nvila.py": "4ad40894a1c03ada5ce5c7b92c7ffaf658584fe572e1bb54924633d365a6f36a",
+        "preprocessor_config.json": "84641b6ff10af9951f96e58c2d77049e8ebd1ee9598dab3d55bd156e7b71863b",
+        "processing_nvila.py": "2b9dbf36a9c69954af7e7cc8478a980e406e91c2ba27b7f2f164167da70dbc9a",
+        "processor_config.json": "55e1660d43fd7e7b00d9b3bfd7266fa76f698c27e604d8d1fdcf4247401bf554",
+        "pytorch_model.bin.index.json": "b37a2f427b8aab3e25d7373bdf127765a3375d4d52306ecc315d5eba05039549",
+        "tokenizer_config.json": "a78516f2955346a04b72bb7dfa895cef476d190ed312143e2fbfe5d42ae7f13b"
+      },
+      "nvila_snapshot_revision": "7a5670e20da435d98b0efdc49f9a536f73985152",
+      "preflight_sha256": "005d7a9d09a1a4e077c702c9ad7b0c316a1c660ebccea5adffdf85bc0c07fcc8",
+      "random16_rule": null,
+      "random16_seed": null,
+      "raw_directory": "/storage/user/latn/artifacts/f1/20261106-1052_f1_hlvid-selection-floor_98c0dce/stavis_center16",
+      "results_sha256": "e5d52c07c6d934e4f72cb58fcd6eb7e439f06af044083b5f1d054e54a61f7275",
+      "run_manifest_sha256": "67c3a5e9786c0d83ecc22566f78b63bd303f60b06475de79522524bfe4d77738",
+      "summary_sha256": "f5901f148f1147186adc311c9290cc45940506184cc49c96d4ae82e9cb0b037a"
+    }
+  ],
+  "outputs": {
+    "README.md": "37d3447502b028e6709a589ca0472c2082800002d120fb9f4401c7ac546b146c",
+    "config.yaml": "5611a04e090173840e49ebd0e7ad94e3f1dc1691b9c7e6a443f9be8fce1cc331",
+    "contrasts.csv": "9a6a0d4b60a7d7e46e3d0d28020cc008c34e88e8a1be269fd8231f23f2857ff0",
+    "metrics.json": "ab6285a954c7aa48d2e854c5b8d7bd17f54585a433d38402379681b4b55c30f9",
+    "per_arm.csv": "2e75077350d0dfed00644d980b3c3e87b3e2c4a4eb7441bc497c2d723cd1c488",
+    "per_example_telemetry.csv": "63226c1dc98c04c564390299b59414b0b4f6765a1c2a6f432eba9094ce43a5bb",
+    "per_question_letters.csv": "46feae22e0fa79702c9b88479e276f5d94e799822e3e70e5f0c6912b632e82d7",
+    "per_video.csv": "8e0b5d479b1b14514ff9b43dcd5485f845b9c1beff7d626d005a249be01be1f0",
+    "recovery.json": "b8c1c6ffaff7a4aedb11589301c76791a27dc32e9c890a6a59b0cbf246ce9991"
+  },
+  "parquet_sha256": "ed2a1a47603fd19f5d7fae0db4f9792369f5aff6548f35e0225c3b4bd35e112a",
+  "recovery": {
+    "authorized_cumulative_recovery_seconds": 28800,
+    "original_failed_seconds": 23908,
+    "original_job": "1992333",
+    "random16_preserved": true,
+    "receipts": [
+      "/storage/user/latn/artifacts/f1/20261106-1052_f1_hlvid-selection-floor_98c0dce/recovery/20261107-oom/attempt-20261107T164114204669Z.json",
+      "/storage/user/latn/artifacts/f1/20261106-1052_f1_hlvid-selection-floor_98c0dce/recovery/20261107-oom/attempt-20261107T223016381175Z.json",
+      "/storage/user/latn/artifacts/f1/20261106-1052_f1_hlvid-selection-floor_98c0dce/recovery/20261107-oom/attempt-20261108T101558054086Z.json"
+    ],
+    "saved_center16_answers": 9,
+    "scientific_settings_changed": false
+  },
+  "run_id": "20261106-1052_f1_hlvid-selection-floor_98c0dce",
+  "schema_version": 1
+}

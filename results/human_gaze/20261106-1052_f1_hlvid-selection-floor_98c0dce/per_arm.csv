@@ -1,0 +1,3 @@
+arm,num_correct,question_micro_accuracy,macro_video_accuracy,invalid_predictions
+random16,120,0.44776119402985076,0.44385019742162596,0
+stavis_center16,137,0.5111940298507462,0.5091967556253271,0
