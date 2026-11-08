@@ -2,7 +2,7 @@
 #SBATCH --job-name=n1-native-cov
 #SBATCH --partition=NORMAL
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:1,VRAM:24G
+#SBATCH --gres=gpu:a40:1
 #SBATCH --cpus-per-task=5
 #SBATCH --mem=32G
 #SBATCH --time=02:00:00

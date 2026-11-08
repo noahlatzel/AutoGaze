@@ -100,7 +100,7 @@ analysis:
     definition: exact-area centred square with a uniformly fractional boundary ring. The frame centre lies between pixels 111 and 112, so centred pixel squares have even sides 2k. For union area A (pixels), k = largest integer with (2k)^2 <= A; coverage = M(2k) + f * (M(2k+2) - M(2k)), f = (A - (2k)^2) / ((2k+2)^2 - (2k)^2), where M(s) is the attention mass of the centred s x s pixel square. A = 4096 reproduces Center16 exactly.
 resources:
   partition: NORMAL
-  gres: gpu:1,VRAM:24G
+  gres: "gpu:a40:1"  # attempt with gpu:1,VRAM:24G landed on a Pascal P6000 (sm_61), unsupported by the torch cu130 build
   cpus_per_task: 5
   host_memory_gib: 32
   max_walltime: "02:00:00"
