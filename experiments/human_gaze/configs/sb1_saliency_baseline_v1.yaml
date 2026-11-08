@@ -1,0 +1,140 @@
+schema_version: 1
+experiment_id: sb1_saliency_baseline
+gate: SB1
+title: Off-the-shelf video saliency model (TASED-Net, DHF1K) as a K16 human-attention baseline
+status: frozen_before_inference
+date: 2026-11-08
+authorization:
+  user: Noah Latzel
+  date: 2026-11-08
+  scope: inference only; one GPU job (TASED-Net over 663 test clips x 16 frames) plus dependent CPU curation
+  third_party: download and run public ViNet / TASED-Net code and weights (weights-only loading where possible); UNISAL not covered
+  training_authorized: false
+  nvila_authorized: false
+gate_note: wiki/experiments/SB1 Saliency Model Baseline.md (wrapper repository; decision rule frozen 2026-11-08)
+run_id_template: "YYYYMMDD-HHMM_sb1_saliency-baseline_<short-commit>"
+data:
+  root: /storage/user/zverev/datasets/av-gaze-stavis
+  manifest: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+  manifest_sha256: 0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10
+  cell_mass: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+  cell_mass_sha256: fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8
+  split: test
+  expected_clips: 663
+  expected_videos: 67
+  expected_train_clips: 1854
+  clip_len: 16
+  native_frames: video_frames/<source>/<video>/img_XXXXX.jpg (1-based, contiguous); clip frame_numbers index this sequence
+  prior_exposure: Historically exposed test split (opened before GT1); prospective rule on an exposed population.
+model_selection:
+  order: [ViNet (DHF1K), TASED-Net (DHF1K), UNISAL (not authorized)]
+  vinet:
+    repository: https://github.com/samyak0210/ViNet
+    commit: 2a526668c91466c3819564e7c6ae6cf2409bac91
+    weights_url: https://iiitaphyd-my.sharepoint.com/:u:/g/personal/samyak_j_research_iiit_ac_in/EXYq5WiSbh9Kq9R_n-Gr3yABRyKPSkxM7ROLg-zPDXV_qA?e=5AL7UU
+    status: not_available
+    reason: >-
+      The only official weight link (README) returns HTTP 404 "FILE NOT FOUND" (checked 2026-11-08);
+      upstream issue #41 "Link to weights is broken" (open since 2022-11) offers only a third-party
+      mega.nz re-upload, which is not an official source and cannot be verified, so it was not used.
+  chosen: tased_net
+tased_net:
+  repository: https://github.com/MichiganCOG/TASED-Net
+  commit: 0cf47b73cf055bfc64dc132a85276cca67308226
+  license: MIT (Copyright (c) 2019 Kyle Min); model.py vendored verbatim at autogaze/human_gaze/third_party/tased_net/
+  model_py_sha256: caa050e71e3fdecfa3e8230ab6e23b0215ad049dd8189e5c73ad3f2c1caea884
+  weights_url: https://drive.google.com/file/d/1y4KSTm-e7kP84k0IyVI-rRtmYZkrC-wL
+  weights_path: /storage/user/latn/models/sb1/dl_tasednet/TASED_updated.pt
+  weights_sha256: 8be860c8faf41674f5f2e23ea8e1cef2290ecc7e4f6ed0a75d61c0e117588afd
+  weights_loading: torch.load(weights_only=True); plain state dict, 513 tensors; 'module.' prefix stripped; strict load (all keys and shapes match)
+  training_data: >-
+    Paper (Min & Corso, ICCV 2019, arXiv:1908.05786 v2, Sec. 4 "Training/testing process"): S3D encoder pre-trained
+    on Kinetics(-400); TASED-Net trained end-to-end on the 600 DHF1K training videos (validation on DHF1K val).
+    Hollywood2/UCFSports models are separate fine-tunes of the DHF1K model (Sec. 4.3). The single released
+    TASED_updated.pt is the "updated" DHF1K model whose DHF1K test-benchmark scores the README reports. No STAViS source
+    (AVAD, DIEM, Coutrot db1/db2, ETMD, SumMe) is used -> eligible.
+  paper_pdf_sha256: a30625607169f4abba0b544b9409d6c7eef27e14a1979e28a42bacfd0273dcd9
+  inference:
+    protocol: upstream run_example.py re-implemented in autogaze/human_gaze/saliency_baseline.py (no upstream script executed)
+    len_temporal: 32
+    window: native frames j-31..j for 0-based target j >= 31; time-reversed j+31..j for j < 31 (upstream flipped first clip); both end at the target frame
+    frame_read: JPEG -> RGB (PIL; upstream cv2.imread + BGR->RGB)
+    resize: 384x224 (WxH), half-pixel bilinear without antialias (cv2.INTER_LINEAR equivalent via torch interpolate), rounded to uint8
+    normalisation: (2x - 255) / 255
+    postprocess: sigmoid map -> int(255 x)/255 -> Gaussian sigma 7 (reflect, truncate 4; SciPy gaussian_filter defaults) -> / max -> uint8 (the saved PNG)
+    to_224: PIL bilinear 384x224 -> 224x224 (same resampler as the D0 ground-truth maps), clip >= 0, normalise to unit mass
+    cells: 14x14 grid of 16x16 px, cell = row * 14 + col
+    selection: per frame top-16 cells by predicted mass, ties by smaller cell index
+geometry:
+  grid: 14
+  fine_cells: 196
+  k: 16
+arms:
+  reference:
+    gt1_run_id: 20261105-1447_gaze-completion_94e3da6
+    gt1_actions: /storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions
+    gt1_metrics: results/human_gaze/20261105-1447_gaze-completion_94e3da6/test_confirmation/metrics.json
+    gt1_metrics_sha256: e4bcd29bccc60c179c6ef8c89859691219f80883e096eb6f013ba0e688b9563e
+    actions_sha256:
+      rl440826: 3101b625d2a782a3955bcbcbed618503a1f4e4b81b4bc2a6307f88ec91c39b99
+      rl440827: c56cd96d6826a612156af144ad12983dbb0fc2b476fb1c7464814e538fcb3c58
+      rl440828: 701c23b2186486b3f2a35f266f95ecee1420ccd76f3b03a1dd036c73b51ad93f
+      rl440829: 1bb0f63a1cedf7f768a5a439de421b1b129273f158d2dbb9718711141d0a0419
+      rl440830: bad0508c66b066d4df7f1c530d6d41a8eabd930765df46b1f9ea697f902c9387
+      rl440831: eb98bb723b912f0da840cf816a38d78e0f2e9b288540473240f0a2a91ff46cae
+    seeds: [440826, 440827, 440828, 440829, 440830, 440831]
+    center16: center_order(14)[:16]
+    train_source_prior: source_prior_cells (GT1 definition; per source, train frames pooled)
+  best_constant:
+    definition: 16 cells with the largest training-split attention mass; weights equal sources, equal videos within source, equal clips within video, equal frames within clip; ties by cell index
+    fitted_on: train
+analysis:
+  coverage: D0 14x14 cell mass of the selected cells; frames -> clips -> videos -> equal-weight sources (aggregate_frame_values, as GT1)
+  primary_contrast: trained RL K16 six-seed mean minus saliency_top16, source-macro coverage
+  uncertainty: paired source-stratified video bootstrap (source_stratified_video_bootstrap_delta), seed-averaged
+  bootstrap_iterations: 10000
+  bootstrap_seed: 20261109
+  confidence: 0.90
+  decision_rule:
+    policy_better: 90% lower bound > 0
+    saliency_better: 90% upper bound < 0
+    inconclusive: otherwise; no equivalence claim
+  implementation_check:
+    rule: the scorer reproduces GT1 source-macro test values for trained six-seed mean, Center16 and the train source prior within 1e-6
+    targets: {rl_six_seed_mean: 0.44301112915277024, center16: 0.3616306240380483, train_source_prior: 0.4320433881606243}
+    tolerance: 1.0e-6
+    on_failure: abort curation; no metrics.json
+  secondary:
+    - saliency_top16 minus center16 (same bootstrap)
+    - saliency_top16 minus train_source_prior (same bootstrap)
+    - trained six-seed mean minus best_constant (same bootstrap)
+    - per-source coverage table
+    - cell overlap (|intersection| / 16) of saliency with each trained seed (seed-averaged) and with Center16
+resources:
+  partition: NORMAL
+  gres: "gpu:a40:1"  # generic GPU requests can land on Pascal (sm_61), unsupported by the torch cu130 build
+  cpus_per_task: 6
+  host_memory_gib: 32
+  max_walltime: "02:00:00"
+  ceiling_walltime_hours: 4
+  batch_size: 8  # target frames per forward pass (each a 32-frame window)
+  num_workers: 5
+numerics:
+  dtype: float32 (no autocast)
+  cudnn_allow_tf32: false
+  matmul_allow_tf32: false
+  cudnn_deterministic: true
+  cudnn_benchmark: false
+  max_unpool: >-
+    TASED-Net's MaxUnpool3d layers (unpool2/3) use switches from overlapping 3x3/stride-2 poolings, so several
+    inputs can target one output cell. The CUDA kernel resolves these collisions by a write race: in the
+    pre-submission smoke (RTX A2000, 3 clips) two identical batch-1 runs differed by up to 0.0063 in predicted
+    cell mass and changed some top-16 sets. They are replaced at load time (vendored model.py unchanged) by
+    LastWriteMaxUnpool3d, PyTorch's CPU rule (inputs written in flat order; the last wins) implemented as a
+    deterministic scatter-amax. Smoke: bit-identical CPU unpool outputs in unit tests; GPU outputs run-to-run
+    identical and identical for batch 1/2/8; vs the unmodified model on CPU max |diff| 6.2e-4 in the sigmoid
+    map, identical top-16 cells.
+outputs:
+  artifact_root: /storage/user/latn/artifacts/sb1/<run_id>
+  result_bundle: results/human_gaze/<run_id>
+  curation: dependent CPU job, experiments/human_gaze/slurm/run_sb1_saliency_baseline_curate.sbatch
