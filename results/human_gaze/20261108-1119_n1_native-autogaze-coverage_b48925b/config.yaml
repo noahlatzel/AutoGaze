@@ -1,0 +1,176 @@
+schema_version: 1
+experiment_id: n1_native_autogaze_coverage
+gate: N1
+title: Native AutoGaze human-attention coverage
+status: frozen_before_inference
+date: '2026-11-08'
+authorization:
+  user: Noah Latzel
+  date: '2026-11-08'
+  scope: inference only; one GPU job (two native passes over 663 test clips) plus
+    dependent CPU curation
+  training_authorized: false
+  nvila_authorized: false
+  hlvid_authorized: false
+gate_note: wiki/experiments/N1 Native AutoGaze Coverage.md (wrapper repository; decision
+  rule frozen 2026-11-08)
+run_id_template: YYYYMMDD-HHMM_n1_native-autogaze-coverage_<short-commit>
+data:
+  root: /storage/user/zverev/datasets/av-gaze-stavis
+  manifest: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl
+  manifest_sha256: 0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10
+  cell_mass: /home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy
+  cell_mass_sha256: fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8
+  split: test
+  expected_clips: 663
+  expected_videos: 67
+  clip_len: 16
+  heatmap_transform: eyeMap JPEG -> greyscale -> PIL bilinear 224x224 -> float ->
+    divide by frame sum (load_aligned_clip, identical to the cell_mass cache)
+  prior_exposure: Historically exposed test split (opened before GT1); prospective
+    rule on an exposed population.
+pretrained:
+  path: /storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze
+  model_safetensors_sha256: a48e6a83a198368e3798420ff5d5df42af7c0003c9230f85581c39a2ea64e9eb
+  config_sha256: 2bfa48a1f8ac23e67e3477edfd5c439305bdf5fb22dd0130965863bc3e29236b
+  preprocessor_config_sha256: a28d1b6ea575bc9877782f5c467428ab986dfb2bba78c9e62f3a7652130cfca3
+  preprocessing: frozen AVGazeStavisDataset 224x224 RGB + checkpoint AutoGazeImageProcessor
+    (same as GT1 fine-only exports)
+geometry:
+  scales:
+  - 32
+  - 64
+  - 112
+  - 224
+  patch_size: 16
+  image_size: 224
+  action_blocks:
+    grid2x2:
+      ids:
+      - 0
+      - 3
+      patch_side_px: 112
+    grid4x4:
+      ids:
+      - 4
+      - 19
+      patch_side_px: 56
+    grid7x7:
+      ids:
+      - 20
+      - 68
+      patch_side_px: 32
+    grid14x14:
+      ids:
+      - 69
+      - 264
+      patch_side_px: 16
+  eos_id: 265
+  source: AutoGaze.__init__ token split + get_mask_from_gazing_pos scale order + multi-scale
+    ViT embeddings (resize to s, 16-px patches, row-major)
+arms:
+  native16:
+    role: primary comparator
+    call: 'model({''video'': v}, max_gaze_tokens_each_frame=16, generate_only=True)'
+    vocabulary: all 265 actions
+    allow_eos: false
+    task_loss_requirement: null
+    exact_actions_per_frame: 16
+    decoding: greedy (model.eval -> do_sample=False), no repeats (NoRepeatTokensLogitsProcessor)
+  native_default:
+    role: secondary (descriptive)
+    call: 'model({''video'': v}, gazing_ratio=0.75, task_loss_requirement=0.7, generate_only=True)'
+    source_of_settings: NVILA-8B-HD-Video preprocessor_config.json gazing_ratio_tile=0.75,
+      task_loss_requirement_tile=0.7 (equal to the checkpoint's fixed inference config)
+    max_actions_per_frame: 198
+    stopping: per multi-token block, positions whose predicted task loss <= 0.7 are
+      replaced by EOS padding and the frame ends after that block; the first action
+      of each frame is never dropped
+    allow_eos: false
+    decoding: greedy, no repeats
+    target_scales: null
+  reference:
+    gt1_run_id: 20261105-1447_gaze-completion_94e3da6
+    gt1_actions: /storage/user/latn/artifacts/gaze-completion/20261105-1447_gaze-completion_94e3da6/test_actions
+    gt1_metrics: results/human_gaze/20261105-1447_gaze-completion_94e3da6/test_confirmation/metrics.json
+    gt1_metrics_sha256: e4bcd29bccc60c179c6ef8c89859691219f80883e096eb6f013ba0e688b9563e
+    actions_sha256:
+      rl440826: 3101b625d2a782a3955bcbcbed618503a1f4e4b81b4bc2a6307f88ec91c39b99
+      rl440827: c56cd96d6826a612156af144ad12983dbb0fc2b476fb1c7464814e538fcb3c58
+      rl440828: 701c23b2186486b3f2a35f266f95ecee1420ccd76f3b03a1dd036c73b51ad93f
+      rl440829: 1bb0f63a1cedf7f768a5a439de421b1b129273f158d2dbb9718711141d0a0419
+      rl440830: bad0508c66b066d4df7f1c530d6d41a8eabd930765df46b1f9ea697f902c9387
+      rl440831: eb98bb723b912f0da840cf816a38d78e0f2e9b288540473240f0a2a91ff46cae
+      pretrained: 8099b0580f6be8e73d7d835b924e376bc4bd9ffee70eacf88cdb85ccd810ea04
+    seeds:
+    - 440826
+    - 440827
+    - 440828
+    - 440829
+    - 440830
+    - 440831
+    center16: center_order(14)[:16] fine cells (centred 64x64 px square)
+analysis:
+  coverage: per frame, normalised attention mass inside the pixel union of the selected
+    patches (any scale); frames -> clips -> videos -> equal-weight sources
+  primary_contrast: trained RL K16 six-seed mean minus native16, source-macro coverage
+  uncertainty: paired source-stratified video bootstrap (source_stratified_video_bootstrap_delta),
+    seed-averaged
+  bootstrap_iterations: 10000
+  bootstrap_seed: 20261108
+  confidence: 0.9
+  decision_rule:
+    trained_better: 90% lower bound > 0
+    native_better: 90% upper bound < 0
+    inconclusive: otherwise; no equivalence claim
+  implementation_check:
+    rule: pixel-union scorer reproduces GT1 source-macro test values for the fine-only
+      arms within 1e-6 (exact values from gt1_metrics; the gate note quotes them rounded
+      to 5 decimals)
+    targets:
+      rl_six_seed_mean: 0.44301112915277024
+      center16: 0.3616306240380483
+      pretrained: 0.1450638990995491
+    tolerance: 1.0e-06
+    on_failure: abort curation; no metrics.json
+  secondary:
+  - trained minus native_default, same bootstrap (budgets differ; descriptive)
+  - per arm mean actions per frame, per-scale action counts, mean selected pixel-area
+    fraction (all source-macro), coverage per unit area = source-macro coverage /
+    source-macro area fraction
+  - centre_at_area per native frame; report native minus centre_at_area (same bootstrap)
+    alongside trained minus Center16 (GT1 +0.0813805)
+  - per-source coverage table
+  centre_at_area:
+    definition: exact-area centred square with a uniformly fractional boundary ring.
+      The frame centre lies between pixels 111 and 112, so centred pixel squares have
+      even sides 2k. For union area A (pixels), k = largest integer with (2k)^2 <=
+      A; coverage = M(2k) + f * (M(2k+2) - M(2k)), f = (A - (2k)^2) / ((2k+2)^2 -
+      (2k)^2), where M(s) is the attention mass of the centred s x s pixel square.
+      A = 4096 reproduces Center16 exactly.
+resources:
+  partition: NORMAL
+  gres: gpu:a40:1
+  cpus_per_task: 5
+  host_memory_gib: 32
+  max_walltime: 02:00:00
+  ceiling_walltime_hours: 4
+  batch_size: 1
+  num_workers: 4
+numerics:
+  dtype: float32 (checkpoint attn_mode sdpa; no autocast)
+  cudnn_allow_tf32: false
+  matmul_allow_tf32: false
+  batch_size_rationale: 'Pre-submission smoke (8 test clips, RTX A2000): with cuDNN
+    TF32 on, greedy Native-16 actions changed with batch size (logit near-ties); with
+    TF32 off they did not. Native-default remained batch-dependent from frame 1 on
+    even in FP32, because in batched generation a clip that has stopped keeps receiving
+    padded slots that enter the KV cache with attention mask 1 and shift positions
+    for its retained actions, whereas alone the frame ends and those tokens are re-encoded
+    with padding masked. Batch size 1 gives every clip the selections it would receive
+    alone and was run-to-run identical in the smoke. GT1 fine-only exports (batch
+    16, TF32 default) are reused as saved actions, unchanged.'
+outputs:
+  artifact_root: /storage/user/latn/artifacts/n1/<run_id>
+  result_bundle: results/human_gaze/<run_id>
+  curation: dependent CPU job, experiments/human_gaze/slurm/run_n1_native_coverage_curate.sbatch

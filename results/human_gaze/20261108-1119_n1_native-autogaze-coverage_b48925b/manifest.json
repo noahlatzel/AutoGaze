@@ -1,0 +1,83 @@
+{
+  "config_sha256": "9f57f3c5c3ac5aad9bed34127fdf1ebd4959c2eba720bd0977764b518a07f644",
+  "curation_runtime": {
+    "elapsed_seconds": 83.57364439964294,
+    "host": "node2",
+    "slurm_job_id": "2001362"
+  },
+  "data": {
+    "cell_mass": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/cell_mass.npy",
+    "cell_mass_sha256": "fed5a6552ab94eeaa02a807959d4c3cda6de9dbadeadc35ee248e46ebc16dfb8",
+    "manifest": "/home/stud/latn/master-thesis/AutoGaze/outputs/human_gaze/d0_stavis_fold1_validated/clips.jsonl",
+    "manifest_sha256": "0ef9fa17881517ea69d9edbaf57f8571c5c58d1da517370746fbe264fe33ff10",
+    "root": "/storage/user/zverev/datasets/av-gaze-stavis"
+  },
+  "gate": "N1",
+  "heavy_artifacts": "/storage/user/latn/artifacts/n1/20261108-1119_n1_native-autogaze-coverage_b48925b/actions",
+  "logical_nvila_rollouts": 0,
+  "model": {
+    "model_safetensors_sha256": "a48e6a83a198368e3798420ff5d5df42af7c0003c9230f85581c39a2ea64e9eb",
+    "path": "/storage/slurm/latn/data/AutoGaze/hf_models/nvidia--AutoGaze"
+  },
+  "native_exports": {
+    "native16": {
+      "actions_sha256": "0b85bba9c11311e6dd7fb4647cc3188e50cc75f81d5380771de8e1eb29813d9c",
+      "manifest": "/storage/user/latn/artifacts/n1/20261108-1119_n1_native-autogaze-coverage_b48925b/actions/native16/manifest.json",
+      "manifest_sha256": "2d55cbfa73158d8b6df31a239354f8d075e8d8f0e75bfdd05fc65718554d03bc",
+      "runtime": {
+        "elapsed_seconds": 215.00034022331238,
+        "gpu": "NVIDIA A40",
+        "host": "node16",
+        "peak_allocated_bytes": 113392640,
+        "python": "3.11.15",
+        "started_unix": 1794147290.9653332,
+        "torch": "2.11.0+cu130"
+      },
+      "slurm_job_id": "2001361",
+      "source": {
+        "commit": "b48925b0272968775edf7c004a39fb5a4889e68a",
+        "dirty": false,
+        "repository": "git@github.com:noahlatzel/AutoGaze.git"
+      }
+    },
+    "native_default": {
+      "actions_sha256": "5ff36cd92b5ddd3ea7ddb647bdae8479d5c45d8f3bbc4ea6f0c2291d08b77d6a",
+      "manifest": "/storage/user/latn/artifacts/n1/20261108-1119_n1_native-autogaze-coverage_b48925b/actions/native_default/manifest.json",
+      "manifest_sha256": "8ceb7066bece2f1f35b883b0f5ec58f5f09e5aa80875f5d73e2adb577de61b4e",
+      "runtime": {
+        "elapsed_seconds": 690.1218137741089,
+        "gpu": "NVIDIA A40",
+        "host": "node16",
+        "peak_allocated_bytes": 169988096,
+        "python": "3.11.15",
+        "started_unix": 1794147515.9643247,
+        "torch": "2.11.0+cu130"
+      },
+      "slurm_job_id": "2001361",
+      "source": {
+        "commit": "b48925b0272968775edf7c004a39fb5a4889e68a",
+        "dirty": false,
+        "repository": "git@github.com:noahlatzel/AutoGaze.git"
+      }
+    }
+  },
+  "reference_actions": {
+    "pretrained": "8099b0580f6be8e73d7d835b924e376bc4bd9ffee70eacf88cdb85ccd810ea04",
+    "rl440826": "3101b625d2a782a3955bcbcbed618503a1f4e4b81b4bc2a6307f88ec91c39b99",
+    "rl440827": "c56cd96d6826a612156af144ad12983dbb0fc2b476fb1c7464814e538fcb3c58",
+    "rl440828": "701c23b2186486b3f2a35f266f95ecee1420ccd76f3b03a1dd036c73b51ad93f",
+    "rl440829": "1bb0f63a1cedf7f768a5a439de421b1b129273f158d2dbb9718711141d0a0419",
+    "rl440830": "bad0508c66b066d4df7f1c530d6d41a8eabd930765df46b1f9ea697f902c9387",
+    "rl440831": "eb98bb723b912f0da840cf816a38d78e0f2e9b288540473240f0a2a91ff46cae"
+  },
+  "resolved_config_sha256": "900921cf6a27efa28cfce87ac0f37114029e246181ff5c809c45a26381b9be8c",
+  "run_id": "20261108-1119_n1_native-autogaze-coverage_b48925b",
+  "schema_version": 1,
+  "source": {
+    "commit": "b48925b0272968775edf7c004a39fb5a4889e68a",
+    "dirty": false,
+    "repository": "git@github.com:noahlatzel/AutoGaze.git"
+  },
+  "status": "complete",
+  "training_updates_run": 0
+}

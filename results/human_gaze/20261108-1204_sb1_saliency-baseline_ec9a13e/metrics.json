@@ -1,0 +1,1683 @@
+{
+  "constants": {
+    "best_constant_cells_train": [
+      91,
+      90,
+      105,
+      104,
+      77,
+      76,
+      103,
+      117,
+      89,
+      63,
+      106,
+      92,
+      75,
+      118,
+      78,
+      119
+    ],
+    "center16_cells": [
+      90,
+      91,
+      104,
+      105,
+      76,
+      77,
+      89,
+      92,
+      103,
+      106,
+      118,
+      119,
+      75,
+      78,
+      117,
+      120
+    ],
+    "train_source_prior_cells": {
+      "AVAD": [
+        91,
+        77,
+        63,
+        90,
+        105,
+        49,
+        104,
+        76,
+        75,
+        89,
+        92,
+        78,
+        62,
+        119,
+        64,
+        106
+      ],
+      "Coutrot_db1": [
+        90,
+        91,
+        104,
+        105,
+        76,
+        77,
+        78,
+        62,
+        79,
+        65,
+        60,
+        75,
+        47,
+        64,
+        63,
+        92
+      ],
+      "Coutrot_db2": [
+        117,
+        114,
+        123,
+        109,
+        100,
+        103,
+        131,
+        115,
+        107,
+        121,
+        116,
+        101,
+        128,
+        120,
+        106,
+        129
+      ],
+      "DIEM": [
+        91,
+        90,
+        77,
+        105,
+        104,
+        76,
+        63,
+        92,
+        62,
+        78,
+        119,
+        106,
+        118,
+        89,
+        103,
+        75
+      ],
+      "ETMD_av": [
+        76,
+        90,
+        91,
+        77,
+        75,
+        78,
+        104,
+        92,
+        89,
+        61,
+        105,
+        62,
+        64,
+        79,
+        63,
+        103
+      ],
+      "SumMe": [
+        90,
+        104,
+        105,
+        91,
+        89,
+        76,
+        118,
+        103,
+        119,
+        77,
+        75,
+        106,
+        92,
+        117,
+        62,
+        132
+      ]
+    }
+  },
+  "decision": "saliency_better",
+  "export": {
+    "boundary_ties_at_k": 0,
+    "frames_with_reversed_window": 268
+  },
+  "gate": "SB1",
+  "gt1_contrasts_reference": {
+    "center16": {
+      "bootstrap_seed": 20261105,
+      "ci90_high": 0.1054030066955479,
+      "ci90_low": 0.05653724539480636,
+      "cluster_unit": "video_stratified_by_source_with_paired_methods_and_seeds",
+      "difference": 0.08138050511472185,
+      "interpretation": "descriptive_unadjusted",
+      "iterations": 10000
+    },
+    "pretrained": {
+      "bootstrap_seed": 20261105,
+      "ci90_high": 0.3244372726253199,
+      "ci90_low": 0.2718243834890373,
+      "cluster_unit": "video_stratified_by_source_with_paired_methods_and_seeds",
+      "difference": 0.29794723005322116,
+      "interpretation": "descriptive_unadjusted",
+      "iterations": 10000
+    },
+    "train_source_prior": {
+      "bootstrap_seed": 20261105,
+      "ci90_high": 0.029470773288218805,
+      "ci90_low": -0.006372846858568357,
+      "cluster_unit": "video_stratified_by_source_with_paired_methods_and_seeds",
+      "difference": 0.010967740992145848,
+      "interpretation": "descriptive_unadjusted",
+      "iterations": 10000
+    }
+  },
+  "implementation_check": {
+    "pass": true,
+    "tolerance": 1e-06,
+    "values": {
+      "center16": {
+        "abs_error": 0.0,
+        "frozen_target": 0.3616306240380483,
+        "gt1": 0.3616306240380483,
+        "observed": 0.3616306240380483
+      },
+      "rl_six_seed_mean": {
+        "abs_error": 0.0,
+        "frozen_target": 0.44301112915277024,
+        "gt1": 0.44301112915277024,
+        "observed": 0.44301112915277024
+      },
+      "train_source_prior": {
+        "abs_error": 0.0,
+        "frozen_target": 0.4320433881606243,
+        "gt1": 0.4320433881606243,
+        "observed": 0.4320433881606243
+      }
+    }
+  },
+  "model": "TASED-Net (DHF1K, TASED_updated.pt)",
+  "overlap": {
+    "saliency_vs_center16": {
+      "macro_source_mean": 0.4500390793815263,
+      "per_source": {
+        "AVAD": 0.4444110576923077,
+        "Coutrot_db1": 0.444091796875,
+        "Coutrot_db2": 0.3580000620039683,
+        "DIEM": 0.49114610151658705,
+        "ETMD_av": 0.4880810897720848,
+        "SumMe": 0.4745043684292104
+      },
+      "pooled_frame_mean": 0.4713895173453997
+    },
+    "saliency_vs_trained": {
+      "macro_source_mean": 0.5080014088338061,
+      "per_seed_macro": {
+        "rl440826": 0.5083245484473545,
+        "rl440827": 0.5085835771156042,
+        "rl440828": 0.5090732795315909,
+        "rl440829": 0.5064289843051456,
+        "rl440830": 0.5077371571864165,
+        "rl440831": 0.5078609064167247
+      },
+      "per_source": {
+        "AVAD": 0.5413161057692308,
+        "Coutrot_db1": 0.5266845703124999,
+        "Coutrot_db2": 0.4344461495535714,
+        "DIEM": 0.49136444827624676,
+        "ETMD_av": 0.5471634000365496,
+        "SumMe": 0.5070337790547377
+      },
+      "pooled_frame_mean": 0.5135118149824032
+    },
+    "trained_vs_center16_reference": {
+      "macro_source_mean": 0.5823158826445071
+    }
+  },
+  "per_arm": {
+    "best_constant": {
+      "coverage_macro": 0.3635371632668523,
+      "coverage_pooled_frame": 0.38707647961944974,
+      "per_source": {
+        "AVAD": 0.35794708068727105,
+        "Coutrot_db1": 0.29288059869286504,
+        "Coutrot_db2": 0.3007490951848872,
+        "DIEM": 0.4191427473779144,
+        "ETMD_av": 0.4491564317131448,
+        "SumMe": 0.361347025945032
+      }
+    },
+    "center16": {
+      "coverage_macro": 0.3616306240380483,
+      "coverage_pooled_frame": 0.37963793388761047,
+      "per_source": {
+        "AVAD": 0.34976915433479844,
+        "Coutrot_db1": 0.28379264387016867,
+        "Coutrot_db2": 0.3472379691361477,
+        "DIEM": 0.4119923027615659,
+        "ETMD_av": 0.417088437693114,
+        "SumMe": 0.35990323643249555
+      }
+    },
+    "rl440826": {
+      "coverage_macro": 0.44344418954096804,
+      "coverage_pooled_frame": 0.4321534140668943,
+      "per_source": {
+        "AVAD": 0.4176735840240363,
+        "Coutrot_db1": 0.35304098734255507,
+        "Coutrot_db2": 0.5902207586256536,
+        "DIEM": 0.42050250499954034,
+        "ETMD_av": 0.5051635846515388,
+        "SumMe": 0.37406371760248436
+      }
+    },
+    "rl440827": {
+      "coverage_macro": 0.442887329606493,
+      "coverage_pooled_frame": 0.43149460978965254,
+      "per_source": {
+        "AVAD": 0.41885418540471275,
+        "Coutrot_db1": 0.3508796189413542,
+        "Coutrot_db2": 0.588308079798224,
+        "DIEM": 0.42366631704404284,
+        "ETMD_av": 0.5007253590356702,
+        "SumMe": 0.37489041741495366
+      }
+    },
+    "rl440828": {
+      "coverage_macro": 0.44261132898204325,
+      "coverage_pooled_frame": 0.4325981407764858,
+      "per_source": {
+        "AVAD": 0.41738666355341647,
+        "Coutrot_db1": 0.35143382973467574,
+        "Coutrot_db2": 0.5831508785700679,
+        "DIEM": 0.4204740385466011,
+        "ETMD_av": 0.5080623478899573,
+        "SumMe": 0.37516021559754104
+      }
+    },
+    "rl440829": {
+      "coverage_macro": 0.4420943335693668,
+      "coverage_pooled_frame": 0.4304356756016171,
+      "per_source": {
+        "AVAD": 0.42402169096683906,
+        "Coutrot_db1": 0.3496580992458169,
+        "Coutrot_db2": 0.5817541127926963,
+        "DIEM": 0.41943730857084155,
+        "ETMD_av": 0.5049212701920986,
+        "SumMe": 0.37277351964790817
+      }
+    },
+    "rl440830": {
+      "coverage_macro": 0.4433436008155856,
+      "coverage_pooled_frame": 0.43105922757501675,
+      "per_source": {
+        "AVAD": 0.42711466667432446,
+        "Coutrot_db1": 0.35024744631869614,
+        "Coutrot_db2": 0.5859467183230292,
+        "DIEM": 0.4218891182767879,
+        "ETMD_av": 0.5035254375434385,
+        "SumMe": 0.37133821775723763
+      }
+    },
+    "rl440831": {
+      "coverage_macro": 0.4436859924021647,
+      "coverage_pooled_frame": 0.4320575703612424,
+      "per_source": {
+        "AVAD": 0.4219373548120204,
+        "Coutrot_db1": 0.3529297787827345,
+        "Coutrot_db2": 0.58628662268649,
+        "DIEM": 0.4217198180717718,
+        "ETMD_av": 0.503395551072038,
+        "SumMe": 0.37584682898793303
+      }
+    },
+    "rl_six_seed_mean": {
+      "coverage_macro": 0.44301112915277024,
+      "per_source": {
+        "AVAD": 0.42116469090589165,
+        "Coutrot_db1": 0.3513649600609721,
+        "Coutrot_db2": 0.5859445284660268,
+        "DIEM": 0.42128151758493093,
+        "ETMD_av": 0.5042989250641235,
+        "SumMe": 0.3740121528346763
+      }
+    },
+    "saliency_top16": {
+      "coverage_macro": 0.5604225895880225,
+      "coverage_pooled_frame": 0.5462120574667488,
+      "per_source": {
+        "AVAD": 0.5974391644193943,
+        "Coutrot_db1": 0.48678054703145823,
+        "Coutrot_db2": 0.6679481122214482,
+        "DIEM": 0.49989677537716637,
+        "ETMD_av": 0.6109569544549301,
+        "SumMe": 0.49951398402373814
+      }
+    },
+    "train_source_prior": {
+      "coverage_macro": 0.4320433881606243,
+      "coverage_pooled_frame": 0.4252339488962956,
+      "per_source": {
+        "AVAD": 0.3694927897090904,
+        "Coutrot_db1": 0.3055860451733185,
+        "Coutrot_db2": 0.6155460015942349,
+        "DIEM": 0.4307285677145206,
+        "ETMD_av": 0.5095050474949333,
+        "SumMe": 0.3614018772776485
+      }
+    }
+  },
+  "primary": {
+    "bootstrap_seed": 20261109,
+    "ci90_high": -0.0938663920798963,
+    "ci90_low": -0.14156229133550766,
+    "cluster_unit": "video_stratified_by_source_with_paired_methods_and_seeds",
+    "contrast": "trained_rl_k16_six_seed_mean_minus_saliency_top16",
+    "difference": -0.11741146043525232,
+    "interpretation": "descriptive_unadjusted",
+    "iterations": 10000
+  },
+  "prior_exposure": "Historically exposed test split (opened before GT1); prospective rule on an exposed population.",
+  "reports": {
+    "best_constant": {
+      "macro_source_mean": 0.3635371632668523,
+      "num_clips": 663,
+      "num_frames": 10608,
+      "num_sources": 6,
+      "num_videos": 67,
+      "per_source": {
+        "AVAD": {
+          "mean_video_value": 0.35794708068727105,
+          "num_clips": 13,
+          "num_frames": 208,
+          "num_videos": 13,
+          "video_values": {
+            "V10_News3": 0.6622339077362653,
+            "V13_Conservation2": 0.3581826510226449,
+            "V15_Drummer1": 0.4416509138197853,
+            "V17_Soccer1": 0.24466263036697455,
+            "V23_Tap3": 0.36193069546089873,
+            "V24_Tap4": 0.36874646525502897,
+            "V25_Piano1": 0.09084226382941551,
+            "V27_Piano3": 0.30895923438286843,
+            "V32_Dancers": 0.20104334431709958,
+            "V33_Harp": 0.6316397002760823,
+            "V41_Violin1": 0.5705766152597107,
+            "V6_Basketball1": 0.29636001008123003,
+            "V9_News2": 0.11648361712651933
+          }
+        },
+        "Coutrot_db1": {
+          "mean_video_value": 0.29288059869286504,
+          "num_clips": 50,
+          "num_frames": 800,
+          "num_videos": 20,
+          "video_values": {
+            "clip10": 0.6653261594722082,
+            "clip14": 0.33282484458209183,
+            "clip15": 0.192314405953681,
+            "clip16": 0.45145830497710904,
+            "clip17": 0.21618876803081832,
+            "clip22": 0.30455269848179967,
+            "clip24": 0.10533491271651485,
+            "clip26": 0.22894162845898336,
+            "clip32": 0.32799386156057153,
+            "clip37": 0.3490994524200062,
+            "clip38": 0.387570150249843,
+            "clip39": 0.33538271904888006,
+            "clip4": 0.3244491574498909,
+            "clip44": 0.4106955725874286,
+            "clip47": 0.09018450217408258,
+            "clip48": 0.26430756634034935,
+            "clip5": 0.46365729615085155,
+            "clip50": 0.16584245555305444,
+            "clip56": 0.02000308500468151,
+            "clip58": 0.22148443264445442
+          }
+        },
+        "Coutrot_db2": {
+          "mean_video_value": 0.3007490951848872,
+          "num_clips": 38,
+          "num_frames": 608,
+          "num_videos": 5,
+          "video_values": {
+            "clip11": 0.4822147529206815,
+            "clip14": 0.24456757056471473,
+            "clip15": 0.25462591721184175,
+            "clip2": 0.2774568344179045,
+            "clip4": 0.24488040080929352
+          }
+        },
+        "DIEM": {
+          "mean_video_value": 0.4191427473779144,
+          "num_clips": 159,
+          "num_frames": 2544,
+          "num_videos": 17,
+          "video_values": {
+            "BBC_life_in_cold_blood_1278x710": 0.47300958989822156,
+            "BBC_wildlife_serpent_1280x704": 0.40112895939962245,
+            "DIY_SOS_1280x712": 0.39999960853782773,
+            "advert_bbc4_bees_1024x576": 0.34293709354081364,
+            "advert_bbc4_library_1024x576": 0.19407142142914527,
+            "advert_iphone_1272x720": 0.5443770862317592,
+            "harry_potter_6_trailer_1280x544": 0.5551744413294613,
+            "music_gummybear_880x720": 0.6059947222296671,
+            "music_trailer_nine_inch_nails_1280x720": 0.44887953486318966,
+            "nightlife_in_mozambique_1280x580": 0.4174274659767043,
+            "one_show_1280x712": 0.39316443911272536,
+            "pingpong_angle_shot_960x720": 0.4197060709579546,
+            "pingpong_no_bodies_960x720": 0.3949641513909725,
+            "sport_scramblers_1280x720": 0.4838643691761383,
+            "sport_wimbledon_federer_final_1280x704": 0.2874408289428918,
+            "tv_uni_challenge_final_1280x712": 0.33291391758424416,
+            "university_forum_construction_ionic_1280x720": 0.4303730048232062
+          }
+        },
+        "ETMD_av": {
+          "mean_video_value": 0.4491564317131448,
+          "num_clips": 153,
+          "num_frames": 2448,
+          "num_videos": 4,
+          "video_values": {
+            "CHI_1_color": 0.37263559871943724,
+            "CHI_2_color": 0.46287656684469664,
+            "GLA_1_color": 0.3965100879809718,
+            "GLA_2_color": 0.5646034733074733
+          }
+        },
+        "SumMe": {
+          "mean_video_value": 0.361347025945032,
+          "num_clips": 250,
+          "num_frames": 4000,
+          "num_videos": 8,
+          "video_values": {
+            "Bearpark_climbing": 0.3828381421022863,
+            "Car_railcrossing": 0.4800936662761798,
+            "Cockpit_Landing": 0.4107616209614016,
+            "Fire_Domino": 0.426405228664143,
+            "Notre_Dame": 0.28372616736077283,
+            "Playing_on_water_slide": 0.3423001905868411,
+            "Saving_dolphines": 0.4466652233644502,
+            "Valparaiso_Downhill": 0.11798596824418084
+          }
+        }
+      },
+      "pooled_frame_mean": 0.38707647961944974
+    },
+    "center16": {
+      "macro_source_mean": 0.3616306240380483,
+      "num_clips": 663,
+      "num_frames": 10608,
+      "num_sources": 6,
+      "num_videos": 67,
+      "per_source": {
+        "AVAD": {
+          "mean_video_value": 0.34976915433479844,
+          "num_clips": 13,
+          "num_frames": 208,
+          "num_videos": 13,
+          "video_values": {
+            "V10_News3": 0.6238696797277612,
+            "V13_Conservation2": 0.332024526098877,
+            "V15_Drummer1": 0.4596779410893532,
+            "V17_Soccer1": 0.23931668050420285,
+            "V23_Tap3": 0.34978610628064644,
+            "V24_Tap4": 0.3331679493034727,
+            "V25_Piano1": 0.11071633717295981,
+            "V27_Piano3": 0.2994955388858074,
+            "V32_Dancers": 0.18477395260208596,
+            "V33_Harp": 0.5760075268271976,
+            "V41_Violin1": 0.6329813515395699,
+            "V6_Basketball1": 0.29172595009089264,
+            "V9_News2": 0.11345546622955283
+          }
+        },
+        "Coutrot_db1": {
+          "mean_video_value": 0.28379264387016867,
+          "num_clips": 50,
+          "num_frames": 800,
+          "num_videos": 20,
+          "video_values": {
+            "clip10": 0.6200930561910738,
+            "clip14": 0.3075985753456507,
+            "clip15": 0.1947712524373344,
+            "clip16": 0.40313421990885345,
+            "clip17": 0.17279248559073324,
+            "clip22": 0.31667346729845747,
+            "clip24": 0.10446591241075964,
+            "clip26": 0.22807409901759002,
+            "clip32": 0.3398570618817587,
+            "clip37": 0.3278367264443034,
+            "clip38": 0.38460687786825076,
+            "clip39": 0.3948051184554515,
+            "clip4": 0.3456431691527371,
+            "clip44": 0.41254579369979183,
+            "clip47": 0.05018580657596772,
+            "clip48": 0.2680970386434325,
+            "clip5": 0.4422370149175852,
+            "clip50": 0.12837336991685078,
+            "clip56": 0.01864761742550769,
+            "clip58": 0.21541421422128337
+          }
+        },
+        "Coutrot_db2": {
+          "mean_video_value": 0.3472379691361477,
+          "num_clips": 38,
+          "num_frames": 608,
+          "num_videos": 5,
+          "video_values": {
+            "clip11": 0.5301104038463443,
+            "clip14": 0.3273244321593495,
+            "clip15": 0.33790128246404344,
+            "clip2": 0.2857731016167975,
+            "clip4": 0.2550806255942035
+          }
+        },
+        "DIEM": {
+          "mean_video_value": 0.4119923027615659,
+          "num_clips": 159,
+          "num_frames": 2544,
+          "num_videos": 17,
+          "video_values": {
+            "BBC_life_in_cold_blood_1278x710": 0.47056048401553596,
+            "BBC_wildlife_serpent_1280x704": 0.42555567769030345,
+            "DIY_SOS_1280x712": 0.34116499672281414,
+            "advert_bbc4_bees_1024x576": 0.34405111282508677,
+            "advert_bbc4_library_1024x576": 0.1896050608054054,
+            "advert_iphone_1272x720": 0.5128125669553697,
+            "harry_potter_6_trailer_1280x544": 0.5107359664791216,
+            "music_gummybear_880x720": 0.6594270005235388,
+            "music_trailer_nine_inch_nails_1280x720": 0.4469443329964264,
+            "nightlife_in_mozambique_1280x580": 0.43667465514178616,
+            "one_show_1280x712": 0.34808944342479897,
+            "pingpong_angle_shot_960x720": 0.4309000929610079,
+            "pingpong_no_bodies_960x720": 0.3977603638887395,
+            "sport_scramblers_1280x720": 0.47827784950729324,
+            "sport_wimbledon_federer_final_1280x704": 0.2804850349351368,
+            "tv_uni_challenge_final_1280x712": 0.30943501950107644,
+            "university_forum_construction_ionic_1280x720": 0.4213894885731797
+          }
+        },
+        "ETMD_av": {
+          "mean_video_value": 0.417088437693114,
+          "num_clips": 153,
+          "num_frames": 2448,
+          "num_videos": 4,
+          "video_values": {
+            "CHI_1_color": 0.3456048625161431,
+            "CHI_2_color": 0.42525415703047814,
+            "GLA_1_color": 0.36777825540565234,
+            "GLA_2_color": 0.5297164758201826
+          }
+        },
+        "SumMe": {
+          "mean_video_value": 0.35990323643249555,
+          "num_clips": 250,
+          "num_frames": 4000,
+          "num_videos": 8,
+          "video_values": {
+            "Bearpark_climbing": 0.3608336669180886,
+            "Car_railcrossing": 0.5046238671752401,
+            "Cockpit_Landing": 0.42160589224693457,
+            "Fire_Domino": 0.41638592819344356,
+            "Notre_Dame": 0.2850187936990124,
+            "Playing_on_water_slide": 0.33594595080295536,
+            "Saving_dolphines": 0.47129842802804356,
+            "Valparaiso_Downhill": 0.08351336439624646
+          }
+        }
+      },
+      "pooled_frame_mean": 0.37963793388761047
+    },
+    "rl440826": {
+      "macro_source_mean": 0.44344418954096804,
+      "num_clips": 663,
+      "num_frames": 10608,
+      "num_sources": 6,
+      "num_videos": 67,
+      "per_source": {
+        "AVAD": {
+          "mean_video_value": 0.4176735840240363,
+          "num_clips": 13,
+          "num_frames": 208,
+          "num_videos": 13,
+          "video_values": {
+            "V10_News3": 0.705879029456753,
+            "V13_Conservation2": 0.32759291137446667,
+            "V15_Drummer1": 0.36299452110282004,
+            "V17_Soccer1": 0.30896478497180624,
+            "V23_Tap3": 0.3503889639879958,
+            "V24_Tap4": 0.3723587079732198,
+            "V25_Piano1": 0.12812409003959147,
+            "V27_Piano3": 0.33273941212455327,
+            "V32_Dancers": 0.29116636153653985,
+            "V33_Harp": 0.6161100600306781,
+            "V41_Violin1": 0.6229655537373873,
+            "V6_Basketball1": 0.3311727699087612,
+            "V9_News2": 0.6792994260678995
+          }
+        },
+        "Coutrot_db1": {
+          "mean_video_value": 0.35304098734255507,
+          "num_clips": 50,
+          "num_frames": 800,
+          "num_videos": 20,
+          "video_values": {
+            "clip10": 0.5531359160529021,
+            "clip14": 0.35268151571807493,
+            "clip15": 0.17855692895167863,
+            "clip16": 0.5651052547631537,
+            "clip17": 0.3075839174506143,
+            "clip22": 0.336896955137604,
+            "clip24": 0.2347759929380473,
+            "clip26": 0.4727575293192672,
+            "clip32": 0.2765582625068106,
+            "clip37": 0.36402794337550404,
+            "clip38": 0.3832968509226191,
+            "clip39": 0.49409086795085005,
+            "clip4": 0.2531683957810458,
+            "clip44": 0.4010792614197385,
+            "clip47": 0.14718417373142265,
+            "clip48": 0.23410048707354747,
+            "clip5": 0.6081797140085617,
+            "clip50": 0.26303428425355335,
+            "clip56": 0.10962079807415037,
+            "clip58": 0.5249846974219565
+          }
+        },
+        "Coutrot_db2": {
+          "mean_video_value": 0.5902207586256536,
+          "num_clips": 38,
+          "num_frames": 608,
+          "num_videos": 5,
+          "video_values": {
+            "clip11": 0.5249087207132087,
+            "clip14": 0.6419857650268312,
+            "clip15": 0.5971571615095651,
+            "clip2": 0.561215444137158,
+            "clip4": 0.6258367017415054
+          }
+        },
+        "DIEM": {
+          "mean_video_value": 0.42050250499954034,
+          "num_clips": 159,
+          "num_frames": 2544,
+          "num_videos": 17,
+          "video_values": {
+            "BBC_life_in_cold_blood_1278x710": 0.47556323580529974,
+            "BBC_wildlife_serpent_1280x704": 0.3834596744807669,
+            "DIY_SOS_1280x712": 0.41263493658044986,
+            "advert_bbc4_bees_1024x576": 0.19961827537135587,
+            "advert_bbc4_library_1024x576": 0.29462933865481084,
+            "advert_iphone_1272x720": 0.5294552190348071,
+            "harry_potter_6_trailer_1280x544": 0.5832484955307172,
+            "music_gummybear_880x720": 0.5412739438956351,
+            "music_trailer_nine_inch_nails_1280x720": 0.4059058596526285,
+            "nightlife_in_mozambique_1280x580": 0.37358098290760466,
+            "one_show_1280x712": 0.7152809253002914,
+            "pingpong_angle_shot_960x720": 0.26998985951819066,
+            "pingpong_no_bodies_960x720": 0.2725080245319935,
+            "sport_scramblers_1280x720": 0.524716720620674,
+            "sport_wimbledon_federer_final_1280x704": 0.3402469266099125,
+            "tv_uni_challenge_final_1280x712": 0.43427956909223253,
+            "university_forum_construction_ionic_1280x720": 0.3921505974048145
+          }
+        },
+        "ETMD_av": {
+          "mean_video_value": 0.5051635846515388,
+          "num_clips": 153,
+          "num_frames": 2448,
+          "num_videos": 4,
+          "video_values": {
+            "CHI_1_color": 0.5190011474879259,
+            "CHI_2_color": 0.5248480644524843,
+            "GLA_1_color": 0.4164495536126793,
+            "GLA_2_color": 0.5603555730530656
+          }
+        },
+        "SumMe": {
+          "mean_video_value": 0.37406371760248436,
+          "num_clips": 250,
+          "num_frames": 4000,
+          "num_videos": 8,
+          "video_values": {
+            "Bearpark_climbing": 0.3723708874342623,
+            "Car_railcrossing": 0.44057279295651136,
+            "Cockpit_Landing": 0.4440410258319193,
+            "Fire_Domino": 0.4240295991363411,
+            "Notre_Dame": 0.2771444477837945,
+            "Playing_on_water_slide": 0.3557284179185401,
+            "Saving_dolphines": 0.45036704579568687,
+            "Valparaiso_Downhill": 0.22825552396281967
+          }
+        }
+      },
+      "pooled_frame_mean": 0.4321534140668943
+    },
+    "rl440827": {
+      "macro_source_mean": 0.442887329606493,
+      "num_clips": 663,
+      "num_frames": 10608,
+      "num_sources": 6,
+      "num_videos": 67,
+      "per_source": {
+        "AVAD": {
+          "mean_video_value": 0.41885418540471275,
+          "num_clips": 13,
+          "num_frames": 208,
+          "num_videos": 13,
+          "video_values": {
+            "V10_News3": 0.7092690625428304,
+            "V13_Conservation2": 0.31093435917631496,
+            "V15_Drummer1": 0.35720956145124205,
+            "V17_Soccer1": 0.3089966436086513,
+            "V23_Tap3": 0.3453334200218592,
+            "V24_Tap4": 0.37451964049206765,
+            "V25_Piano1": 0.12903358252469843,
+            "V27_Piano3": 0.34168483311400166,
+            "V32_Dancers": 0.31629822972601573,
+            "V33_Harp": 0.6116205444818661,
+            "V41_Violin1": 0.6386150894064002,
+            "V6_Basketball1": 0.3391610581635405,
+            "V9_News2": 0.6624283855517774
+          }
+        },
+        "Coutrot_db1": {
+          "mean_video_value": 0.3508796189413542,
+          "num_clips": 50,
+          "num_frames": 800,
+          "num_videos": 20,
+          "video_values": {
+            "clip10": 0.5540100282509073,
+            "clip14": 0.3489022720077628,
+            "clip15": 0.17412784064950415,
+            "clip16": 0.5572875457675366,
+            "clip17": 0.2835231520101331,
+            "clip22": 0.3335299258508684,
+            "clip24": 0.22391968086239444,
+            "clip26": 0.4869966643429393,
+            "clip32": 0.28408913858329754,
+            "clip37": 0.3601234912333666,
+            "clip38": 0.372348707083205,
+            "clip39": 0.48274116410366713,
+            "clip4": 0.2753744125794526,
+            "clip44": 0.39732205653638175,
+            "clip47": 0.16659113185245644,
+            "clip48": 0.21808598876494045,
+            "clip5": 0.5857991418306862,
+            "clip50": 0.2669474090405579,
+            "clip56": 0.09262661350219403,
+            "clip58": 0.5532460139748329
+          }
+        },
+        "Coutrot_db2": {
+          "mean_video_value": 0.588308079798224,
+          "num_clips": 38,
+          "num_frames": 608,
+          "num_videos": 5,
+          "video_values": {
+            "clip11": 0.5181066582053688,
+            "clip14": 0.6448983234966107,
+            "clip15": 0.5914419992462163,
+            "clip2": 0.5536851562849883,
+            "clip4": 0.6334082617579355
+          }
+        },
+        "DIEM": {
+          "mean_video_value": 0.42366631704404284,
+          "num_clips": 159,
+          "num_frames": 2544,
+          "num_videos": 17,
+          "video_values": {
+            "BBC_life_in_cold_blood_1278x710": 0.4776822975726384,
+            "BBC_wildlife_serpent_1280x704": 0.396042247818869,
+            "DIY_SOS_1280x712": 0.4102436391830488,
+            "advert_bbc4_bees_1024x576": 0.20499874099840756,
+            "advert_bbc4_library_1024x576": 0.2865652407856264,
+            "advert_iphone_1272x720": 0.5248763045179515,
+            "harry_potter_6_trailer_1280x544": 0.5816712336282264,
+            "music_gummybear_880x720": 0.5599922587979449,
+            "music_trailer_nine_inch_nails_1280x720": 0.4015414191106544,
+            "nightlife_in_mozambique_1280x580": 0.38176395014677666,
+            "one_show_1280x712": 0.7173803215548631,
+            "pingpong_angle_shot_960x720": 0.29543635988885625,
+            "pingpong_no_bodies_960x720": 0.27519663214287693,
+            "sport_scramblers_1280x720": 0.5260037701374721,
+            "sport_wimbledon_federer_final_1280x704": 0.3392984172102687,
+            "tv_uni_challenge_final_1280x712": 0.43077671171328413,
+            "university_forum_construction_ionic_1280x720": 0.39285784454096273
+          }
+        },
+        "ETMD_av": {
+          "mean_video_value": 0.5007253590356702,
+          "num_clips": 153,
+          "num_frames": 2448,
+          "num_videos": 4,
+          "video_values": {
+            "CHI_1_color": 0.5164490926173174,
+            "CHI_2_color": 0.5199798646349074,
+            "GLA_1_color": 0.4114933621898273,
+            "GLA_2_color": 0.5549791167006285
+          }
+        },
+        "SumMe": {
+          "mean_video_value": 0.37489041741495366,
+          "num_clips": 250,
+          "num_frames": 4000,
+          "num_videos": 8,
+          "video_values": {
+            "Bearpark_climbing": 0.37994726723869066,
+            "Car_railcrossing": 0.43901419322619195,
+            "Cockpit_Landing": 0.4440763575575737,
+            "Fire_Domino": 0.42209602979497446,
+            "Notre_Dame": 0.27620916675022616,
+            "Playing_on_water_slide": 0.36018849935095953,
+            "Saving_dolphines": 0.4541915670803607,
+            "Valparaiso_Downhill": 0.22340025832065225
+          }
+        }
+      },
+      "pooled_frame_mean": 0.43149460978965254
+    },
+    "rl440828": {
+      "macro_source_mean": 0.44261132898204325,
+      "num_clips": 663,
+      "num_frames": 10608,
+      "num_sources": 6,
+      "num_videos": 67,
+      "per_source": {
+        "AVAD": {
+          "mean_video_value": 0.41738666355341647,
+          "num_clips": 13,
+          "num_frames": 208,
+          "num_videos": 13,
+          "video_values": {
+            "V10_News3": 0.7063078692283398,
+            "V13_Conservation2": 0.3337761255091607,
+            "V15_Drummer1": 0.3348664801259531,
+            "V17_Soccer1": 0.28134487147946174,
+            "V23_Tap3": 0.35895080127164647,
+            "V24_Tap4": 0.3719520520594557,
+            "V25_Piano1": 0.12646151706348974,
+            "V27_Piano3": 0.31470233689724125,
+            "V32_Dancers": 0.34315846583032794,
+            "V33_Harp": 0.6018501309198996,
+            "V41_Violin1": 0.6095324862161959,
+            "V6_Basketball1": 0.32684291438712876,
+            "V9_News2": 0.7162805752061132
+          }
+        },
+        "Coutrot_db1": {
+          "mean_video_value": 0.35143382973467574,
+          "num_clips": 50,
+          "num_frames": 800,
+          "num_videos": 20,
+          "video_values": {
+            "clip10": 0.5505905607656771,
+            "clip14": 0.3510497415833811,
+            "clip15": 0.17459003005087936,
+            "clip16": 0.5401353951661747,
+            "clip17": 0.31053419375889746,
+            "clip22": 0.3276011003481756,
+            "clip24": 0.244345592398858,
+            "clip26": 0.501452933362259,
+            "clip32": 0.26897104310570796,
+            "clip37": 0.3557426316500596,
+            "clip38": 0.36904042746468235,
+            "clip39": 0.48075593134952516,
+            "clip4": 0.26347339363479705,
+            "clip44": 0.39745809863224696,
+            "clip47": 0.15499300843576216,
+            "clip48": 0.22851126460336957,
+            "clip5": 0.572369998566027,
+            "clip50": 0.28581252961983594,
+            "clip56": 0.11310243511084295,
+            "clip58": 0.5381462850863556
+          }
+        },
+        "Coutrot_db2": {
+          "mean_video_value": 0.5831508785700679,
+          "num_clips": 38,
+          "num_frames": 608,
+          "num_videos": 5,
+          "video_values": {
+            "clip11": 0.5161459436276125,
+            "clip14": 0.6362576610468722,
+            "clip15": 0.5846548611946096,
+            "clip2": 0.5556275163756332,
+            "clip4": 0.6230684106056117
+          }
+        },
+        "DIEM": {
+          "mean_video_value": 0.4204740385466011,
+          "num_clips": 159,
+          "num_frames": 2544,
+          "num_videos": 17,
+          "video_values": {
+            "BBC_life_in_cold_blood_1278x710": 0.4755820837919771,
+            "BBC_wildlife_serpent_1280x704": 0.38152373802999195,
+            "DIY_SOS_1280x712": 0.4161499392529261,
+            "advert_bbc4_bees_1024x576": 0.19227221793520602,
+            "advert_bbc4_library_1024x576": 0.29190859335915526,
+            "advert_iphone_1272x720": 0.5300774942760625,
+            "harry_potter_6_trailer_1280x544": 0.5828369546286373,
+            "music_gummybear_880x720": 0.5452307455608547,
+            "music_trailer_nine_inch_nails_1280x720": 0.39614119997563935,
+            "nightlife_in_mozambique_1280x580": 0.37525266324990625,
+            "one_show_1280x712": 0.7199452183950683,
+            "pingpong_angle_shot_960x720": 0.2796621355974196,
+            "pingpong_no_bodies_960x720": 0.26539278237612773,
+            "sport_scramblers_1280x720": 0.5279990905229555,
+            "sport_wimbledon_federer_final_1280x704": 0.34139507767722216,
+            "tv_uni_challenge_final_1280x712": 0.4383355450486319,
+            "university_forum_construction_ionic_1280x720": 0.38835317561443716
+          }
+        },
+        "ETMD_av": {
+          "mean_video_value": 0.5080623478899573,
+          "num_clips": 153,
+          "num_frames": 2448,
+          "num_videos": 4,
+          "video_values": {
+            "CHI_1_color": 0.5220998225450216,
+            "CHI_2_color": 0.5263000345180098,
+            "GLA_1_color": 0.42001239123313583,
+            "GLA_2_color": 0.563837143263662
+          }
+        },
+        "SumMe": {
+          "mean_video_value": 0.37516021559754104,
+          "num_clips": 250,
+          "num_frames": 4000,
+          "num_videos": 8,
+          "video_values": {
+            "Bearpark_climbing": 0.37925651454973547,
+            "Car_railcrossing": 0.43517529451596987,
+            "Cockpit_Landing": 0.44235614854260547,
+            "Fire_Domino": 0.41751032448656533,
+            "Notre_Dame": 0.27650891022662133,
+            "Playing_on_water_slide": 0.36350501739778673,
+            "Saving_dolphines": 0.4466060896581405,
+            "Valparaiso_Downhill": 0.24036342540290345
+          }
+        }
+      },
+      "pooled_frame_mean": 0.4325981407764858
+    },
+    "rl440829": {
+      "macro_source_mean": 0.4420943335693668,
+      "num_clips": 663,
+      "num_frames": 10608,
+      "num_sources": 6,
+      "num_videos": 67,
+      "per_source": {
+        "AVAD": {
+          "mean_video_value": 0.42402169096683906,
+          "num_clips": 13,
+          "num_frames": 208,
+          "num_videos": 13,
+          "video_values": {
+            "V10_News3": 0.7041305463545768,
+            "V13_Conservation2": 0.32854266025725565,
+            "V15_Drummer1": 0.3763353189724796,
+            "V17_Soccer1": 0.32608457651741674,
+            "V23_Tap3": 0.34879156177595405,
+            "V24_Tap4": 0.37378966309053396,
+            "V25_Piano1": 0.12698098445025607,
+            "V27_Piano3": 0.3422350484002976,
+            "V32_Dancers": 0.32577472934977436,
+            "V33_Harp": 0.6040305308917624,
+            "V41_Violin1": 0.6231134807781444,
+            "V6_Basketball1": 0.3362464008837094,
+            "V9_News2": 0.6962264808467467
+          }
+        },
+        "Coutrot_db1": {
+          "mean_video_value": 0.3496580992458169,
+          "num_clips": 50,
+          "num_frames": 800,
+          "num_videos": 20,
+          "video_values": {
+            "clip10": 0.5353661187042533,
+            "clip14": 0.3681291226797896,
+            "clip15": 0.17192949372579847,
+            "clip16": 0.5396044975491918,
+            "clip17": 0.31543766712134413,
+            "clip22": 0.3331490310590368,
+            "clip24": 0.2457872723838932,
+            "clip26": 0.48930074871003626,
+            "clip32": 0.2644016177524833,
+            "clip37": 0.35535167957527847,
+            "clip38": 0.3733667502923197,
+            "clip39": 0.4933728490305687,
+            "clip4": 0.25688076054787246,
+            "clip44": 0.3929692330937087,
+            "clip47": 0.14975459954709436,
+            "clip48": 0.21187406979841228,
+            "clip5": 0.6023105456285597,
+            "clip50": 0.27658098171004397,
+            "clip56": 0.10026665283220026,
+            "clip58": 0.5173282931744533
+          }
+        },
+        "Coutrot_db2": {
+          "mean_video_value": 0.5817541127926963,
+          "num_clips": 38,
+          "num_frames": 608,
+          "num_videos": 5,
+          "video_values": {
+            "clip11": 0.5074544414598784,
+            "clip14": 0.6343431056341075,
+            "clip15": 0.5858981229923147,
+            "clip2": 0.5547931306585809,
+            "clip4": 0.6262817632186
+          }
+        },
+        "DIEM": {
+          "mean_video_value": 0.41943730857084155,
+          "num_clips": 159,
+          "num_frames": 2544,
+          "num_videos": 17,
+          "video_values": {
+            "BBC_life_in_cold_blood_1278x710": 0.47198555654763585,
+            "BBC_wildlife_serpent_1280x704": 0.38329913431448687,
+            "DIY_SOS_1280x712": 0.42078477714067575,
+            "advert_bbc4_bees_1024x576": 0.20088691169453096,
+            "advert_bbc4_library_1024x576": 0.28923829414243585,
+            "advert_iphone_1272x720": 0.5231707958124815,
+            "harry_potter_6_trailer_1280x544": 0.5848409737061613,
+            "music_gummybear_880x720": 0.5423323487766197,
+            "music_trailer_nine_inch_nails_1280x720": 0.403639219035054,
+            "nightlife_in_mozambique_1280x580": 0.37510069011453595,
+            "one_show_1280x712": 0.7169751640514548,
+            "pingpong_angle_shot_960x720": 0.2679656866266328,
+            "pingpong_no_bodies_960x720": 0.2593203799889645,
+            "sport_scramblers_1280x720": 0.5196876953976578,
+            "sport_wimbledon_federer_final_1280x704": 0.3456730482230584,
+            "tv_uni_challenge_final_1280x712": 0.4340992036429223,
+            "university_forum_construction_ionic_1280x720": 0.39143436648899765
+          }
+        },
+        "ETMD_av": {
+          "mean_video_value": 0.5049212701920986,
+          "num_clips": 153,
+          "num_frames": 2448,
+          "num_videos": 4,
+          "video_values": {
+            "CHI_1_color": 0.5205439007776567,
+            "CHI_2_color": 0.5253477872396898,
+            "GLA_1_color": 0.41569020713514104,
+            "GLA_2_color": 0.5581031856159073
+          }
+        },
+        "SumMe": {
+          "mean_video_value": 0.37277351964790817,
+          "num_clips": 250,
+          "num_frames": 4000,
+          "num_videos": 8,
+          "video_values": {
+            "Bearpark_climbing": 0.37472178422884495,
+            "Car_railcrossing": 0.4305579855664578,
+            "Cockpit_Landing": 0.442071524482659,
+            "Fire_Domino": 0.42537755837001046,
+            "Notre_Dame": 0.2770274482202411,
+            "Playing_on_water_slide": 0.3582396356801279,
+            "Saving_dolphines": 0.4460808571762112,
+            "Valparaiso_Downhill": 0.22811136345871263
+          }
+        }
+      },
+      "pooled_frame_mean": 0.4304356756016171
+    },
+    "rl440830": {
+      "macro_source_mean": 0.4433436008155856,
+      "num_clips": 663,
+      "num_frames": 10608,
+      "num_sources": 6,
+      "num_videos": 67,
+      "per_source": {
+        "AVAD": {
+          "mean_video_value": 0.42711466667432446,
+          "num_clips": 13,
+          "num_frames": 208,
+          "num_videos": 13,
+          "video_values": {
+            "V10_News3": 0.7066776385923959,
+            "V13_Conservation2": 0.34644391687766074,
+            "V15_Drummer1": 0.377122677462836,
+            "V17_Soccer1": 0.32296457262219747,
+            "V23_Tap3": 0.35346371045847036,
+            "V24_Tap4": 0.37792373698859194,
+            "V25_Piano1": 0.12437921755463321,
+            "V27_Piano3": 0.348051276037765,
+            "V32_Dancers": 0.3372427354972558,
+            "V33_Harp": 0.6135701818984103,
+            "V41_Violin1": 0.629713666203358,
+            "V6_Basketball1": 0.33339927500807676,
+            "V9_News2": 0.6815380615645665
+          }
+        },
+        "Coutrot_db1": {
+          "mean_video_value": 0.35024744631869614,
+          "num_clips": 50,
+          "num_frames": 800,
+          "num_videos": 20,
+          "video_values": {
+            "clip10": 0.5629172197790311,
+            "clip14": 0.348790900001859,
+            "clip15": 0.18118176941355557,
+            "clip16": 0.5545404585541007,
+            "clip17": 0.29214083950105874,
+            "clip22": 0.3380924647163255,
+            "clip24": 0.22705202358612553,
+            "clip26": 0.4819250099429837,
+            "clip32": 0.2658756235631614,
+            "clip37": 0.37132359251404523,
+            "clip38": 0.38131132313478133,
+            "clip39": 0.48384144775701543,
+            "clip4": 0.2582573871167284,
+            "clip44": 0.39209574984776435,
+            "clip47": 0.1568375618840463,
+            "clip48": 0.2249502399384511,
+            "clip5": 0.5818685524734141,
+            "clip50": 0.2678725919229983,
+            "clip56": 0.11367374047505407,
+            "clip58": 0.520400430251423
+          }
+        },
+        "Coutrot_db2": {
+          "mean_video_value": 0.5859467183230292,
+          "num_clips": 38,
+          "num_frames": 608,
+          "num_videos": 5,
+          "video_values": {
+            "clip11": 0.5250509565765703,
+            "clip14": 0.6348944340014526,
+            "clip15": 0.5847686650303997,
+            "clip2": 0.5560750718720477,
+            "clip4": 0.6289444641346762
+          }
+        },
+        "DIEM": {
+          "mean_video_value": 0.4218891182767879,
+          "num_clips": 159,
+          "num_frames": 2544,
+          "num_videos": 17,
+          "video_values": {
+            "BBC_life_in_cold_blood_1278x710": 0.47605830912722996,
+            "BBC_wildlife_serpent_1280x704": 0.3939168025497935,
+            "DIY_SOS_1280x712": 0.42017290616128783,
+            "advert_bbc4_bees_1024x576": 0.20123791889059003,
+            "advert_bbc4_library_1024x576": 0.29567497792859043,
+            "advert_iphone_1272x720": 0.5311558760533984,
+            "harry_potter_6_trailer_1280x544": 0.5844491101575342,
+            "music_gummybear_880x720": 0.5389535426742895,
+            "music_trailer_nine_inch_nails_1280x720": 0.40190755501247677,
+            "nightlife_in_mozambique_1280x580": 0.3741605255583096,
+            "one_show_1280x712": 0.7118417436540199,
+            "pingpong_angle_shot_960x720": 0.2777343331498031,
+            "pingpong_no_bodies_960x720": 0.26868585421633195,
+            "sport_scramblers_1280x720": 0.5223215296904837,
+            "sport_wimbledon_federer_final_1280x704": 0.34600283192178316,
+            "tv_uni_challenge_final_1280x712": 0.43350663046202653,
+            "university_forum_construction_ionic_1280x720": 0.3943345634974449
+          }
+        },
+        "ETMD_av": {
+          "mean_video_value": 0.5035254375434385,
+          "num_clips": 153,
+          "num_frames": 2448,
+          "num_videos": 4,
+          "video_values": {
+            "CHI_1_color": 0.5182520372711462,
+            "CHI_2_color": 0.523166276913646,
+            "GLA_1_color": 0.41685560411333494,
+            "GLA_2_color": 0.5558278318756269
+          }
+        },
+        "SumMe": {
+          "mean_video_value": 0.37133821775723763,
+          "num_clips": 250,
+          "num_frames": 4000,
+          "num_videos": 8,
+          "video_values": {
+            "Bearpark_climbing": 0.37200710056399944,
+            "Car_railcrossing": 0.43785709146370405,
+            "Cockpit_Landing": 0.4446149395379922,
+            "Fire_Domino": 0.4129104423793734,
+            "Notre_Dame": 0.2779296114823274,
+            "Playing_on_water_slide": 0.35660691278438006,
+            "Saving_dolphines": 0.4477168278841909,
+            "Valparaiso_Downhill": 0.22106281596193345
+          }
+        }
+      },
+      "pooled_frame_mean": 0.43105922757501675
+    },
+    "rl440831": {
+      "macro_source_mean": 0.4436859924021647,
+      "num_clips": 663,
+      "num_frames": 10608,
+      "num_sources": 6,
+      "num_videos": 67,
+      "per_source": {
+        "AVAD": {
+          "mean_video_value": 0.4219373548120204,
+          "num_clips": 13,
+          "num_frames": 208,
+          "num_videos": 13,
+          "video_values": {
+            "V10_News3": 0.7029260799404256,
+            "V13_Conservation2": 0.34147501284340365,
+            "V15_Drummer1": 0.3516677254937406,
+            "V17_Soccer1": 0.3363309339814009,
+            "V23_Tap3": 0.3524428965483253,
+            "V24_Tap4": 0.37319197109901836,
+            "V25_Piano1": 0.1276214097515549,
+            "V27_Piano3": 0.3414542810121901,
+            "V32_Dancers": 0.32881498070597104,
+            "V33_Harp": 0.6019039231563852,
+            "V41_Violin1": 0.6165273551850277,
+            "V6_Basketball1": 0.33046283766131523,
+            "V9_News2": 0.6803662051775063
+          }
+        },
+        "Coutrot_db1": {
+          "mean_video_value": 0.3529297787827345,
+          "num_clips": 50,
+          "num_frames": 800,
+          "num_videos": 20,
+          "video_values": {
+            "clip10": 0.5384338383096079,
+            "clip14": 0.3689903083184447,
+            "clip15": 0.1789634511261795,
+            "clip16": 0.5547619501359833,
+            "clip17": 0.30685450700664774,
+            "clip22": 0.34086464560157026,
+            "clip24": 0.2454095174087101,
+            "clip26": 0.4878753386653898,
+            "clip32": 0.2680530839147792,
+            "clip37": 0.38101867351429064,
+            "clip38": 0.3736108760543573,
+            "clip39": 0.4904510879763393,
+            "clip4": 0.25386396079190376,
+            "clip44": 0.3977287867244191,
+            "clip47": 0.1585827775464376,
+            "clip48": 0.2211412332925562,
+            "clip5": 0.5978089471161449,
+            "clip50": 0.2597525290049312,
+            "clip56": 0.10878931514308832,
+            "clip58": 0.5256407480029092
+          }
+        },
+        "Coutrot_db2": {
+          "mean_video_value": 0.58628662268649,
+          "num_clips": 38,
+          "num_frames": 608,
+          "num_videos": 5,
+          "video_values": {
+            "clip11": 0.5125991648427196,
+            "clip14": 0.6328257934137611,
+            "clip15": 0.5949983652574166,
+            "clip2": 0.562775969412229,
+            "clip4": 0.628233820506324
+          }
+        },
+        "DIEM": {
+          "mean_video_value": 0.4217198180717718,
+          "num_clips": 159,
+          "num_frames": 2544,
+          "num_videos": 17,
+          "video_values": {
+            "BBC_life_in_cold_blood_1278x710": 0.47660208323106684,
+            "BBC_wildlife_serpent_1280x704": 0.3929182842013944,
+            "DIY_SOS_1280x712": 0.4150183609200622,
+            "advert_bbc4_bees_1024x576": 0.1995831773054054,
+            "advert_bbc4_library_1024x576": 0.29543554454618004,
+            "advert_iphone_1272x720": 0.5183915371372194,
+            "harry_potter_6_trailer_1280x544": 0.5840826736903151,
+            "music_gummybear_880x720": 0.5519397965328494,
+            "music_trailer_nine_inch_nails_1280x720": 0.4027613968243742,
+            "nightlife_in_mozambique_1280x580": 0.3819505459150925,
+            "one_show_1280x712": 0.7118316571588466,
+            "pingpong_angle_shot_960x720": 0.28878182592249,
+            "pingpong_no_bodies_960x720": 0.262178994374886,
+            "sport_scramblers_1280x720": 0.523284021681287,
+            "sport_wimbledon_federer_final_1280x704": 0.3412640448287944,
+            "tv_uni_challenge_final_1280x712": 0.4330973770803972,
+            "university_forum_construction_ionic_1280x720": 0.3901155858694594
+          }
+        },
+        "ETMD_av": {
+          "mean_video_value": 0.503395551072038,
+          "num_clips": 153,
+          "num_frames": 2448,
+          "num_videos": 4,
+          "video_values": {
+            "CHI_1_color": 0.5189541742785742,
+            "CHI_2_color": 0.5233782266199938,
+            "GLA_1_color": 0.414098416861198,
+            "GLA_2_color": 0.5571513865283859
+          }
+        },
+        "SumMe": {
+          "mean_video_value": 0.37584682898793303,
+          "num_clips": 250,
+          "num_frames": 4000,
+          "num_videos": 8,
+          "video_values": {
+            "Bearpark_climbing": 0.38532571806830956,
+            "Car_railcrossing": 0.4396149193880357,
+            "Cockpit_Landing": 0.44439381523142657,
+            "Fire_Domino": 0.4236094624925357,
+            "Notre_Dame": 0.27796352682270054,
+            "Playing_on_water_slide": 0.36050707872809756,
+            "Saving_dolphines": 0.45062299623948726,
+            "Valparaiso_Downhill": 0.2247371149328714
+          }
+        }
+      },
+      "pooled_frame_mean": 0.4320575703612424
+    },
+    "saliency_top16": {
+      "macro_source_mean": 0.5604225895880225,
+      "num_clips": 663,
+      "num_frames": 10608,
+      "num_sources": 6,
+      "num_videos": 67,
+      "per_source": {
+        "AVAD": {
+          "mean_video_value": 0.5974391644193943,
+          "num_clips": 13,
+          "num_frames": 208,
+          "num_videos": 13,
+          "video_values": {
+            "V10_News3": 0.7404370542681136,
+            "V13_Conservation2": 0.8033271483178055,
+            "V15_Drummer1": 0.5004803924490488,
+            "V17_Soccer1": 0.7570751680221122,
+            "V23_Tap3": 0.3852738791591719,
+            "V24_Tap4": 0.40150268822569046,
+            "V25_Piano1": 0.449043700970833,
+            "V27_Piano3": 0.3601915177864896,
+            "V32_Dancers": 0.5190513348082391,
+            "V33_Harp": 0.6404940874865588,
+            "V41_Violin1": 0.6721369491418727,
+            "V6_Basketball1": 0.7627281728730395,
+            "V9_News2": 0.7749670439431497
+          }
+        },
+        "Coutrot_db1": {
+          "mean_video_value": 0.48678054703145823,
+          "num_clips": 50,
+          "num_frames": 800,
+          "num_videos": 20,
+          "video_values": {
+            "clip10": 0.8211238190504417,
+            "clip14": 0.39842304825360486,
+            "clip15": 0.14042216083156234,
+            "clip16": 0.5402950775282562,
+            "clip17": 0.538435460108758,
+            "clip22": 0.5774728204518169,
+            "clip24": 0.4004495047555494,
+            "clip26": 0.39590023370504923,
+            "clip32": 0.27659117749080764,
+            "clip37": 0.3323636753445953,
+            "clip38": 0.36850719574749746,
+            "clip39": 0.5181916567896868,
+            "clip4": 0.3456620480040513,
+            "clip44": 0.38430887807608843,
+            "clip47": 0.7224547358004353,
+            "clip48": 0.5704755362955325,
+            "clip5": 0.5617955446769732,
+            "clip50": 0.7070458131194748,
+            "clip56": 0.43172806855218226,
+            "clip58": 0.7039644860468002
+          }
+        },
+        "Coutrot_db2": {
+          "mean_video_value": 0.6679481122214482,
+          "num_clips": 38,
+          "num_frames": 608,
+          "num_videos": 5,
+          "video_values": {
+            "clip11": 0.7051670698408101,
+            "clip14": 0.7465074358447197,
+            "clip15": 0.6451517852335736,
+            "clip2": 0.6398525942792475,
+            "clip4": 0.60306167590889
+          }
+        },
+        "DIEM": {
+          "mean_video_value": 0.49989677537716637,
+          "num_clips": 159,
+          "num_frames": 2544,
+          "num_videos": 17,
+          "video_values": {
+            "BBC_life_in_cold_blood_1278x710": 0.5794712194439184,
+            "BBC_wildlife_serpent_1280x704": 0.46178578619767163,
+            "DIY_SOS_1280x712": 0.6333475028106729,
+            "advert_bbc4_bees_1024x576": 0.2631403145333258,
+            "advert_bbc4_library_1024x576": 0.339886895173724,
+            "advert_iphone_1272x720": 0.5308395143612359,
+            "harry_potter_6_trailer_1280x544": 0.7089344695357753,
+            "music_gummybear_880x720": 0.4010107756146368,
+            "music_trailer_nine_inch_nails_1280x720": 0.41788785284153107,
+            "nightlife_in_mozambique_1280x580": 0.5002130005830896,
+            "one_show_1280x712": 0.8006177468529785,
+            "pingpong_angle_shot_960x720": 0.4047905442354477,
+            "pingpong_no_bodies_960x720": 0.18678756830444332,
+            "sport_scramblers_1280x720": 0.6487780902695243,
+            "sport_wimbledon_federer_final_1280x704": 0.5485158056609704,
+            "tv_uni_challenge_final_1280x712": 0.5895854998411032,
+            "university_forum_construction_ionic_1280x720": 0.48265259515178016
+          }
+        },
+        "ETMD_av": {
+          "mean_video_value": 0.6109569544549301,
+          "num_clips": 153,
+          "num_frames": 2448,
+          "num_videos": 4,
+          "video_values": {
+            "CHI_1_color": 0.5999220449058796,
+            "CHI_2_color": 0.6713440397898168,
+            "GLA_1_color": 0.5726278634946581,
+            "GLA_2_color": 0.5999338696293658
+          }
+        },
+        "SumMe": {
+          "mean_video_value": 0.49951398402373814,
+          "num_clips": 250,
+          "num_frames": 4000,
+          "num_videos": 8,
+          "video_values": {
+            "Bearpark_climbing": 0.5867017135498349,
+            "Car_railcrossing": 0.44128505070592894,
+            "Cockpit_Landing": 0.4713466713213509,
+            "Fire_Domino": 0.5151529551061585,
+            "Notre_Dame": 0.32498465477175187,
+            "Playing_on_water_slide": 0.4788856388707314,
+            "Saving_dolphines": 0.5924609768399152,
+            "Valparaiso_Downhill": 0.5852942110242338
+          }
+        }
+      },
+      "pooled_frame_mean": 0.5462120574667488
+    },
+    "train_source_prior": {
+      "macro_source_mean": 0.4320433881606243,
+      "num_clips": 663,
+      "num_frames": 10608,
+      "num_sources": 6,
+      "num_videos": 67,
+      "per_source": {
+        "AVAD": {
+          "mean_video_value": 0.3694927897090904,
+          "num_clips": 13,
+          "num_frames": 208,
+          "num_videos": 13,
+          "video_values": {
+            "V10_News3": 0.7367706139007737,
+            "V13_Conservation2": 0.44906065300213527,
+            "V15_Drummer1": 0.4899570037269996,
+            "V17_Soccer1": 0.20858034752166077,
+            "V23_Tap3": 0.3657270048906298,
+            "V24_Tap4": 0.4033678303287189,
+            "V25_Piano1": 0.08288359510794407,
+            "V27_Piano3": 0.21484165752586648,
+            "V32_Dancers": 0.2514517328269221,
+            "V33_Harp": 0.6855025286681666,
+            "V41_Violin1": 0.5667795718223374,
+            "V6_Basketball1": 0.23084551090363448,
+            "V9_News2": 0.11763821599238611
+          }
+        },
+        "Coutrot_db1": {
+          "mean_video_value": 0.3055860451733185,
+          "num_clips": 50,
+          "num_frames": 800,
+          "num_videos": 20,
+          "video_values": {
+            "clip10": 0.6918955084785736,
+            "clip14": 0.3690537379985912,
+            "clip15": 0.16393688475218937,
+            "clip16": 0.44331964306732274,
+            "clip17": 0.3141778006739173,
+            "clip22": 0.2433605296549075,
+            "clip24": 0.10851130646703666,
+            "clip26": 0.28415293753317883,
+            "clip32": 0.2982944301326995,
+            "clip37": 0.3595698653505792,
+            "clip38": 0.3119579559831607,
+            "clip39": 0.1345463893213695,
+            "clip4": 0.17027488759416798,
+            "clip44": 0.3660819249998208,
+            "clip47": 0.18010903431647782,
+            "clip48": 0.2683602739647455,
+            "clip5": 0.5257188315748825,
+            "clip50": 0.397875851806905,
+            "clip56": 0.05765932481554614,
+            "clip58": 0.42286378498029836
+          }
+        },
+        "Coutrot_db2": {
+          "mean_video_value": 0.6155460015942349,
+          "num_clips": 38,
+          "num_frames": 608,
+          "num_videos": 5,
+          "video_values": {
+            "clip11": 0.5762569679755024,
+            "clip14": 0.6485619913405145,
+            "clip15": 0.6201399525275438,
+            "clip2": 0.6136528447971017,
+            "clip4": 0.6191182513305122
+          }
+        },
+        "DIEM": {
+          "mean_video_value": 0.4307285677145206,
+          "num_clips": 159,
+          "num_frames": 2544,
+          "num_videos": 17,
+          "video_values": {
+            "BBC_life_in_cold_blood_1278x710": 0.48018442676820833,
+            "BBC_wildlife_serpent_1280x704": 0.3757124455203183,
+            "DIY_SOS_1280x712": 0.4184894044340877,
+            "advert_bbc4_bees_1024x576": 0.3491497155456256,
+            "advert_bbc4_library_1024x576": 0.1999341177619231,
+            "advert_iphone_1272x720": 0.5730208494933663,
+            "harry_potter_6_trailer_1280x544": 0.5932975928775642,
+            "music_gummybear_880x720": 0.6038771322574462,
+            "music_trailer_nine_inch_nails_1280x720": 0.4475074158930369,
+            "nightlife_in_mozambique_1280x580": 0.3828629617705026,
+            "one_show_1280x712": 0.5077697118670823,
+            "pingpong_angle_shot_960x720": 0.4242670808386265,
+            "pingpong_no_bodies_960x720": 0.3849121177019761,
+            "sport_scramblers_1280x720": 0.47358806420756294,
+            "sport_wimbledon_federer_final_1280x704": 0.2874223960035907,
+            "tv_uni_challenge_final_1280x712": 0.37079238320676167,
+            "university_forum_construction_ionic_1280x720": 0.44959783499917094
+          }
+        },
+        "ETMD_av": {
+          "mean_video_value": 0.5095050474949333,
+          "num_clips": 153,
+          "num_frames": 2448,
+          "num_videos": 4,
+          "video_values": {
+            "CHI_1_color": 0.4445685963125869,
+            "CHI_2_color": 0.5111460451673852,
+            "GLA_1_color": 0.45925822570664165,
+            "GLA_2_color": 0.6230473227931194
+          }
+        },
+        "SumMe": {
+          "mean_video_value": 0.3614018772776485,
+          "num_clips": 250,
+          "num_frames": 4000,
+          "num_videos": 8,
+          "video_values": {
+            "Bearpark_climbing": 0.38585428634581204,
+            "Car_railcrossing": 0.47782126141332115,
+            "Cockpit_Landing": 0.4222112241940467,
+            "Fire_Domino": 0.4002554713966077,
+            "Notre_Dame": 0.28106504803606097,
+            "Playing_on_water_slide": 0.34745266021312504,
+            "Saving_dolphines": 0.4491138502125416,
+            "Valparaiso_Downhill": 0.12744121640967254
+          }
+        }
+      },
+      "pooled_frame_mean": 0.4252339488962956
+    }
+  },
+  "rl_seed_summary": {
+    "ci90_high": 0.443500472045031,
+    "ci90_low": 0.4425217862605095,
+    "interval": "descriptive_two_sided_t_df5_unadjusted",
+    "mean": 0.44301112915277024,
+    "num_seeds": 6,
+    "sample_sd": 0.0005948444767675627
+  },
+  "run_id": "20261108-1204_sb1_saliency-baseline_ec9a13e",
+  "schema_version": 1,
+  "secondary": {
+    "saliency_minus_center16": {
+      "bootstrap_seed": 20261109,
+      "ci90_high": 0.23058798753019472,
+      "ci90_low": 0.1663680785317788,
+      "cluster_unit": "video_stratified_by_source_with_paired_methods_and_seeds",
+      "difference": 0.19879196554997422,
+      "interpretation": "descriptive_unadjusted",
+      "iterations": 10000
+    },
+    "saliency_minus_train_source_prior": {
+      "bootstrap_seed": 20261109,
+      "ci90_high": 0.15778576689515345,
+      "ci90_low": 0.09918135285386158,
+      "cluster_unit": "video_stratified_by_source_with_paired_methods_and_seeds",
+      "difference": 0.1283792014273982,
+      "interpretation": "descriptive_unadjusted",
+      "iterations": 10000
+    },
+    "trained_minus_best_constant": {
+      "bootstrap_seed": 20261109,
+      "ci90_high": 0.10282533355537654,
+      "ci90_low": 0.05541651856360027,
+      "cluster_unit": "video_stratified_by_source_with_paired_methods_and_seeds",
+      "difference": 0.07947396588591783,
+      "interpretation": "descriptive_unadjusted",
+      "iterations": 10000
+    }
+  },
+  "status": "complete"
+}
