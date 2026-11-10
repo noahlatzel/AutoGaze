@@ -4,6 +4,14 @@ status: active
 model_root: /storage/slurm/latn/data/AutoGaze/hf_models
 hf_home: /storage/slurm/latn/data/huggingface_cache
 models:
+  resnet50_imagenet1k_v2:
+    source: torchvision.models.ResNet50_Weights.IMAGENET1K_V2
+    source_url: https://download.pytorch.org/models/resnet50-11ad3fa6.pth
+    local_path: /storage/slurm/latn/data/AutoGaze/hf_models/torchvision--resnet50-imagenet1k-v2/resnet50-11ad3fa6.pth
+    sha256: 11ad3fa62ca79e40addfd354a8ec4b7c75143b3038b8d2a807fbc68deab379ca
+    role: Frozen ImageNet ResNet-50 feature encoder for the InfoShot paper reimplementation.
+    used_by:
+      - scripts/frame_selectors/generate_infoshot_indices.py
   clip_vit_l14:
     hf_id: openai/clip-vit-large-patch14
     local_path: /storage/slurm/latn/data/AutoGaze/hf_models/openai--clip-vit-large-patch14

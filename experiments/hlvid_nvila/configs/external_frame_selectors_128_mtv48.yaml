@@ -9,6 +9,7 @@ slurm:
     hlvid_external_bolt_128_mtv48: 1617050
     hlvid_external_sealing_mdf_128_mtv48: 1617051
     hlvid_external_sealing_mif_128_mtv48: 1617052
+    hlvid_external_infoshot_reimpl_128_mtv48: 1626647
   previous_jobs:
     hlvid_external_aks_128_mtv48_timeout: 1617049
 runner: scripts/runners/evaluate_hlvid_nvila.py
@@ -78,3 +79,14 @@ runs:
     output_dir: outputs/hlvid/external_frame_selectors_128_mtv48/sealing_mif
     command:
       selected_indices: outputs/frame_indices/sealing_mif_128.jsonl
+  - id: hlvid_external_infoshot_reimpl_128_mtv48
+    status: queued
+    slurm_job_id: 1626647
+    dependency: afterok:1626645
+    resources:
+      nodelist: node21
+      gres: gpu:nvidia_h100_nvl:1
+      memory: 90G
+    output_dir: outputs/hlvid/external_frame_selectors_128_mtv48/infoshot_reimpl
+    command:
+      selected_indices: outputs/frame_indices/infoshot_reimpl_128.jsonl

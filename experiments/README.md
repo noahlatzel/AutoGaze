@@ -12,6 +12,7 @@ launch metadata, run ledgers, and result summaries live here.
 | `proxy_sampling` | HLVid frame/tile selection with thumbnail and semantic proxy metrics | `proxy_sampling/configs/`, `proxy_sampling/manifests/` |
 | `delta_policy` | pseudo-label generation, frozen AutoGaze feature probes, contextual-bandit delta policies | `delta_policy/configs/`, `delta_policy/manifests/` |
 | `hlvid_nvila` | NVILA-HD-Video baselines and fixed-delta evaluations | `hlvid_nvila/configs/`, `hlvid_nvila/manifests/` |
+| `frame_selectors` | External and paper-reimplemented fixed-budget HLVid frame selectors | `frame_selectors/configs/`, `frame_selectors/models.yaml` |
 
 ## Status Vocabulary
 

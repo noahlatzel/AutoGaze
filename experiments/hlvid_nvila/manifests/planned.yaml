@@ -1,6 +1,33 @@
 version: 1
-updated: "2026-06-26"
+updated: "2026-07-14"
 runs:
+  - id: hlvid_external_infoshot_reimpl_128
+    status: queued
+    question: Compare the query-agnostic InfoShot paper reimplementation with external 128-frame selectors on HLVid/NVILA.
+    selector_config: experiments/frame_selectors/configs/infoshot_reimpl_128.yaml
+    index_output: outputs/frame_indices/infoshot_reimpl_128.jsonl
+    evaluation_configs:
+      - experiments/hlvid_nvila/configs/external_frame_selectors_128_mtv1.yaml
+      - experiments/hlvid_nvila/configs/external_frame_selectors_128_mtv48.yaml
+    output_roots:
+      - outputs/hlvid/external_frame_selectors_128_mtv1/infoshot_reimpl
+      - outputs/hlvid/external_frame_selectors_128_mtv48/infoshot_reimpl
+    slurm:
+      selector_job_id: 1626645
+      selector_state: running
+      mtv1_job_id: 1626646
+      mtv48_job_id: 1626647
+      evaluation_dependency: afterok:1626645
+      mtv1_memory: 48G
+      mtv48_memory: 90G
+      mtv48_nodelist: node21
+    metrics:
+      - accuracy
+      - mean_visited_frames
+      - mean_visited_tiles
+      - by_category
+      - visual_tokens
+      - end_to_end_seconds
   - id: hlvid_nvila_uniform_128_mtv1
     status: submitted
     question: Evaluate uniform 128-frame sampling on HLVid/NVILA with max_tiles_video=1.

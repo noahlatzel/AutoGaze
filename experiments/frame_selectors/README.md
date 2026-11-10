@@ -4,6 +4,10 @@ This family tracks external fixed-budget frame-selection baselines for HLVid.
 Selectors generate frame-index JSONL files that are later consumed by
 `scripts/runners/evaluate_hlvid_nvila.py --frame-source selected_indices`.
 
+`infoshot_reimpl` is an independent implementation from the published paper;
+the public upstream repository contained no implementation code at integration
+time. It is intentionally named differently from an official reproduction.
+
 Primary interface:
 
 ```text

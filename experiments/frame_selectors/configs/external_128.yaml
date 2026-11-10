@@ -34,3 +34,8 @@ runs:
     method: sealing_mdf
     output: outputs/frame_indices/sealing_mdf_128.jsonl
     adapter: scripts/frame_selectors/generate_sealing_indices.py
+  - id: infoshot_reimpl_128
+    status: planned
+    method: infoshot_reimpl
+    output: outputs/frame_indices/infoshot_reimpl_128.jsonl
+    adapter: scripts/frame_selectors/generate_infoshot_indices.py

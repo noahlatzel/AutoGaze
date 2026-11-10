@@ -1,0 +1,59 @@
+id: frame_selectors_infoshot_reimpl_128
+family: frame_selectors
+status: running
+slurm:
+  submitted_at: "2026-07-15"
+  job_id: 1626645
+  state_at_submission: PD
+  current_state: R
+  assigned_node: node5
+  script: outputs/frame_indices/infoshot_reimpl_128/frame_selectors_infoshot_reimpl_128/submit.sbatch
+  dependency: null
+  nodelist: node4,node5,node11,node13,node14,node15,node16,node17,node18,node19,node20,node21,node22
+  gres: gpu:1
+  memory: 48G
+  time: "24:00:00"
+question: Does task-agnostic shot-aware representative-plus-deviation sampling improve HLVid at a fixed 128-frame budget?
+runner: scripts/frame_selectors/generate_infoshot_indices.py
+environment: autogaze
+dataset:
+  name: hlvid
+  root: /storage/slurm/latn/data/AutoGaze/HLVid
+features:
+  encoder: torchvision_resnet50_imagenet1k_v2
+  candidate_fps: 10.0
+  cache: /storage/slurm/latn/data/AutoGaze/frame_selector_features/infoshot_reimpl/resnet50_10fps
+outputs:
+  root: outputs/frame_indices/infoshot_reimpl_128
+command:
+  dataset_root: /storage/slurm/latn/data/AutoGaze/HLVid
+  output: outputs/frame_indices/infoshot_reimpl_128.jsonl
+  num_frames: 128
+  method: infoshot_reimpl
+  candidate_fps: 10.0
+  feature_cache_dir: /storage/slurm/latn/data/AutoGaze/frame_selector_features/infoshot_reimpl/resnet50_10fps
+  resnet_weights: /storage/slurm/latn/data/AutoGaze/hf_models/torchvision--resnet50-imagenet1k-v2/resnet50-11ad3fa6.pth
+  device: cuda
+  dtype: float16
+  batch_size: 128
+  boundary_window_min: 3
+  boundary_window_max: 15
+  min_segment_frames: 3
+  max_segment_frames: 300
+  neighborhood: 1
+  common_weight: 0.7
+  unique_weight: 0.5
+  resume: true
+metrics:
+  primary:
+    - selected_source_indices
+    - exact_budget_repair_count
+    - coverage
+    - wall_time
+notes:
+  - Independent implementation of arXiv:2603.17374v1; it is not official InfoShot code.
+  - One query-agnostic selection is computed per unique video and reused across HLVid questions.
+  - Low-resolution ResNet features drive selection; the evaluator reloads selected source frames at full resolution.
+  - Linear boundary-window scaling is an explicit local choice because the paper reports only the 3-15 range.
+  - See research/frame_selectors_infoshot.md.
+  - Submitted as job 1626645 on the general 48+ GB VRAM node pool.
