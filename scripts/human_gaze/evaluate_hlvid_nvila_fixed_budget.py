@@ -80,6 +80,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device-map", default="auto")
     parser.add_argument("--fine-action-offset", type=int, default=69)
     parser.add_argument("--actions-per-frame", type=int, default=265)
+    parser.add_argument(
+        "--target-scales",
+        help=(
+            "Comma-separated processor target scales, e.g. 64,128,224,448. Omit to keep the "
+            "released processor default, whose patch layout differs from the vision tower's."
+        ),
+    )
+    parser.add_argument(
+        "--target-patch-size",
+        type=int,
+        help="Processor target patch size; required together with --target-scales",
+    )
     parser.add_argument("--limit", type=int)
     parser.add_argument("--resume", action="store_true")
     return parser.parse_args()
@@ -130,6 +142,47 @@ def dtype_from_name(name: str) -> torch.dtype:
         "bfloat16": torch.bfloat16,
         "float32": torch.float32,
     }[name]
+
+
+def processor_layout_overrides(args: argparse.Namespace) -> dict[str, Any]:
+    """Registered processor target layout, or {} for the released default."""
+
+    scales = getattr(args, "target_scales", None)
+    patch = getattr(args, "target_patch_size", None)
+    if scales is None and patch is None:
+        return {}
+    if scales is None or patch is None:
+        raise ValueError("--target-scales and --target-patch-size must be given together")
+    values = [int(value) for value in str(scales).split(",")]
+    if len(values) != 4 or values != sorted(values) or min(values) <= 0 or int(patch) <= 0:
+        raise ValueError("Target scales must be four ascending positive integers with a positive patch size")
+    return {"target_scales": values, "target_patch_size": int(patch)}
+
+
+def processor_tower_layout(processor: Any, model: Any) -> dict[str, Any]:
+    """Positions per frame as addressed by the processor and as read by the vision tower.
+
+    AutoGaze returns flat patch positions over per-scale square grids whose sides are
+    target_scale // target_patch_size; the tower gathers by the same flat index over its
+    own grids. The selected patches are the encoded patches only if the grids coincide.
+    """
+
+    scales = sorted(int(value) for value in processor.target_scales)
+    patch = int(processor.target_patch_size)
+    processor_counts = [(scale // patch) ** 2 for scale in scales]
+    towers = [module for module in model.modules() if hasattr(module, "num_patch_each_scale")]
+    if len(towers) != 1:
+        raise ValueError("Expected exactly one multi-scale patch embedding module")
+    tower_counts = [int(value) for value in towers[0].num_patch_each_scale]
+    return {
+        "processor_target_scales": scales,
+        "processor_target_patch_size": patch,
+        "processor_positions_per_scale": processor_counts,
+        "processor_positions_per_frame": sum(processor_counts),
+        "tower_positions_per_scale": tower_counts,
+        "tower_positions_per_frame": sum(tower_counts),
+        "consistent": processor_counts == tower_counts,
+    }
 
 
 def load_rows(dataset_root: Path) -> list[dict[str, Any]]:
@@ -578,6 +631,7 @@ def validate_args(args: argparse.Namespace) -> None:
         raise ValueError("Trained policies require both seed identifiers")
     if not (args.autogaze_model_id / "model.safetensors").is_file():
         raise FileNotFoundError(f"Incomplete AutoGaze checkpoint: {args.autogaze_model_id}")
+    processor_layout_overrides(args)
 
 
 def build_identity(
@@ -601,8 +655,12 @@ def build_identity(
         if args.policy_kind == "random16"
         else {}
     )
+    # Likewise, the processor layout enters the identity only when it is overridden.
+    overrides = processor_layout_overrides(args)
+    layout_identity = {"processor_layout_overrides": overrides} if overrides else {}
     return {
         **random16_identity,
+        **layout_identity,
         "schema_version": 1,
         "protocol_id": PROTOCOL_ID,
         "benchmark": "HLVid",
@@ -755,6 +813,7 @@ def main() -> None:
         max_batch_size_autogaze=args.max_batch_size_autogaze,
         trust_remote_code=True,
         use_fast=False,
+        **processor_layout_overrides(args),
     )
     if processor._autogaze_model.training:
         raise ValueError("AutoGaze must be in evaluation mode")
@@ -788,6 +847,16 @@ def main() -> None:
         max_batch_size_siglip=args.max_batch_size_siglip,
     )
     model.eval()
+    layout_overrides = processor_layout_overrides(args)
+    layout_check = processor_tower_layout(processor, model)
+    if layout_overrides and (
+        layout_check["processor_target_scales"] != layout_overrides["target_scales"]
+        or layout_check["processor_target_patch_size"] != layout_overrides["target_patch_size"]
+    ):
+        raise ValueError("Processor did not take the registered target layout")
+    if layout_overrides and not layout_check["consistent"]:
+        raise ValueError(f"Registered processor layout does not match the vision tower: {layout_check}")
+    print(json.dumps({"processor_tower_layout": layout_check}), flush=True)
     nvila_timing = NVILATimingTrace(model)
     video_token = processor.tokenizer.video_token
     target_device = model.device if hasattr(model, "device") else next(model.parameters()).device
@@ -1030,6 +1099,7 @@ def main() -> None:
             "autogaze_model_id": str(args.autogaze_model_id),
             "autogaze_checkpoint_sha256": sha256(args.autogaze_model_id / "model.safetensors"),
             "checkpoint_compatibility": checkpoint_compatibility,
+            "processor_tower_layout": layout_check,
             "fixed_budget_adapter": {
                 "exact_decoder_actions_per_autogaze_frame": args.exact_budget,
                 "fine_action_offset": args.fine_action_offset,

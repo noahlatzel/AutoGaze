@@ -22,7 +22,9 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--summary", type=Path, required=True)
     parser.add_argument("--evidence-dir", type=Path, required=True)
-    parser.add_argument("--policy-kind", choices=("pretrained", "center16", "random16"), required=True)
+    parser.add_argument(
+        "--policy-kind", choices=("trained", "pretrained", "center16", "random16"), required=True
+    )
     parser.add_argument("--attestation", type=Path, required=True)
     parser.add_argument("--admission-record", type=Path, required=True)
     return parser.parse_args()
