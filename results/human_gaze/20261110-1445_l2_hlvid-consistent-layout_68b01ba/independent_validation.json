@@ -1,0 +1,437 @@
+{
+ "floor": {
+  "questions": 268,
+  "videos": 77,
+  "level": 0.9,
+  "seed": 20261110,
+  "replicates": 10000,
+  "reference": {
+   "files": [
+    "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/random16/results.jsonl"
+   ],
+   "sha256": [
+    "112618e3bde2de544a65c7f9b0695233f4a968b17cfd2456a5cb62e01e4dbac9"
+   ],
+   "micro": 0.4626865671641791,
+   "macro": 0.47737857380714527
+  },
+  "candidate": {
+   "files": [
+    "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/center16/results.jsonl"
+   ],
+   "sha256": [
+    "d33f331d267ee15ca1b6fb4ce46e23c21a7c90918cbef7273d850f031db1fdb0"
+   ],
+   "micro": 0.48507462686567165,
+   "macro": 0.48158389229817805
+  },
+  "invalid_answers": {
+   "reference": [
+    0
+   ],
+   "candidate": [
+    0
+   ]
+  },
+  "difference": {
+   "micro": 0.022388059701492546,
+   "macro": 0.0042053184910327834
+  },
+  "interval": {
+   "micro": [
+    -0.004484304932735426,
+    0.04744587405666212
+   ],
+   "macro": [
+    -0.031975881261595555,
+    0.03719851576994434
+   ]
+  },
+  "gains": 13,
+  "losses": 7,
+  "letters_changed": 34,
+  "exact_mcnemar_p": 0.26317596435546875,
+  "seed_sensitivity": {
+   "micro": {
+    "lower_min": -0.004878048780487805,
+    "lower_max": -0.004219409282700422,
+    "upper_min": 0.04666666666666667,
+    "upper_max": 0.04773332995701524,
+    "seeds_with_lower_above_zero": 0,
+    "seeds_with_upper_below_zero": 0,
+    "seeds": 50
+   },
+   "macro": {
+    "lower_min": -0.031944959802102664,
+    "lower_max": -0.029870129870129873,
+    "upper_min": 0.036244588744588684,
+    "upper_max": 0.03787878787878788,
+    "seeds_with_lower_above_zero": 0,
+    "seeds_with_upper_below_zero": 0,
+    "seeds": 50
+   }
+  }
+ },
+ "gaze": {
+  "questions": 268,
+  "videos": 77,
+  "level": 0.9,
+  "seed": 20261110,
+  "replicates": 10000,
+  "reference": {
+   "files": [
+    "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/center16/results.jsonl"
+   ],
+   "sha256": [
+    "d33f331d267ee15ca1b6fb4ce46e23c21a7c90918cbef7273d850f031db1fdb0"
+   ],
+   "micro": 0.48507462686567165,
+   "macro": 0.48158389229817805
+  },
+  "candidate": {
+   "files": [
+    "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/trained_440826/results.jsonl",
+    "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/trained_440827/results.jsonl"
+   ],
+   "sha256": [
+    "980690d4c0cbf6300305e9d8825fac254f0b6c843de73e25728c29235685d331",
+    "19540978602075c23ed6118da337630061b2c0240e62d51615674accb15da76c"
+   ],
+   "micro": 0.48507462686567165,
+   "macro": 0.463782645925503
+  },
+  "invalid_answers": {
+   "reference": [
+    0
+   ],
+   "candidate": [
+    0,
+    0
+   ]
+  },
+  "difference": {
+   "micro": 0.0,
+   "macro": -0.01780124637267505
+  },
+  "interval": {
+   "micro": [
+    -0.03076923076923077,
+    0.027450980392156862
+   ],
+   "macro": [
+    -0.05514580657437801,
+    0.021458184672470373
+   ]
+  },
+  "seed_sensitivity": {
+   "micro": {
+    "lower_min": -0.03205128205128205,
+    "lower_max": -0.030303030303030304,
+    "upper_min": 0.026470588235294117,
+    "upper_max": 0.028268814151102134,
+    "seeds_with_lower_above_zero": 0,
+    "seeds_with_upper_below_zero": 0,
+    "seeds": 50
+   },
+   "macro": {
+    "lower_min": -0.05649743114028829,
+    "lower_max": -0.05473098330241188,
+    "upper_min": 0.02010727367870223,
+    "upper_max": 0.02211038961038959,
+    "seeds_with_lower_above_zero": 0,
+    "seeds_with_upper_below_zero": 0,
+    "seeds": 50
+   }
+  }
+ },
+ "pretrained_minus_center16": {
+  "questions": 268,
+  "videos": 77,
+  "level": 0.9,
+  "seed": 20261110,
+  "replicates": 10000,
+  "reference": {
+   "files": [
+    "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/center16/results.jsonl"
+   ],
+   "sha256": [
+    "d33f331d267ee15ca1b6fb4ce46e23c21a7c90918cbef7273d850f031db1fdb0"
+   ],
+   "micro": 0.48507462686567165,
+   "macro": 0.48158389229817805
+  },
+  "candidate": {
+   "files": [
+    "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/pretrained/results.jsonl"
+   ],
+   "sha256": [
+    "7fd905eb600055096ce3ffeea2613c603696b9b18bc48bb4d63da415e93f9c51"
+   ],
+   "micro": 0.5186567164179104,
+   "macro": 0.5113148756005899
+  },
+  "invalid_answers": {
+   "reference": [
+    0
+   ],
+   "candidate": [
+    0
+   ]
+  },
+  "difference": {
+   "micro": 0.03358208955223879,
+   "macro": 0.029730983302411806
+  },
+  "interval": {
+   "micro": [
+    0.003424657534246575,
+    0.06696428571428571
+   ],
+   "macro": [
+    -0.011767161410018559,
+    0.07302102659245516
+   ]
+  },
+  "gains": 20,
+  "losses": 11,
+  "letters_changed": 43,
+  "exact_mcnemar_p": 0.14961278438568115,
+  "seed_sensitivity": {
+   "micro": {
+    "lower_min": 0.0,
+    "lower_max": 0.0037313432835820895,
+    "upper_min": 0.06521739130434782,
+    "upper_max": 0.06736042382255338,
+    "seeds_with_lower_above_zero": 49,
+    "seeds_with_upper_below_zero": 0,
+    "seeds": 50
+   },
+   "macro": {
+    "lower_min": -0.013404452690166978,
+    "lower_max": -0.010745207173778602,
+    "upper_min": 0.07169217687074829,
+    "upper_max": 0.07411951144094,
+    "seeds_with_lower_above_zero": 0,
+    "seeds_with_upper_below_zero": 0,
+    "seeds": 50
+   }
+  }
+ },
+ "trained_minus_pretrained": {
+  "questions": 268,
+  "videos": 77,
+  "level": 0.9,
+  "seed": 20261110,
+  "replicates": 10000,
+  "reference": {
+   "files": [
+    "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/pretrained/results.jsonl"
+   ],
+   "sha256": [
+    "7fd905eb600055096ce3ffeea2613c603696b9b18bc48bb4d63da415e93f9c51"
+   ],
+   "micro": 0.5186567164179104,
+   "macro": 0.5113148756005899
+  },
+  "candidate": {
+   "files": [
+    "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/trained_440826/results.jsonl",
+    "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/trained_440827/results.jsonl"
+   ],
+   "sha256": [
+    "980690d4c0cbf6300305e9d8825fac254f0b6c843de73e25728c29235685d331",
+    "19540978602075c23ed6118da337630061b2c0240e62d51615674accb15da76c"
+   ],
+   "micro": 0.48507462686567165,
+   "macro": 0.463782645925503
+  },
+  "invalid_answers": {
+   "reference": [
+    0
+   ],
+   "candidate": [
+    0,
+    0
+   ]
+  },
+  "difference": {
+   "micro": -0.03358208955223879,
+   "macro": -0.04753222967508686
+  },
+  "interval": {
+   "micro": [
+    -0.07348179714939884,
+    0.0
+   ],
+   "macro": [
+    -0.08106167641881928,
+    -0.017006624328052902
+   ]
+  },
+  "seed_sensitivity": {
+   "micro": {
+    "lower_min": -0.07407759470497113,
+    "lower_max": -0.0719704339110954,
+    "upper_min": -0.0016714102194954606,
+    "upper_max": 0.0,
+    "seeds_with_lower_above_zero": 0,
+    "seeds_with_upper_below_zero": 17,
+    "seeds": 50
+   },
+   "macro": {
+    "lower_min": -0.08246830550401979,
+    "lower_max": -0.08052572427572426,
+    "upper_min": -0.01703599971457117,
+    "upper_max": -0.0155187074829932,
+    "seeds_with_lower_above_zero": 0,
+    "seeds_with_upper_below_zero": 50,
+    "seeds": 50
+   }
+  }
+ },
+ "trained_minus_random16": {
+  "questions": 268,
+  "videos": 77,
+  "level": 0.9,
+  "seed": 20261110,
+  "replicates": 10000,
+  "reference": {
+   "files": [
+    "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/random16/results.jsonl"
+   ],
+   "sha256": [
+    "112618e3bde2de544a65c7f9b0695233f4a968b17cfd2456a5cb62e01e4dbac9"
+   ],
+   "micro": 0.4626865671641791,
+   "macro": 0.47737857380714527
+  },
+  "candidate": {
+   "files": [
+    "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/trained_440826/results.jsonl",
+    "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/trained_440827/results.jsonl"
+   ],
+   "sha256": [
+    "980690d4c0cbf6300305e9d8825fac254f0b6c843de73e25728c29235685d331",
+    "19540978602075c23ed6118da337630061b2c0240e62d51615674accb15da76c"
+   ],
+   "micro": 0.48507462686567165,
+   "macro": 0.463782645925503
+  },
+  "invalid_answers": {
+   "reference": [
+    0
+   ],
+   "candidate": [
+    0,
+    0
+   ]
+  },
+  "difference": {
+   "micro": 0.022388059701492546,
+   "macro": -0.013595927881642267
+  },
+  "interval": {
+   "micro": [
+    -0.015151515151515152,
+    0.055984555984555984
+   ],
+   "macro": [
+    -0.044527496313210596,
+    0.017913515056372193
+   ]
+  },
+  "seed_sensitivity": {
+   "micro": {
+    "lower_min": -0.017241379310344827,
+    "lower_max": -0.014705882352941176,
+    "upper_min": 0.05513377879668977,
+    "upper_max": 0.05663462024676375,
+    "seeds_with_lower_above_zero": 0,
+    "seeds_with_upper_below_zero": 0,
+    "seeds": 50
+   },
+   "macro": {
+    "lower_min": -0.047186147186147186,
+    "lower_max": -0.04540709290709291,
+    "upper_min": 0.017449217449217447,
+    "upper_max": 0.01931770610342034,
+    "seeds_with_lower_above_zero": 0,
+    "seeds_with_upper_below_zero": 0,
+    "seeds": 50
+   }
+  }
+ },
+ "pretrained_minus_random16": {
+  "questions": 268,
+  "videos": 77,
+  "level": 0.9,
+  "seed": 20261110,
+  "replicates": 10000,
+  "reference": {
+   "files": [
+    "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/random16/results.jsonl"
+   ],
+   "sha256": [
+    "112618e3bde2de544a65c7f9b0695233f4a968b17cfd2456a5cb62e01e4dbac9"
+   ],
+   "micro": 0.4626865671641791,
+   "macro": 0.47737857380714527
+  },
+  "candidate": {
+   "files": [
+    "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/pretrained/results.jsonl"
+   ],
+   "sha256": [
+    "7fd905eb600055096ce3ffeea2613c603696b9b18bc48bb4d63da415e93f9c51"
+   ],
+   "micro": 0.5186567164179104,
+   "macro": 0.5113148756005899
+  },
+  "invalid_answers": {
+   "reference": [
+    0
+   ],
+   "candidate": [
+    0
+   ]
+  },
+  "difference": {
+   "micro": 0.05597014925373134,
+   "macro": 0.03393630179344459
+  },
+  "interval": {
+   "micro": [
+    0.02054794520547945,
+    0.09004739336492891
+   ],
+   "macro": [
+    -0.002953772418058136,
+    0.07161410018552875
+   ]
+  },
+  "gains": 24,
+  "losses": 9,
+  "letters_changed": 45,
+  "exact_mcnemar_p": 0.013530986849218607,
+  "seed_sensitivity": {
+   "micro": {
+    "lower_min": 0.020076305220883522,
+    "lower_max": 0.02181818181818182,
+    "upper_min": 0.08852640493618048,
+    "upper_max": 0.09061539239482201,
+    "seeds_with_lower_above_zero": 50,
+    "seeds_with_upper_below_zero": 0,
+    "seeds": 50
+   },
+   "macro": {
+    "lower_min": -0.0038976499690785457,
+    "lower_max": -0.002164502164502167,
+    "upper_min": 0.06991651205936916,
+    "upper_max": 0.07220392702535557,
+    "seeds_with_lower_above_zero": 0,
+    "seeds_with_upper_below_zero": 0,
+    "seeds": 50
+   }
+  }
+ }
+}

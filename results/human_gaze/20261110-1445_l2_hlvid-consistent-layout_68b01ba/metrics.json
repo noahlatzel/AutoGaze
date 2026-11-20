@@ -1,0 +1,290 @@
+{
+  "schema_version": 1,
+  "gate": "L2",
+  "run_id": "20261110-1445_l2_hlvid-consistent-layout_68b01ba",
+  "primaries": {
+    "floor": {
+      "contrast": "center16 minus random16",
+      "difference": 0.022388059701492536,
+      "paired_video_ci90_low": -0.004484304932735426,
+      "paired_video_ci90_high": 0.04744587405666212,
+      "decision": "unresolved (no equivalence claim)"
+    },
+    "gaze": {
+      "contrast": "mean of the two trained seeds minus center16",
+      "difference": 0.0,
+      "paired_video_ci90_low": -0.03076923076923077,
+      "paired_video_ci90_high": 0.027450980392156862,
+      "decision": "unresolved (no equivalence claim)"
+    }
+  },
+  "contrasts_micro_and_macro": {
+    "floor": {
+      "question_micro_accuracy": {
+        "difference": 0.022388059701492536,
+        "paired_video_ci90_low": -0.004484304932735426,
+        "paired_video_ci90_high": 0.04744587405666212
+      },
+      "macro_video_accuracy": {
+        "difference": 0.004205318491032776,
+        "paired_video_ci90_low": -0.03197588126159554,
+        "paired_video_ci90_high": 0.03719851576994434
+      }
+    },
+    "gaze": {
+      "question_micro_accuracy": {
+        "difference": 0.0,
+        "paired_video_ci90_low": -0.03076923076923077,
+        "paired_video_ci90_high": 0.027450980392156862
+      },
+      "macro_video_accuracy": {
+        "difference": -0.017801246372674943,
+        "paired_video_ci90_low": -0.055145806574378,
+        "paired_video_ci90_high": 0.021458184672470373
+      }
+    },
+    "pretrained_minus_center16": {
+      "question_micro_accuracy": {
+        "difference": 0.033582089552238806,
+        "paired_video_ci90_low": 0.003424657534246575,
+        "paired_video_ci90_high": 0.06696428571428571
+      },
+      "macro_video_accuracy": {
+        "difference": 0.029730983302411872,
+        "paired_video_ci90_low": -0.011767161410018554,
+        "paired_video_ci90_high": 0.07302102659245516
+      }
+    },
+    "trained_minus_pretrained": {
+      "question_micro_accuracy": {
+        "difference": -0.033582089552238806,
+        "paired_video_ci90_low": -0.07348179714939883,
+        "paired_video_ci90_high": 0.0
+      },
+      "macro_video_accuracy": {
+        "difference": -0.047532229675086815,
+        "paired_video_ci90_low": -0.08106167641881928,
+        "paired_video_ci90_high": -0.017006624328052902
+      }
+    },
+    "trained_minus_random16": {
+      "question_micro_accuracy": {
+        "difference": 0.022388059701492536,
+        "paired_video_ci90_low": -0.015151515151515152,
+        "paired_video_ci90_high": 0.055984555984555984
+      },
+      "macro_video_accuracy": {
+        "difference": -0.013595927881642168,
+        "paired_video_ci90_low": -0.04452749631321059,
+        "paired_video_ci90_high": 0.017913515056372193
+      }
+    },
+    "pretrained_minus_random16": {
+      "question_micro_accuracy": {
+        "difference": 0.055970149253731345,
+        "paired_video_ci90_low": 0.02054794520547945,
+        "paired_video_ci90_high": 0.09004739336492891
+      },
+      "macro_video_accuracy": {
+        "difference": 0.033936301793444645,
+        "paired_video_ci90_low": -0.0029537724180581336,
+        "paired_video_ci90_high": 0.07161410018552875
+      }
+    }
+  },
+  "accuracy": {
+    "center16": {
+      "question_micro_accuracy": 0.48507462686567165,
+      "macro_video_accuracy": 0.48158389229817805
+    },
+    "random16": {
+      "question_micro_accuracy": 0.4626865671641791,
+      "macro_video_accuracy": 0.47737857380714527
+    },
+    "pretrained": {
+      "question_micro_accuracy": 0.5186567164179104,
+      "macro_video_accuracy": 0.5113148756005899
+    },
+    "trained_440826": {
+      "question_micro_accuracy": 0.48134328358208955,
+      "macro_video_accuracy": 0.461751343894201
+    },
+    "trained_440827": {
+      "question_micro_accuracy": 0.48880597014925375,
+      "macro_video_accuracy": 0.46581394795680503
+    },
+    "trained_mean": {
+      "question_micro_accuracy": 0.48507462686567165,
+      "macro_video_accuracy": 0.463782645925503
+    }
+  },
+  "answer_letter_disagreement": {
+    "center16__random16": 0.12686567164179105,
+    "center16__pretrained": 0.16044776119402984,
+    "center16__trained_440826": 0.14925373134328357,
+    "center16__trained_440827": 0.13432835820895522,
+    "random16__pretrained": 0.16791044776119404,
+    "random16__trained_440826": 0.16791044776119404,
+    "random16__trained_440827": 0.1865671641791045,
+    "pretrained__trained_440826": 0.16417910447761194,
+    "pretrained__trained_440827": 0.17164179104477612,
+    "trained_440826__trained_440827": 0.08582089552238806
+  },
+  "released_layout_references": {
+    "center16": {
+      "available": true,
+      "path": "/storage/user/latn/artifacts/f1/20261106-1052_f1_hlvid-selection-floor_98c0dce/stavis_center16/results.jsonl",
+      "sha256": "e5d52c07c6d934e4f72cb58fcd6eb7e439f06af044083b5f1d054e54a61f7275",
+      "question_micro_accuracy": 0.5111940298507462,
+      "macro_video_accuracy": 0.5091967556253271,
+      "consistent_minus_released": {
+        "question_micro_accuracy": {
+          "difference": -0.026119402985074626,
+          "paired_video_ci90_low": -0.06666666666666667,
+          "paired_video_ci90_high": 0.013888888888888888
+        },
+        "macro_video_accuracy": {
+          "difference": -0.027612863327149042,
+          "paired_video_ci90_low": -0.08611626468769325,
+          "paired_video_ci90_high": 0.02940785405071117
+        }
+      },
+      "answer_letters_changed": 0.20149253731343283,
+      "note": "other job, possibly other hardware; descriptive"
+    },
+    "random16": {
+      "available": true,
+      "path": "/storage/user/latn/artifacts/f1/20261106-1052_f1_hlvid-selection-floor_98c0dce/random16/results.jsonl",
+      "sha256": "7f5278dff39142c66c11f4e14a5c7cc46ff83c2f3ac27a74de48802da25d0dec",
+      "question_micro_accuracy": 0.44776119402985076,
+      "macro_video_accuracy": 0.44385019742162596,
+      "consistent_minus_released": {
+        "question_micro_accuracy": {
+          "difference": 0.014925373134328358,
+          "paired_video_ci90_low": -0.014578323508756994,
+          "paired_video_ci90_high": 0.04693140794223827
+        },
+        "macro_video_accuracy": {
+          "difference": 0.03352837638551925,
+          "paired_video_ci90_low": 0.00438977688977689,
+          "paired_video_ci90_high": 0.06602885210028064
+        }
+      },
+      "answer_letters_changed": 0.11194029850746269,
+      "note": "other job, possibly other hardware; descriptive"
+    },
+    "pretrained": {
+      "available": true,
+      "path": "/storage/user/latn/worktrees/autogaze-r2e-k16-controls-b795de0/outputs/human_gaze/hlvid_nvila/r2e_k16_causal_controls_mtv48/pretrained_exact_k16/results.jsonl",
+      "sha256": "c00b06da0678939baa6db6aec1c33749b745492fc04cf30e7548ba7c6b4e2984",
+      "question_micro_accuracy": 0.5,
+      "macro_video_accuracy": 0.48245920745920745,
+      "consistent_minus_released": {
+        "question_micro_accuracy": {
+          "difference": 0.018656716417910446,
+          "paired_video_ci90_low": -0.01552976291176257,
+          "paired_video_ci90_high": 0.057695778950291536
+        },
+        "macro_video_accuracy": {
+          "difference": 0.028855668141382428,
+          "paired_video_ci90_low": -0.01657437800294943,
+          "paired_video_ci90_high": 0.07627372627372626
+        }
+      },
+      "answer_letters_changed": 0.17164179104477612,
+      "note": "other job, possibly other hardware; descriptive"
+    },
+    "trained_440826": {
+      "available": true,
+      "path": "/home/stud/latn/.codex/worktrees/3f12/master-thesis/AutoGaze/outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_all_seeds_mtv48/fixedk16_seed440826/results.jsonl",
+      "sha256": "4496c3394b09c9511577592cfc20c250b38f9e5004c55f4e9858cf3e454509cf",
+      "question_micro_accuracy": 0.5111940298507462,
+      "macro_video_accuracy": 0.5035381285381285,
+      "consistent_minus_released": {
+        "question_micro_accuracy": {
+          "difference": -0.029850746268656716,
+          "paired_video_ci90_low": -0.0658715535961045,
+          "paired_video_ci90_high": 0.004
+        },
+        "macro_video_accuracy": {
+          "difference": -0.0417867846439275,
+          "paired_video_ci90_low": -0.07813912278197992,
+          "paired_video_ci90_high": -0.006010656010656011
+        }
+      },
+      "answer_letters_changed": 0.19776119402985073,
+      "note": "other job, possibly other hardware; descriptive"
+    },
+    "trained_440827": {
+      "available": true,
+      "path": "/home/stud/latn/.codex/worktrees/3f12/master-thesis/AutoGaze/outputs/human_gaze/hlvid_nvila/r2e_fixed_budget_all_seeds_mtv48/fixedk16_seed440827/results.jsonl",
+      "sha256": "0a04084a4c9bd7b2ed021992ec552917a82016fdb06a3604fee231ae1e50df0e",
+      "question_micro_accuracy": 0.4925373134328358,
+      "macro_video_accuracy": 0.47527591456162877,
+      "consistent_minus_released": {
+        "question_micro_accuracy": {
+          "difference": -0.0037313432835820895,
+          "paired_video_ci90_low": -0.04741464495025215,
+          "paired_video_ci90_high": 0.03529411764705882
+        },
+        "macro_video_accuracy": {
+          "difference": -0.009461966604823749,
+          "paired_video_ci90_low": -0.05114409400123685,
+          "paired_video_ci90_high": 0.03354978354978355
+        }
+      },
+      "answer_letters_changed": 0.21641791044776118,
+      "note": "other job, possibly other hardware; descriptive"
+    }
+  },
+  "hardware": {
+    "gpus_per_arm": {
+      "center16": [
+        "NVIDIA A40"
+      ],
+      "random16": [
+        "NVIDIA A40"
+      ],
+      "pretrained": [
+        "NVIDIA A40"
+      ],
+      "trained_440826": [
+        "NVIDIA A40"
+      ],
+      "trained_440827": [
+        "NVIDIA A40"
+      ]
+    },
+    "all_arms_same_gpu_model": true
+  },
+  "layout": {
+    "consistent": true,
+    "processor_positions_per_frame": 1060,
+    "processor_positions_per_scale": [
+      16,
+      64,
+      196,
+      784
+    ],
+    "processor_target_patch_size": 16,
+    "processor_target_scales": [
+      64,
+      128,
+      224,
+      448
+    ],
+    "tower_positions_per_frame": 1060,
+    "tower_positions_per_scale": [
+      16,
+      64,
+      196,
+      784
+    ]
+  },
+  "bootstrap": {
+    "seed": 20261110,
+    "iterations": 10000,
+    "level": 0.9,
+    "unit": "video"
+  }
+}

@@ -1,0 +1,230 @@
+{
+  "clip": {
+    "frames": 16,
+    "size": 448,
+    "spatial_tiles": 1,
+    "sub_tiles": 4
+  },
+  "code_commit": "68b01baf0e932510dc82859043779f82575c1525",
+  "code_dirty": false,
+  "conclusion": {
+    "consistent_layout_delivers_selected_cells": true,
+    "released_default_delivers_selected_cells": false
+  },
+  "config_sha256": "ad6f6e002ca2390c8ca2295db58cf782f23ca473a68db988ba9c0fa4bab9bccb",
+  "gate": "L2",
+  "layouts": {
+    "consistent": {
+      "center16": {
+        "gathered_patches": 1024,
+        "gathered_patches_not_intended": 0.0,
+        "intended_patches": 1024,
+        "intended_patches_gathered": 1.0,
+        "intended_patches_gathered_by_frame": {
+          "0": 1.0,
+          "1": 1.0,
+          "10": 1.0,
+          "11": 1.0,
+          "12": 1.0,
+          "13": 1.0,
+          "14": 1.0,
+          "15": 1.0,
+          "2": 1.0,
+          "3": 1.0,
+          "4": 1.0,
+          "5": 1.0,
+          "6": 1.0,
+          "7": 1.0,
+          "8": 1.0,
+          "9": 1.0
+        },
+        "layout_consistent": true,
+        "patches_per_tile_frame": 64.0,
+        "processor_positions_per_scale": [
+          16,
+          64,
+          196,
+          784
+        ]
+      },
+      "pretrained": {
+        "gathered_patches": 1024,
+        "gathered_patches_not_intended": 0.0,
+        "intended_patches": 1024,
+        "intended_patches_gathered": 1.0,
+        "intended_patches_gathered_by_frame": {
+          "0": 1.0,
+          "1": 1.0,
+          "10": 1.0,
+          "11": 1.0,
+          "12": 1.0,
+          "13": 1.0,
+          "14": 1.0,
+          "15": 1.0,
+          "2": 1.0,
+          "3": 1.0,
+          "4": 1.0,
+          "5": 1.0,
+          "6": 1.0,
+          "7": 1.0,
+          "8": 1.0,
+          "9": 1.0
+        },
+        "layout_consistent": true,
+        "patches_per_tile_frame": 64.0,
+        "processor_positions_per_scale": [
+          16,
+          64,
+          196,
+          784
+        ]
+      },
+      "random16": {
+        "gathered_patches": 1024,
+        "gathered_patches_not_intended": 0.0,
+        "intended_patches": 1024,
+        "intended_patches_gathered": 1.0,
+        "intended_patches_gathered_by_frame": {
+          "0": 1.0,
+          "1": 1.0,
+          "10": 1.0,
+          "11": 1.0,
+          "12": 1.0,
+          "13": 1.0,
+          "14": 1.0,
+          "15": 1.0,
+          "2": 1.0,
+          "3": 1.0,
+          "4": 1.0,
+          "5": 1.0,
+          "6": 1.0,
+          "7": 1.0,
+          "8": 1.0,
+          "9": 1.0
+        },
+        "layout_consistent": true,
+        "patches_per_tile_frame": 64.0,
+        "processor_positions_per_scale": [
+          16,
+          64,
+          196,
+          784
+        ]
+      }
+    },
+    "released_default": {
+      "center16": {
+        "gathered_patches": 1024,
+        "gathered_patches_not_intended": 0.962890625,
+        "intended_patches": 1024,
+        "intended_patches_gathered": 0.037109375,
+        "intended_patches_gathered_by_frame": {
+          "0": 0.0,
+          "1": 0.3125,
+          "10": 0.0,
+          "11": 0.0,
+          "12": 0.0,
+          "13": 0.125,
+          "14": 0.0,
+          "15": 0.15625,
+          "2": 0.0,
+          "3": 0.0,
+          "4": 0.0,
+          "5": 0.0,
+          "6": 0.0,
+          "7": 0.0,
+          "8": 0.0,
+          "9": 0.0
+        },
+        "layout_consistent": false,
+        "patches_per_tile_frame": 64.0,
+        "processor_positions_per_scale": [
+          9,
+          49,
+          196,
+          784
+        ]
+      },
+      "pretrained": {
+        "gathered_patches": 1024,
+        "gathered_patches_not_intended": 0.935546875,
+        "intended_patches": 1024,
+        "intended_patches_gathered": 0.064453125,
+        "intended_patches_gathered_by_frame": {
+          "0": 0.171875,
+          "1": 0.078125,
+          "10": 0.03125,
+          "11": 0.0625,
+          "12": 0.03125,
+          "13": 0.046875,
+          "14": 0.0,
+          "15": 0.015625,
+          "2": 0.03125,
+          "3": 0.046875,
+          "4": 0.03125,
+          "5": 0.078125,
+          "6": 0.09375,
+          "7": 0.0625,
+          "8": 0.15625,
+          "9": 0.09375
+        },
+        "layout_consistent": false,
+        "patches_per_tile_frame": 64.0,
+        "processor_positions_per_scale": [
+          9,
+          49,
+          196,
+          784
+        ]
+      },
+      "random16": {
+        "gathered_patches": 1024,
+        "gathered_patches_not_intended": 0.9306640625,
+        "intended_patches": 1024,
+        "intended_patches_gathered": 0.0693359375,
+        "intended_patches_gathered_by_frame": {
+          "0": 0.078125,
+          "1": 0.078125,
+          "10": 0.046875,
+          "11": 0.046875,
+          "12": 0.03125,
+          "13": 0.046875,
+          "14": 0.09375,
+          "15": 0.046875,
+          "2": 0.046875,
+          "3": 0.078125,
+          "4": 0.09375,
+          "5": 0.0625,
+          "6": 0.15625,
+          "7": 0.078125,
+          "8": 0.046875,
+          "9": 0.078125
+        },
+        "layout_consistent": false,
+        "patches_per_tile_frame": 64.0,
+        "processor_positions_per_scale": [
+          9,
+          49,
+          196,
+          784
+        ]
+      }
+    }
+  },
+  "step": "cpu layout check of the fixed-budget path",
+  "tower": {
+    "patch_size": 14,
+    "positions_per_scale": [
+      16,
+      64,
+      196,
+      784
+    ],
+    "scales": [
+      56,
+      112,
+      196,
+      392
+    ]
+  }
+}

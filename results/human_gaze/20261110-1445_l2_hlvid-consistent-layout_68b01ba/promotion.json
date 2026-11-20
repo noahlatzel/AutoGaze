@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "run_id": "20261110-1445_l2_hlvid-consistent-layout_68b01ba",
+  "promoted": "2026-11-20",
+  "source_directory": "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba/curated (written by curation job 2038416 on 2026-11-20; copied unchanged)",
+  "heavy_artifacts": "/storage/user/latn/artifacts/l2/20261110-1445_l2_hlvid-consistent-layout_68b01ba",
+  "execution_commit": "68b01baf0e932510dc82859043779f82575c1525",
+  "dirty_worktree": false,
+  "resources": {
+    "gpu": "NVIDIA A40 for every allocation of every arm",
+    "cumulative_seconds_per_arm": {
+      "center16": 68060,
+      "random16": 65049,
+      "pretrained": 79699,
+      "trained_440826": 74144,
+      "trained_440827": 73951
+    },
+    "cumulative_gpu_hours": 100.3,
+    "registered_cap_seconds_per_arm": 72000,
+    "amendments": [
+      "2026-11-18, user: trained_440826 and trained_440827 resumed for at most two hours each after the 20-hour cap expired at 261 and 263 of 268 answers (recovery array 2032443)",
+      "2026-11-20, user: pretrained resumed for at most two hours after its cap expired at 244 of 268 answers (recovery array 2037673), then for at most one further hour at 267 of 268 (recovery array 2038411)"
+    ],
+    "note": "Three arms exceeded the registered 20-hour cap under these amendments. Every continuation resumed the saved records with the frozen code, configuration and checkpoints; no answered question was evaluated again.",
+    "answerer_calls": 1340
+  },
+  "independent_validation": {
+    "status": "pass",
+    "script": "code/scripts/validate_paired_hlvid.py (code repository)",
+    "output": "independent_validation.json",
+    "checks": [
+      "manifest hashes match all six bundle files and the raw results of all five arms",
+      "268 unique questions per arm; stored correctness of every row agrees with the answer key read from the dataset parquet; no invalid answers",
+      "every arm: 268 completed evidence records, no failed attempt, one run identity, all allocations on an A40",
+      "accuracy of all five arms and all six contrasts (question-micro and video-macro) recomputed from the raw answers: exact match with metrics.json and contrasts.csv",
+      "90% video bootstrap reimplemented (seed 20261110, 10,000 draws): exact match for all six contrasts; both primaries unresolved with each of 50 other seeds",
+      "every question of every arm has 5,760 tile-frames (45 spatial tiles x 128 frames) with 64 selected patches each and 48,512 visual tokens; context length 48,571-48,721 tokens, not truncated by the evaluator"
+    ],
+    "seed_sensitivity": "Secondary pretrained minus Center16: lower bound of the 90% micro interval between 0.00 and +0.37 pp over 50 other seeds (above zero for 49). Secondary pretrained minus Random16: lower bound +2.0 to +2.2 pp for all 50."
+  },
+  "readings": {
+    "floor_center16_minus_random16": "unresolved (no equivalence claim)",
+    "gaze_trained_minus_center16": "unresolved (no equivalence claim)"
+  },
+  "files_sha256": {
+    "README.md": "868042cbf15d5226a8fcb55436bb0af686261ca50fbf4eacdfb916c02ddc1589",
+    "config.yaml": "ad6f6e002ca2390c8ca2295db58cf782f23ca473a68db988ba9c0fa4bab9bccb",
+    "contrasts.csv": "ebc24883438408fce95dc22a4e177334d0ec402121663e328d4cfe8e47326e3b",
+    "independent_validation.json": "34a95513425769dcc55859a323a5f3d5a3b5aed73e5863bb6046524d1ef2eb18",
+    "layout_check.json": "9e5d66d62bc7894b39fadf1cc9145d527d5a9bd5323828c8d98997e203bb6566",
+    "manifest.json": "be69bbb2099ad48f0d7cef1e92d369d4ec1621cce9a5a440a8d07e64ce9dc728",
+    "metrics.json": "bf33f8169479016a7ff9becdafa9e64c176b0fdfdb110e691673700d922b4f46",
+    "per_arm.csv": "482e9d39d665315e33a4ed35c65c36d2b1413119a5bf3cd7ae944c91e501203f",
+    "per_question_letters.csv": "b27875fe561cf07b84d91d4055d41a6518287eafe7b9fdda9850b9a99dd373f9"
+  }
+}
